@@ -6,7 +6,6 @@ import file from 'utils/file';
 const electron = window.require('electron');
 const ipc = electron.ipcRenderer;
 const dialog = electron.remote.dialog;
-const fs = window.require('fs');
 
 
 class TestSaveLoad extends Component {
@@ -38,7 +37,7 @@ class TestSaveLoad extends Component {
       
           self.contentEditorTxt.current.value = data;
         };
-        file.readFile(fs, fileNames[0], callBack);
+        file.readFile(fileNames[0], callBack);
       }
     });
   }
@@ -55,7 +54,7 @@ class TestSaveLoad extends Component {
     
         alert("The file has been succesfully saved");
       }
-      file.writeFile(fs, actualFilePath, this.contentEditorTxt.current.value, callBack);      
+      file.writeFile(actualFilePath, this.contentEditorTxt.current.value, callBack);      
     } else {
       alert("Please select a file first");
     }
@@ -73,7 +72,7 @@ class TestSaveLoad extends Component {
         }
       };
       
-      file.deleteFile(fs, actualFilePath, callBack);
+      file.deleteFile(actualFilePath, callBack);
       this.actualFileTxt.current.value = "";
       this.contentEditorTxt.current.value = "";
     } else {
@@ -96,7 +95,7 @@ class TestSaveLoad extends Component {
         }
         alert("The file has been succesfully saved");
       };
-      file.writeFile(fs, fileName, content, callBack);
+      file.writeFile(fileName, content, callBack);
     });
   }
 

@@ -1,12 +1,13 @@
+const fs = window.require('fs');
 
-const writeFile = (fs, filepath, content, callBack) => {
+const writeFile = (filepath, content, callBack) => {
   fs.writeFile(filepath, content, callBack);  
 };
-const readFile = (fs, filepath, callBack) => {
+const readFile = (filepath, callBack) => {
   fs.readFile(filepath, 'utf-8', callBack);
 };
 
-const deleteFile = (fs, filepath, callBack) => {
+const deleteFile = (filepath, callBack) => {
   if (fs.existsSync(filepath)) {
     // File exists deletings
     fs.unlink(filepath, callBack);
@@ -15,7 +16,7 @@ const deleteFile = (fs, filepath, callBack) => {
   }
 };
 
-const saveChanges = (fs, filepath, content, callBack) => {
+const saveChanges = (filepath, content, callBack) => {
   fs.writeFile(filepath, content, callBack);
 };
 
