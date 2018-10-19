@@ -1,8 +1,8 @@
 const IPCKeys = {
+  FileWrite: "FileWrite",
   FileRead: "FileRead",
-  FileDelete: "FileDelete",
   FileSaveChanges: "FileSaveChanges",
-  FileWrite: "FileWrite"
+  FileDelete: "FileDelete"  
 };
 
 export default IPCKeys;
