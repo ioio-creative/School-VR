@@ -3,12 +3,18 @@
 - Electron 3.0.4
 - Node.js 8.12.0
 - v8 61.0.3163.100
+
 Can see by calling "process.versions" in node
 
 ## References
-[reference:From React to an Electron app ready for production](https://medium.com/@kitze/%EF%B8%8F-from-react-to-an-electron-app-ready-for-production-a0468ecb1da3)
+[Reference: From React to an Electron app ready for production](https://medium.com/@kitze/%EF%B8%8F-from-react-to-an-electron-app-ready-for-production-a0468ecb1da3)
 
-[reference2:a reply from the above post](https://medium.com/@rouftomb/great-article-65a2702e4529)
+[Reference: a reply from the above post](https://medium.com/@rouftomb/great-article-65a2702e4529)
+
+[Reference: hokein/electron-sample-apps/file-explorer]
+(https://github.com/hokein/electron-sample-apps/tree/master/file-explorer)
+
+[Reference: How to choose , read, save, delete or create a file with Electron Framework](https://ourcodeworld.com/articles/read/106/how-to-choose-read-save-delete-or-create-a-file-with-electron-framework)
 
 **package need**
 * concurrently

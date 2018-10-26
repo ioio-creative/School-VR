@@ -1,30 +1,42 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+//import logo from './logo.svg';
 import './App.css';
 
-import TestSaveLoad from 'pages/TestSaveLoad';
+//import TestSaveLoad from 'pages/TestSaveLoad';
+import TestFileExplorer from 'pages/TestFileExplorer/TestFileExplorer';
+
+import config from 'globals/config';
+import fileSystem from 'utils/fileSystem';
+
+
+// create App Data directory if it does not exist
+fileSystem.createDirectoryIfNotExistsSync(config.appDataDirectory);
 
 class App extends Component {
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-        <br />
-        <TestSaveLoad />
-        <br />
+      <div>
+        {/* <div className="App">
+          <header className="App-header">
+            <img src={logo} className="App-logo" alt="logo" />
+            <p>
+              Edit <code>src/App.js</code> and save to reload.
+            </p>
+            <a
+              className="App-link"
+              href="https://reactjs.org"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Learn React
+            </a>
+          </header>
+          <br />
+          
+          <br />
+        </div> */}
+        {/* <TestSaveLoad /> */}
+        <TestFileExplorer />
       </div>
     );
   }

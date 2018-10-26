@@ -1,10 +1,10 @@
+// https://ourcodeworld.com/articles/read/106/how-to-choose-read-save-delete-or-create-a-file-with-electron-framework
+
 import React, { Component } from 'react';
 
-import IPCKeys from 'globals/ipcKeys';
-import file from 'utils/file';
+import fileSystem from 'utils/fileSystem';
 
 const electron = window.require('electron');
-const ipc = electron.ipcRenderer;
 const dialog = electron.remote.dialog;
 
 
@@ -37,7 +37,7 @@ class TestSaveLoad extends Component {
       
           self.contentEditorTxt.current.value = data;
         };
-        file.readFile(fileNames[0], callBack);
+        fileSystem.readFile(fileNames[0], callBack);
       }
     });
   }
@@ -54,7 +54,7 @@ class TestSaveLoad extends Component {
     
         alert("The file has been succesfully saved");
       }
-      file.writeFile(actualFilePath, this.contentEditorTxt.current.value, callBack);      
+      fileSystem.writeFile(actualFilePath, this.contentEditorTxt.current.value, callBack);      
     } else {
       alert("Please select a file first");
     }
@@ -72,7 +72,7 @@ class TestSaveLoad extends Component {
         }
       };
       
-      file.deleteFile(actualFilePath, callBack);
+      fileSystem.deleteFile(actualFilePath, callBack);
       this.actualFileTxt.current.value = "";
       this.contentEditorTxt.current.value = "";
     } else {
@@ -89,13 +89,15 @@ class TestSaveLoad extends Component {
         return;
       }
 
+      console.log(fileName);
+
       const callBack = (err) => {
         if (err) {
           alert("An error ocurred creating the file " + err.message)
         }
         alert("The file has been succesfully saved");
       };
-      file.writeFile(fileName, content, callBack);
+      fileSystem.writeFile(fileName, content, callBack);
     });
   }
 
@@ -125,12 +127,12 @@ class TestSaveLoad extends Component {
         </div>
         <hr />
         <div style={{textAlign: 'center'}}>
-            <p>
-                The file content will be the same as the editor.
-            </p>
-            <input type="button" value="Save new file" id="create-new-file"
-              onClick={this.handleCreateNewFileClick} 
-            />
+          <p>
+              The file content will be the same as the editor.
+          </p>
+          <input type="button" value="Save new file" id="create-new-file"
+            onClick={this.handleCreateNewFileClick} 
+          />
         </div>
       </div>
     );
