@@ -65,16 +65,20 @@ class FolderView extends Component {
   // Click on blank
   // Note: It's important to have the background <ul> element has height 100%
   handleBackgroundClick() {
-    this.setState({
-      focusedItemIdx: this.defaultFocusedItemIdx
-    })
+    if (this.state.focusedItemIdx !== this.defaultFocusedItemIdx) {
+      this.setState({
+        focusedItemIdx: this.defaultFocusedItemIdx
+      });
+    }
   }
 
   // Click on file
   handleFileItemClick(evnt, fileItemIdx) {
-    this.setState({
-      focusedItemIdx: fileItemIdx
-    });
+    if (this.state.focusedItemIdx !== this.fileItemIdx) {
+      this.setState({
+        focusedItemIdx: fileItemIdx
+      });
+    }
     evnt.stopPropagation();
   }
 

@@ -86,9 +86,10 @@ class TestFileExplorer extends Component {
   }
 
   handleFavouriteDirectoryClick(dirPath, favouriteDirectoryIdx) {
-    if (this.state.activeFavouriteDirectoryIdx !== favouriteDirectoryIdx) {
+    const newDirPath = this.getAbsolutePathFromHome(dirPath);
+    if (this.state.currentPath !== newDirPath) {
       this.setState({
-        currentPath: this.getAbsolutePathFromHome(dirPath),
+        currentPath: newDirPath,
         activeFavouriteDirectoryIdx: favouriteDirectoryIdx
       });
     }
@@ -127,11 +128,11 @@ class TestFileExplorer extends Component {
           <ul className="nav nav-list" id="sidebar" ref={this.sidebarRef}>
             <li className="nav-header">Favorites</li>
             {favouriteFolderItems}
-            <li class="nav-header">Network</li>
-            <li class="divider"></li>
+            <li className="nav-header">Network</li>
+            <li className="divider"></li>
             <li>
               <a href="#" onClick={this.handleAboutButtonClick}>
-                <i class="icon-flag"></i>
+                <i className="icon-flag"></i>
                 About
               </a>
             </li>
