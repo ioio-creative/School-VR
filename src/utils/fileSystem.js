@@ -32,6 +32,10 @@ const saveChangesToFile = (filepath, content, callBack) => {
   writeFile(filepath, content, callBack);
 };
 
+const statSync = (filePath) => {
+  return fs.statSync(filePath);
+}
+
 /* end of file api */
 
 
@@ -59,6 +63,7 @@ export default {
   readFile,
   deleteFile,
   saveChangesToFile,
+  statSync,
 
   // directory api
   createDirectoryIfNotExistsSync,

@@ -9,56 +9,131 @@ import config from 'globals/config';
 
 const electron = window.require('electron');
 const remote = electron.remote;
-const { app, shell } = remote;
+const { app, BrowserWindow, shell } = remote;
+
+let aboutWindow;
+
+
+function FolderLink(props) {
+  return (
+    <li className={props.isActive ? "active" : ""}>
+      <a href="#" 
+        onClick={() => {                    
+          props.handleClickFunc(props.dirPath, props.idx);
+        }}>
+        <i className={(props.isActive ? "icon-white " : "") + props.iconClass}></i>
+        {props.folderName}
+      </a>
+    </li>
+  );
+}
 
 class TestFileExplorer extends Component {
   constructor(props) {
     super(props);
 
+    this.favouriteDirectories = [
+      { name: "School VR", path: config.appDataDirectory, iconClass: "icon-home" },  
+      { name: "Home", path: "~/", iconClass: "icon-home" },
+      { name: "Documents", path: "~/Documents", iconClass: "icon-book" },
+      { name: "Pictures", path: "~/Pictures", iconClass: "icon-picture" },
+      { name: "Music", path: "~/Music", iconClass: "icon-music" },
+      { name: "Movies", path: "~/Movies", iconClass: "icon-film" }
+    ];
+    
     this.state = {
-      currentPath: config.appDataDirectory
+      currentPath: config.appDataDirectory,
+      activeFavouriteDirectoryIdx: 0
     };
+
+    this.getAbsolutePathFromHome = this.getAbsolutePathFromHome.bind(this);    
     
     this.handleAddressBarItemClick = this.handleAddressBarItemClick.bind(this);
-    this.handleFolderItemClick = this.handleFolderItemClick.bind(this);
+    this.handleFileItemClick = this.handleFileItemClick.bind(this);
+    this.handleFavouriteDirectoryClick = this.handleFavouriteDirectoryClick.bind(this);
+    this.handleAboutButtonClick = this.handleAboutButtonClick.bind(this);
   }
 
   // set path for file explorer
-  setPath(path) {
-    if (path.indexOf('~') === 0) {
-      // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname
-      path = path.replace('~', app.getPath('appData'));
+  getAbsolutePathFromHome(path) {
+    let absolutePath = path;
+    if (path.indexOf('~') === 0) {      
+      absolutePath = path.replace('~', app.getPath('home'));
     }
-    this.folder.open(path);
-    this.addressbar.set(path);
+    return absolutePath;
   }
 
   /* event handlers */
 
   handleAddressBarItemClick(dirPath) {
-    this.setState({
-      currentPath: dirPath
-    });
+    if (this.state.currentPath !== dirPath) {
+      this.setState({
+        currentPath: dirPath
+      });
+    }
   }
 
-  handleFolderItemClick(dir, mime) {
-    if (mime.type !== 'folder') {
+  handleFileItemClick(filePath, mime) {
+    if (mime.type === 'folder') {
+      if (this.state.currentPath !== filePath) {
+        this.setState({
+          currentPath: filePath
+        });
+      }      
+    } else {
       shell.openItem(mime.path);
     }
   }
 
-  /* end of event handlers */
+  handleFavouriteDirectoryClick(dirPath, favouriteDirectoryIdx) {
+    if (this.state.activeFavouriteDirectoryIdx !== favouriteDirectoryIdx) {
+      this.setState({
+        currentPath: this.getAbsolutePathFromHome(dirPath),
+        activeFavouriteDirectoryIdx: favouriteDirectoryIdx
+      });
+    }
+  }
 
+  handleAboutButtonClick() {
+    const params = {
+      toolbar: false,
+      //resizable: false,
+      show: true,
+      height: 600,
+      width: 800
+    };
+    aboutWindow = new BrowserWindow(params);
+    aboutWindow.loadURL('https://github.com/hokein/electron-sample-apps/tree/master/file-explorer');
+  }
+
+  /* end of event handlers */
 
   render() {
     const state = this.state;
+    const favouriteFolderItems = this.favouriteDirectories.map((directory, idx) => {
+      return (
+        <FolderLink key={directory.path} idx={idx}
+          dirPath={directory.path}
+          isActive={state.activeFavouriteDirectoryIdx === idx}
+          iconClass={directory.iconClass}
+          folderName={directory.name}
+          handleClickFunc={this.handleFavouriteDirectoryClick}
+        />
+      );
+    });
     return (
       <div style={{position: "absolute", left: "10px", right: "10px", top: "10px", bottom: "10px"}}>
         <div className="well" style={{float: "left", width: "160px", padding: "8px"}}>
           <ul className="nav nav-list" id="sidebar" ref={this.sidebarRef}>
             <li className="nav-header">Favorites</li>
-            <li className="active">
-              <a href="#"><i className="icon-white icon-home"></i> Home</a>
+            {favouriteFolderItems}
+            <li class="nav-header">Network</li>
+            <li class="divider"></li>
+            <li>
+              <a href="#" onClick={this.handleAboutButtonClick}>
+                <i class="icon-flag"></i>
+                About
+              </a>
             </li>
           </ul>
         </div>
@@ -71,8 +146,10 @@ class TestFileExplorer extends Component {
             />
           </div>
           <div className="row" style={{background: "#FFF", WebkitBorderRadius: "2px", margin: "-5px 1px 0 -19px", height: "100%", overflow: "auto"}}>
-            <FolderView
+            {/* Note: Setting key is compulsory for the FolderView to re-mount after path change. */}
+            <FolderView key={state.currentPath}
               currentPath={state.currentPath}
+              handleFileItemClickFunc={this.handleFileItemClick}
             />
           </div>
         </div>

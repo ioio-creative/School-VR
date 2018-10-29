@@ -10,27 +10,35 @@ import { getAbsoluteUrlFromRelativeUrl } from 'utils/setStaticResourcesPath';
 const path = window.require('path');
 
 
-function FileItem(props) {  
+function FileItem(props) { 
+  const addFocusClass = (existingClass) => 
+    (existingClass + (props.isFocus ? " focus" : ""));
   return (
-    <div className="file"
-      data-path={props.path}>
-      <div className="icon">
+    <div className={addFocusClass("file")}
+      onClick={(evnt) => { props.handleClickFunc(evnt, props.idx); }}
+      onDoubleClick={() => { props.handledDoubleClickFunc(props.path, mime.stat(props.path)); }}>
+      <div className={addFocusClass("icon")}>
         <img src={getAbsoluteUrlFromRelativeUrl(`fileExplorer/icons/${props.type}.png`)} />
-        <div className="name">{props.name}</div>
+        <div className={addFocusClass("name")}>{props.name}</div>
       </div>
     </div>
-  );
+  );  
 }
 
 class FolderView extends Component {
   constructor(props) {
     super(props);
 
+    this.defaultFocusedItemIdx = -1;
+
     this.state = {
-      files: []
+      files: [],
+      focusedItemIdx: this.defaultFocusedItemIdx
     };
 
-    this.handleFolderItemClick = this.handleFolderItemClick.bind(this);   
+    this.handleBackgroundClick = this.handleBackgroundClick.bind(this);
+    this.handleFileItemClick = this.handleFileItemClick.bind(this);
+    this.handleFileItemDoubleClick = this.handleFileItemDoubleClick.bind(this);
   }
 
   componentDidMount() {
@@ -54,11 +62,26 @@ class FolderView extends Component {
 
   /* event handlers */
 
-  handleFolderItemClick(dir, mime) {
-    if (mime.type === 'folder') {
-      this.open(dir);
-    }
+  // Click on blank
+  // Note: It's important to have the background <ul> element has height 100%
+  handleBackgroundClick() {
+    this.setState({
+      focusedItemIdx: this.defaultFocusedItemIdx
+    })
   }
+
+  // Click on file
+  handleFileItemClick(evnt, fileItemIdx) {
+    this.setState({
+      focusedItemIdx: fileItemIdx
+    });
+    evnt.stopPropagation();
+  }
+
+  // Double click on file
+  handleFileItemDoubleClick(filePath, mime) {
+    this.props.handleFileItemClickFunc(filePath, mime);
+  } 
 
   /* end of event handlers */
 
@@ -68,20 +91,25 @@ class FolderView extends Component {
 
     if (state.files.length === 0) {
       return null;
-    }
+    }    
 
-    const files = state.files.map((file) => {
+    const files = state.files.map((file, idx) => {
       return (
         <FileItem key={file.path}
+          idx={idx}
+          isFocus={state.focusedItemIdx === idx}
           name={file.name}
           type={file.type}
           path={file.path}
+          handleClickFunc={this.handleFileItemClick}
+          handledDoubleClickFunc={this.handleFileItemDoubleClick}
         />
       );
     });    
 
     return (
-      <ul style={{margin: "5px"}} id="files">
+      <ul style={{margin: "5px", height: "100%"}} id="files"
+        onClick={this.handleBackgroundClick}>
         {files}
       </ul>
     );

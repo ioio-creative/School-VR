@@ -1,10 +1,7 @@
 // https://github.com/hokein/electron-sample-apps/tree/master/file-explorer
 
-import _ from 'underscore';
-
-const fs = window.require('fs');
+import fileSystem from 'utils/fileSystem';
 const path = window.require('path');
-//const _ = window.require('underscore');
 
 
 const map = {
@@ -22,21 +19,21 @@ const map = {
 let cached = {};
 
 const stat = (filepath) => {
-  var result = {
+  const result = {
     name: path.basename(filepath),
-    path: filepath,
+    path: filepath
   };
 
   try {
-    var stat = fs.statSync(filepath);
+    const stat = fileSystem.statSync(filepath);
     if (stat.isDirectory()) {
       result.type = 'folder';
     } else {
-      var ext = path.extname(filepath).substr(1);
+      const ext = path.extname(filepath).substr(1);
       result.type = cached[ext];
       if (!result.type) {
-        for (var key in map) {
-          if (_.include(map[key], ext)) {
+        for (let key in map) {
+          if (map[key].includes(ext)) {
             cached[ext] = result.type = key;
             break;
           }

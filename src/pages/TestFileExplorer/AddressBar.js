@@ -28,15 +28,8 @@ function PathItem(props) {
 class AddressBar extends Component {
   constructor(props) {
     super(props);
-   
-    this.enter = this.enter.bind(this);
 
-    this.handleAddressBarItemClick = this.handleAddressBarItemClick(this);
-    this.handleFolderItemClick = this.handleFolderItemClick.bind(this);
-  }
-
-  enter(mime) {
-
+    this.handleAddressBarItemClick = this.handleAddressBarItemClick.bind(this);    
   }
 
   /* event handlers */
@@ -45,23 +38,13 @@ class AddressBar extends Component {
     this.props.handleAddressBarItemClickFunc(dirPath);
   }
 
-  handleFolderItemClick(dir, mime) {
-    if (mime.type === 'folder') {
-      this.enter(mime);
-    }
-  }
-
   /* end of event handlers */
 
   render() {
     const props = this.props;
 
-    if (!(props.currentPath)) {
-      return null;
-    }
-
     // Split path into separate elements
-    const pathItems = path.normalize(props.currentPath).split(path.sep);
+    const pathItems = path.normalize(props.currentPath).split(path.sep);    
     
     // Customise path items
     const customisedPathItems = pathItems.map((pathItem, idx) => {
