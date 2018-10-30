@@ -6,10 +6,13 @@ import AddressBar from 'pages/TestFileExplorer/AddressBar';
 import FolderView from 'pages/TestFileExplorer/FolderView';
 
 import config from 'globals/config';
+import fileSystem from '../../utils/fileSystem';
 
 const electron = window.require('electron');
 const remote = electron.remote;
 const { app, BrowserWindow, shell } = remote;
+
+const path = window.require('path');
 
 let aboutWindow;
 
@@ -79,7 +82,26 @@ class TestFileExplorer extends Component {
         this.setState({
           currentPath: filePath
         });
-      }      
+      }
+    } else if (mime.type === 'image') {      
+      fileSystem.base64Encode(mime.path, (err, data) => {
+        if (err) {
+          console.error(err);
+        } else {
+          //console.log(data);
+          const pathToSave = path.join(config.appDataDirectory, 'test_images', 'test1' + path.extname(mime.path));  // path.extname return the leading '.'                    
+          //console.log(pathToSave);
+          if (path.resolve(pathToSave) !== path.resolve(mime.path)) {
+            fileSystem.base64Decode(
+              pathToSave,
+              data,
+              (err) => { console.error(err); }
+            );
+          } else {
+            shell.openItem(mime.path);      
+          }
+        }
+      });      
     } else {
       shell.openItem(mime.path);
     }
