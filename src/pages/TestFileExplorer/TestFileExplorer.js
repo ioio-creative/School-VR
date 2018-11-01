@@ -169,8 +169,7 @@ class TestFileExplorer extends Component {
             />
           </div>
           <div className="row" style={{background: "#FFF", WebkitBorderRadius: "2px", margin: "-5px 1px 0 -19px", height: "100%", overflow: "auto"}}>
-            {/* Note: Setting key is compulsory for the FolderView to re-mount after path change. */}
-            <FolderView key={state.currentPath}
+            <FolderView
               currentPath={state.currentPath}
               handleFileItemClickFunc={this.handleFileItemClick}
             />

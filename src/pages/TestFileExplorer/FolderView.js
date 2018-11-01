@@ -30,11 +30,14 @@ class FolderView extends Component {
     super(props);
 
     this.defaultFocusedItemIdx = -1;
+    this.oldCurrentPath = "";
 
     this.state = {
       files: [],
       focusedItemIdx: this.defaultFocusedItemIdx
     };
+
+    this.enumerateDirectory = this.enumerateDirectory.bind(this);
 
     this.handleBackgroundClick = this.handleBackgroundClick.bind(this);
     this.handleFileItemClick = this.handleFileItemClick.bind(this);
@@ -42,22 +45,35 @@ class FolderView extends Component {
   }
 
   componentDidMount() {
+    this.enumerateDirectory();
+  }
+
+  componentDidUpdate() {
+    this.enumerateDirectory();
+  }
+
+  enumerateDirectory() {
     const props = this.props;
-    fileSystem.readDirectory(props.currentPath, (error, files) => {
-      if (error) {
-        console.log(error);
-        window.alert(error);
-        return;
-      }
 
-      const customisedFiles = files.map((file) => {
-        return mime.statSync(path.join(props.currentPath, file))
+    if (props.currentPath !== this.oldCurrentPath) {
+      fileSystem.readDirectory(props.currentPath, (error, files) => {
+        if (error) {
+          console.log(error);
+          window.alert(error);
+          return;
+        }
+
+        const customisedFiles = files.map((file) => {
+          return mime.statSync(path.join(props.currentPath, file))
+        });
+
+        this.setState({
+          files: customisedFiles
+        });
       });
 
-      this.setState({
-        files: customisedFiles
-      });
-    });
+      this.oldCurrentPath = props.currentPath;
+    }
   }
 
   /* event handlers */
