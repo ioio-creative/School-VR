@@ -151,7 +151,7 @@ const extractAll = (archive, dest) => {
   // asar would cache previous result!
   asar.uncache(archive);
   //asar.uncacheAll();
-  // overwrite!
+  // overwrite existing dest!
   asar.extractAll(archive, dest);
 };
 
