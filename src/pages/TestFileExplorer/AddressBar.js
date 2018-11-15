@@ -1,8 +1,7 @@
 // https://github.com/hokein/electron-sample-apps/tree/master/file-explorer
 
 import React, { Component } from 'react';
-
-const path = window.require('path');
+import fileSystem from 'utils/fileSystem';
 
 
 function PathItem(props) {
@@ -44,13 +43,13 @@ class AddressBar extends Component {
     const props = this.props;
 
     // Split path into separate elements
-    const pathItems = path.normalize(props.currentPath).split(path.sep);    
+    const pathItems = fileSystem.normalize(props.currentPath).split(fileSystem.sep);    
     
     // Customise path items
     const customisedPathItems = pathItems.map((pathItem, idx) => {
       return {
         name: pathItem,
-        path: pathItems.slice(0, idx + 1).join(path.sep)
+        path: pathItems.slice(0, idx + 1).join(fileSystem.sep)
       };
     });
     

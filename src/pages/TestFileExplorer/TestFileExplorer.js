@@ -6,16 +6,14 @@ import AddressBar from 'pages/TestFileExplorer/AddressBar';
 import FolderView from 'pages/TestFileExplorer/FolderView';
 
 import config from 'globals/config';
-import fileSystem from '../../utils/fileSystem';
+import fileSystem from 'utils/fileSystem';
 
 const electron = window.require('electron');
 const remote = electron.remote;
 const { app, BrowserWindow, shell } = remote;
 
-const path = window.require('path');
 
 let aboutWindow;
-
 
 function FolderLink(props) {
   return (
@@ -54,7 +52,7 @@ class TestFileExplorer extends Component {
     this.handleAddressBarItemClick = this.handleAddressBarItemClick.bind(this);
     this.handleFileItemClick = this.handleFileItemClick.bind(this);
     this.handleFavouriteDirectoryClick = this.handleFavouriteDirectoryClick.bind(this);
-    this.handleAboutButtonClick = this.handleAboutButtonClick.bind(this);
+    this.handleAboutButtonClick = this.handleAboutButtonClick.bind(this);  
   }
 
   // set path for file explorer
@@ -78,20 +76,37 @@ class TestFileExplorer extends Component {
 
   handleFileItemClick(filePath, mime) {
     if (mime.type === 'folder') {
-      if (this.state.currentPath !== filePath) {
-        this.setState({
-          currentPath: filePath
+      if (filePath.includes('progressive-texture-trial')) {  // test packaging
+        const src = filePath;
+        const dest = filePath + config.schoolVrProjectArchiveExtensionWithLeadingDot;
+
+        fileSystem.createPackage(src, dest, () => {          
+          this.setState({
+            // this shows the normalized version of the path ... , not what I want
+            //currentPath: fileSystem.join(filePath, '..')
+            currentPath: filePath + fileSystem.sep + '..'
+          });
         });
-      }
-    } else if (mime.type === 'image') {      
+      } else {
+        if (this.state.currentPath !== filePath) {
+          this.setState({
+            currentPath: filePath
+          });
+        }
+      }      
+    } else if (filePath.includes(config.schoolVrProjectArchiveExtensionWithLeadingDot)) {  // test unpackaging
+      const archive = filePath;
+      const dest = fileSystem.join(config.appTempWorkingDirectory, fileSystem.getFileNameWithoutExtension(filePath));      
+      fileSystem.extractAll(archive, dest);
+    } else if (mime.type === 'image') {  // test base64 encode / decode
       fileSystem.base64Encode(mime.path, (err, data) => {
         if (err) {
           console.error(err);
         } else {
           //console.log(data);
-          const pathToSave = path.join(config.appDataDirectory, 'test_images', 'test1' + path.extname(mime.path));  // path.extname return the leading '.'                    
+          const pathToSave = fileSystem.join(config.appDataDirectory, 'test_images', 'test1' + fileSystem.getFileExtensionWithLeadingDot(mime.path));
           //console.log(pathToSave);
-          if (path.resolve(pathToSave) !== path.resolve(mime.path)) {
+          if (fileSystem.resolve(pathToSave) !== fileSystem.resolve(mime.path)) {
             fileSystem.base64Decode(
               pathToSave,
               data,
@@ -108,7 +123,7 @@ class TestFileExplorer extends Component {
   }
 
   handleFavouriteDirectoryClick(dirPath, favouriteDirectoryIdx) {
-    const newDirPath = this.getAbsolutePathFromHome(dirPath);
+    const newDirPath = this.getAbsolutePathFromHome(dirPath);    
     if (this.state.currentPath !== newDirPath) {
       this.setState({
         currentPath: newDirPath,

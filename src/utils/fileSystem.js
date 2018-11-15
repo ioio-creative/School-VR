@@ -3,6 +3,13 @@
 import toBase64Str from 'utils/base64/toBase64Str';
 import fromBase64Str from 'utils/base64/fromBase64Str';
 
+// https://github.com/electron/asar
+// http://www.tc4shell.com/en/7zip/asar/
+// Somehow using the "import" syntax would result in the following error:
+// "Module not found: Can't resolve 'original-fs' in 'E:\Documents\Projects\Electron\School-VR\node_modules\asar\lib'"
+//import asar from 'asar';
+const asar = window.require('asar');
+
 const fs = window.require('fs');
 const path = window.require('path');
 
@@ -45,6 +52,10 @@ const writeFileSync = (filePath, content) => {
     fs.mkdirSync(directoriesStr, { recursive: true });
   }
   fs.writeFileSync(filePath, content);
+}
+
+const createWriteStream = (outputPath) => {
+  return fs.createWriteStream(outputPath);
 }
 
 const readFile = (filePath, callBack) => {
@@ -109,6 +120,44 @@ const base64DecodeSync = (locationToSaveFile, encodedStr) => {
 /* end of file api */
 
 
+/* asar - Electron Archive https://github.com/electron/asar/blob/master/lib/asar.js */
+
+const createPackage = (src, dest, callBack) => {
+  // https://github.com/electron/asar#transform
+  // passing null as 3rd argument won't work
+  // should pass {} (empty value) or _ => null (a function which returns nothing) or anything other than null or undefined
+  createPackageWithOptions(src, dest, {}, callBack);  
+};
+
+const createPackageWithTransformOption = (src, dest, transformFunc, callBack) => {
+  createPackageWithOptions(src, dest, { transform: transformFunc }, callBack);
+};
+
+// overwrite existing dest
+const createPackageWithOptions = (src, dest, options, callBack) => {
+  //console.log(asar);  
+  asar.createPackageWithOptions(src, dest, options, (err) => {
+    if (err) {
+      console.error(err.stack);
+      callBack && callBack(err);
+      return;
+    }
+    console.log(`${src} packaged to ${dest}`);
+    callBack && callBack(null);
+  });
+};
+
+const extractAll = (archive, dest) => {
+  // asar would cache previous result!
+  asar.uncache(archive);
+  //asar.uncacheAll();
+  // overwrite!
+  asar.extractAll(archive, dest);
+};
+
+/* end of asar - Electron Archive */
+
+
 /* directory api */
 
 // https://stackoverflow.com/questions/21194934/node-how-to-create-a-directory-if-doesnt-exist
@@ -122,26 +171,80 @@ const readDirectory = (dirPath, callBack) => {
   fs.readdir(dirPath, (error, files) => {
     callBack(error, files);
   });
-}
+};
 
 /* end of directory api */
+
+
+/* path api */
+
+const sep = path.sep;
+
+const getFileExtensionWithLeadingDot = (filePath) => {
+  return path.extname(filePath);
+};
+
+const getFileExtensionWithoutLeadingDot = (filePath) => {
+  return path.extname(filePath).substr(1);
+};
+
+const getFileNameWithExtension = (filePath) => {
+  return path.basename(filePath);
+};
+
+const getFileNameWithoutExtension = (filePath) => {
+  // https://stackoverflow.com/questions/4250364/how-to-trim-a-file-extension-from-a-string-in-javascript
+  return path.basename(filePath).split('.').slice(0, -1).join('.');
+};
+
+const join = (...paths) => {  
+  return path.join(...paths);
+};
+
+const resolve = (...paths) => {
+  return path.resolve(...paths);
+}
+
+const normalize = (filePath) => {
+  return path.normalize(filePath);
+}
+
+/* end of path api */
 
 
 export default {
   // file api
   exists,
   writeFile,
+  writeFileSync,
+  createWriteStream,
   readFile,
   readFileSync,
   deleteFile,
-  saveChangesToFile,
+  saveChangesToFile,  
   isDirectorySync,
   base64Encode,
   base64EncodeSync,
   base64Decode,
   base64DecodeSync,
 
+  // asar - Electron Archive
+  createPackage,
+  createPackageWithTransformOption, 
+  createPackageWithOptions,
+  extractAll,
+
   // directory api
   createDirectoryIfNotExistsSync,
-  readDirectory
+  readDirectory,
+
+  // path api
+  sep,
+  getFileExtensionWithLeadingDot,
+  getFileExtensionWithoutLeadingDot,
+  getFileNameWithExtension,
+  getFileNameWithoutExtension,
+  join,
+  resolve,
+  normalize
 };

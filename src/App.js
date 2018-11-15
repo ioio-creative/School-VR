@@ -9,8 +9,9 @@ import config from 'globals/config';
 import fileSystem from 'utils/fileSystem';
 
 
-// create App Data directory if it does not exist
+// create App Data directories if they do not exist
 fileSystem.createDirectoryIfNotExistsSync(config.appDataDirectory);
+fileSystem.createDirectoryIfNotExistsSync(config.appTempWorkingDirectory);
 
 class App extends Component {
   render() {

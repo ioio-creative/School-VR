@@ -1,7 +1,6 @@
 // https://github.com/hokein/electron-sample-apps/tree/master/file-explorer
 
 import fileSystem from 'utils/fileSystem';
-const path = window.require('path');
 
 
 const map = {
@@ -20,7 +19,7 @@ let cached = {};
 
 const statSync = (filepath) => {
   const result = {
-    name: path.basename(filepath),
+    name: fileSystem.getFileNameWithExtension(filepath),
     path: filepath
   };
 
@@ -28,7 +27,7 @@ const statSync = (filepath) => {
     if (fileSystem.isDirectorySync(filepath)) {
       result.type = 'folder';
     } else {
-      const ext = path.extname(filepath).substr(1);
+      const ext = fileSystem.getFileExtensionWithoutLeadingDot(filepath);
       result.type = cached[ext];
       if (!result.type) {
         for (let key in map) {

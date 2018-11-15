@@ -7,8 +7,6 @@ import mime from 'utils/mime';
 import fileSystem from 'utils/fileSystem';
 import { getAbsoluteUrlFromRelativeUrl } from 'utils/setStaticResourcesPath';
 
-const path = window.require('path');
-
 
 function FileItem(props) { 
   const addFocusClass = (existingClass) => 
@@ -29,8 +27,7 @@ class FolderView extends Component {
   constructor(props) {
     super(props);
 
-    this.defaultFocusedItemIdx = -1;
-    this.oldCurrentPath = "";
+    this.defaultFocusedItemIdx = -1;    
 
     this.state = {
       files: [],
@@ -42,38 +39,43 @@ class FolderView extends Component {
     this.handleBackgroundClick = this.handleBackgroundClick.bind(this);
     this.handleFileItemClick = this.handleFileItemClick.bind(this);
     this.handleFileItemDoubleClick = this.handleFileItemDoubleClick.bind(this);
+
+    this.handleWindowFocus = this.handleWindowFocus.bind(this);    
   }
 
   componentDidMount() {
+    window.addEventListener('focus', this.handleWindowFocus);
     this.enumerateDirectory();
   }
 
-  componentDidUpdate() {
-    this.enumerateDirectory();
+  componentWillUnmount() {
+    window.removeEventListener('focus', this.handleWindowFocus);
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.currentPath !== prevProps.currentPath) {
+      this.enumerateDirectory();
+    }
   }
 
   enumerateDirectory() {
     const props = this.props;
 
-    if (props.currentPath !== this.oldCurrentPath) {
-      fileSystem.readDirectory(props.currentPath, (error, files) => {
-        if (error) {
-          console.log(error);
-          window.alert(error);
-          return;
-        }
+    fileSystem.readDirectory(props.currentPath, (error, files) => {
+      if (error) {
+        console.log(error);
+        window.alert(error);
+        return;
+      }
 
-        const customisedFiles = files.map((file) => {
-          return mime.statSync(path.join(props.currentPath, file))
-        });
-
-        this.setState({
-          files: customisedFiles
-        });
+      const customisedFiles = files.map((file) => {
+        return mime.statSync(fileSystem.join(props.currentPath, file))
       });
 
-      this.oldCurrentPath = props.currentPath;
-    }
+      this.setState({
+        files: customisedFiles
+      });
+    });    
   }
 
   /* event handlers */
@@ -101,7 +103,12 @@ class FolderView extends Component {
   // Double click on file
   handleFileItemDoubleClick(filePath, mime) {
     this.props.handleFileItemClickFunc(filePath, mime);
-  } 
+  }
+
+  // Refresh when in focus again
+  handleWindowFocus() {
+    this.enumerateDirectory();
+  }
 
   /* end of event handlers */
 

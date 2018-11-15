@@ -1,8 +1,10 @@
 {
-  "name": "app",
+  "name": "school-vr",
+  "productName": "School VR",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "asar": "^0.14.5",
     "electron-is-dev": "^1.0.1",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
