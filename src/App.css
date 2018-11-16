@@ -1,32 +1,97 @@
-.App {
-  text-align: center;
+* {
+  box-sizing: border-box;
 }
-
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 40vmin;
+html, body {
+  /*
+  * display a transparent border when in electron 
+  * the border is use for window resize
+  * https://stackoverflow.com/questions/32894925/electron-resizing-a-frameless-window
+  */
+  background-color: transparent;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe WPC, Segoe UI, HelveticaNeue-Light, Ubuntu, Droid Sans, sans-serif;
 }
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+#root {
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
-
-.App-link {
-  color: #61dafb;
+#App {
+  /*
+  * leave a 2px border for resize use
+  */
+  position: fixed;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  cursor: initial;
 }
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+#App {
+  background-color: #FFFFFF;
+}
+.aframe-editor-opened #App {
+  background-color: #000000;
+}
+#root .window-resizer {
+  position: absolute;
+  z-index: 999;
+}
+#root .window-resizer.border-left,
+#root .window-resizer.border-right {
+  width: 2px;
+  height: 100%;
+  cursor: ew-resize;
+}
+#root .window-resizer.border-top,
+#root .window-resizer.border-bottom {
+  width: 100%;
+  height: 2px;
+  cursor: ns-resize;
+}  
+#root .window-resizer.border-left {
+  left: 0;
+}
+#root .window-resizer.border-right {
+  right: 0;
+}
+#root .window-resizer.border-top {
+  top: 0;
+}
+#root .window-resizer.border-bottom {
+  bottom: 0;
+}
+#root .window-resizer.corner-top-left,
+#root .window-resizer.corner-top-right,
+#root .window-resizer.corner-bottom-left,
+#root .window-resizer.corner-bottom-right {
+  width: 4px;
+  height: 4px;
+}
+#root .window-resizer.corner-top-left,
+#root .window-resizer.corner-bottom-right {
+  cursor: nwse-resize;
+}
+#root .window-resizer.corner-top-right,
+#root .window-resizer.corner-bottom-left {
+  cursor: nesw-resize;
+}
+#root .window-resizer.corner-top-left {
+  top: 0;
+  left: 0;
+}
+#root .window-resizer.corner-top-right {
+  top: 0;
+  right: 0;
+}
+#root .window-resizer.corner-bottom-left {
+  left: 0;
+  bottom: 0;
+}
+#root .window-resizer.corner-bottom-right {
+  right: 0;
+  bottom: 0;
 }

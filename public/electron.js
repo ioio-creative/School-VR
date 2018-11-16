@@ -15,7 +15,12 @@ setUpIpcMain();
 let mainWindow;
 
 function createWindow() {
-  mainWindow = new BrowserWindow({width: 1440, height: 810});
+  mainWindow = new BrowserWindow({
+    width: 1440,
+    height: 810,
+    frame: false,
+    transparent: true
+  });
   mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
   mainWindow.on('closed', () => mainWindow = null);
 

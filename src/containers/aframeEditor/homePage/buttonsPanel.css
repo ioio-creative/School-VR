@@ -1,0 +1,30 @@
+#buttons-panel {
+  position: absolute;
+  top: 30px;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  background-color: var(--appBackgroundColor);
+}
+#buttons-panel button {
+  background-color: transparent;
+  border: 1px solid transparent;
+}
+#buttons-panel button:hover {
+  border: 1px solid #444444;
+}
+.buttons-list {
+  float: left;
+  border-left: 1px solid #b4b1b1;
+}
+.buttons-list:nth-child(1) {
+  float: left;
+  border-left: 0;
+}
+.buttons-list-wrapper {
+  width: 100%;
+  padding-left: 15px;
+}
+button {
+  color: #FFFFFF;
+}

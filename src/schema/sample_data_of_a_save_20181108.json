@@ -1,0 +1,320 @@
+{
+  "project_name": "ABCDEFGHIJKLMNOPQRSTU",
+  "camera": {
+    "entity_type": "a-camera",
+    "id": "ABCD",
+    "name": "ABCDEFGHIJKLMNOPQRSTUVWXYZABC",
+    "slides": [
+      {
+        "id": "ABCDEFGHIJKLMNOPQRSTUVWXYZAB",
+        "timelines": [
+          {
+            "id": "ABCDEFGHIJK",
+            "time": 511.75,
+            "duration": 85.0,
+            "start_attrrbutes": {
+              "position": {
+                "x": 465.75,
+                "y": 993.0,
+                "z": 377.75
+              },
+              "rotation": {
+                "x": 168.75,
+                "y": 86.25,
+                "z": 334.5
+              }
+            },
+            "end_attrrbutes": {
+              "position": {
+                "x": 436.75,
+                "y": 32.75,
+                "z": 243.0
+              },
+              "rotation": {
+                "x": 863.25,
+                "y": 11.0,
+                "z": 951.5
+              }
+            }
+          },
+          {
+            "id": "ABCDEFG",
+            "time": 31.0,
+            "duration": 325.5,
+            "start_attrrbutes": {
+              "position": {
+                "x": 842.0,
+                "y": -71.0,
+                "z": 860.25
+              },
+              "rotation": {
+                "x": 39.25,
+                "y": 305.5,
+                "z": -24.5
+              }
+            },
+            "end_attrrbutes": {
+              "position": {
+                "x": 93.0,
+                "y": 995.5,
+                "z": 616.25
+              },
+              "rotation": {
+                "x": 495.0,
+                "y": -78.5,
+                "z": -17.75
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "ABCDEFGHIJKLMNOPQRSTUVWXYZAB",
+        "timelines": [
+          {
+            "id": "ABCDEFGHIJKLMNOPQRSTUVWXYZA",
+            "time": 122.75,
+            "duration": 8.0,
+            "start_attrrbutes": {
+              "position": {
+                "x": 524.75,
+                "y": 583.75,
+                "z": 544.0
+              },
+              "rotation": {
+                "x": 488.25,
+                "y": 862.25,
+                "z": 809.5
+              }
+            },
+            "end_attrrbutes": {
+              "position": {
+                "x": 419.25,
+                "y": 780.25,
+                "z": 775.75
+              },
+              "rotation": {
+                "x": 324.75,
+                "y": 697.0,
+                "z": 234.5
+              }
+            }
+          },
+          {
+            "id": "ABCDEFGHIJKLMNO",
+            "time": 315.0,
+            "duration": 260.25,
+            "start_attrrbutes": {
+              "position": {
+                "x": 256.5,
+                "y": 5.5,
+                "z": 803.25
+              },
+              "rotation": {
+                "x": 91.5,
+                "y": 63.5,
+                "z": 65.25
+              }
+            },
+            "end_attrrbutes": {
+              "position": {
+                "x": 634.25,
+                "y": 933.75,
+                "z": 912.75
+              },
+              "rotation": {
+                "x": 654.0,
+                "y": -31.75,
+                "z": 591.25
+              }
+            }
+          },
+          {
+            "id": "ABCDEFGHIJKLMNOPQRST",
+            "time": 190.5,
+            "duration": 151.25,
+            "start_attrrbutes": {
+              "position": {
+                "x": 261.0,
+                "y": 622.0,
+                "z": 71.5
+              },
+              "rotation": {
+                "x": 80.25,
+                "y": 437.25,
+                "z": -4.5
+              }
+            },
+            "end_attrrbutes": {
+              "position": {
+                "x": 27.5,
+                "y": 411.0,
+                "z": 608.0
+              },
+              "rotation": {
+                "x": 649.5,
+                "y": 292.75,
+                "z": 346.0
+              }
+            }
+          },
+          {
+            "id": "ABCD",
+            "time": 437.0,
+            "duration": 753.0,
+            "start_attrrbutes": {
+              "position": {
+                "x": 245.25,
+                "y": 133.5,
+                "z": 111.0
+              },
+              "rotation": {
+                "x": 333.75,
+                "y": 430.75,
+                "z": 44.5
+              }
+            },
+            "end_attrrbutes": {
+              "position": {
+                "x": 880.5,
+                "y": 843.75,
+                "z": 220.5
+              },
+              "rotation": {
+                "x": 922.5,
+                "y": 304.25,
+                "z": 59.25
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "entities_list": [
+    {
+      "entity_type": "a-entity",
+      "id": "ABCD",
+      "name": "ABCDEFGHIJKLMNOPQRSTUVWX",
+      "slides": [
+        {
+          "id": "ABCDEFGHIJKLMNOPQRS",
+          "timelines": [
+            {
+              "id": "ABCDEFG",
+              "time": 995.75,
+              "duration": 139.0,
+              "start_attrrbutes": {
+                "geometry": {
+                  "primitive": "ABCDEFGHIJKLMNOP",
+                  "height": -1.75,
+                  "width": 398.5,
+                  "depth": 1.0,
+                  "radius": 659.0,
+                  "radiusBottom": 939.5,
+                  "radiusTop": 769.5,
+                  "vertexA": 244.75,
+                  "vertexB": 131.0,
+                  "vertexC": 911.5
+                },
+                "position": {
+                  "x": 623.25,
+                  "y": 992.5,
+                  "z": 468.75
+                },
+                "rotation": {
+                  "x": 562.75,
+                  "y": 337.5,
+                  "z": 411.75
+                },
+                "scale": {
+                  "x": 462.75,
+                  "y": 181.75,
+                  "z": 776.5
+                },
+                "src": "#abc123",
+                "material": {
+                  "color": "#abc123",
+                  "opacity": 729.75,
+                  "transparent": false,
+                  "shader": "gif",
+                  "src": "#abc123"
+                },
+                "text": {
+                  "value": "ABCDEFGHIJKLMNOPQRSTU",
+                  "width": 282.75,
+                  "align": "left",
+                  "side": "double",
+                  "wrapCount": 665.75,
+                  "color": "ABCDEFG"
+                }
+              },
+              "end_attrrbutes": {
+                "geometry": {
+                  "primitive": "ABCDEFGHIJKLMN",
+                  "height": 561.5,
+                  "width": 791.75,
+                  "depth": 233.0,
+                  "radius": 920.75,
+                  "radiusBottom": 769.5,
+                  "radiusTop": 344.0,
+                  "vertexA": 365.0,
+                  "vertexB": 960.75,
+                  "vertexC": -22.25
+                },
+                "position": {
+                  "x": 721.25,
+                  "y": 536.0,
+                  "z": -13.0
+                },
+                "rotation": {
+                  "x": 5.0,
+                  "y": 687.25,
+                  "z": 381.75
+                },
+                "scale": {
+                  "x": 218.5,
+                  "y": -86.0,
+                  "z": 370.0
+                },
+                "src": "#abc123",
+                "material": {
+                  "color": "#abc123",
+                  "opacity": 375.75,
+                  "transparent": false,
+                  "shader": "gif",
+                  "src": "#abc123"
+                },
+                "text": {
+                  "value": "ABCDEFGHIJKLMNOPQRS",
+                  "width": 704.0,
+                  "align": "right",
+                  "side": "double",
+                  "wrapCount": 700.25,
+                  "color": "ABCDEFGHIJKL"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "assets_list": [
+    {
+      "media_type": "video",
+      "src": "ABCDEFGHIJKLMNOPQRSTUV",
+      "id": "ABCDEFGHIJKLMNOPQRSTUVWXYZAB"
+    },
+    {
+      "media_type": "image",
+      "src": "ABCDEFGHIJKLMN",
+      "id": "ABCDEFGHIJKLMNOPQRSTU"
+    },
+    {
+      "media_type": "image",
+      "src": "ABCDEFGHIJKLMNOPQRSTUVWXYZAB",
+      "id": "ABCD"
+    }
+  ]
+}

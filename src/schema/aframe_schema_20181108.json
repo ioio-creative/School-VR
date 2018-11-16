@@ -1,0 +1,378 @@
+{
+  "$id": "aframe_schema_20181016",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "School VR save/load json format for validate use",
+  "definitions": {
+    "vec3D": {
+      "type": "object",
+      "properties": {
+        "x": {"type": "number"},
+        "y": {"type": "number"},
+        "z": {"type": "number"}
+      }
+    },
+    "geometry": {
+      "type": "object",
+      "properties": {
+        "primitive": {
+          "type": "string"
+        },
+        "height": {
+          "type": "number"
+        },
+        "width": {
+          "type": "number"
+        },
+        "depth": {
+          "type": "number"
+        },
+        "radius": {
+          "type": "number"
+        },
+        "radiusBottom": {
+          "type": "number"
+        },
+        "radiusTop": {
+          "type": "number"
+        },
+        "vertexA": {
+          "type": "number"
+        },
+        "vertexB": {
+          "type": "number"
+        },
+        "vertexC": {
+          "type": "number"
+        }
+      }
+    },
+    "position": {
+      "$ref": "#/definitions/vec3D"
+    },
+    "rotation": {
+      "$ref": "#/definitions/vec3D"
+    },
+    "scale": {
+      "$ref": "#/definitions/vec3D"
+    },
+    "src": {
+      "type": "string",
+      "pattern": "^#[^#\\s]+$"
+    },
+    "material": {
+      "type": "object",
+      "properties": {
+        "color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "default": "#FFFFFF"
+        },
+        "opacity": {
+          "type": "number"
+        },
+        "transparent": {
+          "type": "boolean"
+        },
+        "shader": {
+          "type": "string",
+          "enum": ["gif"]
+        },
+        "src": {
+          "$ref": "#/definitions/src"
+        }
+      }
+    },
+    "text": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string"
+        },
+        "width": {
+          "type": "number"
+        },
+        "align": {
+          "type": "string",
+          "enum": ["left", "center", "right"]
+        },
+        "side": {
+          "type": "string",
+          "enum": ["front", "back", "double"]
+        },
+        "wrapCount": {
+          "type": "number"
+        },
+        "color": {
+          "type": "string"
+        }
+      }
+    },
+    "entity_type": {
+      "type": "string",
+      "enum": [
+        "a-box",
+        "a-cone",
+        "a-image",
+        "a-sphere",
+        "a-cylinder",
+        "a-tetrahedron",
+        "a-icosahedron",
+        "a-plane",
+        "a-triangle",
+        "a-text",
+        "a-video",
+        "a-videosphere",
+        "a-camera",
+        "a-entity"
+      ]
+    },
+    "entity_attributes": {
+      "type": "object",
+      "properties": {
+        "geometry" : {
+          "$ref" : "#/definitions/geometry"
+        },
+        "position": {
+          "$ref": "#/definitions/position"
+        },
+        "rotation": {
+          "$ref": "#/definitions/rotation"
+        },
+        "scale": {
+          "$ref": "#/definitions/scale"
+        },
+        "src": {
+          "$ref": "#/definitions/src"
+        },
+        "material": {
+          "$ref": "#/definitions/material"
+        },
+        "text": {
+          "$ref": "#/definitions/text"
+        }
+      }
+    },
+    "camera_attributes": {
+      "type": "object",
+      "properties": {
+        "position": {
+          "$ref": "#/definitions/position"
+        },
+        "rotation": {
+          "$ref": "#/definitions/rotation"
+        }
+      }
+    },
+    "scene_attributes": {
+      "type": "object",
+      "properties": {
+        "background": {
+          "$ref": "#/definitions/material/color"
+        }
+      }
+    },
+    "entity": {
+      "type": "object",
+      "properties": {
+        "entity_type": {
+          "$ref": "#/definitions/entity_type"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "slides": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "timelines": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "number"
+                    },
+                    "duration": {
+                      "type": "number"
+                    },
+                    "start_attrrbutes": {
+                      "$ref": "#/definitions/entity_attributes"
+                    },
+                    "end_attrrbutes": {
+                      "$ref": "#/definitions/entity_attributes"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "camera": {
+      "type": "object",
+      "properties": {
+        "entity_type": {
+          "type": "string",
+          "enum": ["a-camera"]
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "slides": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "timelines": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "duration": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "start_attrrbutes": {
+                      "$ref": "#/definitions/camera_attributes"
+                    },
+                    "end_attrrbutes": {
+                      "$ref": "#/definitions/camera_attributes"
+                    }
+                  }
+                }           
+              }  
+            }
+          }
+        }
+      }
+    },
+    "scene": {
+      "type": "object",
+      "properties": {
+        "entity_type": {
+          "type": "string",
+          "enum": ["a-scene"]
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "slides": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "timelines": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "duration": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "start_attrrbutes": {
+                      "$ref": "#/definitions/scene_attributes"
+                    },
+                    "end_attrrbutes": {
+                      "$ref": "#/definitions/scene_attributes"
+                    }
+                  }
+                }           
+              }  
+            }
+          }
+        }
+      }
+    },
+    "asset": {
+      "type": "object",
+      "properties": {
+        "media_type": {
+          "type": "string",
+          "description": "image should have a dimension of power of 2 (e.g. 128 x 128, 512 x 512)",
+          "enum": ["image", "video", "audio"]
+        },
+        "src": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "type": "object",
+  "properties": {
+    "project_name": {
+      "description": "The project name",
+      "type": "string"
+    },
+    "entities_list": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "anyOf": [
+          {
+            "type": "object",
+            "$ref": "#/definitions/scene"
+          },
+          {
+            "type": "object",
+            "$ref": "#/definitions/entity"
+          },
+          {
+            "type": "object",
+            "$ref": "#/definitions/camera"
+          }
+        ]
+      }
+    },
+    "assets_list": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "#/definitions/asset"
+      }
+    }
+  }
+}

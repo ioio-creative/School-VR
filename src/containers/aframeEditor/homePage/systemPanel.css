@@ -1,0 +1,174 @@
+#system-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  z-index: 100;
+  background-color: #3C3C3C;
+  -webkit-app-region: drag;
+  display: flex;
+  user-select: none;
+  font-family: -apple-system,BlinkMacSystemFont,Segoe WPC,Segoe UI,HelveticaNeue-Light,Ubuntu,Droid Sans,sans-serif;
+}
+#app-icon,
+#app-buttons {
+  flex-shrink: 1;
+  flex-grow: 0;
+}
+#app-name {
+  flex-shrink: 1;
+  flex-grow: 1;
+  text-align: center;
+  white-space: nowrap;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+  font-size: 12px;
+}
+#app-name .app-name,
+#app-name .hyphen,
+#app-name .project-name {
+  align-self: center;
+}
+#app-name .project-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+#app-name .hyphen {
+  padding: 0 5px;
+}
+
+#app-icon {
+  background-color: #8597ad;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  margin: 1px 5px 1px 5px;
+  align-self: center;
+}
+#app-name {
+  color: #FFFFFF;
+  /* line-height: 20px; */
+  margin-right: 10px;
+}
+#app-buttons,
+#system-buttons {
+  -webkit-app-region: no-drag;
+  white-space: nowrap;
+  display: inline-flex;
+}
+#app-buttons .menu-group {
+  position: relative;
+}
+#app-buttons button,
+#system-buttons button {
+  height: 100%;
+  appearance: none;
+  border: 0;
+  background-color: transparent;
+  color: #CCCCCC;
+  outline: 0;
+}
+#system-buttons button {
+  width: 45px;
+  overflow: hidden;
+  position: relative;
+}
+#app-buttons button:hover,
+#system-buttons button:hover {
+  background-color: #505050;
+  color: #FFFFFF;
+}
+#system-buttons button#btn-min-app:before {
+  content: '';
+  display: block;
+  border-bottom: 1px solid #CCCCCC;
+  width: 9px;
+  height: 9px;
+  margin: 0 auto;
+}
+#system-buttons button#btn-max-app:before {
+  content: '';
+  display: block;
+  border: 1px solid #CCCCCC;
+  width: 9px;
+  height: 9px;
+  margin: 0 auto;
+}
+body.maximized #system-buttons button#btn-max-app:before,
+body.maximized #system-buttons button#btn-max-app:after {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 6px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #3C3C3C;
+  border: 1px solid #CCCCCC;
+}
+body.maximized #system-buttons button#btn-max-app:before {
+  margin-left: -1px;
+  margin-top: 1px;
+  z-index: 1;
+}
+body.maximized #system-buttons button#btn-max-app:after {
+  margin-left: 1px;
+  margin-top: -1px;
+}
+#system-buttons button#btn-min-app:hover:before,
+#system-buttons button#btn-max-app:hover:before,
+#system-buttons button#btn-max-app:hover:after {
+  border-color: #FFFFFF;
+  background-color: #505050;
+}
+#system-buttons button#btn-close-app {
+  /* font-size: 20px; */
+}
+#system-buttons button#btn-close-app:hover {
+  background-color: #D10F20;
+}
+#system-buttons button#btn-close-app:hover:before,
+#system-buttons button#btn-close-app:hover:after {
+  background-color: #FFFFFF;
+}
+#system-buttons button#btn-close-app:before,
+#system-buttons button#btn-close-app:after {
+  content: '';
+  width: 14px;
+  height: 1px;
+  background-color: #CCCCCC;
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+#system-buttons button#btn-close-app:before {
+  transform: translate(-50%, -50%) rotate(45DEG);
+}
+#system-buttons button#btn-close-app:after {
+  transform: translate(-50%, -50%) rotate(-45DEG);
+}
+
+#system-panel .menu-list {
+  position: absolute;
+  top: 30px;
+  width: 150px;
+  background-color: #252526;
+}
+#system-panel .menu-list .menu-item {
+  padding: 5px 10px;
+  color: #CCCCCC;
+}
+#system-panel .menu-list .menu-item:hover {
+  background-color: #505050;
+  color: #ffffff;
+}
+#system-panel .menu-list .seperator {
+  background-color: #7F7F7F;
+  margin: 5px 8px;
+  height: 1px;
+}

@@ -1,0 +1,115 @@
+{
+  "$id": "aframe_schema_20181016",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "School VR save/load json format for validate use",
+  "definitions": {
+    "geometry": {
+      "type": "object",
+      "properties": {
+        "primitive": {
+          "type": "string",
+          "enum": [
+            "circle",
+            "triangle",
+            "plane",
+            "sphere",
+            "cone",
+            "cylinder",
+            "box"
+          ]
+        },
+        "position": {
+          "type": "object",
+          "properties": {
+            "x": {"type": "number"},
+            "y": {"type": "number"},
+            "z": {"type": "number"}
+          }
+        },
+        "rotation": {
+          "type": "object",
+          "properties": {
+            "x": {"type": "number"},
+            "y": {"type": "number"},
+            "z": {"type": "number"}
+          }
+        },
+        "scale": {
+          "type": "object",
+          "properties": {
+            "x": {"type": "number"},
+            "y": {"type": "number"},
+            "z": {"type": "number"}
+          }
+        },
+        "radius": {
+          "type": "number"
+        }
+      }
+    },
+    "material": {
+      "type": "string"
+    },
+    "object_type": {
+      "type": "string",
+      "enum": [
+        "a-triangle",
+        "a-plane",
+        "a-box",
+        "a-cone",
+        "a-cylinder",
+        "a-image",
+        "a-video",
+        "a-sphere"
+      ]
+    },
+    "entity": {
+      "type": "object",
+      "properties": {
+        "geometry" : {
+          "$ref" : "#/definitions/geometry"
+        },
+        "material": {"$ref" : "#/definitions/material"}
+      }
+    },
+    "camera": {
+      "type": "object",
+      "properties": {
+        "geometry" : {
+          "$ref" : "#/definitions/geometry"
+        }
+      }
+    }
+  },
+  "type": "object",
+  "properties": {
+    "project_name": {
+      "description": "The project name",
+      "type": "string"
+    },
+    "aframe_elements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "anyOf": [
+          {
+            "entity": {
+              "$ref": "#/definitions/entity"
+            },
+            "object_type": {
+              "$ref": "#/definitions/object_type"
+            }
+          },
+          {
+            "camera": {
+              "$ref": "#/definitions/camera"
+            },
+            "object_type": {
+              "$ref": "#/definitions/object_type"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

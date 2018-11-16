@@ -1,0 +1,247 @@
+:root {
+  --panel-header-background-color: #141f29;
+  --panel-body-background-color: #03141c;
+  --default-color: #DDDDDD;
+  --selected-color: #28a8ff;
+  --selected-background-color: #041e2b;
+  --text-color: #8597ad;
+}
+#info-panel {
+  position: absolute;
+  top: 120px;
+  width: 300px;
+  right: 0;
+  background-color: var(--panel-body-background-color);
+  color: var(--text-color);
+}
+#info-panel .panel-header {
+  /* display: flex; */
+  position: relative;
+  padding: 5px;
+  text-align: center;
+  color: var(--text-color);
+  background-color: var(--panel-header-background-color);
+}
+#info-panel .timeline-position-wrap {
+  flex: 1;
+  display: flex;
+  position: relative;
+  margin: -5px -15px 0;
+}
+#info-panel .timeline-position {
+  flex: 1;
+  text-align: center;
+  cursor: pointer;
+  font-size: 26px;
+  padding: 15px 0;
+  color: var(--default-color);
+  transition: all 0.2s;
+}
+#info-panel .timeline-position:hover {
+  color: var(--selected-color);
+}
+#info-panel .timeline-position.selected {
+  color: var(--selected-color);
+  background-color: var(--selected-background-color);
+}
+#info-panel .underline-indicator {
+  position: absolute;
+  bottom: 0;
+  width: 50%;
+  height: 4px;
+  transition: all 0.2s;
+}
+#info-panel .underline-indicator:after {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 4px;
+  background-color: var(--selected-color);
+  margin: 0 auto;
+}
+  
+#info-panel .vec3D-fields {
+  display: flex;
+  flex: 1;
+}
+#info-panel .vec3D-fields .textInput {
+  width: 100%;
+  flex: 1;
+}
+#info-panel .panel .panel-body {
+  padding: 5px 15px;
+  /* background-color: #FFFFFF; */
+}
+#info-panel .vec3D-col {
+  display: flex;
+}
+#info-panel .vec3D-col button {
+  appearance: none;
+  border: 0;
+  outline: 0;
+  background-color: transparent;
+}
+#info-panel .vec3D-btn-col {
+  display: flex;
+  margin: 0 -5px 10px;
+}
+#info-panel .vec3D-btn-col button {
+  flex: 1;
+  appearance: none;
+  border: 0;
+  outline: 0;
+  padding: 15px 0;
+  margin: 0 5px;
+  background-color: transparent;
+  transition: all 0.2s;
+  font-size: 26px;
+  cursor: pointer;
+  color: var(--default-color);
+}
+#info-panel .vec3D-btn-col button.selected {
+  cursor: default;
+  background-color: #333333;
+  color: var(--selected-color);  
+}
+#info-panel .vec3D-btn-col button:hover {
+  color: var(--selected-color);  
+}
+#info-panel .attribute-col {
+  margin: 10px 0;
+}
+#info-panel .color-col label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#info-panel .color-col .field-label {
+}
+#info-panel .color-col .color-preview {
+  width: 150px;
+  height: 25px;
+  border: 1px solid #CCCCCC;
+}
+#info-panel .opacity-col {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#info-panel .opacity-col input {
+  width: 150px;
+  height: 25px;
+  border: 1px solid #CCCCCC;
+  text-align: right;
+  padding: 0 5px;
+}
+#info-panel .opacity-col .opacity-control {
+  flex: 0 0 150px;
+  display: flex;
+}
+#info-panel .opacity-col .opacity-drag-control {
+  flex: 0 0 125px;
+  height: 25px;
+  border-right: 1px solid #CCCCCC;
+  border-bottom: 1px solid #CCCCCC;
+  position: relative;
+  overflow: hidden;
+}
+
+#info-panel .opacity-col .opacity-drag-control:before {
+  content: '';
+  display: block;
+  width: 128px;
+  height: 27px;
+  background-color: var(--panel-body-background-color);
+  position: absolute;
+  bottom: -1px;
+  left: -1px;
+  z-index: 1;
+  border-bottom: 1px solid #CCCCCC;
+  transform: rotate(-11DEG);
+  transform-origin: bottom left;
+  pointer-events: none;
+}
+#info-panel .opacity-col .current-opacity {
+  height: 25px;
+  background-color: #CCCCCC;
+}
+#info-panel .opacity-col .hide-button {
+  flex: 0 0 25px;
+  padding: 5px 3px 4px 4px;
+  cursor: pointer;
+}
+#info-panel .opacity-col .hide-button:hover {
+  color: var(--selected-color);
+}
+
+#info-panel .new-timeline-btn {
+  appearance: none;
+  border: 0;
+  outline: 0;
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border-radius: 30px;
+  background-color: var(--selected-background-color);
+  color: var(--text-color);
+  cursor: pointer;
+}
+#info-panel .menu-wrapper {
+}
+#info-panel .menu-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+}
+#info-panel .menu-btn .dot {
+  position: absolute;
+  top: 11px;
+  right: 11px;
+  width: 4px;
+  height: 4px;
+  background-color: var(--text-color);
+}
+#info-panel .menu-btn .dot:before,
+#info-panel .menu-btn .dot:after {
+  content: '';
+  display: block;
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background-color: var(--text-color);
+}
+#info-panel .menu-btn .dot:before {
+  left: -6px;
+}
+#info-panel .menu-btn .dot:after {
+  right: -6px;
+}
+#info-panel .menu-list {
+  position: absolute;
+  right: 0;
+  top: 26px;
+  z-index: 1;
+  opacity: 0;
+  visibility: hidden;
+}
+#info-panel .menu-wrapper:hover .menu-list {
+  opacity: 1;
+  visibility: visible;
+}
+#info-panel .menu-list .menu-item {
+  padding: 5px 10px;
+  cursor: pointer;
+  background-color: var(--panel-header-background-color);
+}
+#info-panel .menu-list .menu-item:hover {
+  background-color: var(--selected-background-color);
+}
+#info-panel .menu-list .menu-item.delete-timeline {
+  background-color: #e4bbbb;
+}
+#info-panel .menu-list .menu-item.delete-timeline:hover {
+  color: #D10F20;
+}

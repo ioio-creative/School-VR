@@ -1,0 +1,80 @@
+{
+  "entities": [{
+  "uuid": "uuid-of-the-object",
+  "type": "a-box",
+  "geometry": {
+    // for a-triangle
+    "vertex-a": "0 0.5 0",
+    "vertex-b": "-0.5 -0.5 0",
+    "vertex-c": "0.5 -0.5 0",
+    // for a-cone
+    "radiusTop": "0"
+  },
+  "material": {
+    "color": "#FFFFFF",
+    "src": "#img_xx",
+    "transparent": true,
+    "opacity": 1,
+    "shader": "gif" // for gif images
+  },
+  "text": {
+    "value": "for a-text",
+    "width": 5,
+    "align": "center",
+    "wrap-count": 5,
+    "side": "double", // for 2d object
+  },
+  "position": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "scale": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "rotation": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "children": [
+    // for future use, an entity can be place inside another entity
+    {
+      "uuid": "xxxx",
+      "type": "a-box",
+      "...": "..."
+    }
+  ]
+}],
+"assets": [{
+  "type": "a-asset",
+  "src": "//somewhere.to/media",
+  "uuid": "u-u-i-d",
+  "media-type": "img|video"
+}],
+"slides": [
+  0,20,40,60
+],
+"timelines": {
+  "0":[
+    {
+      "entity": "uuid",
+      "initial_attribute": {
+
+      },
+      "timeline": [{
+        "start": 0,
+        "end": 10,
+        "start_attribute": {
+
+        },
+        "end_attribute": {
+
+        },
+        "is_animation": true
+      }]
+    }
+  ]}
+}

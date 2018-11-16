@@ -1,0 +1,12 @@
+#aframe-panel {
+    position: absolute;
+    top: 0px;
+    top: 77px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    bottom: 80px;
+}
+#aframe-panel a-scene.fullscreen .a-canvas {
+    position: absolute !important;
+}
