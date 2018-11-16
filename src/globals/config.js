@@ -4,10 +4,13 @@ const { app } = remote;
 
 const path = window.require('path');
 
+const appName = app.getName();
+
 const config = {
+  appName: appName,
   // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname  
-  appDataDirectory: path.join(app.getPath('documents'), `${app.getName()}-Data`),
-  appTempWorkingDirectory: path.join(app.getPath('appData'), `${app.getName()}-Temp`),
+  appDataDirectory: path.join(app.getPath('documents'), `${appName}-Data`),
+  appTempWorkingDirectory: path.join(app.getPath('appData'), `${appName}-Temp`),
   schoolVrProjectArchiveExtensionWithLeadingDot: '.iar'
 };
 

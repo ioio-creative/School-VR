@@ -2,7 +2,7 @@
   info generation of right panel
 */
 import React, {Component} from 'react';
-import {roundTo, addToAsset, rgba2hex} from 'globals/aframeEditor/helperfunctions';
+import {roundTo, addToAsset, rgba2hex} from 'utils/aframeEditor/helperfunctions';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {Rnd as ResizableAndDraggable} from 'react-rnd';
 

@@ -6,8 +6,7 @@ import React, {Component} from 'react';
 
 import './systemPanel.css';
 
-// import consts from 'globals/consts';
-const appName = require('globals/aframeEditor/consts').default.appName;
+const appName = require('globals/config').default.appName;
 
 const Events = require('vendor/Events.js');
 

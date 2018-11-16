@@ -9,7 +9,7 @@ import AssetsPanel from 'containers/aframeEditor/homePage/assetsPanel';
 
 import Editor from 'vendor/editor.js';
 import {addEntityAutoType} from 'utils/aframeEditor/aFrameEntities';
-import {roundTo, jsonCopy} from 'globals/aframeEditor/helperfunctions';
+import {roundTo, jsonCopy} from 'utils/aframeEditor/helperfunctions';
 import {TweenMax, TimelineMax, Linear} from 'gsap';
 
 import './editorPage.css';

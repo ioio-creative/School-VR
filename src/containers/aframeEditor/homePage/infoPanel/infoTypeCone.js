@@ -2,7 +2,7 @@
   info generation of right panel
 */
 import React, {Component} from 'react';
-import {roundTo, addToAsset} from 'globals/aframeEditor/helperfunctions';
+import {roundTo, addToAsset} from 'utils/aframeEditor/helperfunctions';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 
 import './infoTypeCone.css';

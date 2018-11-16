@@ -1,7 +1,7 @@
 import React, {Component, Fragment} from 'react';
 import {Switch, Route, Redirect} from 'react-router-dom';
 
-import routes from 'globals/aframeEditor/routes';
+import routes from 'globals/routes';
 import EditorPage from 'pages/aframeEditor/editorPage';
 import PresenterPage from 'pages/aframeEditor/presenterPage';
 import {library} from '@fortawesome/fontawesome-svg-core'
