@@ -49,14 +49,14 @@ class App extends Component {
   render() {    
     return (
       <Fragment>
-        <div className="window-resizer border-left"></div>
+        {/* <div className="window-resizer border-left"></div>
         <div className="window-resizer border-right"></div>
         <div className="window-resizer border-top"></div>
         <div className="window-resizer border-bottom"></div>
         <div className="window-resizer corner-top-left"></div>
         <div className="window-resizer corner-top-right"></div>
         <div className="window-resizer corner-bottom-left"></div>
-        <div className="window-resizer corner-bottom-right"></div>
+        <div className="window-resizer corner-bottom-right"></div> */}
         <div id="App">
           <Switch>
             <Route exact path="/file-explorer" render={() => <AsyncTestFileExplorer />} />

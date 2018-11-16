@@ -26,6 +26,7 @@ class SystemPanel extends Component {
   render() {
     return (
       <div id="system-panel">
+        <div className="window-resizer border-top"></div>
         <div id="app-icon"></div>
         {/* <div id="app-name">School VR</div> */}
         <div id="app-buttons">

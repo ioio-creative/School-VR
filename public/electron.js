@@ -18,6 +18,8 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1440,
     height: 810,
+    minWidth: 1024,
+    minheight: 768,
     frame: false,
     transparent: true
   });
