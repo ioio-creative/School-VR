@@ -3,6 +3,8 @@
 import React, { Component } from 'react';
 import fileSystem from 'utils/fileSystem';
 
+import './style.css';
+
 
 function PathItem(props) {
   return (

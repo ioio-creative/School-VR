@@ -7,6 +7,8 @@ import mime from 'utils/mime';
 import fileSystem from 'utils/fileSystem';
 import { getAbsoluteUrlFromRelativeUrl } from 'utils/setStaticResourcesPath';
 
+import './style.css';
+
 
 function FileItem(props) { 
   const addFocusClass = (existingClass) => 
@@ -101,7 +103,7 @@ class FolderView extends Component {
   }
 
   // Double click on file
-  handleFileItemDoubleClick(filePath, mime) {
+  handleFileItemDoubleClick(filePath, mime) {    
     this.props.handleFileItemClickFunc(filePath, mime);
   }
 

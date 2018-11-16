@@ -8,6 +8,9 @@ import FolderView from 'pages/TestFileExplorer/FolderView';
 import config from 'globals/config';
 import fileSystem from 'utils/fileSystem';
 
+import './bootstrap/css/bootstrap.css';
+import './style.css';
+
 const electron = window.require('electron');
 const remote = electron.remote;
 const { app, BrowserWindow, shell } = remote;
@@ -74,7 +77,7 @@ class TestFileExplorer extends Component {
     }
   }
 
-  handleFileItemClick(filePath, mime) {
+  handleFileItemClick(filePath, mime) {    
     if (mime.type === 'folder') {
       if (filePath.includes('progressive-texture-trial')) {  // test packaging
         const src = filePath;
@@ -117,7 +120,7 @@ class TestFileExplorer extends Component {
           }
         }
       });      
-    } else {
+    } else {      
       shell.openItem(mime.path);
     }
   }
