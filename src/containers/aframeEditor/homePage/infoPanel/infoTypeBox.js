@@ -31,11 +31,15 @@ class InfoTypeBox extends Component {
     for (let eventName in this.events) {
       Events.on(eventName, this.events[eventName]);
     }
-    // this.changeTransformMode('translate');
-      // Events.emit('transformmodechanged', 'translate');
+    Events.emit('gettransformmode', mode => {
+      if (this.state.editorMode !== mode) {
+        this.changeTransformMode(mode);
+      }
+    })
   }
   componentDidUpdate(prevProps, prevState) {
     const props = this.props;
+    const self = this;
     if (
       props.selectedEntity !== prevProps.selectedEntity ||
       props.selectedSlide !== prevProps.selectedSlide ||
@@ -43,7 +47,12 @@ class InfoTypeBox extends Component {
       props.timelinePosition !== prevProps.timelinePosition
     ) {
       this.changeTransformMode(null);
-      return true;
+    } else {
+      Events.emit('gettransformmode', mode => {
+        if (self.state.editorMode !== mode) {
+          self.changeTransformMode(mode);
+        }
+      })
     }
   }
   componentWillUnmount() {
@@ -127,7 +136,7 @@ class InfoTypeBox extends Component {
                 className="current-opacity"
                 disableDragging={true}
                 bounds="parent"
-                minWidth={0}
+                minWidth="0%"
                 maxWidth="100%"
                 default={{
                   x: 0,

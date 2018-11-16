@@ -7,7 +7,7 @@ html, body {
   * the border is use for window resize
   * https://stackoverflow.com/questions/32894925/electron-resizing-a-frameless-window
   */
-  background-color: transparent;
+  background: transparent;
   padding: 0;
   margin: 0;
   width: 100%;
@@ -24,11 +24,12 @@ html, body {
   * leave a 2px border for resize use
   */
   position: fixed;
-  top: 2px;
-  left: 2px;
-  right: 2px;
-  bottom: 2px;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
   cursor: initial;
+  z-index: 1;
 }
 #App {
   background-color: #FFFFFF;
@@ -37,7 +38,8 @@ html, body {
   background-color: #000000;
 }
 #root .window-resizer {
-  position: absolute;
+  position: fixed;
+  -webkit-app-region: no-drag;
   z-index: 999;
 }
 #root .window-resizer.border-left,

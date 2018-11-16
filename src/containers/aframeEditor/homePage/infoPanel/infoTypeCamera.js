@@ -35,13 +35,18 @@ class InfoTypeCamera extends Component {
     for (let eventName in this.events) {
       Events.on(eventName, this.events[eventName]);
     }
-    this.changeTransformMode(null);
+    Events.emit('gettransformmode', mode => {
+      if (["translate", "rotate"].indexOf(mode) === -1) {
+        this.changeTransformMode(null);
+      } else if (this.state.editorMode !== mode){
+        this.changeTransformMode(mode);
+      }
+    })
     this.updateCameraView();
   }
   componentDidUpdate(prevProps, prevState) {
     const props = this.props;
     const self = this;
-    // console.log('componentDidUpdate');
     if (
       props.selectedEntity !== prevProps.selectedEntity ||
       props.selectedSlide !== prevProps.selectedSlide ||
@@ -49,16 +54,16 @@ class InfoTypeCamera extends Component {
       props.timelinePosition !== prevProps.timelinePosition
     ) {
       this.changeTransformMode(null);
-      // return true;
     } else {
       Events.emit('gettransformmode', mode => {
-        if (["translate", "rotate"].indexOf(mode) === -1) {
+        if (["translate", "rotate", null].indexOf(mode) === -1) {
           self.changeTransformMode("translate");
+        } else if (self.state.editorMode !== mode){
+          self.changeTransformMode(mode);
         }
       })
     }
     this.updateCameraView();
-
   }
   componentWillUnmount() {
     for (let eventName in this.events) {
@@ -71,7 +76,16 @@ class InfoTypeCamera extends Component {
     const renderer = editor.sceneEl.renderer;
     const scene = editor.sceneEl.object3D;
     const camera = editor.currentCameraEl.getObject3D('camera');
+    // const selected = editor.selected;
+    const helper_status = [];
+    for (let i = 0; i < editor.sceneHelpers.children.length; i++){
+      helper_status[i] = editor.sceneHelpers.children[i].visible;
+      editor.sceneHelpers.children[i].visible = false;
+    }
     renderer.render(scene, camera);
+    for (let i = 0; i < editor.sceneHelpers.children.length; i++){
+      editor.sceneHelpers.children[i].visible = helper_status[i];
+    }
     const width = renderer.domElement.width;
     const height = renderer.domElement.height;
     const newHeight = 270 / width * height;
