@@ -2,16 +2,13 @@ import React, {Component, Fragment} from 'react';
 import {Switch, Route, Redirect} from 'react-router-dom';
 
 import routes from 'globals/routes';
-import EditorPage from 'pages/aframeEditor/editorPage';
-import PresenterPage from 'pages/aframeEditor/presenterPage';
 import {library} from '@fortawesome/fontawesome-svg-core'
 // import {faArrowsAlt, faArrowsAlt} from '@fortawesome/free-solid-svg-icons'
 
-//import TestSaveLoad from 'pages/TestSaveLoad';
-import TestFileExplorer from 'pages/TestFileExplorer/TestFileExplorer';
-
 import config from 'globals/config';
 import fileSystem from 'utils/fileSystem';
+
+import asyncLoadingComponent from 'components/asyncLoadingComponent';
 
 import './App.css';
 
@@ -34,12 +31,21 @@ faIconsNeed.forEach(iconName => {
 fileSystem.createDirectoryIfNotExistsSync(config.appDataDirectory);
 fileSystem.createDirectoryIfNotExistsSync(config.appTempWorkingDirectory);
 
+
+
+// Code Splitting and React Router v4
+// https://serverless-stack.com/chapters/code-splitting-in-create-react-app.html
+const AsyncEditorPage = asyncLoadingComponent(() => import('pages/aframeEditor/editorPage'));
+const AsyncPresenterPage = asyncLoadingComponent(() => import('pages/aframeEditor/presenterPage'));
+//const AsyncTestSaveLoad = asyncLoadingComponent(() => import('pages/TestSaveLoad'));
+const AsyncTestFileExplorer = asyncLoadingComponent(() => import('pages/TestFileExplorer/TestFileExplorer'));
+
 class App extends Component {
   constructor(props) {
     super(props);
   }
   componentDidMount() {
-  }
+  }  
   render() {    
     return (
       <Fragment>
@@ -53,9 +59,9 @@ class App extends Component {
         <div className="window-resizer corner-bottom-right"></div>
         <div id="App">
           <Switch>
-            <Route exact path="/file-explorer" component={TestFileExplorer} />
-            <Route exact path={routes.editor} component={EditorPage} />
-            <Route exact path={routes.presenter} component={PresenterPage} />
+            <Route exact path="/file-explorer" render={() => <AsyncTestFileExplorer />} />
+            <Route exact path={routes.editor} render={() => <AsyncEditorPage />} />
+            <Route exact path={routes.presenter} render={() => <AsyncPresenterPage />} />
             <Redirect to={routes.editor} />
           </Switch>
         </div>

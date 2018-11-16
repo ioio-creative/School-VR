@@ -132,11 +132,13 @@ class SystemPanel extends Component {
           <div className="app-name">{appName}</div>
         </div>
         <div id="system-buttons">
-          <button id="btn-min-app"></button>
+          <button id="btn-min-app" onClick={() => {
+            alert('developing')
+          }} />
           <button id="btn-max-app" onClick={()=>{
             Events.emit('toggleMaximize');
-          }}></button>
-          <button id="btn-close-app"></button>
+          }} />
+          <button id="btn-close-app" />
         </div>
       </div>
     );
