@@ -188,7 +188,6 @@ class timelinePanel extends Component {
   //   event.stopPropagation();
   // }
   selectEntityTimelinePosition(event, entityId, timelineId, position) {
-    console.log(entityId, this.props.selectedSlide);
     Events.emit('setTimelinePositionSelected', entityId, this.props.selectedSlide, timelineId, position);
     event.preventDefault();
     event.stopPropagation();

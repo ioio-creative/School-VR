@@ -25,6 +25,7 @@
 }
 #timeline-panel.panel .panel-header {
   display: flex;
+  align-items: center;
 }
 #timeline-panel.panel .panel-header .header-text,
 #timeline-panel.panel .panel-header .timer,
@@ -186,6 +187,7 @@
   overflow: hidden;
   background-color: var(--panel-background-color);
   z-index: 2;
+  border-right: 1px solid #AAAAAA;
 }
 #timeline-panel .timeline-list {
   overflow: auto;

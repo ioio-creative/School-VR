@@ -396,9 +396,6 @@ class SaveDebug extends Component{
 class EditorPage extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      'updated': uuid()
-    };
     this.projectName = 'untitled';
     this.globalTimeline = new TimelineMax({
       paused: true
@@ -444,20 +441,6 @@ class EditorPage extends Component {
         self.projectName = newName;
         self.forceUpdate();
       },
-      toggleMaximize: () => {
-        const bodyClassList = document.body.classList;
-        const app = document.getElementById('editor');
-        bodyClassList.toggle("maximized");
-        if (bodyClassList.contains("maximized")) {
-          // call electron api here
-          let requestFullScreen = app.webkitRequestFullScreen || app.mozRequestFullScreen || app.requestFullScreen;
-          requestFullScreen.call(app);
-        } else {
-          // call electron api here
-          let exitFullscreen = document.webkitExitFullscreen || document.mozCancelFullScreen || document.exitFullscreen;
-          exitFullscreen.call(document);
-        }
-      },
       setTimelinePositionSelected: (entityId, slideId, timelineId, position) => {
         // console.log('setTimelinePositionSelected', entityId, slideId, timelineId, position);
         self.selectedEntity = entityId;
@@ -479,7 +462,6 @@ class EditorPage extends Component {
           } else {
             // self.selectedEntity = entityId;
             // self.selectedSlide = slideId;
-            console.log('disablecontrols');
             Events.emit('disablecontrols');
             self.forceUpdate();
           }
@@ -561,7 +543,7 @@ class EditorPage extends Component {
           Events.emit('disablecontrols');
         }
         if (self.inited) {
-          console.log('hello');
+          // console.log('hello');
           Events.emit('setTimelinePositionSelected', newEntityId, self.selectedSlide);
         }
         // self.forceUpdate();

@@ -9,17 +9,22 @@ const isDev = require('electron-is-dev');
 
 const { setUpIpcMain } = require('./js/ipcMain.js');
 
+// ipc.on('invokeAction', function(event, data){
+//     var result = processData(data);
+//     event.sender.send('actionReply', result);
+// });
 
 setUpIpcMain();
 
 let mainWindow;
 
 function createWindow() {
+  const ipcMain = electron.ipcMain;
   mainWindow = new BrowserWindow({
     width: 1440,
     height: 810,
     minWidth: 1024,
-    minheight: 768,
+    minHeight: 768,
     frame: false,
     transparent: true
   });
@@ -27,12 +32,31 @@ function createWindow() {
   mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
   mainWindow.on('closed', () => mainWindow = null);
 
-  mainWindow.webContents.openDevTools();
+  
   
   // https://electronjs.org/docs/tutorial/keyboard-shortcuts
   // const ret = globalShortcut.register('F5', () => {
   //   mainWindow.reload();
   // })
+
+  mainWindow.on('maximize', () => {
+    mainWindow.webContents.send('maximize');
+  })
+  mainWindow.on('unmaximize', () => {
+    mainWindow.webContents.send('unmaximize');
+  })
+
+  ipcMain.on('toggleMaximize', () => {
+    if (mainWindow.isMaximized()) {
+      mainWindow.unmaximize();
+    } else {
+      mainWindow.maximize();
+    }
+  })
+
+  ipcMain.on('toggleDevTools', () => {
+    mainWindow.webContents.toggleDevTools();
+  })
 }
 
 app.on('ready', createWindow);

@@ -10,6 +10,10 @@ const appName = require('globals/config').default.appName;
 
 const Events = require('vendor/Events.js');
 
+const remote = window.require('electron').remote;
+
+const ipcRenderer = window.require('electron').ipcRenderer;
+
 class SystemPanel extends Component {
   constructor(props) {
     super(props);
@@ -20,6 +24,14 @@ class SystemPanel extends Component {
     };
   }
   componentDidMount() {
+    ipcRenderer.on('maximize', () => {
+      const bodyClassList = document.body.classList;
+      bodyClassList.add("maximized");
+    })
+    ipcRenderer.on('unmaximize', () => {
+      const bodyClassList = document.body.classList;
+      bodyClassList.remove("maximized");
+    })
   }
   componentWillUnmount() {
   }
@@ -117,7 +129,17 @@ class SystemPanel extends Component {
                 this.setState({
                   menuOpen: false
                 });
-              }}>Toggle Debug</div>
+              }}>
+                Toggle S/L Debug
+              </div>
+              <div className="menu-item" onClick={() => {
+                ipcRenderer.send('toggleDevTools');
+                this.setState({
+                  menuOpen: false
+                });
+              }}>
+                Toggle DevTools
+              </div>
             </div>
           }
           </div>
@@ -134,12 +156,16 @@ class SystemPanel extends Component {
         </div>
         <div id="system-buttons">
           <button id="btn-min-app" onClick={() => {
-            alert('developing')
+            const win = remote.getCurrentWindow();
+            win.minimize();
           }} />
           <button id="btn-max-app" onClick={()=>{
-            Events.emit('toggleMaximize');
+            ipcRenderer.send('toggleMaximize');
           }} />
-          <button id="btn-close-app" />
+          <button id="btn-close-app" onClick={()=>{
+            const win = remote.getCurrentWindow();
+            win.close();
+          }} />
         </div>
       </div>
     );

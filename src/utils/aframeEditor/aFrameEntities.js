@@ -5,8 +5,10 @@ const uuid = require('uuid/v1');
 
 let editor = null;
 Events.on('editor-load', obj => {
+  // console.log('editorLoad');
   editor = obj;
 });
+
 function addToAsset(el, uuid) {
 const sceneEl = editor.sceneEl;
 let assetEl = sceneEl.querySelector('a-asset');
