@@ -20,7 +20,7 @@
   bottom: 50px;
   left: 0;
   right: 0;
-  overflow: auto;
+  overflow: hidden;
 }
 #save-debug-panel .btn-list{
   position: absolute;

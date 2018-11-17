@@ -20,6 +20,9 @@ let mainWindow;
 
 function createWindow() {
   const ipcMain = electron.ipcMain;
+  const Menu = electron.Menu;
+  const MenuItem = electron.MenuItem;
+
   mainWindow = new BrowserWindow({
     width: 1440,
     height: 810,
@@ -57,6 +60,25 @@ function createWindow() {
   ipcMain.on('toggleDevTools', () => {
     mainWindow.webContents.toggleDevTools();
   })
+
+  const menu = new Menu()
+
+  menu.append(new MenuItem({
+    label: 'Toggle DevTools',
+    accelerator: 'F12',
+    click: () => { 
+      mainWindow.webContents.toggleDevTools();
+    }
+  }))
+  menu.append(new MenuItem({
+    label: 'Refresh',
+    accelerator: 'F5',
+    click: () => { 
+      mainWindow.reload();
+    }
+  }))
+
+  Menu.setApplicationMenu(menu);
 }
 
 app.on('ready', createWindow);
