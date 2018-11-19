@@ -42,6 +42,9 @@ html, body {
   -webkit-app-region: no-drag;
   z-index: 999;
 }
+.maximized #root .window-resizer {
+  display: none;
+}
 #root .window-resizer.border-left,
 #root .window-resizer.border-right {
   width: 2px;
