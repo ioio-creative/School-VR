@@ -35,13 +35,13 @@ fileSystem.createDirectoryIfNotExistsSync(config.appDataDirectory);
 fileSystem.createDirectoryIfNotExistsSync(config.appTempWorkingDirectory);
 
 
-
+/* Note: Using async to load editor page causes some undesirable effects, hence not used. */
 // Code Splitting and React Router v4
 // https://serverless-stack.com/chapters/code-splitting-in-create-react-app.html
 // const EditorPage = require('pages/aframeEditor/editorPage').default;
 // const PresenterPage = require('pages/aframeEditor/presenterPage').default;
-const AsyncEditorPage = asyncLoadingComponent(() => import('pages/aframeEditor/editorPage'));
-const AsyncPresenterPage = asyncLoadingComponent(() => import('pages/aframeEditor/presenterPage'));
+// const AsyncEditorPage = asyncLoadingComponent(() => import('pages/aframeEditor/editorPage'));
+// const AsyncPresenterPage = asyncLoadingComponent(() => import('pages/aframeEditor/presenterPage'));
 //const AsyncTestSaveLoad = asyncLoadingComponent(() => import('pages/TestSaveLoad'));
 const AsyncTestFileExplorer = asyncLoadingComponent(() => import('pages/TestFileExplorer/TestFileExplorer'));
 
