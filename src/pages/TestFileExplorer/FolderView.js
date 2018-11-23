@@ -42,7 +42,7 @@ class FolderView extends Component {
     this.handleFileItemClick = this.handleFileItemClick.bind(this);
     this.handleFileItemDoubleClick = this.handleFileItemDoubleClick.bind(this);
 
-    this.handleWindowFocus = this.handleWindowFocus.bind(this);    
+    this.handleWindowFocus = this.handleWindowFocus.bind(this);  
   }
 
   componentDidMount() {
