@@ -9,6 +9,8 @@ import React, {Component} from 'react';
 
 import './assetsPanel.css';
 
+const {dialog} = window.require('electron').remote;
+
 const Events = require('vendor/Events.js');
 
 function handleUpload(event, callback) {
@@ -23,6 +25,24 @@ function handleUpload(event, callback) {
     reader.readAsDataURL(self.files[0]);
     self.value = '';
   }
+}
+function handleUploadThroughElectron(callback) {
+  const src = dialog.showOpenDialog({
+    properties: [
+      'openFile'
+    ],
+    filters: [
+      {name: 'Images', extensions: ['jpg', 'png', 'gif']},
+      {name: 'Movies', extensions: ['mkv', 'avi', 'mp4']},
+      {name: 'Custom File Type', extensions: ['as']},
+      {name: 'All Files', extensions: ['*']}
+    ]
+  });
+  callback({
+    src: src,
+    width: 'test',
+    height: 'test'
+  });
 }
 // if have time, this one seems funny
 // http://www.html5rocks.com/en/tutorials/canvas/imagefilters/
@@ -105,7 +125,7 @@ class AssetsPanel extends Component {
           </div>
           <div className="panel-body">
             <div className="assets-buttons">
-              <button id="add-assets" onClick={_=>this.fileUpload.click()}>Add</button>
+              <button id="add-assets" onClick={_=>handleUploadThroughElectron(self.addAsset)}>Add</button>
               <input type="file" 
                 ref={ref=>this.fileUpload = ref} 
                 onChange={event=>handleUpload(event, self.addAsset)} 
