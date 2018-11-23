@@ -10,6 +10,7 @@ import AssetsPanel from 'containers/aframeEditor/homePage/assetsPanel';
 import Editor from 'vendor/editor.js';
 import {addEntityAutoType} from 'utils/aframeEditor/aFrameEntities';
 import {roundTo, jsonCopy} from 'utils/aframeEditor/helperfunctions';
+import {parseDataToSaveFormat, saveProjectToLocal} from 'utils/saveLoadProject/saveProject';
 import {TweenMax, TimelineMax, Linear} from 'gsap';
 
 import './editorPage.css';
@@ -323,39 +324,6 @@ function getPrevNextTimeline(allTimeline, start) {
   };
 }
 
-function parseDataToSaveFormat(projectName, entitiesList, assetsList) {
-  const resultJson = {
-    "project_name": projectName,
-    "entities_list": [],
-    "assets_list": []
-  };
-  Object.keys(entitiesList).forEach(entityId => {
-    const currentEntity = entitiesList[entityId];
-    const entityEntry = {
-      "id": entityId,
-      "name": currentEntity["name"],
-      "entity_type": currentEntity["type"],
-      "slides": []
-    };
-    Object.keys(currentEntity["slide"]).forEach(slideId => {
-      const currentSlide = currentEntity["slide"][slideId];
-      const slideEntry = {
-        "id": slideId,
-        "timelines": []
-      };
-      Object.keys(currentSlide["timeline"]).forEach(timelineId => {
-        slideEntry["timelines"].push({
-          "id": timelineId,
-          ...currentSlide["timeline"][timelineId]
-        })
-      })
-      entityEntry["slides"].push(slideEntry);
-    })
-    resultJson["entities_list"].push(entityEntry);
-  })
-  // TODO: assets_list
-  return resultJson;
-}
 class SaveDebug extends Component{
   constructor(props) {
     super(props);
@@ -717,9 +685,10 @@ class EditorPage extends Component {
         }
       },
       saveProject: () => {
-        const jsonForSave = parseDataToSaveFormat(self.projectName, self.entitiesList, self.assetsList);
+        const jsonStr = saveProjectToLocal(self.projectName, self.entitiesList, self.assetsList);
+
         // call electron save api here
-        navigator.clipboard.writeText(JSON.stringify(jsonForSave));
+        //navigator.clipboard.writeText(jsonStr);
       },
       loadProject: (jsonText) => {
         try {

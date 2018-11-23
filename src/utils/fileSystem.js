@@ -58,6 +58,10 @@ const createWriteStream = (outputPath) => {
   return fs.createWriteStream(outputPath);
 }
 
+const rename = (oldPath, newPath, callback) => {
+
+};
+
 const readFile = (filePath, callBack) => {
   //fs.readFile(filePath, 'utf-8', (err, data) => {
   fs.readFile(filePath, (err, data) => {
@@ -218,6 +222,7 @@ export default {
   writeFile,
   writeFileSync,
   createWriteStream,
+  rename,
   readFile,
   readFileSync,
   deleteFile,

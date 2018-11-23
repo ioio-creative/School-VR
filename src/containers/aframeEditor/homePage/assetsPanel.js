@@ -13,6 +13,7 @@ const Events = require('vendor/Events.js');
 
 function handleUpload(event, callback) {
   var self = event.target;
+  console.log(self.value);
   if (self.files && self.files[0]) {
     var reader = new FileReader();
     reader.onload = function (e) {

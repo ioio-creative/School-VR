@@ -11,7 +11,8 @@ const config = {
   // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname  
   appDataDirectory: path.join(app.getPath('documents'), `${appName}-Data`),
   appTempWorkingDirectory: path.join(app.getPath('appData'), `${appName}-Temp`),
-  schoolVrProjectArchiveExtensionWithLeadingDot: '.iar'
+  schoolVrProjectArchiveExtensionWithLeadingDot: '.iar',
+  jsonFileExtensionWithLeadingDot: '.json'
 };
 
 export default config;

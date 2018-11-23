@@ -24,7 +24,8 @@ function createWindow() {
     minWidth: 1024,
     minHeight: 768,
     frame: false,
-    transparent: true
+    transparent: true, 
+    webPreferences: { webSecurity: false },  // for saving and loading assets via local path
   });
 
   //mainWindow.loadURL(isDev ? 'http://localhost:3000/file-explorer' : `file://${path.join(__dirname, '../build/index.html')}`);
