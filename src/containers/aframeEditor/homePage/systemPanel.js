@@ -4,6 +4,8 @@
 */
 import React, {Component} from 'react';
 
+import IPCKeys from 'globals/ipcKeys';
+
 import './systemPanel.css';
 
 const appName = require('globals/config').default.appName;
@@ -143,7 +145,7 @@ class SystemPanel extends Component {
                   Toggle S/L Debug
                 </div>
                 <div className="menu-item" onClick={() => {
-                  ipcRenderer.send('toggleDevTools');
+                  ipcRenderer.send(IPCKeys.toggleDevTools);
                   this.setState({
                     menuOpen: false
                   });
@@ -170,7 +172,7 @@ class SystemPanel extends Component {
             win.minimize();
           }} />
           <button id="btn-max-app" onClick={()=>{
-            ipcRenderer.send('toggleMaximize');
+            ipcRenderer.send(IPCKeys.toggleMaximize);
           }} />
           <button id="btn-close-app" onClick={()=>{
             const win = remote.getCurrentWindow();

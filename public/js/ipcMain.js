@@ -1,7 +1,28 @@
-const ipc = require("electron").ipcMain;
+const ipcMain = require('electron').ipcMain;
 
-exports.setUpIpcMain = () => {
-  ipc.on("FileWrite", (event, arg) =>{
-    console.log(arg);
-  });
+let mainWindow;
+
+exports.registerMainWindowToIpcMain = (mainWin) => {
+  mainWindow = mainWin;
 };
+
+exports.deregisterMainWindowFromIpcMain = () => {
+  mainWindow = null;
+}
+
+// ipc.on('invokeAction', function(event, data){
+//     var result = processData(data);
+//     event.sender.send('actionReply', result);
+// });
+
+ipcMain.on('toggleMaximize', () => {
+  if (mainWindow.isMaximized()) {
+    mainWindow.unmaximize();
+  } else {
+    mainWindow.maximize();
+  }
+})
+
+ipcMain.on('toggleDevTools', () => {
+  mainWindow.webContents.toggleDevTools();
+})
