@@ -10,6 +10,7 @@
     "aframe": "^0.8.2",
     "aframe-gif-shader": "^0.2.0",
     "asar": "^0.14.5",
+    "deepmerge": "^2.2.1",
     "electron-is-dev": "^1.0.1",
     "gsap": "^2.0.2",
     "jsonschema": "^1.2.4",
@@ -20,7 +21,8 @@
     "react-rnd": "^9.0.3",
     "react-router-dom": "^4.3.1",
     "react-scripts": "2.0.5",
-    "save-dev": "^2.0.0"
+    "save-dev": "^2.0.0",
+    "smalltalk": "^3.2.2"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -44,7 +46,7 @@
     "eject": "react-scripts eject",
     "electron-dev": "concurrently \"BROWSER=none npm start\" \"wait-on http://localhost:3000 && electron .\"",
     "electron-pack": "electron-builder -c.extraMetadata.main=build/electron.js",
-    "preelectron-pack": "npm build"
+    "preelectron-pack": "react-scripts build"
   },
   "build": {
     "appId": "com.ioiocreative.school-vr",

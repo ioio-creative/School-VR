@@ -23,6 +23,39 @@ function rgba2hex(rgb){
   ("0" + parseInt(parsedrgb[3],10).toString(16)).slice(-2) : rgb;
 }
 
+function isClockwise(vertices=[]) {
+  const len = vertices.length;
+  let sum = vertices.map(({x, y}, index) => {
+      let nextIndex = index + 1;
+      if (nextIndex === len) nextIndex = 0;
+
+      return {
+          x1: x,
+          x2: vertices[nextIndex].x,
+          y1: x,
+          y2: vertices[nextIndex].x
+      }
+  });
+  console.log(sum);
+  sum = sum.map(({ x1, x2, y1, y2}) => ((x2 - x1) * (y1 + y2)));
+  console.log(sum);
+  sum = sum.reduce((a, b) => a + b);
+  console.log(sum);
+  if (sum > 0) return true;
+  if (sum <= 0) return false;
+}
+
+function polygonArea(vertices=[]) {
+  const len = vertices.length;
+  let sum = 0;
+  vertices.forEach(({x, y}, index) => {
+      let nextIndex = index + 1;
+      if (nextIndex === len) nextIndex = 0;
+      sum += x * vertices[nextIndex].y - y * vertices[nextIndex].x;
+  });
+  return sum;
+}
+
 function addToAsset(el) {
     let assetEl = document.querySelector('a-asset');
     if (!assetEl) {
@@ -44,4 +77,4 @@ function addToAsset(el) {
     return newId;
 }
 
-export {roundTo, jsonCopy, rgba2hex, addToAsset}
+export {roundTo, jsonCopy, rgba2hex, isClockwise, polygonArea, addToAsset}

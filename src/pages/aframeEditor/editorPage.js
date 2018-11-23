@@ -16,6 +16,12 @@ import './editorPage.css';
 const Events = require('vendor/Events.js');
 const uuid = require('uuid/v1');
 
+/**
+ * deepmerge = jquery $.extend
+ * https://github.com/KyleAMathews/deepmerge
+ * */
+
+const mergeJSON = require('deepmerge').default;
 const jsonSchemaValidator = require('jsonschema').Validator;
 const validator = new jsonSchemaValidator();
 const schema = require('schema/aframe_schema_20181108.json');
@@ -170,7 +176,7 @@ function flattenState(state, prefix = '') {
   Object.keys(state).forEach((attr) => {
     let key = (prefix !== '' ? prefix + '.' + attr: attr);
     if (Object.prototype.toString.call(state[attr]) === '[object Object]') {
-      flatted = {...flatted, ...flattenState(state[attr], key)};
+      flatted = mergeJSON(flatted, flattenState(state[attr], key));
     } else {
       flatted[key] = jsonCopy(state[attr]);
       return flatted;
@@ -179,6 +185,9 @@ function flattenState(state, prefix = '') {
   return flatted;
 }
 
+window.getEntityState = getEntityState;
+window.flattenState = flattenState;
+window.deFlattenState = deFlattenState;
 /**
  * deFlattenState revert the process flattenState done
  * e.g. turn
@@ -199,14 +208,21 @@ function flattenState(state, prefix = '') {
 function deFlattenState(state) {
   let nested = {};
   Object.keys(state).forEach((attr) => {
-    const keys = attr.split('.');
+    const key = attr.split('.')[0];
     const remain = attr.split('.').slice(1).join('.');
+    // console.log(remain);
     if (remain) {
       const tmp = {};
       tmp[remain] = state[attr];
-      nested[keys[0]] = {...nested[keys[0]], ...deFlattenState(tmp)};
+      if (nested[key] === undefined) {
+        nested[key] = {};
+      }
+      nested[key] = mergeJSON(
+        nested[key], 
+        deFlattenState(tmp)
+      );
     } else {
-      nested[keys[0]] = state[keys[0]];
+      nested[key] = state[key];
     }
   })
   return nested;
@@ -573,7 +589,17 @@ class EditorPage extends Component {
           const key = Object.keys(attr)[0];
           const fields = key.split('.');
           const selectedTime = (position === "startAttribute"? selectedTimelineObj.start + 0.001: selectedTimelineObj.start + selectedTimelineObj.duration - 0.001);
-          selectedTimelineObj[position][fields[0]][fields[1]] = Object.values(attr)[0];
+          let targetField = selectedTimelineObj[position];
+          for (let i = 0; i < fields.length - 1; i++) {
+            const field = fields[i];
+            // if (typeof(targetField[field]) === "object") {
+              targetField = targetField[field];
+            // } else {
+              // break;
+            // }
+          }
+          targetField[fields[fields.length - 1]] = Object.values(attr)[0];
+          // console.log(selectedTimelineObj, Object.values(attr)[0]);
           self.updateTimeline();
           self.seekTimeline(selectedTime);
           self.forceUpdate();

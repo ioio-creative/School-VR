@@ -5,7 +5,7 @@
   ▭ │AFRAME│
   ▭ └──────◲
 */
-import React, {Component} from 'react';
+import React, {Component, Fragment} from 'react';
 import InfoTypeBox from 'containers/aframeEditor/homePage/infoPanel/infoTypeBox';
 import InfoTypeCone from 'containers/aframeEditor/homePage/infoPanel/infoTypeCone';
 import InfoTypeCylinder from 'containers/aframeEditor/homePage/infoPanel/infoTypeCylinder';
@@ -22,15 +22,16 @@ var Events = require('vendor/Events.js');
 
 const infoRenderer = {
   'a-box': InfoTypeBox,
-  'a-cone': InfoTypeBox, //InfoTypeCone,
+  'a-cone': InfoTypeCone,
   'a-cylinder': InfoTypeBox, //InfoTypeCylinder,
   'a-tetrahedron': InfoTypeBox,
   'a-sphere': InfoTypeBox,
   'a-plane': InfoTypeBox, //InfoTypePlane,
-  'a-triangle': InfoTypeBox, //InfoTypeTriangle,
+  'a-triangle': InfoTypeTriangle,
   'a-image': InfoTypeBox, //InfoTypeImage
   'a-camera': InfoTypeCamera,
   'a-scene': InfoTypeBackground,
+  'a-text': InfoTypeBox,
 };
 
 function EntityDetails(props) {
@@ -62,6 +63,21 @@ class InfoPanel extends Component {
     const selectedEntity = props.entitiesList[props.selectedEntity];
     if (!selectedEntity) return null;
 
+    const staticInfo = (
+      <div id="content-panel">
+        <div className="panel">
+          <div className="panel-header">
+            Content - {selectedEntity['name']}
+          </div>
+          <div className="panel-body">
+            <div className="attribute-col">
+              <div className="field-label">Text:</div>
+              {/* <input type="text" value={selectedEntity}/> */}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
     const selectedSlide = selectedEntity['slide'][props.selectedSlide];
     if (!selectedSlide) return null;
 
@@ -71,6 +87,8 @@ class InfoPanel extends Component {
       if (Object.keys(selectedSlide['timeline']).length === 0) {
         // no timeline exist, display hints box
         return (
+          <Fragment>
+          {staticInfo}
           <div id="info-panel">
             <div className="panel">
               <div className="panel-header">
@@ -87,11 +105,14 @@ class InfoPanel extends Component {
               </div>
             </div>
           </div>
+          </Fragment>
         )
       }
       return null;
     } else {
       return (
+        <Fragment>
+        {staticInfo}
         <div id="info-panel">
           <div className="panel">
             <div className="panel-header">
@@ -135,6 +156,7 @@ class InfoPanel extends Component {
             
           </div>
         </div>
+        </Fragment>      
       );
     }
   }

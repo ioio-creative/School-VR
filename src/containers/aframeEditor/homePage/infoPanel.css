@@ -8,7 +8,7 @@
 }
 #info-panel {
   position: absolute;
-  top: 120px;
+  top: 230px;
   width: 300px;
   right: 0;
   background-color: var(--panel-body-background-color);
@@ -244,4 +244,14 @@
 }
 #info-panel .menu-list .menu-item.delete-timeline:hover {
   color: #D10F20;
+}
+
+
+#content-panel {
+  position: absolute;
+  top: 120px;
+  width: 300px;
+  right: 0;
+  background-color: var(--panel-body-background-color);
+  color: var(--text-color);
 }

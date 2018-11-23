@@ -94,12 +94,6 @@ class ButtonsPanel extends Component {
               addNewVideo
             </button> */}
             {btns.addNewVideo()}
-            <button onClick={() => entityFunction.addNewCone()}>
-              addNewCone
-            </button>
-            <button onClick={() => entityFunction.setControlMode()}>
-              setControlMode
-            </button>
           </div>
         </div>
       </div>
