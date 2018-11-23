@@ -2,6 +2,7 @@ import React from 'react';
 import 'aframe-gif-shader';
 const Events = require('vendor/Events.js');
 const uuid = require('uuid/v1');
+const smalltalk = require('smalltalk');
 
 let editor = null;
 Events.on('editor-load', obj => {
@@ -271,34 +272,40 @@ function addNewTriangle(elementId, entityParent) {
   );
 }
 function addNewText(elementId, entityParent) {
+
   if (!elementId) {
     elementId = uuid();
   }
-  addEntity({
-      element: 'a-text',
-      components: {
-        id: elementId,
-        geometry: {
-          'primitive': 'plane',
-          'width': 'auto',
-          'height': 'auto',
+  smalltalk.prompt('Enter new text', 'text to display', 'new text')
+    .then((value) => {
+      addEntity({
+          element: 'a-text',
+          components: {
+            id: elementId,
+            geometry: {
+              primitive: 'plane',
+              width: 'auto',
+              height: 'auto',
+            },
+            text: {
+              'value': value,
+              'width': 10,
+              'align': 'center',
+              'side':'both',
+              'wrapCount': 15
+            },
+            material: {
+              color: '#FFFFFF',
+              opacity: 0,
+              transparent: true
+            }
+          }
         },
-        text: {
-          'value': 'text',
-          'width': 10,
-          'align': 'center',
-          'side':'front',
-          'wrap-count': 15
-        },
-        material: {
-          color: '#FFFFFF',
-          opacity: 0,
-          'transparent': true
-        }
-      }
-    },
-    (entityParent?entityParent['el']: null)
-  );
+        (entityParent?entityParent['el']: null)
+      );
+    })
+
+  
 }
 
 function addNewCamera(elementId) {

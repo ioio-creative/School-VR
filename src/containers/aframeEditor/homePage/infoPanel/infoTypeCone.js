@@ -2,154 +2,177 @@
   info generation of right panel
 */
 import React, {Component} from 'react';
-import {roundTo, addToAsset} from 'utils/aframeEditor/helperfunctions';
+import {roundTo, addToAsset, rgba2hex} from 'utils/aframeEditor/helperfunctions';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
+import {Rnd as ResizableAndDraggable} from 'react-rnd';
 
 import './infoTypeCone.css';
 
 var Events = require('vendor/Events.js');
-let editor = null;
-
-Events.on('editor-load', obj => {
-    editor = obj;
-});
-
-function rgb2hex(rgb){
-  if (!rgb) return '#FFFFFF';
-  const parsedrgb = rgb.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
-  return (parsedrgb && parsedrgb.length === 4) ? "#" +
-   ("0" + parseInt(parsedrgb[1],10).toString(16)).slice(-2) +
-   ("0" + parseInt(parsedrgb[2],10).toString(16)).slice(-2) +
-   ("0" + parseInt(parsedrgb[3],10).toString(16)).slice(-2) : rgb;
-}
 
 class InfoTypeCone extends Component {
   constructor(props) {
     super(props);
-    props.timeline[props.timelinePosition]['material']['color'] = rgb2hex(props.timeline[props.timelinePosition]['material']['color']);
+    const self = this;
     this.state = {
-      el: props.el,
-      data: props.timeline[props.timelinePosition]
+      editorMode: null
     };
-    this.eventListener = Array();
-    // this.changeObjectTexture = this.changeObjectTexture.bind(this);
     this.changeObjectField = this.changeObjectField.bind(this);
-    this.deleteObject = this.deleteObject.bind(this);
-    this.selectTimelinePosition = this.selectTimelinePosition.bind(this);
+    this.changeTransformMode = this.changeTransformMode.bind(this);
+    this.events = {
+      transformmodechanged: (mode) => {
+        self.setState({
+          editorMode: mode
+        });
+      }
+    };
   }
   componentDidMount() {
-    // let self = this;
-    // const props = this.props;
-    // // // later need to add event emit when change value
-    // // this.setState({
-    // // });
-    // // console.log('componentDidMount');
-    // props.timeline[props.timelinePosition]['material']['color'] = rgb2hex(props.timeline[props.timelinePosition]['material']['color']);
-    // this.state = {
-    //   el: props.el,
-    //   data: props.timeline[props.timelinePosition]
-    // };
+    for (let eventName in this.events) {
+      Events.on(eventName, this.events[eventName]);
+    }
+    Events.emit('gettransformmode', mode => {
+      if (this.state.editorMode !== mode) {
+        this.changeTransformMode(mode);
+      }
+    })
   }
-  componentDidUpdate() {
+  componentDidUpdate(prevProps, prevState) {
     const props = this.props;
-    props.timeline[props.timelinePosition]['material']['color'] = rgb2hex(props.timeline[props.timelinePosition]['material']['color']);
-    this.state = {
-      el: props.el,
-      data: props.timeline[props.timelinePosition]
-    };
+    const self = this;
+    if (
+      props.selectedEntity !== prevProps.selectedEntity ||
+      props.selectedSlide !== prevProps.selectedSlide ||
+      props.selectedTimeline !== prevProps.selectedTimeline ||
+      props.timelinePosition !== prevProps.timelinePosition
+    ) {
+      this.changeTransformMode(null);
+    } else {
+      Events.emit('gettransformmode', mode => {
+        if (self.state.editorMode !== mode) {
+          self.changeTransformMode(mode);
+        }
+      })
+    }
   }
-  /*
-  componentWillReceiveProps(newProps) {
-    console.log('componentWillReceiveProps');
-    let self = this;
-    // later need to add event emit when change value
-    this.setState({
-      el: newProps.el,
-      data: fetchDataFromEl(newProps.el)
-    });
-  }
-  */
   componentWillUnmount() {
-    for (var emitter in this.eventListener) {
-      Events.removeListener(emitter,this.eventListener[emitter]);
+    for (let eventName in this.events) {
+      Events.removeListener(eventName, this.events[eventName]);
     }
   }
-  deleteObject() {
-    // editor.deselect();
-    // this.state.el.parentNode.removeChild(this.state.el);
-  }
-  selectTimelinePosition(transformMode) {
-    const props = this.props;
-    Events.emit('timelinepositionselected', props.el.object3D, props.timeline.uuid, props.timelinePosition);
+  changeTransformMode(transformMode) {
+    this.setState({
+      editorMode: transformMode
+    });
     if (transformMode) {
+      Events.emit('enablecontrols');
       Events.emit('transformmodechanged', transformMode);
+    } else {
+      Events.emit('disablecontrols');
     }
   }
-  changeObjectField(event) {
-    const props = this.props;
-    let field = event.target.getAttribute('data-value').split('.');
-    // props.timeline
-    // props.timelinePosition
-    const tmp = this.state.data[field[0]];
-    tmp[field[1]] = event.target.value;
-    // this.setState({
-    //   data: tmp
-    // });
-    props.timeline[props.timelinePosition][field[0]][field[1]] = event.target.value;
-    Events.emit('timelinepositionselected', props.el.object3D, props.timeline.uuid, props.timelinePosition);
-    // Events.emit('timelineselected', props.el.object3D, props.timeline.uuid);
+  changeObjectField(field, value) {
+    const tmp = {};
+    tmp[field] = value;
+    Events.emit('updateSelectedEntityAttribute', tmp);
   }
   render() {
-    let data = this.state.data;
-    if (!data) return null;
+    const props = this.props;
+    const data = props.timelineObj[props.timelinePosition];
+    const color = rgba2hex(data.material.color);
     return (
-      <div>
-        <div className="vec3D-col" onFocus={()=>{this.selectTimelinePosition('translate')}}>
-          <button><FontAwesomeIcon icon="arrows-alt" /></button>
-          <div className="vec3D-fields">
-            <input className="textInput" value={data.position.x} data-value="position.x" onChange={this.changeObjectField} />
-            <input className="textInput" value={data.position.y} data-value="position.y" onChange={this.changeObjectField} />
-            <input className="textInput" value={data.position.z} data-value="position.z" onChange={this.changeObjectField} />
-          </div>
+      <div className="animatable-params">
+        <div className="vec3D-btn-col">
+          <button 
+            className={(this.state.editorMode === "translate"? "selected": "")}
+            onClick={()=>{this.changeTransformMode('translate')}}
+            title="Translate"
+          >
+            <FontAwesomeIcon icon="arrows-alt" />
+          </button>
+          <button 
+            className={(this.state.editorMode === "rotate"? "selected": "")}
+            onClick={()=>{this.changeTransformMode('rotate')}}
+            title="Rotate"
+          >
+            <FontAwesomeIcon icon="sync-alt" />
+          </button>
+          <button 
+            className={(this.state.editorMode === "scale"? "selected": "")}
+            onClick={()=>{this.changeTransformMode('scale')}}
+            title="Scale"
+          >
+            <FontAwesomeIcon icon="expand-arrows-alt" />
+          </button>
         </div>
-        <div>
-          <div className="vec3D-col" onFocus={()=>{this.selectTimelinePosition('rotate')}}>
-            <button><FontAwesomeIcon icon="sync-alt" /></button>
-            <div className="vec3D-fields">
-              <input className="textInput" value={data.rotation.x} data-value="rotation.x" onChange={this.changeObjectField} />
-              <input className="textInput" value={data.rotation.y} data-value="rotation.y" onChange={this.changeObjectField} />
-              <input className="textInput" value={data.rotation.z} data-value="rotation.z" onChange={this.changeObjectField} />
+        <div className="attribute-col color-col" onClick={() => this.changeTransformMode(null)}>
+          <label title={color}>
+            <div className="field-label">Color:</div><div className="color-preview" style={{backgroundColor: color}}/>
+            <input type="color" value={color} onChange={(event) => this.changeObjectField('material.color', event.target.value)} hidden/>
+          </label>
+        </div>
+        <div className="attribute-col opacity-col" onClick={() => this.changeTransformMode(null)}>
+          <div className="field-label">Opacity:</div>
+          <div className="opacity-control">
+            <div className="hide-button" onClick={() => {
+              // ~~! int value of the opposite opacity, 0 -> 1, 0.x -> 0
+              this.changeObjectField('material.opacity', ~~!data.material.opacity);              
+            }}>
+              {data.material.opacity?
+                <FontAwesomeIcon icon="eye-slash" />:
+                <FontAwesomeIcon icon="eye" />
+              }
             </div>
-          </div>
-        </div>
-        <div>
-          <div className="vec3D-col" onFocus={()=>{this.selectTimelinePosition('scale')}}>
-            <button><FontAwesomeIcon icon="expand-arrows-alt" /></button>
-            <div className="vec3D-fields">
-              <input className="textInput" value={data.scale.x} data-value="scale.x" onChange={this.changeObjectField} />
-              <input className="textInput" value={data.scale.y} data-value="scale.y" onChange={this.changeObjectField} />
-              <input className="textInput" value={data.scale.z} data-value="scale.z" onChange={this.changeObjectField} />
+            <div className="opacity-drag-control"
+              title={data.material.opacity * 100 + '%'}
+              ref={ref=> this.opacityControl = ref}
+              onClick={(event) => {
+
+                const clickPercent = (event.clientX - event.currentTarget.getBoundingClientRect().left) / event.currentTarget.getBoundingClientRect().width;
+                this.changeObjectField('material.opacity', roundTo(clickPercent, 2));
+              }}
+            >
+              <ResizableAndDraggable
+                className="current-opacity"
+                disableDragging={true}
+                bounds="parent"
+                minWidth="0%"
+                maxWidth="100%"
+                default={{
+                  x: 0,
+                  y: 0
+                }}
+                size={{
+                  height: 24,
+                  width: data.material.opacity * 100 + '%'
+                }}
+                dragAxis='x'
+                enableResizing={{
+                  top: false, right: true, bottom: false, left: false,
+                  topRight: false, bottomRight: false, bottomLeft: false, topLeft: false
+                }}
+                onResizeStart={(event, dir, ref, delta,pos)=>{
+
+                }}
+                onResize={(event, dir, ref, delta, pos)=>{
+                }}
+                onResizeStop={(event, dir, ref, delta, pos)=>{
+                  console.log(delta.width, this.opacityControl.getBoundingClientRect().width);
+                  // this.opacityInput.value = delta.width;
+                  // this.opacityInput.value = (150 + delta.width) / 150;
+                  this.changeObjectField('material.opacity', roundTo(data.material.opacity + delta.width / this.opacityControl.getBoundingClientRect().width, 2));
+                }}
+              >
+                <div className="current-opacity" />
+              </ResizableAndDraggable>  
             </div>
+            <input type="text" value={data.material.opacity} ref={(ref) => this.opacityInput = ref} onChange={(event) => this.changeObjectField('material.opacity', event.target.value)} hidden/>
           </div>
         </div>
-        <div>
-          <div className="vec3D-col" onFocus={()=>{this.selectTimelinePosition()}}>
-            <button>radius top/ bottom</button>
-            <div className="vec3D-fields">
-              <input className="textInput" value={data.geometry.radiusTop} data-value="geometry.radiusTop" onChange={this.changeObjectField} />
-              <input className="textInput" value={data.geometry.radiusBottom} data-value="geometry.radiusBottom" onChange={this.changeObjectField} />
-            </div>
-          </div>
-        </div>
-        {/* <div>
-          texture: <span><img className={data.textureClass} src={data.texture} /></span><input onChange={this.changeObjectTexture} type="file" />
-        </div> */}
-        <div className="vec3D-col" onFocus={()=>{this.selectTimelinePosition()}}>
-          <span>color: </span><input className="colorInput" onChange={this.changeObjectField} type="color" data-value="material.color" value={data.material.color} />
-        </div>
-        
-        <div className="vec3D-col" onFocus={()=>{this.selectTimelinePosition()}}>
-          opacity: <input className="textInput" value={data.material.opacity} data-value="material.opacity" onChange={this.changeObjectField} />
+        <div className="attribute-col radius-col" onClick={() => this.changeTransformMode(null)}>
+          <div className="field-label">Radius:</div>
+          <input type="text" value={data.geometry.radiusTop} onChange={(event) => this.changeObjectField('geometry.radiusTop', event.target.value)} />
+          <input type="text" value={data.geometry.radiusBottom} onChange={(event) => this.changeObjectField('geometry.radiusBottom', event.target.value)} />          
         </div>
       </div>
     );

@@ -1,0 +1,15 @@
+.triangle-col .triangle-wrap {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 10px auto;
+}
+.triangle-col .triangle-wrap .controlDot {
+  width: 8px;
+  height: 8px;
+  position: absolute;
+  border-radius: 50%;
+  cursor: move;
+  background-color: red;
+  margin: -4px 0 0 -4px;
+}

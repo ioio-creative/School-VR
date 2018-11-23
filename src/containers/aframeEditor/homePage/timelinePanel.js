@@ -351,7 +351,7 @@ class timelinePanel extends Component {
                         <ResizableAndDraggable
                           ref={(ref)=>this.resizableAndDraggable[timelineId] = ref}
                           key={timelineId}
-                          className={props.selectedTimeline === timelineId? "time-span selected": "time-span"}
+                          className={selectedEntity === entityId && props.selectedTimeline === timelineId? "time-span selected": "time-span"}
                           default={{
                             x: timelineData.start * self.state.timeScale,
                             y: 0,
@@ -411,11 +411,11 @@ class timelinePanel extends Component {
                         >
                           <div className="drag-handle"></div>
                           <div 
-                            className={"position-select start-attribute" + (props.selectedTimeline === timelineId && props.selectedTimelinePosition === "startAttribute"? " selected": "")}
+                            className={"position-select start-attribute" + (selectedEntity === entityId && props.selectedTimeline === timelineId && props.selectedTimelinePosition === "startAttribute"? " selected": "")}
                             onClick={(event) => this.selectEntityTimelinePosition(event, entityId, timelineId, "startAttribute") }
                           />
                           <div 
-                            className={"position-select end-attribute" + (props.selectedTimeline === timelineId && props.selectedTimelinePosition === "endAttribute"? " selected": "")}
+                            className={"position-select end-attribute" + (selectedEntity === entityId && props.selectedTimeline === timelineId && props.selectedTimelinePosition === "endAttribute"? " selected": "")}
                             onClick={(event) => this.selectEntityTimelinePosition(event, entityId, timelineId, "endAttribute") }
                           />
                         </ResizableAndDraggable>
