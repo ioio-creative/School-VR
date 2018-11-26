@@ -14,58 +14,89 @@ const fs = window.require('fs');
 const path = window.require('path');
 
 
+
+const handleGeneralErr = (callBack, err) => {
+  handleGeneralErrAndData(callBack, err);
+};
+
+const handleGeneralErrAndData = (callBack, err, data) => {
+  const callBackCall = (newErr) => {
+    callBack && callBack(newErr);
+  };
+  if (err) {
+    console.error(err.stack);
+    callBackCall(err, null);
+  } else {
+    callBackCall(null, data);    
+  }
+};
+
+
 /* file api */
+
+//const useFileHandle = (filePath, )
 
 // https://nodejs.org/api/fs.html#fs_fs_access_path_mode_callback
 const exists = (filePath, callBack) => {
   fs.access(filePath, fs.constants.F_OK, (err) => {
-    callBack(err);
+    callBack(err);  // would throw error if callBack is undefined
   });
+};
+
+const existsSync = (filePath) => {
+  return fs.existsSync(filePath);
 };
 
 // https://stackoverflow.com/questions/16316330/how-to-write-file-if-parent-folder-doesnt-exist
 const writeFile = (filePath, content, callBack) => {
   const directoriesStr = path.dirname(filePath);
   const writeFileCallBack = () => {
-    fs.writeFile(filePath, content, (err) => {      
-      callBack(err);
+    fs.writeFile(filePath, content, (err) => {
+      handleGeneralErr(callBack, err);
     });
   }
   exists(directoriesStr, (err) => {
     if (err) {  // directory does not exist
       //console.log(err);
-      fs.mkdir(directoriesStr, { recursive: true }, (err) => {    
+      mkdir(directoriesStr, { recursive: true }, (err) => {    
         if (err) {
-          return callBack(err);      
+          handleGeneralErr(callBack, err);
+          return;
         }    
         writeFileCallBack();
       });      
     } else {  // directory exists
       writeFileCallBack();
     }
-  })  
+  });
 };
 
 const writeFileSync = (filePath, content) => {
   const directoriesStr = path.dirname(filePath);
-  if (!fs.existsSync(directoriesStr)) {
-    fs.mkdirSync(directoriesStr, { recursive: true });
+  if (!existsSync(directoriesStr)) {
+    mkdirSync(directoriesStr);
   }
   fs.writeFileSync(filePath, content);
-}
+};
 
 const createWriteStream = (outputPath) => {
   return fs.createWriteStream(outputPath);
-}
+};
 
 const rename = (oldPath, newPath, callback) => {
+  fs.rename(oldPath, newPath, (err) => {
+    handleGeneralErr(callBack, err);
+  });
+};
 
+const renameSync = (oldPath, newPath) => {
+  fs.renameSync(oldPath, newPath);
 };
 
 const readFile = (filePath, callBack) => {
   //fs.readFile(filePath, 'utf-8', (err, data) => {
   fs.readFile(filePath, (err, data) => {
-    callBack(err, data);
+    handleGeneralErrAndData(callBack, err, data);
   });
 };
 
@@ -73,14 +104,27 @@ const readFileSync = (filePath) => {
   return fs.readFileSync(filePath);
 }
 
-const deleteFile = (filePath, callBack) => {
-  if (fs.existsSync(filePath)) {
-    // File exists deletings
-    fs.unlink(filePath, (err) => {
-      callBack(err);
-    });
+const deleteFileSafe = (filePath, callBack) => {
+  if (existsSync(filePath)) {
+    
   } else {
     callBack(new Error("This file doesn't exist, cannot delete"));
+  }
+
+  exists(filePath, (err) => {
+    if (err) {  // file does not exist
+      handleGeneralErr(callBack, null);
+    } else {  // file exists      
+      fs.unlink(filePath, (err) => {
+        handleGeneralErr(callBack, err);
+      });
+    }
+  });
+}
+
+const deleteFileSafeSync = (filePath) => {
+  if (existsSync(filePath)) {  // file exists    
+    fs.unlinkSync(filePath);
   }
 };
 
@@ -94,11 +138,7 @@ const isDirectorySync = (filePath) => {
 
 const base64Encode = (filePath, callBack) => {
   readFile(filePath, (err, data) => {
-    if (err) {
-      callBack(err, null);
-    } else {
-      callBack(null, toBase64Str(data));
-    }
+    handleGeneralErrAndData(callBack, err, data);
   });
 };
 
@@ -113,7 +153,7 @@ const base64EncodeSync = (filePath) => {
 const base64Decode = (locationToSaveFile, encodedStr, callBack) => {
   writeFile(locationToSaveFile, 
     fromBase64Str(encodedStr),
-    (err) => { callBack(err); })
+    (err) => { handleGeneralErr(callBack, err); })
 };
 
 const base64DecodeSync = (locationToSaveFile, encodedStr) => {
@@ -141,13 +181,11 @@ const createPackageWithTransformOption = (src, dest, transformFunc, callBack) =>
 const createPackageWithOptions = (src, dest, options, callBack) => {
   //console.log(asar);  
   asar.createPackageWithOptions(src, dest, options, (err) => {
-    if (err) {
-      console.error(err.stack);
-      callBack && callBack(err);
-      return;
+    if (!err) {
+      console.log(`${src} packaged to ${dest}`);
     }
-    console.log(`${src} packaged to ${dest}`);
-    callBack && callBack(null);
+    
+    handleGeneralErr(callBack, err);
   });
 };
 
@@ -164,17 +202,62 @@ const extractAll = (archive, dest) => {
 
 /* directory api */
 
-// https://stackoverflow.com/questions/21194934/node-how-to-create-a-directory-if-doesnt-exist
-const createDirectoryIfNotExistsSync = (dirPath) => {
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath);
-  }
+const defaultMkDirOptions = {
+  recursive: true
+};
+
+const mkdir = (dirPath, callBack) => {
+  fs.mkdir(dirPath, defaultMkDirOptions, (err) => {
+    handleGeneralErr(callBack, err);
+  });
+};
+
+const mkdirSync = (dirPath) => {
+  fs.mkdirSync(dirPath, defaultMkDirOptions);
 }
 
-const readDirectory = (dirPath, callBack) => {
-  fs.readdir(dirPath, (error, files) => {
-    callBack(error, files);
+const createDirectoryIfNotExists = (dirPath, callBack) => {  
+  exists(dirPath, (existsErr) => {    
+    if (existsErr) {  // directory does not exist
+      mkdir(dirPath, (mkDirErr) => {
+        handleGeneralErr(callBack, mkDirErr);
+      });
+    } else {  // directory exists
+      handleGeneralErr(callBack, null);
+    }
+  })
+};
+
+// https://stackoverflow.com/questions/21194934/node-how-to-create-a-directory-if-doesnt-exist
+const createDirectoryIfNotExistsSync = (dirPath) => {  
+  if (!existsSync(dirPath)) {
+    mkdirSync(dirPath);
+  }
+};
+
+// TODO:
+const createAndOverwriteDirectoryIfExists = (dirPath) => {
+  
+}
+
+const readdir = (dirPath, callBack) => {
+  fs.readdir(dirPath, (err, files) => {
+    handleGeneralErrAndData(callBack, err, files);
   });
+};
+
+const readdirSync = (dirPath) => {
+  return fs.readdirSync(dirPath);
+}
+
+const rmdir = (dirPath, callBack) => {
+  fs.rmdir(dirPath, (err) => {
+    handleGeneralErr(callBack, err);
+  });
+};
+
+const rmdirSync = (dirPath) => {
+  fs.rmdirSync(dirPath);
 };
 
 /* end of directory api */
@@ -219,13 +302,16 @@ const normalize = (filePath) => {
 export default {
   // file api
   exists,
+  existsSync,
   writeFile,
   writeFileSync,
   createWriteStream,
   rename,
+  renameSync,
   readFile,
   readFileSync,
-  deleteFile,
+  deleteFileSafe,
+  deleteFileSafeSync,
   saveChangesToFile,  
   isDirectorySync,
   base64Encode,
@@ -240,8 +326,15 @@ export default {
   extractAll,
 
   // directory api
+  //mkdir,
+  //mkdirSync,
+  createDirectoryIfNotExists,
   createDirectoryIfNotExistsSync,
-  readDirectory,
+  createAndOverwriteDirectoryIfExists,
+  readdir,
+  readdirSync,
+  rmdir,
+  rmdirSync,
 
   // path api
   sep,

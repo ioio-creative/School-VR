@@ -1,7 +1,7 @@
 import config from 'globals/config';
 import fileSystem from 'utils/fileSystem';
 
-function parseDataToSaveFormat(projectName, entitiesList, assetsList) {
+const parseDataToSaveFormat = (projectName, entitiesList, assetsList) => {
   const resultJson = {
     "project_name": projectName,
     "entities_list": [],
@@ -26,16 +26,16 @@ function parseDataToSaveFormat(projectName, entitiesList, assetsList) {
           "id": timelineId,
           ...currentSlide["timeline"][timelineId]
         })
-      })
+      });
       entityEntry["slides"].push(slideEntry);
-    })
+    });
     resultJson["entities_list"].push(entityEntry);
-  })
+  });
   // TODO: assets_list
   return resultJson;
 };
 
-const saveProjectToLocal = (projectName, entitiesList, assetsList) => {
+const saveProjectToLocal = async (projectName, entitiesList, assetsList, callBack) => {
   const jsonForSave = parseDataToSaveFormat(projectName, entitiesList, assetsList);
   const jsonForSaveStr = JSON.stringify(jsonForSave);
 
@@ -47,7 +47,7 @@ const saveProjectToLocal = (projectName, entitiesList, assetsList) => {
 
   // zip and move temp folder to appDataDirectory
   // TODO: delete temp folder and zip after move
-
+    
 
   return jsonForSave;
 };
