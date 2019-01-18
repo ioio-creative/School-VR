@@ -35,9 +35,9 @@ const parseDataToSaveFormat = (projectName, entitiesList, assetsList) => {
   return resultJson;
 };
 
-const saveProjectToLocal = async (projectName, entitiesList, assetsList, callBack) => {
+const saveProjectToLocal = (projectName, entitiesList, assetsList, callBack) => {
   const jsonForSave = parseDataToSaveFormat(projectName, entitiesList, assetsList);
-  const jsonForSaveStr = JSON.stringify(jsonForSave);
+  const jsonForSaveStr = JSON.stringify(jsonForSave);  
 
   // save in temp folder before zip (in appTempWorkingDirectory)
   // TODO: check if projectName is already used
@@ -45,11 +45,19 @@ const saveProjectToLocal = async (projectName, entitiesList, assetsList, callBac
   const tempProjectDirPath = fileSystem.join(config.appTempWorkingDirectory, projectName);
   const tempJsonPath = fileSystem.join(tempProjectDirPath, projectName + config.jsonFileExtensionWithLeadingDot);
 
-  // zip and move temp folder to appDataDirectory
-  // TODO: delete temp folder and zip after move
-    
+  fileSystem.writeFile(tempJsonPath, jsonForSaveStr, (err) => {
+    if (err) {
+      console.log(err);
+      fileSystem.handleGeneralErr(callBack, err)
+    } else {
+      // zip and move temp folder to appDataDirectory
+      // TODO: delete temp folder and zip after move
 
-  return jsonForSave;
+      console.log(`JSON file saved in ${tempJsonPath}`);
+    }
+  })
+
+  return jsonForSaveStr;
 };
 
 export {

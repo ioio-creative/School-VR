@@ -685,10 +685,12 @@ class EditorPage extends Component {
         }
       },
       saveProject: () => {
-        const jsonStr = saveProjectToLocal(self.projectName, self.entitiesList, self.assetsList);
+        const projectJson = saveProjectToLocal(self.projectName, self.entitiesList, self.assetsList);
+        const projectJsonStr = JSON.stringify(projectJson);
+        //console.log(projectJsonStr);
 
         // call electron save api here
-        //navigator.clipboard.writeText(jsonStr);
+        //navigator.clipboard.writeText(projectJsonStr);
       },
       loadProject: (jsonText) => {
         try {

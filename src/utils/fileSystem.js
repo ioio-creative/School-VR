@@ -3,6 +3,8 @@
 import toBase64Str from 'utils/base64/toBase64Str';
 import fromBase64Str from 'utils/base64/fromBase64Str';
 
+import isFunction from 'utils/variableType/isFunction';
+
 // https://github.com/electron/asar
 // http://www.tc4shell.com/en/7zip/asar/
 // Somehow using the "import" syntax would result in the following error:
@@ -14,6 +16,7 @@ const fs = window.require('fs');
 const path = window.require('path');
 
 
+/* error handling */
 
 const handleGeneralErr = (callBack, err) => {
   handleGeneralErrAndData(callBack, err);
@@ -21,7 +24,7 @@ const handleGeneralErr = (callBack, err) => {
 
 const handleGeneralErrAndData = (callBack, err, data) => {
   const callBackCall = (newErr) => {
-    callBack && callBack(newErr);
+    isFunction(callBack) && callBack(newErr);
   };
   if (err) {
     console.error(err.stack);
@@ -30,6 +33,8 @@ const handleGeneralErrAndData = (callBack, err, data) => {
     callBackCall(null, data);    
   }
 };
+
+/* end of error handling */
 
 
 /* file api */
@@ -83,7 +88,7 @@ const createWriteStream = (outputPath) => {
   return fs.createWriteStream(outputPath);
 };
 
-const rename = (oldPath, newPath, callback) => {
+const rename = (oldPath, newPath, callBack) => {
   fs.rename(oldPath, newPath, (err) => {
     handleGeneralErr(callBack, err);
   });
@@ -235,9 +240,22 @@ const createDirectoryIfNotExistsSync = (dirPath) => {
   }
 };
 
-// TODO:
-const createAndOverwriteDirectoryIfExists = (dirPath) => {
-  
+// https://askubuntu.com/questions/517329/overwrite-an-existing-directory
+const createAndOverwriteDirectoryIfExists = (dirPath, callBack) => {
+  rmdir(dirPath, (err) => {
+    if (err) {
+      handleGeneralErr(callBack, err);
+    } else {
+      mkdir(dirPath, (err) => {
+        handleGeneralErr(callBack, err);
+      });
+    }
+  });
+}
+
+const createAndOverwriteDirectoryIfExistsSync = (dirPath) => {
+  rmdirSync(dirPath);
+  mkdirSync(dirPath);
 }
 
 const readdir = (dirPath, callBack) => {
@@ -300,6 +318,10 @@ const normalize = (filePath) => {
 
 
 export default {
+  // error handling
+  handleGeneralErr,
+  handleGeneralErrAndData,
+
   // file api
   exists,
   existsSync,
@@ -331,6 +353,7 @@ export default {
   createDirectoryIfNotExists,
   createDirectoryIfNotExistsSync,
   createAndOverwriteDirectoryIfExists,
+  createAndOverwriteDirectoryIfExistsSync,
   readdir,
   readdirSync,
   rmdir,
