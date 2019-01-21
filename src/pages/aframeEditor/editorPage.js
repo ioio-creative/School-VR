@@ -10,7 +10,8 @@ import AssetsPanel from 'containers/aframeEditor/homePage/assetsPanel';
 import Editor from 'vendor/editor.js';
 import {addEntityAutoType} from 'utils/aframeEditor/aFrameEntities';
 import {roundTo, jsonCopy} from 'utils/aframeEditor/helperfunctions';
-import {parseDataToSaveFormat, saveProjectToLocal} from 'utils/saveLoadProject/saveProject';
+import saveProjectToLocal from 'utils/saveLoadProject/saveProjectToLocal';
+import parseDataToSaveFormat from 'utils/saveLoadProject/parseDataToSaveFormat';
 import {TweenMax, TimelineMax, Linear} from 'gsap';
 
 import './editorPage.css';
@@ -685,9 +686,16 @@ class EditorPage extends Component {
         }
       },
       saveProject: () => {
-        const projectJson = saveProjectToLocal(self.projectName, self.entitiesList, self.assetsList);
+        const projectJson = saveProjectToLocal(self.projectName, self.entitiesList, self.assetsList, (err, data) => {
+          console.log(err);
+          if (err) {
+            alert(`${err}`);
+          } else {
+            alert(`Data: ${data}`);
+          }
+        });
         const projectJsonStr = JSON.stringify(projectJson);
-        //console.log(projectJsonStr);
+        //console.log(projectJsonStr);        
 
         // call electron save api here
         //navigator.clipboard.writeText(projectJsonStr);

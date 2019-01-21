@@ -6,13 +6,21 @@ const path = window.require('path');
 
 const appName = app.getName();
 
+const appDirectory = {
+  // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname  
+  appDataDirectory: path.join(app.getPath('appData'), `${appName}-Data`),  
+  appProjectsDirectory: path.join(app.getPath('documents'), `${appName}-Projects`),  
+  appTempDirectory: path.join(app.getPath('appData'), `${appName}-Temp`),
+  appTempProjectsDirectory: path.join(app.getPath('appData'), `${appName}-Temp`, `${appName}-Projects`)
+};
+
 const config = {
   appName: appName,
-  // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname  
-  appDataDirectory: path.join(app.getPath('documents'), `${appName}-Data`),
-  appTempWorkingDirectory: path.join(app.getPath('appData'), `${appName}-Temp`),
+  appDirectory: appDirectory,
   schoolVrProjectArchiveExtensionWithLeadingDot: '.iar',
   jsonFileExtensionWithLeadingDot: '.json'
 };
 
 export default config;
+
+export { appDirectory };

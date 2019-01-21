@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import AddressBar from 'pages/TestFileExplorer/AddressBar';
 import FolderView from 'pages/TestFileExplorer/FolderView';
 
-import config from 'globals/config';
+import config, { appDirectory } from 'globals/config';
 import fileSystem from 'utils/fileSystem';
 
 import './bootstrap/css/bootstrap.css';
@@ -37,7 +37,7 @@ class TestFileExplorer extends Component {
     super(props);
 
     this.favouriteDirectories = [
-      { name: "School VR", path: config.appDataDirectory, iconClass: "icon-home" },  
+      { name: "School VR", path: appDirectory.appDataDirectory, iconClass: "icon-home" },  
       { name: "Home", path: "~/", iconClass: "icon-home" },
       { name: "Documents", path: "~/Documents", iconClass: "icon-book" },
       { name: "Pictures", path: "~/Pictures", iconClass: "icon-picture" },
@@ -46,7 +46,7 @@ class TestFileExplorer extends Component {
     ];
     
     this.state = {
-      currentPath: config.appDataDirectory,
+      currentPath: appDirectory.appDataDirectory,
       activeFavouriteDirectoryIdx: 0
     };
 
@@ -99,7 +99,7 @@ class TestFileExplorer extends Component {
       }      
     } else if (filePath.includes(config.schoolVrProjectArchiveExtensionWithLeadingDot)) {  // test unpackaging
       const archive = filePath;
-      const dest = fileSystem.join(config.appTempWorkingDirectory, fileSystem.getFileNameWithoutExtension(filePath));      
+      const dest = fileSystem.join(config.appTempDirectory, fileSystem.getFileNameWithoutExtension(filePath));      
       fileSystem.extractAll(archive, dest);
     } else if (mime.type === 'image') {  // test base64 encode / decode
       fileSystem.base64Encode(mime.path, (err, data) => {

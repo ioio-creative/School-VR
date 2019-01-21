@@ -18,13 +18,18 @@ const path = window.require('path');
 
 /* error handling */
 
+const passbackControlToCallBack = (callBack, data) => {
+  handleGeneralErrAndData(callBack, null, data);
+};
+
 const handleGeneralErr = (callBack, err) => {
   handleGeneralErrAndData(callBack, err);
 };
 
 const handleGeneralErrAndData = (callBack, err, data) => {
-  const callBackCall = (newErr) => {
-    isFunction(callBack) && callBack(newErr);
+  console.log("fileSystem handleGeneralErrAndData");  
+  const callBackCall = (newErr, theData) => {
+    isFunction(callBack) && callBack(newErr, theData);
   };
   if (err) {
     console.error(err.stack);
@@ -52,7 +57,12 @@ const existsSync = (filePath) => {
   return fs.existsSync(filePath);
 };
 
-// https://stackoverflow.com/questions/16316330/how-to-write-file-if-parent-folder-doesnt-exist
+/**
+ * writeFile would create any parent directories in filePath if not exist.
+ * writeFile would replace the file if already exists. (same behaviour as fs.writeFile)
+ * https://nodejs.org/api/fs.html#fs_fs_writefile_file_data_options_callback
+ * https://stackoverflow.com/questions/16316330/how-to-write-file-if-parent-folder-doesnt-exist
+ */
 const writeFile = (filePath, content, callBack) => {
   const directoriesStr = path.dirname(filePath);
   const writeFileCallBack = () => {
@@ -63,7 +73,7 @@ const writeFile = (filePath, content, callBack) => {
   exists(directoriesStr, (err) => {
     if (err) {  // directory does not exist
       //console.log(err);
-      mkdir(directoriesStr, { recursive: true }, (err) => {    
+      mkdir(directoriesStr, (err) => {    
         if (err) {
           handleGeneralErr(callBack, err);
           return;
@@ -109,16 +119,14 @@ const readFileSync = (filePath) => {
   return fs.readFileSync(filePath);
 }
 
+/**
+ * fs.unlink() will not work on a directory, empty or otherwise. To remove a directory, use fs.rmdir()
+ * https://nodejs.org/api/fs.html#fs_fs_unlink_path_callback
+ */
 const deleteFileSafe = (filePath, callBack) => {
-  if (existsSync(filePath)) {
-    
-  } else {
-    callBack(new Error("This file doesn't exist, cannot delete"));
-  }
-
   exists(filePath, (err) => {
     if (err) {  // file does not exist
-      handleGeneralErr(callBack, null);
+      passbackControlToCallBack(callBack);
     } else {  // file exists      
       fs.unlink(filePath, (err) => {
         handleGeneralErr(callBack, err);
@@ -228,7 +236,7 @@ const createDirectoryIfNotExists = (dirPath, callBack) => {
         handleGeneralErr(callBack, mkDirErr);
       });
     } else {  // directory exists
-      handleGeneralErr(callBack, null);
+      passbackControlToCallBack(callBack);
     }
   })
 };
@@ -242,7 +250,7 @@ const createDirectoryIfNotExistsSync = (dirPath) => {
 
 // https://askubuntu.com/questions/517329/overwrite-an-existing-directory
 const createAndOverwriteDirectoryIfExists = (dirPath, callBack) => {
-  rmdir(dirPath, (err) => {
+  deleteDirectorySafe(dirPath, (err) => {
     if (err) {
       handleGeneralErr(callBack, err);
     } else {
@@ -254,7 +262,7 @@ const createAndOverwriteDirectoryIfExists = (dirPath, callBack) => {
 }
 
 const createAndOverwriteDirectoryIfExistsSync = (dirPath) => {
-  rmdirSync(dirPath);
+  deleteDirectorySafeSync(dirPath);
   mkdirSync(dirPath);
 }
 
@@ -268,14 +276,32 @@ const readdirSync = (dirPath) => {
   return fs.readdirSync(dirPath);
 }
 
-const rmdir = (dirPath, callBack) => {
-  fs.rmdir(dirPath, (err) => {
-    handleGeneralErr(callBack, err);
-  });
-};
+// const rmdir = (dirPath, callBack) => {
+//   fs.rmdir(dirPath, (err) => {
+//     handleGeneralErr(callBack, err);
+//   });
+// };
 
-const rmdirSync = (dirPath) => {
-  fs.rmdirSync(dirPath);
+// const rmdirSync = (dirPath) => {
+//   fs.rmdirSync(dirPath);
+// };
+
+const deleteDirectorySafe = (dirPath, callBack) => {  
+  exists(dirPath, (err) => {
+    if (err) {  // dir does not exist
+      passbackControlToCallBack(callBack);      
+    } else {  // dir exists      
+      fs.rmdir(dirPath, (err) => {
+        handleGeneralErr(callBack, err);        
+      });
+    }
+  });
+}
+
+const deleteDirectorySafeSync = (dirPath) => {
+  if (existsSync(dirPath)) {  // dir exists    
+    fs.rmdirSync(dirPath);
+  }
 };
 
 /* end of directory api */
@@ -319,6 +345,7 @@ const normalize = (filePath) => {
 
 export default {
   // error handling
+  passbackControlToCallBack,
   handleGeneralErr,
   handleGeneralErrAndData,
 
@@ -356,8 +383,8 @@ export default {
   createAndOverwriteDirectoryIfExistsSync,
   readdir,
   readdirSync,
-  rmdir,
-  rmdirSync,
+  deleteDirectorySafe,
+  deleteDirectorySafeSync,
 
   // path api
   sep,

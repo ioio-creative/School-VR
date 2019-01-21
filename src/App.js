@@ -5,7 +5,7 @@ import routes from 'globals/routes';
 import {library} from '@fortawesome/fontawesome-svg-core'
 // import {faArrowsAlt, faArrowsAlt} from '@fortawesome/free-solid-svg-icons'
 
-import config from 'globals/config';
+import {appDirectory} from 'globals/config';
 import fileSystem from 'utils/fileSystem';
 
 import asyncLoadingComponent from 'components/asyncLoadingComponent';
@@ -31,9 +31,9 @@ faIconsNeed.forEach(iconName => {
 });
 
 // create App Data directories if they do not exist
-fileSystem.createDirectoryIfNotExistsSync(config.appDataDirectory);
-fileSystem.createDirectoryIfNotExistsSync(config.appTempWorkingDirectory);
-
+Object.keys(appDirectory).forEach((appDirectoryKey) => {
+  fileSystem.createDirectoryIfNotExistsSync(appDirectory[appDirectoryKey]);
+})
 
 /* Note: Using async to load editor page causes some undesirable effects, hence not used. */
 // Code Splitting and React Router v4
