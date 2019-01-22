@@ -686,12 +686,11 @@ class EditorPage extends Component {
         }
       },
       saveProject: () => {
-        const projectJson = saveProjectToLocal(self.projectName, self.entitiesList, self.assetsList, (err, data) => {
-          console.log(err);
+        const projectJson = saveProjectToLocal(self.projectName, self.entitiesList, self.assetsList, (err, data) => {          
           if (err) {
             alert(`${err}`);
           } else {
-            alert(`Data: ${data}`);
+            alert(`Data: ${JSON.stringify(data)}`);
           }
         });
         const projectJsonStr = JSON.stringify(projectJson);

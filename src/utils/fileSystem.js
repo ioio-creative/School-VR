@@ -1,5 +1,7 @@
 // https://ourcodeworld.com/articles/read/106/how-to-choose-read-save-delete-or-create-a-file-with-electron-framework
 
+import rimraf from 'rimraf';
+
 import toBase64Str from 'utils/base64/toBase64Str';
 import fromBase64Str from 'utils/base64/fromBase64Str';
 
@@ -123,23 +125,23 @@ const readFileSync = (filePath) => {
  * fs.unlink() will not work on a directory, empty or otherwise. To remove a directory, use fs.rmdir()
  * https://nodejs.org/api/fs.html#fs_fs_unlink_path_callback
  */
-const deleteFileSafe = (filePath, callBack) => {
-  exists(filePath, (err) => {
-    if (err) {  // file does not exist
-      passbackControlToCallBack(callBack);
-    } else {  // file exists      
-      fs.unlink(filePath, (err) => {
-        handleGeneralErr(callBack, err);
-      });
-    }
-  });
-}
+// const deleteFileSafe = (filePath, callBack) => {
+//   exists(filePath, (err) => {
+//     if (err) {  // file does not exist
+//       passbackControlToCallBack(callBack);
+//     } else {  // file exists      
+//       fs.unlink(filePath, (err) => {
+//         handleGeneralErr(callBack, err);
+//       });
+//     }
+//   });
+// }
 
-const deleteFileSafeSync = (filePath) => {
-  if (existsSync(filePath)) {  // file exists    
-    fs.unlinkSync(filePath);
-  }
-};
+// const deleteFileSafeSync = (filePath) => {
+//   if (existsSync(filePath)) {  // file exists    
+//     fs.unlinkSync(filePath);
+//   }
+// };
 
 const saveChangesToFile = (filepath, content, callBack) => {
   writeFile(filepath, content, callBack);
@@ -250,7 +252,7 @@ const createDirectoryIfNotExistsSync = (dirPath) => {
 
 // https://askubuntu.com/questions/517329/overwrite-an-existing-directory
 const createAndOverwriteDirectoryIfExists = (dirPath, callBack) => {
-  deleteDirectorySafe(dirPath, (err) => {
+  myDelete(dirPath, (err) => {
     if (err) {
       handleGeneralErr(callBack, err);
     } else {
@@ -262,7 +264,7 @@ const createAndOverwriteDirectoryIfExists = (dirPath, callBack) => {
 }
 
 const createAndOverwriteDirectoryIfExistsSync = (dirPath) => {
-  deleteDirectorySafeSync(dirPath);
+  myDeleteSync(dirPath);
   mkdirSync(dirPath);
 }
 
@@ -286,25 +288,45 @@ const readdirSync = (dirPath) => {
 //   fs.rmdirSync(dirPath);
 // };
 
-const deleteDirectorySafe = (dirPath, callBack) => {  
-  exists(dirPath, (err) => {
-    if (err) {  // dir does not exist
-      passbackControlToCallBack(callBack);      
-    } else {  // dir exists      
-      fs.rmdir(dirPath, (err) => {
-        handleGeneralErr(callBack, err);        
-      });
-    }
-  });
-}
+// const deleteDirectorySafe = (dirPath, callBack) => {  
+//   exists(dirPath, (err) => {
+//     if (err) {  // dir does not exist
+//       passbackControlToCallBack(callBack);      
+//     } else {  // dir exists      
+//       fs.rmdir(dirPath, (err) => {
+//         handleGeneralErr(callBack, err);        
+//       });
+//     }
+//   });
+// }
 
-const deleteDirectorySafeSync = (dirPath) => {
-  if (existsSync(dirPath)) {  // dir exists    
-    fs.rmdirSync(dirPath);
-  }
-};
+// const deleteDirectorySafeSync = (dirPath) => {
+//   if (existsSync(dirPath)) {  // dir exists    
+//     fs.rmdirSync(dirPath);
+//   }
+// };
 
 /* end of directory api */
+
+
+/**
+ * rimraf api
+ * work for both file and directory 
+ */
+
+const defaultFsOptions = fs;
+
+const myDelete = (filePath, callBack) => {
+  rimraf(filePath, defaultFsOptions, (err) => {    
+    handleGeneralErr(callBack, err);        
+  });  
+};
+
+const myDeleteSync = (filePath) => {
+  rimraf.sync(filePath, defaultFsOptions);
+}
+
+/* end of del api */
 
 
 /* path api */
@@ -359,8 +381,8 @@ export default {
   renameSync,
   readFile,
   readFileSync,
-  deleteFileSafe,
-  deleteFileSafeSync,
+  //deleteFileSafe,
+  //deleteFileSafeSync,
   saveChangesToFile,  
   isDirectorySync,
   base64Encode,
@@ -383,8 +405,12 @@ export default {
   createAndOverwriteDirectoryIfExistsSync,
   readdir,
   readdirSync,
-  deleteDirectorySafe,
-  deleteDirectorySafeSync,
+  //deleteDirectorySafe,
+  //deleteDirectorySafeSync,
+
+  // rimraf api
+  myDelete,
+  myDeleteSync,
 
   // path api
   sep,
@@ -394,5 +420,5 @@ export default {
   getFileNameWithoutExtension,
   join,
   resolve,
-  normalize
+  normalize,  
 };
