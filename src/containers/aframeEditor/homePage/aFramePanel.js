@@ -26,7 +26,7 @@ class AFramePanel extends Component {
           {/* <a-light position="12 5 5" color="#0000FF" intensity="0.5" type="point" el-name="point light" el-isSystem={true}></a-light> */}
         </a-scene>
 	    </div>
-	);
+	  );
   }
 }
 export default AFramePanel;

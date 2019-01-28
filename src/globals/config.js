@@ -8,17 +8,25 @@ try {
   
   const appName = app.getName();
 
-  config['appName'] = appName;   
+const path = window.require('path');
+
+const appName = app.getName();
+
+const appDirectory = {
   // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname  
-  config['appDataDirectory'] = path.join(app.getPath('documents'), `${appName}-Data`);   
-  config['appTempWorkingDirectory'] = path.join(app.getPath('appData'), `${appName}-Temp`);   
-  config['schoolVrProjectArchiveExtensionWithLeadingDot'] = '.iar';   
-} catch(e) {
-  config['appName'] = 'School VR';   
-  // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname  
-  // config['appDataDirectory'] = path.join(app.getPath('documents'), `${appName}-Data`);   
-  // config['appTempWorkingDirectory'] = path.join(app.getPath('appData'), `${appName}-Temp`);   
-  // config['schoolVrProjectArchiveExtensionWithLeadingDot'] = '.iar';   
-}
+  appDataDirectory: path.join(app.getPath('appData'), `${appName}-Data`),  
+  appProjectsDirectory: path.join(app.getPath('documents'), `${appName}-Projects`),  
+  appTempDirectory: path.join(app.getPath('appData'), `${appName}-Temp`),
+  appTempProjectsDirectory: path.join(app.getPath('appData'), `${appName}-Temp`, `${appName}-Projects`)
+};
+
+const config = {
+  appName: appName,
+  appDirectory: appDirectory,
+  schoolVrProjectArchiveExtensionWithLeadingDot: '.iar',
+  jsonFileExtensionWithLeadingDot: '.json'
+};
 
 export default config;
+
+export { appDirectory };

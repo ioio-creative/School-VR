@@ -10,6 +10,8 @@ import AssetsPanel from 'containers/aframeEditor/homePage/assetsPanel';
 import Editor from 'vendor/editor.js';
 import {addEntityAutoType} from 'utils/aframeEditor/aFrameEntities';
 import {roundTo, jsonCopy} from 'utils/aframeEditor/helperfunctions';
+import saveProjectToLocal from 'utils/saveLoadProject/saveProjectToLocal';
+import parseDataToSaveFormat from 'utils/saveLoadProject/parseDataToSaveFormat';
 import {TweenMax, TimelineMax, Linear} from 'gsap';
 
 import './editorPage.css';
@@ -331,39 +333,6 @@ function getPrevNextTimeline(allTimeline, start) {
   };
 }
 
-function parseDataToSaveFormat(projectName, entitiesList, assetsList) {
-  const resultJson = {
-    "project_name": projectName,
-    "entities_list": [],
-    "assets_list": []
-  };
-  Object.keys(entitiesList).forEach(entityId => {
-    const currentEntity = entitiesList[entityId];
-    const entityEntry = {
-      "id": entityId,
-      "name": currentEntity["name"],
-      "entity_type": currentEntity["type"],
-      "slides": []
-    };
-    Object.keys(currentEntity["slide"]).forEach(slideId => {
-      const currentSlide = currentEntity["slide"][slideId];
-      const slideEntry = {
-        "id": slideId,
-        "timelines": []
-      };
-      Object.keys(currentSlide["timeline"]).forEach(timelineId => {
-        slideEntry["timelines"].push({
-          "id": timelineId,
-          ...currentSlide["timeline"][timelineId]
-        })
-      })
-      entityEntry["slides"].push(slideEntry);
-    })
-    resultJson["entities_list"].push(entityEntry);
-  })
-  // TODO: assets_list
-  return resultJson;
-}
 class SaveDebug extends Component{
   constructor(props) {
     super(props);
@@ -730,9 +699,18 @@ class EditorPage extends Component {
         }
       },
       saveProject: () => {
-        const jsonForSave = parseDataToSaveFormat(self.projectName, self.entitiesList, self.assetsList);
+        const projectJson = saveProjectToLocal(self.projectName, self.entitiesList, self.assetsList, (err, data) => {          
+          if (err) {
+            alert(`${err}`);
+          } else {
+            alert(`Data: ${JSON.stringify(data)}`);
+          }
+        });
+        const projectJsonStr = JSON.stringify(projectJson);
+        //console.log(projectJsonStr);        
+
         // call electron save api here
-        navigator.clipboard.writeText(JSON.stringify(jsonForSave));
+        //navigator.clipboard.writeText(projectJsonStr);
       },
       loadProject: (jsonText) => {
         try {

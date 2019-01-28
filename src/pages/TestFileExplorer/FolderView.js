@@ -63,7 +63,7 @@ class FolderView extends Component {
   enumerateDirectory() {
     const props = this.props;
 
-    fileSystem.readDirectory(props.currentPath, (error, files) => {
+    fileSystem.readdir(props.currentPath, (error, files) => {
       if (error) {
         console.log(error);
         window.alert(error);

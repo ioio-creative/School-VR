@@ -33,7 +33,8 @@ function createWindow() {
     minWidth: 1024,
     minHeight: 768,
     frame: false,
-    show: false
+    show: false, 
+    webPreferences: { webSecurity: false },  // for saving and loading assets via local path
   });
 
   splashScreen.loadURL(`file://${path.join(__dirname, 'splash.html')}`);

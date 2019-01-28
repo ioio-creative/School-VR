@@ -15,6 +15,8 @@ const Events = require('vendor/Events.js');
 const remote = window.require('electron').remote;
 
 const ipcRenderer = window.require('electron').ipcRenderer;
+const smalltalk = require('smalltalk');
+
 
 class SystemPanel extends Component {
   constructor(props) {
@@ -158,10 +160,12 @@ class SystemPanel extends Component {
         </div>
         <div id="app-name" title={this.props.projectName + ' - ' + appName}>
           <div className="project-name" onClick={()=>{
-            let newProjectName = prompt('Enter New Project Name');
-            if (newProjectName) {
-              Events.emit('setProjectName', newProjectName, 'testing');
-            }
+            smalltalk.prompt('Enter New Project Name', 'Enter New Project Name', this.props.projectName)
+              .then((value) => {
+                if (value) {
+                  Events.emit('setProjectName', value);
+                }
+              });            
           }}>{this.props.projectName}</div>
           <div className="hyphen">-</div>
           <div className="app-name">{appName}</div>
