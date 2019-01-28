@@ -18,11 +18,11 @@ function addToAsset(el) {
     let newid;
     switch (el.tagName) {
         case 'VIDEO':
-            newid = uuid() // 'vid_' + document.querySelectorAll('video').length;
+            newid = 'vid_' + uuid() // 'vid_' + document.querySelectorAll('video').length;
             el.loop = true;
             break;
         case 'IMG':
-            newid = uuid() // 'img_' + document.querySelectorAll('img').length;
+            newid = 'img_' + uuid() // 'img_' + document.querySelectorAll('img').length;
             break;
         default:
             console.log('editorFunctions_addToAsset: ???');

@@ -33,8 +33,7 @@ function handleUploadThroughElectron(callback) {
     ],
     filters: [
       {name: 'Images', extensions: ['jpg', 'png', 'gif']},
-      {name: 'Movies', extensions: ['mkv', 'avi', 'mp4']},
-      {name: 'Custom File Type', extensions: ['as']},
+      {name: 'Movies', extensions: ['mp4']},
       {name: 'All Files', extensions: ['*']}
     ]
   });

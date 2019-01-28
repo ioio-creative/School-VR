@@ -54,6 +54,13 @@
 #timeline-panel.panel.opened .panel-body {
   height: 158px;
 }
+#timeline-panel.panel.editor-disabled .panel-body {
+  height: 0;
+}
+#timeline-panel.panel.editor-disabled .toggle-panel,
+#timeline-panel.panel.editor-disabled .time-scale-controls {
+  display: none;
+}
 #timeline-panel .time-scaler {
   white-space: nowrap;
   overflow-x: hidden;

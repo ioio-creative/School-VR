@@ -14,6 +14,7 @@ import InfoTypeTriangle from 'containers/aframeEditor/homePage/infoPanel/infoTyp
 import InfoTypeImage from 'containers/aframeEditor/homePage/infoPanel/infoTypeImage';
 import InfoTypeCamera from 'containers/aframeEditor/homePage/infoPanel/infoTypeCamera';
 import InfoTypeBackground from 'containers/aframeEditor/homePage/infoPanel/infoTypeBackground';
+import InfoTypeText from 'containers/aframeEditor/homePage/infoPanel/infoTypeText';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 
 import './infoPanel.css';
@@ -31,7 +32,7 @@ const infoRenderer = {
   'a-image': InfoTypeBox, //InfoTypeImage
   'a-camera': InfoTypeCamera,
   'a-scene': InfoTypeBackground,
-  'a-text': InfoTypeBox,
+  'a-text': InfoTypeText,
 };
 
 function EntityDetails(props) {

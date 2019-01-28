@@ -1,11 +1,13 @@
 #aframe-panel {
     position: absolute;
-    top: 0px;
-    top: 77px;
+    top: 30px;
     left: 0px;
     right: 0px;
     bottom: 0px;
     bottom: 80px;
+}
+.aframe-editor-opened {
+  top: 77px;
 }
 #aframe-panel a-scene.fullscreen .a-canvas {
     position: absolute !important;

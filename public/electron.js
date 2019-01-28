@@ -14,8 +14,17 @@ let mainWindow;
 function createWindow() {
   const Menu = electron.Menu;
   const MenuItem = electron.MenuItem;
-
-
+  let mainWindowReady = false;
+  let splashScreenCountdowned = false;
+  const splashScreen = new BrowserWindow({
+    width: 400,
+    height: 300,
+    resizable: false,
+    movable: false,
+    frame: false,
+    skipTaskbar: true,
+    show: false
+  })
   /* setting up mainWindow */  
 
   mainWindow = new BrowserWindow({
@@ -24,12 +33,32 @@ function createWindow() {
     minWidth: 1024,
     minHeight: 768,
     frame: false,
-    transparent: true
+    show: false
   });
 
+  splashScreen.loadURL(`file://${path.join(__dirname, 'splash.html')}`);
   //mainWindow.loadURL(isDev ? 'http://localhost:3000/file-explorer' : `file://${path.join(__dirname, '../build/index.html')}`);
-  mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
+  mainWindow.loadURL(isDev ? 'http://localhost:1234' : `file://${path.join(__dirname, '../build/index.html')}`);
   
+  mainWindow.on('ready-to-show', () => {
+    mainWindowReady = true;
+    showMainWindow();
+  });
+
+  splashScreen.on('ready-to-show', () => {
+    splashScreen.show();
+    setTimeout(_=>{
+      splashScreenCountdowned = true;
+      showMainWindow();
+    }, 5000);
+  });
+  function showMainWindow() {
+    if (mainWindowReady && splashScreenCountdowned) {
+      mainWindow.show();
+      splashScreen.close();
+    }
+  }
+
   mainWindow.on('closed', () => {
     mainWindow = null;
     deregisterMainWindowFromIpcMain();
