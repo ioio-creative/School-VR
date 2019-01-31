@@ -17,7 +17,7 @@ const appDirectory = {
 const config = {
   appName: appName,
   appDirectory: appDirectory,
-  schoolVrProjectArchiveExtensionWithLeadingDot: '.iar',
+  schoolVrProjectArchiveExtensionWithLeadingDot: '.ivr',
   jsonFileExtensionWithLeadingDot: '.json'
 };
 
