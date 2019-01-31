@@ -60,10 +60,6 @@ class timelinePanel extends Component {
     window.addEventListener('resize', this.handleResize);
     this.handleResize();
   }
-  // componentDidUpdate() {
-  //   // console.log('componentDidUpdate');
-  //   this.forceUpdate();
-  // }
   componentWillUnmount() {
     window.removeEventListener('resize', this.handleResize);
   }
@@ -77,6 +73,7 @@ class timelinePanel extends Component {
       scrollLeft: event.currentTarget.scrollLeft,
       scrollTop: event.currentTarget.scrollTop
     }
+    // console.log(this.entitiesList);
     if (this.needUpdate) {
       window.cancelAnimationFrame(this.needUpdate);
     }
@@ -212,8 +209,8 @@ class timelinePanel extends Component {
     const entitiesList = this.entitiesList;
     const timeIndicatorWrap = this.timeIndicatorWrap;
     const entitiesListWrap = this.entitiesListWrap;
-    entitiesListWrap.style.marginTop = -entitiesList.scrollTop;
-    timeIndicatorWrap.style.marginLeft = -entitiesList.scrollLeft;
+    entitiesListWrap.style.marginTop = -entitiesList.scrollTop + "px";
+    timeIndicatorWrap.style.marginLeft = -entitiesList.scrollLeft + "px";
   }
   render() {
     const props = this.props;
@@ -222,7 +219,7 @@ class timelinePanel extends Component {
     const totalTime = props.totalTime;
     const currentTime = props.currentTime;
     return (
-      <div id="timeline-panel" className="panel opened" onClick={(event)=>{
+      <div id="timeline-panel" className={"panel opened" + (props.editorEnabled? ' editor-enabled': ' editor-disabled')} onClick={(event)=>{
           this.contextMenu.style.display = 'none';
           {/* this.selectEntityTimelinePosition(event); */}
         }}

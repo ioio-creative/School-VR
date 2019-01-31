@@ -1,6 +1,12 @@
-const electron = window.require('electron');
-const remote = electron.remote;
-const { app } = remote;
+const config = {}
+try {
+  const electron = window.require('electron');
+  const remote = electron.remote;
+  const { app } = remote;
+  
+  const path = window.require('path');
+  
+  const appName = app.getName();
 
 const path = window.require('path');
 

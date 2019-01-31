@@ -81,9 +81,9 @@ class ButtonsPanel extends Component {
         </div>
         <div className="buttons-list buttons-2d">
           <div className="buttons-list-wrapper">
-            <button onClick={() => entityFunction.addNewGif()}>
+            {/* <button onClick={() => entityFunction.addNewGif()}>
               addNewGif
-            </button>
+            </button> */}
             <button onClick={() => entityFunction.addNewText()}>
               addNewText
             </button>
@@ -93,7 +93,9 @@ class ButtonsPanel extends Component {
             {/* <button onClick={() => entityFunction.addNewVideo()}>
               addNewVideo
             </button> */}
+            {btns.addNewGif()}
             {btns.addNewVideo()}
+            {btns.addNewVideoSphere()}
           </div>
         </div>
       </div>

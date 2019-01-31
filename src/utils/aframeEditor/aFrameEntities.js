@@ -288,16 +288,17 @@ function addNewText(elementId, entityParent) {
               height: 'auto',
             },
             text: {
-              'value': value,
-              'width': 10,
-              'align': 'center',
-              'side':'both',
-              'wrapCount': 15
+              value: value,
+              width: 10,
+              align: 'center',
+              side:'double',
+              wrapCount: 15,
+              opacity: 1,
             },
             material: {
               color: '#FFFFFF',
               opacity: 0,
-              transparent: true
+              side:'double',
             }
           }
         },

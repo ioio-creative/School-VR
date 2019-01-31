@@ -28,7 +28,15 @@ const jsonSchemaValidator = require('jsonschema').Validator;
 const validator = new jsonSchemaValidator();
 const schema = require('schema/aframe_schema_20181108.json');
 
-function getEntityAvailableAttrs(entityEl) {
+function getEntityType(entityEl) {
+  const tagName = entityEl.tagName.toLowerCase();
+  if (tagName === 'a-entity') {
+    // entityEl.getAttribute('geometry')['primitive']
+  } else {
+    return tagName;
+  }
+}
+function getEntityAnimatableAttrs(entityEl) {
   let componentAttrs = {
     'material': [
       'color', 'opacity',
@@ -70,7 +78,7 @@ function getEntityAvailableAttrs(entityEl) {
     }
     case 'a-text': {
       componentAttrs['geometry'] = ['primitive', 'width', 'height'];
-      componentAttrs['text'] = ['value', 'width', 'align', 'color', 'side', 'wrapCount'];
+      componentAttrs['text'] = ['value', 'width', 'align', 'color', 'side', 'wrapCount', 'opacity'];
       break;
     }
     case 'a-video': {
@@ -118,7 +126,7 @@ function getEntityAvailableAttrs(entityEl) {
 }
 
 function getEntityState(entityEl) {
-  const componentAttrs = getEntityAvailableAttrs(entityEl);
+  const componentAttrs = getEntityAnimatableAttrs(entityEl);
   const entityAttrs = {};
   Object.keys(componentAttrs).forEach((attr) => {
     const attrType = typeof(componentAttrs[attr]);
@@ -187,9 +195,9 @@ function flattenState(state, prefix = '') {
   return flatted;
 }
 
-window.getEntityState = getEntityState;
-window.flattenState = flattenState;
-window.deFlattenState = deFlattenState;
+// window.getEntityState = getEntityState;
+// window.flattenState = flattenState;
+// window.deFlattenState = deFlattenState;
 /**
  * deFlattenState revert the process flattenState done
  * e.g. turn
@@ -388,6 +396,7 @@ class EditorPage extends Component {
     this.inited = false;
     this.camera = null;
     this.editor = null;
+    this.editorEnabled = true;
     this.entitiesList = {};
     this.slideList = {};
     this.timelineList = {};
@@ -519,6 +528,10 @@ class EditorPage extends Component {
       // below are the events emit by the editor
       // maybe later change all the event names
       // so that the events won't trigger inspector?
+      editormodechanged: active => {
+        self.editorEnabled = active;
+        self.forceUpdate();
+      },
       objectadded: obj => {
         const newEntityId = addToEntitieslist(self.entitiesList, obj);
         if (newEntityId) {
@@ -939,6 +952,18 @@ class EditorPage extends Component {
       }
       Events.on('objectselected', this.events['objectselected']);
     }
+    // if (this.editorEnabled === false) {
+      const vids = document.querySelectorAll('video');
+      vids.forEach(v => {
+        v.currentTime = 0;
+        v.play();
+      });
+      this.globalTimeline.eventCallback("onComplete", ()=>{
+        vids.forEach(v=>{
+          v.pause()
+        });
+      })
+    // }
     self.seekTimeline(0);
     this.globalTimeline.play(0);
   }
@@ -952,19 +977,19 @@ class EditorPage extends Component {
     return (
       <div id="editor">
         <SystemPanel projectName={this.projectName} />
-        <ButtonsPanel
+        {this.editorEnabled && <ButtonsPanel
           selectedEntity={this.selectedEntity}
-        />
+        />}
         <AFramePanel />
         
-        <InfoPanel 
+        {this.editorEnabled && <InfoPanel 
           selectedEntity={this.selectedEntity}
           selectedSlide={this.selectedSlide}
           selectedTimeline={this.selectedTimeline}
           selectedTimelinePosition={this.selectedTimelinePosition}
           entitiesList={this.entitiesList}
           editor={this.editor}
-        />
+        />}
         
         {this.inited && <SlidesPanel 
           selectedSlide={this.selectedSlide}
@@ -979,6 +1004,7 @@ class EditorPage extends Component {
           currentTime={this.currentTime}
           totalTime={this.slideList[this.selectedSlide]['totalTime']}
           timeline={this.globalTimeline}
+          editorEnabled={this.editorEnabled}
         />}
         {/* <UndoRedoDebug undoList={this.undoList} redoList={this.redoList} /> */}
         {this.showDebug && 
