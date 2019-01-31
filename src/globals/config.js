@@ -1,13 +1,6 @@
-const config = {}
-try {
-  const electron = window.require('electron');
-  const remote = electron.remote;
-  const { app } = remote;
-  
-  const path = window.require('path');
-  
-  const appName = app.getName();
-
+const electron = window.require('electron');
+const remote = electron.remote;
+const { app } = remote;
 const path = window.require('path');
 
 const appName = app.getName();
@@ -20,6 +13,20 @@ const appDirectory = {
   appTempProjectsDirectory: path.join(app.getPath('appData'), `${appName}-Temp`, `${appName}-Projects`)
 };
 
+const tempProjectDirectoryStructure = {
+  videoDirectory: 'Videos',
+  imageDirectory: 'Images',
+  gifDirectory: 'Gifs'
+}
+
+// https://electronjs.org/docs/api/dialog
+const openFileDialogFilter = {
+  images: { name: 'Images', extensions: ['jpg', 'png'] },
+  gifs: { name: 'Gifs', extensions: ['gif'] },
+  videos: { name: 'Videos', extensions: ['mp4'] },
+  allFiles: { name: 'All Files', extensions: ['*'] }
+};
+
 const config = {
   appName: appName,
   appDirectory: appDirectory,
@@ -29,4 +36,8 @@ const config = {
 
 export default config;
 
-export { appDirectory };
+export { 
+  appDirectory,
+  tempProjectDirectoryStructure,
+  openFileDialogFilter
+};

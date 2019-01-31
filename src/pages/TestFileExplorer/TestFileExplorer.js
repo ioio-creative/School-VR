@@ -12,8 +12,7 @@ import './bootstrap/css/bootstrap.css';
 import './style.css';
 
 const electron = window.require('electron');
-const remote = electron.remote;
-const { app, BrowserWindow, shell } = remote;
+const { app, BrowserWindow, shell } = electron.remote;
 
 
 let aboutWindow;

@@ -168,7 +168,7 @@ const base64EncodeSync = (filePath) => {
 const base64Decode = (locationToSaveFile, encodedStr, callBack) => {
   writeFile(locationToSaveFile, 
     fromBase64Str(encodedStr),
-    (err) => { handleGeneralErr(callBack, err); })
+    (err) => { handleGeneralErr(callBack, err); });
 };
 
 const base64DecodeSync = (locationToSaveFile, encodedStr) => {

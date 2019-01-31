@@ -1,34 +1,41 @@
 import React from 'react';
-import AFRAME from 'aframe';
 import 'aframe-gif-shader';
 
 const Events = require('vendor/Events.js');
 const uuid = require('uuid/v1');
+const smalltalk = require('smalltalk');
+
 
 let editor = null;
 
 Events.on('editor-load', obj => {
+  // console.log('editorLoad');
   editor = obj;
 });
 
-function addToAsset(el) {
-  let assetEl = document.querySelector('a-asset');
+
+function addToAsset(el, existingUuidStr) {
+  const sceneEl = editor.sceneEl;
+  let assetEl = sceneEl.querySelector('a-asset');
   if (!assetEl) {
     assetEl = document.createElement('a-asset');
-    editor.sceneEl.append(assetEl);
+    sceneEl.append(assetEl);
   }
   assetEl.append(el);
   let newid;
   switch (el.tagName) {
     case 'VIDEO':
-      newid = 'vid_' + uuid() // 'vid_' + document.querySelectorAll('video').length;
+      newid = uuid() // 'vid_' + document.querySelectorAll('video').length;
       el.loop = true;
       break;
     case 'IMG':
-      newid = 'img_' + uuid() // 'img_' + document.querySelectorAll('img').length;
+      newid = uuid() // 'img_' + document.querySelectorAll('img').length;
       break;
     default:
       console.log('editorFunctions_addToAsset: ???');
+  }
+  if (existingUuidStr !== undefined) {
+    newid = existingUuidStr;
   }
   el.setAttribute('id', newid);
   return newid;
@@ -43,122 +50,300 @@ function getFileType(base64file) {
   return fileext;
 }
 
-function addNewBox(renderBtn = true) {
-  function clickBtn() {
-    // let x = prompt('width',1);
-    // let y = prompt('height',1);
-    // let z = prompt('depth',1);
-    const id = uuid();
-    var newEl = editor.createNewEntity({
-      element: 'a-box',
-      components: {
-        'id': id,
-        // 'geometry': {
-        //     'primitive': 'box',
-        //     'width': 1, // x,
-        //     'height': 1, // y,
-        //     'depth': 1, // z,
-        // },
-        'material': {
-          'color': '#FFFFFF',
-          opacity: 0.1,
-          transparent: true
-        },
-        'rotation': {
-          x: 0, y: 45, z: 0
-        }
+/**
+ * Helper function to add a new entity with a list of components
+ * wrapper of createNewEntity function in editor.js
+ * @param {object}      options  Entity definition to add:
+ *                               {element: 'a-entity', components: {geometry: 'primitive:box'}}
+ * @param {HTMLElement} parentEl Parent of the entity, now ignore and add to a-scene
+ *                               <a-box />
+ * @return {Element}             Entity created
+ */
+function addEntity(options, parentEl) {
+  return editor.createNewEntity(options);
+  // return editor.createNewEntity(options, parentEl);
+}
+
+function addEntityAutoType(elementType, elementId, entityParent) {
+  switch (elementType) {
+    case 'a-box': {
+      addNewBox(elementId, entityParent);
+      break;
+    };
+    case 'a-cone': {
+      addNewCone(elementId, entityParent);
+      break;
+    };
+    case 'a-sphere': {
+      addNewSphere(elementId, entityParent);
+      break;
+    };
+    case 'a-cylinder': {
+      addNewCylinder(elementId, entityParent);
+      break;
+    };
+    case 'a-tetrahedron': {
+      addNewTetrahedron(elementId, entityParent);
+      break;
+    };
+    case 'a-icosahedron': {
+      addNewIcosahedron(elementId, entityParent);
+      break;
+    };
+    case 'a-plane': {
+      addNewPlane(elementId, entityParent);
+      break;
+    };
+    case 'a-triangle': {
+      addNewTriangle(elementId, entityParent);
+      break;
+    };
+    case 'a-text': {
+      addNewText(elementId, entityParent);
+      break;
+    };
+    case 'a-camera': {
+      addNewCamera(elementId, entityParent);
+      break;
+    };
+    default:
+      break;
+  }
+}
+
+function addNewBox(elementId, entityParent) {
+  if (!elementId) {
+    elementId = uuid();
+  }
+  const newEntity = addEntity({
+    element: 'a-box',
+    components: {
+      id: elementId,
+      material: {
+        color: '#FFFFFF',
+        opacity: 1,
+        transparent: true // use to map transparent png/gif
+      },
+      position: '0 0 0',
+      scale: '1 1 1',
+      rotation: '0 0 0'
+    }
+  },
+    (entityParent ? entityParent['el'] : null)
+  );
+}
+
+function addNewCone(elementId, entityParent) {
+  if (!elementId) {
+    elementId = uuid();
+  }
+  addEntity({
+    element: 'a-cone',
+    components: {
+      id: elementId,
+      geometry: {
+        radiusTop: 0,
+        radiusBottom: 0.5
+      },
+      material: {
+        color: '#FFFFFF'
+      },
+      position: {
+        x: 0, y: 0, z: 0
       }
-    });
-    // newEl.setAttribute('geometry',{
-    //     // 'primitive': 'box',
-    //     'width': 1, // x,
-    //     'height': 1, // y,
-    //     'depth': 1, // z,
-    // });
-    // newEl.setAttribute('material', {'color': '#FFFF00'});
-    // newEl.setAttribute('position', {x:0, y:0, z:0});
-  }
-  if (renderBtn) {
-    return <button key="addNewBox" onClick={clickBtn}>
-      Add a Box
-    </button>;
-  } else {
-    return clickBtn();
-  }
+    }
+  },
+    (entityParent ? entityParent['el'] : null)
+  );
 }
 
-function addNewCone() {
-  function clickBtn() {
-    var newEl = editor.createNewEntity({
-      element: 'a-cone'
-    });
-    newEl.setAttribute('geometry', {
-      // 'primitive': 'cone'
-      'radiusTop': 0,
-      // 'radiusBottom': 0.2,
-      'radius': 0.5
-    });
-    newEl.setAttribute('material', 'color', '#FFFFFF');
-    newEl.setAttribute('position', { x: 0, y: 1, z: 0 });
+function addNewSphere(elementId, entityParent) {
+  if (!elementId) {
+    elementId = uuid();
   }
-  return <button key="addNewCone" onClick={clickBtn}>
-    Add a Cone
-    </button>;
+  addEntity({
+    element: 'a-sphere',
+    components: {
+      id: elementId,
+      geometry: {
+        radius: 0.5
+      },
+      material: {
+        color: '#FFFFFF'
+      },
+      position: {
+        x: 0, y: 0, z: 0
+      }
+    }
+  },
+    (entityParent ? entityParent['el'] : null)
+  );
 }
 
-function addNewCylinder() {
-  function clickBtn() {
-    var newEl = editor.createNewEntity({
-      element: 'a-cylinder'
-    });
-    newEl.setAttribute('geometry', {
-      // 'primitive': 'cylinder',
-      'radius': 0.5
-    });
-    newEl.setAttribute('material', 'color', '#FFFFFF');
-    newEl.setAttribute('position', { x: 0, y: 1, z: 0 });
+function addNewCylinder(elementId, entityParent) {
+  if (!elementId) {
+    elementId = uuid();
   }
-  return <button key="addNewCylinder" onClick={clickBtn}>
-    Add a Cylinder
-    </button>;
+  addEntity({
+    element: 'a-cylinder',
+    components: {
+      id: elementId,
+      geometry: {
+        'radius': 0.5
+      },
+      material: {
+        color: '#FFFFFF'
+      },
+      position: { x: 0, y: 0, z: 0 }
+    }
+  },
+    (entityParent ? entityParent['el'] : null)
+  );
 }
 
-function addNewPlane() {
-  function clickBtn() {
-    var newEl = editor.createNewEntity({
-      element: 'a-plane'
-    });
-    // newEl.setAttribute('geometry',{
-    //   'primitive': 'torusKnot',
-    //   'p': 3,
-    //   'q': 7
-    // });
-    newEl.setAttribute('material', 'color', '#FFFFFF');
-    newEl.setAttribute('position', { x: 0, y: 1, z: 0 });
+function addNewTetrahedron(elementId, entityParent) {
+  if (!elementId) {
+    elementId = uuid();
   }
-  return <button key="addNewPlane" onClick={clickBtn}>
-    Add a Plane
-    </button>;
+  addEntity({
+    element: 'a-tetrahedron',
+    components: {
+      id: elementId,
+      geometry: {
+        'radius': 0.5
+      },
+      material: {
+        color: '#FFFFFF'
+      },
+      position: { x: 0, y: 0, z: 0 }
+    }
+  },
+    (entityParent ? entityParent['el'] : null)
+  );
 }
 
-function addNewTriangle() {
-  function clickBtn() {
-    var newEl = editor.createNewEntity({
-      element: 'a-triangle'
-    });
-    newEl.setAttribute('geometry', {
-      'primitive': 'triangle',
-    });
-    newEl.setAttribute('material', {
-      'color': '#FFFFFF',
-      'opacity': 0.3,
-      'transparent': true
-    });
-    newEl.setAttribute('position', { x: 0, y: 1, z: 0 });
+function addNewIcosahedron(elementId, entityParent) {
+  if (!elementId) {
+    elementId = uuid();
   }
-  return <button key="addNewTriangle" onClick={clickBtn}>
-    Add a Triangle
-    </button>;
+  addEntity({
+    element: 'a-icosahedron',
+    components: {
+      id: elementId,
+      geometry: {
+        'radius': 0.5
+      },
+      material: {
+        color: '#FFFFFF'
+      },
+      position: { x: 0, y: 0, z: 0 }
+    }
+  },
+    (entityParent ? entityParent['el'] : null)
+  );
+}
+
+function addNewPlane(elementId, entityParent) {
+  if (!elementId) {
+    elementId = uuid();
+  }
+  addEntity({
+    element: 'a-plane',
+    components: {
+      id: elementId,
+      material: {
+        color: '#FFFFFF'
+      },
+      position: { x: 0, y: 1, z: 0 }
+    }
+  },
+    (entityParent ? entityParent['el'] : null)
+  );
+}
+
+function addNewTriangle(elementId, entityParent) {
+  if (!elementId) {
+    elementId = uuid();
+  }
+  addEntity({
+    element: 'a-triangle',
+    components: {
+      id: elementId,
+      geometry: {
+        vertexA: '0 0.5 0',
+        vertexB: '-0.5 -0.5 0',
+        vertexC: '0.5 -0.5 0'
+      },
+      material: {
+        color: '#FFFFFF',
+        opacity: 1,
+        'transparent': true
+      }
+    }
+  },
+    (entityParent ? entityParent['el'] : null)
+  );
+}
+
+function addNewText(elementId, entityParent) {
+
+  if (!elementId) {
+    elementId = uuid();
+  }
+  smalltalk.prompt('Enter new text', 'text to display', 'new text')
+    .then((value) => {
+      addEntity({
+        element: 'a-text',
+        components: {
+          id: elementId,
+          geometry: {
+            primitive: 'plane',
+            width: 'auto',
+            height: 'auto',
+          },
+          text: {
+            value: value,
+            width: 10,
+            align: 'center',
+            side: 'double',
+            wrapCount: 15,
+            opacity: 1,
+          },
+          material: {
+            color: '#FFFFFF',
+            opacity: 0,
+            side: 'double',
+          }
+        }
+      },
+        (entityParent ? entityParent['el'] : null)
+      );
+    })
+}
+
+function addNewCamera(elementId) {
+  if (!elementId) {
+    elementId = uuid();
+  }
+  const newEntity = addEntity({
+    element: 'a-camera',
+    components: {
+      id: elementId,
+      position: '0 2 5',
+      rotation: '0 0 0',
+      'wasd-controls': true,
+      'look-controls': true
+    }
+  });
+  newEntity.setAttribute('data-aframe-editor-original-camera', '');
+  newEntity.setAttribute('data-aframe-editor', 'default-camera');
+  newEntity.setAttribute('camera', 'active', 'false');
+  setTimeout(() => {
+    newEntity.setAttribute('camera', 'active', 'true');
+    editor.EDITOR_CAMERA.el.setAttribute('camera', 'active', 'true');
+    editor.currentCameraEl = newEntity;
+    editor.sceneEl.resize();
+  }, 0);
 }
 
 function addNewImage() {
@@ -205,7 +390,7 @@ function addNewImage() {
     <input id="selectImage" type="file" onChange={handleUpload} hidden />
     <button onClick={clickBtn}>
       Add an Image
-        </button>
+      </button>
   </span>;
 }
 
@@ -253,14 +438,14 @@ function addNewGif() {
     <input id="selectGif" type="file" onChange={handleUpload} hidden />
     <button onClick={clickBtn}>
       Add a Gif
-        </button>
+      </button>
   </span>;
 }
 
 function addNewVideo() {
   function clickBtn() {
     let fileupload = document.getElementById('selectVideo');
-    fileupload.click();
+    fileupload.click();   
   }
   function handleUpload(event) {
     var self = event.target;
@@ -306,62 +491,17 @@ function addNewVideo() {
           // after the file loaded, clear the input
           self.value = '';
         });
-        vid.setAttribute('src', e.target.result);
+        vid.setAttribute('src', e.target.result);        
       };
       reader.readAsDataURL(self.files[0]);
     }
   }
   return <span key="addNewVideo">
-    <input id="selectVideo" type="file" onChange={handleUpload} hidden />
+    {/* <input id="selectVideo" type="file" onChange={handleUpload} hidden /> */}
     <button onClick={clickBtn}>
       Add a Video
-        </button>
+      </button>
   </span>;
-}
-
-function addNewText() {
-  function clickBtn() {
-    let text = prompt('Please enter the text to add', 'type text here');
-    if (text) {
-      let textSize = 10;
-      let width = text.length;
-      let textCount = text.length;
-      let wrapCount = text.length;
-      var newEl = editor.createNewEntity({
-        element: 'a-text'
-      });
-      //   newEl.setAttribute('value',text);
-      //   newEl.setAttribute('width', textSize);
-      //   newEl.setAttribute('align','center');
-      //   newEl.setAttribute('side','double');
-      //   newEl.setAttribute('wrap-count', wrapCount );
-      newEl.setAttribute('text', {
-        'value': text,
-        'width': width,
-        'align': 'center',
-        'color': '#FFFF00',
-        // 'side':'double',
-        'side': 'front',
-        'wrapCount': wrapCount
-      });
-      newEl.setAttribute('position', { x: 0, y: 1, z: 0 });
-      // add a transparent plane to make sit selectable
-      // newEl.setAttribute('geometry', 'primitive: plane; height: auto; width: auto;');
-      newEl.setAttribute('geometry', {
-        primitive: 'plane',
-        height: 1.4 * width / textCount,
-        width: width
-      });
-      newEl.setAttribute('material', {
-        'color': '#FF0000',
-        'transparent': true,
-        'opacity': 0.3
-      });
-    }
-  }
-  return <button key="addNewText" onClick={clickBtn}>
-    Add a Text
-    </button>;
 }
 
 function addNewVideoSphere() {
@@ -408,34 +548,12 @@ function addNewVideoSphere() {
     <input id="select360Video" type="file" onChange={handleUpload} hidden />
     <button onClick={clickBtn}>
       Add a 360 Background Video
-        </button>
+      </button>
   </span>;
 }
 
-function setControlMode() {
-  function setRotate() {
-    Events.emit('transformmodechanged', 'rotate');
-  }
-  function setTranslate() {
-    Events.emit('transformmodechanged', 'translate');
-  }
-  function setScale() {
-    Events.emit('transformmodechanged', 'scale');
-  }
-  // function setSpace() {
-  //     Events.emit('transformmodechanged','scale');
-  // }
-  return <span key="control-type">
-    <button onClick={setTranslate}>
-      Translate
-        </button>
-    <button onClick={setRotate}>
-      Rotate
-        </button>
-    <button onClick={setScale}>
-      Scale
-        </button>
-  </span>;
+function setControlMode(mode) {
+  Events.emit('transformmodechanged', mode);
 }
 
 function takeSnapshot() {
@@ -469,8 +587,11 @@ function takeSnapshot() {
   );
 }
 
-export { addNewBox, addNewCone, addNewCylinder, addNewPlane }
-export { addNewText, addNewTriangle, addNewImage, addNewGif, addNewVideo }
+// pass entity options to create a new entity
+export { addEntity, addEntityAutoType }
+// some predefined entities type
+export { addNewBox, addNewSphere, addNewCone, addNewCylinder, addNewIcosahedron, addNewTetrahedron }
+export { addNewText, addNewPlane, addNewTriangle, addNewImage, addNewGif, addNewVideo }
 export { addNewVideoSphere }
 export { takeSnapshot }
 export { setControlMode }

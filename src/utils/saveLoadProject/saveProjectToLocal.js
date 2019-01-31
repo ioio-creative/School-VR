@@ -1,16 +1,16 @@
-import config, {appDirectory} from 'globals/config';
 import fileSystem from 'utils/fileSystem';
 
 import parseDataToSaveFormat from './parseDataToSaveFormat';
 import isProjectNameUsed from './isProjectNameUsed';
 import {isCurrentLoadedProject, setCurrentLoadedProjectName} from './loadProject';
+import {getTempProjectDirectoryPath, getTempProjectJsonFilePath, getSavedProjectFilePath} from './getProjectPaths';
 
 
 const saveProjectToLocalDetail = (tempProjectDirPath, projectName, entitiesList, assetsList, callBack) => {
   const jsonForSave = parseDataToSaveFormat(projectName, entitiesList, assetsList);
   const jsonForSaveStr = JSON.stringify(jsonForSave);  
 
-  const tempJsonPath = fileSystem.join(tempProjectDirPath, projectName + config.jsonFileExtensionWithLeadingDot);      
+  const tempJsonPath = getTempProjectJsonFilePath(projectName);
   fileSystem.writeFile(tempJsonPath, jsonForSaveStr, (err) => {
     if (err) {          
       fileSystem.handleGeneralErr(callBack, err)
@@ -18,7 +18,7 @@ const saveProjectToLocalDetail = (tempProjectDirPath, projectName, entitiesList,
       console.log(`JSON file saved in ${tempJsonPath}`);
 
       // zip and move temp folder to appProjectsDirectory
-      const destProjectPackagePath = fileSystem.join(appDirectory.appProjectsDirectory, projectName) + config.schoolVrProjectArchiveExtensionWithLeadingDot;
+      const destProjectPackagePath = getSavedProjectFilePath(projectName);
       fileSystem.createPackage(tempProjectDirPath, destProjectPackagePath, (err) => {
         if (err) {
           fileSystem.handleGeneralErr(callBack, err)
@@ -42,7 +42,7 @@ const saveProjectToLocalDetail = (tempProjectDirPath, projectName, entitiesList,
 
 
 const saveProjectToLocal = (projectName, entitiesList, assetsList, callBack) => {
-  let jsonForSave;
+  let jsonForSave;  
 
   // save in temp folder before zip (in appTempProjectsDirectory)
     
@@ -61,7 +61,7 @@ const saveProjectToLocal = (projectName, entitiesList, assetsList, callBack) => 
 
     // check if tempProjectDir already exists, if exists, delete it
     // actually this step may be redundant because I would check isProjectNameUsed
-    const tempProjectDirPath = fileSystem.join(appDirectory.appTempProjectsDirectory, projectName);
+    const tempProjectDirPath = getTempProjectDirectoryPath(projectName);
     if (!isCurrentLoadedProject(projectName)) {
       fileSystem.myDelete(tempProjectDirPath, (err) => {
         if (err) {        

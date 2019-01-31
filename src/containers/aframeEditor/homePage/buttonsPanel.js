@@ -94,7 +94,8 @@ class ButtonsPanel extends Component {
               addNewVideo
             </button> */}
             {btns.addNewGif()}
-            {btns.addNewVideo()}
+            {/* {btns.addNewVideo()} */}
+            {entityFunction.addNewVideo()}
             {btns.addNewVideoSphere()}
           </div>
         </div>
