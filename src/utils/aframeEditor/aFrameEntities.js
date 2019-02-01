@@ -1,7 +1,6 @@
 import React from 'react';
 import 'aframe-gif-shader';
 import { openVideoDialog } from './openFileDialog';
-import { saveVideoToProjectTemp } from 'utils/saveLoadProject/saveFilesToTemp';
 
 const Events = require('vendor/Events.js');
 const uuid = require('uuid/v1');
@@ -41,7 +40,7 @@ function addToAsset(el, existingUuidStr) {
   }
   el.setAttribute('id', newid);
   Events.emit('addAsset', 
-    (el.tagName === 'VIDEO'? 'video': 'image'),
+    (el.tagName === 'VIDEO' ? 'video': 'image'),
     newid,
     el.src
   );
