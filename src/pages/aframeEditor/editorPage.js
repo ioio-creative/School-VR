@@ -14,6 +14,8 @@ import saveProjectToLocal from 'utils/saveLoadProject/saveProjectToLocal';
 import parseDataToSaveFormat from 'utils/saveLoadProject/parseDataToSaveFormat';
 import {TweenMax, TimelineMax, Linear} from 'gsap';
 
+import isProjectNameUsed from 'utils/saveLoadProject/isProjectNameUsed'
+
 import './editorPage.css';
 const Events = require('vendor/Events.js');
 const uuid = require('uuid/v1');
@@ -27,6 +29,32 @@ const mergeJSON = require('deepmerge').default;
 const jsonSchemaValidator = require('jsonschema').Validator;
 const validator = new jsonSchemaValidator();
 const schema = require('schema/aframe_schema_20181108.json');
+
+
+// Check if a suggestedProjectName is already used.
+// If name is in use, would suggest a name one.
+// Hence use a callback to set project name.
+// Warning: recursion is used in the getNewProjectName() callback
+const defaultProjectNamePrefix = "untitled_";
+// must have a trailing number
+function getNewProjectName(callBack, suggestedProjectName = defaultProjectNamePrefix + "1") {
+  let newProjectName = suggestedProjectName;
+  function isProjectNameUsedCallBack(err, isNameUsed) {
+    if (err) {
+      alert("Error when calling getNewProjectName().");
+    } else {
+      if (isNameUsed) {
+        const lastNumberInNewProjectName = Number.parseInt(newProjectName.substr(defaultProjectNamePrefix.length)) + 1;
+        newProjectName = defaultProjectNamePrefix + lastNumberInNewProjectName;
+        isProjectNameUsed(newProjectName, isProjectNameUsedCallBack);
+      } else {
+        callBack(newProjectName);
+      }
+    }
+  };
+
+  isProjectNameUsed(newProjectName, isProjectNameUsedCallBack);
+}
 
 function getEntityType(entityEl) {
   const tagName = entityEl.tagName.toLowerCase();
@@ -390,7 +418,10 @@ class SaveDebug extends Component{
 class EditorPage extends Component {
   constructor(props) {
     super(props);
-    this.projectName = 'untitled';
+    this.projectName = null;
+    getNewProjectName((newProjectName) => {      
+      Events.emit('setProjectName', newProjectName);
+    });
     this.globalTimeline = new TimelineMax({
       paused: true
     });
@@ -419,7 +450,7 @@ class EditorPage extends Component {
     this.addSlide = this.addSlide.bind(this);
     this.removeSlide = this.removeSlide.bind(this);
     this.addTimeline = this.addTimeline.bind(this);
-    this.updateAssetsList = this.updateAssetsList.bind(this);
+    //this.updateAssetsList = this.updateAssetsList.bind(this);
   }
   componentDidMount() {
     this.editor = new Editor();
@@ -670,8 +701,8 @@ class EditorPage extends Component {
           "media_type": type,
           "id": id,
           "src": url,
-        })
-        console.log(self.assetsList);
+        });
+        //console.log(self.assetsList);
       },
       removeSlide: (slideId) => {
         self.removeSlide(slideId);
@@ -698,7 +729,10 @@ class EditorPage extends Component {
               delete self.slideList[slideId];
             })
             // initialize
-            self.projectName = 'untitled';
+            self.projectName = null;
+            getNewProjectName((newProjectName) => {
+              Events.emit('setProjectName', newProjectName);
+            });
             self.addSlide();
             const scene = document.querySelector('a-scene');
             scene.setAttribute('el-name', 'Background');
@@ -719,8 +753,7 @@ class EditorPage extends Component {
           alert(e);
         }
       },
-      saveProject: () => {
-        self.updateAssetsList();
+      saveProject: () => {               
         const projectJson = saveProjectToLocal(self.projectName, self.entitiesList, self.assetsList, (err, data) => {          
           if (err) {
             alert(`${err}`);
@@ -1002,21 +1035,23 @@ class EditorPage extends Component {
     self.seekTimeline(0);
     this.globalTimeline.play(0);
   }
-  updateAssetsList() {
-    // query a-assets
-    const assetsEl = document.querySelector('a-asset');
-    if (assetsEl) {
-      this.assetsList.length = 0;
-      const assets = assetsEl.children;
-      for (let asset in assets) {
-        this.assetsList.push({
-          "media_type": (asset.tagName === "img"? "image": "video"),
-          "src": asset.src,
-          "id": asset.id
-        })
-      }
-    }
-  }
+  // updateAssetsList() {
+  //   // query a-assets
+  //   const assetsEl = document.querySelector('a-asset');
+  //   if (assetsEl) {
+  //     this.assetsList.length = 0;
+  //     const assets = assetsEl.children;
+  //     // https://stackoverflow.com/questions/22754315/for-loop-for-htmlcollection-elements
+  //     for (let asset of assets) {
+  //       this.assetsList.push({
+  //         /* TODO: */
+  //         "media_type": (asset.tagName === "img"? "image": "video") (asset.tagName === "img"? "image": "video"),
+  //         "src": asset.src,
+  //         "id": asset.id
+  //       });        
+  //     }
+  //   }    
+  // }
   // queueUndo(event, ) {
 
   // }

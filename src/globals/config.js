@@ -13,6 +13,12 @@ const appDirectory = {
   appTempProjectsDirectory: path.join(app.getPath('appData'), `${appName}-Temp`, `${appName}-Projects`)
 };
 
+const mediaType = {
+  image: 'image',
+  video: 'video',
+  gif: 'gif'
+};
+
 const tempProjectDirectoryStructure = {
   videoDirectory: 'Videos',
   imageDirectory: 'Images',
@@ -36,7 +42,8 @@ const config = {
 
 export default config;
 
-export { 
+export {
+  mediaType,
   appDirectory,
   tempProjectDirectoryStructure,
   openFileDialogFilter

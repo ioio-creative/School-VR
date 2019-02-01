@@ -26,8 +26,8 @@ function getTempProjectJsonFilePath(projectName) {
   return fileSystem.join(getTempProjectDirectoryPath(projectName), projectName + config.jsonFileExtensionWithLeadingDot);
 }
 
-function getTempProjectVideoFilePath(projectName, assetName, fileExtensionWithDot) {
-  return fileSystem.join(getTempProjectVideoDirectoryPath(projectName), assetName) + fileExtensionWithDot;
+function getTempProjectVideoFilePath(projectName, assetId, fileExtensionWithDot) {
+  return fileSystem.join(getTempProjectVideoDirectoryPath(projectName), assetId) + fileExtensionWithDot;
 }
 
 /* end of temp project */

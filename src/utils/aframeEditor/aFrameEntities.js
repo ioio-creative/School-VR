@@ -1,6 +1,8 @@
 import React from 'react';
 import 'aframe-gif-shader';
-import { openVideoDialog } from './openFileDialog';
+import {openImageDialog, openGifDialog, openVideoDialog} from './openFileDialog';
+import {mediaType, openFileDialogFilter} from 'globals/config';
+import fileSystem from 'utils/fileSystem';
 
 const Events = require('vendor/Events.js');
 const uuid = require('uuid/v1');
@@ -15,6 +17,37 @@ Events.on('editor-load', obj => {
 });
 
 
+/* constants */
+
+const defaultSpawnPosition = { x: 0, y: 1, z: 0 };
+
+/* end of constants */
+
+
+function adjustWidthAndHeightOfNewlyCreatedElement(elementWidth, elementHeight) {
+  let w = elementWidth;
+  let h = elementHeight;
+  if (w > h) {
+    w = w / h;
+    h = 1;
+  } else {
+    h = h / w;
+    w = 1;
+  }
+  return {
+    w: w,
+    h: h
+  };
+}
+
+function handleDialogFilesSelected(filePaths, callBack) {
+  if (filePaths && filePaths[0]) {        
+    callBack(filePaths[0]);
+  } else {
+    alert('No files are selected!');
+  }
+}
+
 function addToAsset(el, existingUuidStr) {
   const sceneEl = editor.sceneEl;
   let assetEl = sceneEl.querySelector('a-asset');
@@ -24,23 +57,31 @@ function addToAsset(el, existingUuidStr) {
   }
   assetEl.append(el);
   let newid;
+  let fileMediaType;
   switch (el.tagName) {
     case 'VIDEO':
       newid = 'vid_' + uuid(); // 'vid_' + document.querySelectorAll('video').length;
       el.loop = true;
+      fileMediaType = mediaType.video;
       break;
     case 'IMG':
-      newid = 'img_' + uuid(); // 'img_' + document.querySelectorAll('img').length;
+      newid = 'img_' + uuid() // 'img_' + document.querySelectorAll('img').length;
+      
+      const fileExtensionWithoutDot = fileSystem.getFileExtensionWithoutLeadingDot(el.src);
+      const isGif = openFileDialogFilter.gifs.extensions.includes(fileExtensionWithoutDot);
+      fileMediaType = isGif ? mediaType.gif : mediaType.image;      
+
       break;
     default:
       console.log('editorFunctions_addToAsset: ???');
+      break;
   }
   if (existingUuidStr !== undefined) {
     newid = existingUuidStr;
   }
   el.setAttribute('id', newid);
   Events.emit('addAsset', 
-    (el.tagName === 'VIDEO' ? 'video': 'image'),
+    fileMediaType,
     newid,
     el.src
   );
@@ -48,13 +89,14 @@ function addToAsset(el, existingUuidStr) {
 }
 
 // this function may use later to combine the handleUpload functions
-function getFileType(base64file) {
-  // console.log(base64file);
-  let fileinfo = base64file.split(/[:;\/]/);
-  let filetype = fileinfo[1];
-  let fileext = fileinfo[2];
-  return fileext;
-}
+// may be obsolete as we may not use the Base64 workflow any more
+// function getFileType(base64file) {
+//   // console.log(base64file);
+//   let fileinfo = base64file.split(/[:;\/]/);
+//   let filetype = fileinfo[1];
+//   let fileext = fileinfo[2];
+//   return fileext;
+// }
 
 /**
  * Helper function to add a new entity with a list of components
@@ -260,7 +302,7 @@ function addNewPlane(elementId, entityParent) {
       material: {
         color: '#FFFFFF'
       },
-      position: { x: 0, y: 1, z: 0 }
+      position: defaultSpawnPosition
     }
   },
     (entityParent ? entityParent['el'] : null)
@@ -354,128 +396,83 @@ function addNewCamera(elementId) {
 
 function addNewImage() {
   function clickBtn() {
-    let fileupload = document.getElementById('selectImage');
-    fileupload.click();
+    openImageDialog((filePaths) => {
+      handleDialogFilesSelected(filePaths, handleUpload);             
+    });
   }
-  function handleUpload(event) {
-    var self = event.target;
-    if (self.files && self.files[0]) {
-      var reader = new FileReader();
-      reader.onload = function (e) {
-        let img = new Image();
-        img.onload = function () {
-          let w = this.width;
-          let h = this.height;
-          if (w > h) {
-            w = w / h;
-            h = 1;
-          } else {
-            h = h / w;
-            w = 1;
-          }
-          let newid = addToAsset(img);
-
-          var newEl = editor.createNewEntity({
-            element: 'a-image'
-          });
-          newEl.setAttribute('geometry', {
-            'height': h,
-            'width': w
-          });
-          newEl.setAttribute('src', '#' + newid);
-          newEl.setAttribute('position', { x: 0, y: 1, z: 0 });
-          // after the file loaded, clear the input
-          self.value = '';
-        }
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(self.files[0]);
+  function handleUpload(filePath) {      
+    const img = new Image();
+    img.onload = function () {
+      const {w, h} = adjustWidthAndHeightOfNewlyCreatedElement(this.width, this.height);      
+      const newid = addToAsset(img);
+      const newEl = editor.createNewEntity({
+        element: 'a-image'
+      });
+      newEl.setAttribute('geometry', {
+        'height': h,
+        'width': w
+      });
+      newEl.setAttribute('src', '#' + newid);
+      newEl.setAttribute('position', defaultSpawnPosition);      
     }
+    img.src = filePath;
   }
-  return <span key="addNewImage">
-    <input id="selectImage" type="file" onChange={handleUpload} hidden />
-    <button onClick={clickBtn}>
-      Add an Image
+  return (
+    <span key="addNewImage">
+      <button onClick={clickBtn}>
+        Add an Image
       </button>
-  </span>;
+    </span>
+  );
 }
 
 function addNewGif() {
   function clickBtn() {
-    let fileupload = document.getElementById('selectGif');
-    fileupload.click();
+    openGifDialog((filePaths) => {
+      handleDialogFilesSelected(filePaths, handleUpload);
+    });
   }
-  function handleUpload(event) {
-    var self = event.target;
-    if (self.files && self.files[0]) {
-      var reader = new FileReader();
-      reader.onload = function (e) {
-        let img = new Image();
-        img.onload = function () {
-          let w = this.width;
-          let h = this.height;
-          if (w > h) {
-            w = w / h;
-            h = 1;
-          } else {
-            h = h / w;
-            w = 1;
-          }
-          let newid = addToAsset(img);
-          var newEl = editor.createNewEntity({
-            element: 'a-image'
-          });
-          newEl.setAttribute('geometry', {
-            'height': h,
-            'width': w
-          });
-          // newEl.setAttribute('src', '#'+ newid );
-          newEl.setAttribute('material', 'shader:gif;src:#' + newid + '');
-          newEl.setAttribute('position', { x: 0, y: 1, z: 0 });
-          // after the file loaded, clear the input
-          self.value = '';
-        }
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(self.files[0]);
+  function handleUpload(filePath) {
+    let img = new Image();
+    img.onload = function () {      
+      const {w, h} = adjustWidthAndHeightOfNewlyCreatedElement(this.width, this.height);      
+      const newid = addToAsset(img);
+      const newEl = editor.createNewEntity({
+        element: 'a-image'
+      });
+      newEl.setAttribute('geometry', {
+        'height': h,
+        'width': w
+      });
+      // newEl.setAttribute('src', '#'+ newid );
+      newEl.setAttribute('material', 'shader:gif;src:#' + newid + '');
+      newEl.setAttribute('position', defaultSpawnPosition);
     }
-  }
-  return <span key="addNewGif">
-    <input id="selectGif" type="file" onChange={handleUpload} hidden />
-    <button onClick={clickBtn}>
-      Add a Gif
-    </button>
-  </span>;
+    img.src = filePath;
+  }  
+  return (
+    <span key="addNewGif">      
+      <button onClick={clickBtn}>
+        Add a Gif
+      </button>
+    </span>
+  );
 }
 
 function addNewVideo() {
   function clickBtn() {
     openVideoDialog((filePaths) => {
-      if (filePaths && filePaths[0]) {        
-        handleUpload(filePaths[0]);
-      } else {
-        alert('No files are selected!');
-      }            
+      handleDialogFilesSelected(filePaths, handleUpload);             
     });
   }
-
   function handleUpload(filePath) {
-    let vid = document.createElement('video');
+    const vid = document.createElement('video');
     vid.addEventListener('loadedmetadata', function () {
-      let w = vid.videoWidth;
-      let h = vid.videoHeight;
+      const {w, h} = adjustWidthAndHeightOfNewlyCreatedElement(vid.videoWidth, vid.videoHeight);      
       // let d = vid.duration;
-      // vid.playbackRate
-      if (w > h) {
-        w = w / h;
-        h = 1;
-      } else {
-        h = h / w;
-        w = 1;
-      }
-      let newid = addToAsset(vid);
-      console.log(newid);
-      var newEl = editor.createNewEntity({
+      // vid.playbackRate     
+      const newid = addToAsset(vid);
+      const newEl = editor.createNewEntity({
         element: 'a-video'
       });
       newEl.setAttribute('geometry', {
@@ -496,15 +493,10 @@ function addNewVideo() {
       // newEl.setAttribute('src', e.target.result );
       // pause on add
       // newEl.getObject3D('mesh').material.map.image.pause();
-      newEl.setAttribute('position', { x: 0, y: 1, z: 0 });
+      newEl.setAttribute('position', defaultSpawnPosition);
     });
-
-
-
-
     vid.setAttribute('src', filePath);
   }
-
   return (
     <span key="addNewVideo">
       <button onClick={clickBtn}>
@@ -520,14 +512,14 @@ function addNewVideoSphere() {
     fileupload.click();
   }
   function handleUpload(event) {
-    var self = event.target;
+    const self = event.target;
     if (self.files && self.files[0]) {
       console.log("filechoose");
       var reader = new FileReader();
       reader.onload = function (e) {
-        let vid = document.createElement('video');
-        let newid = addToAsset(vid);
-        var newEl = editor.createNewEntity({
+        const vid = document.createElement('video');
+        const newid = addToAsset(vid);
+        const newEl = editor.createNewEntity({
           element: 'a-videosphere'
         });
         newEl.setAttribute('src', '#' + newid);

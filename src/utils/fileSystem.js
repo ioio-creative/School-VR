@@ -100,6 +100,8 @@ const createWriteStream = (outputPath) => {
   return fs.createWriteStream(outputPath);
 };
 
+
+
 const rename = (oldPath, newPath, callBack) => {
   fs.rename(oldPath, newPath, (err) => {
     handleGeneralErr(callBack, err);
@@ -119,7 +121,17 @@ const readFile = (filePath, callBack) => {
 
 const readFileSync = (filePath) => {
   return fs.readFileSync(filePath);
-}
+};
+
+const copyFile = (src, dest, callBack) => {
+  fs.copyFile(src, dest, (err) => {
+    handleGeneralErr(callBack, err);
+  });
+};
+
+const copyFileSync = (src, dest) => {
+  fs.copyFileSync(src, dest);  
+};
 
 /**
  * fs.unlink() will not work on a directory, empty or otherwise. To remove a directory, use fs.rmdir()
@@ -381,6 +393,8 @@ export default {
   renameSync,
   readFile,
   readFileSync,
+  copyFile,
+  copyFileSync,
   //deleteFileSafe,
   //deleteFileSafeSync,
   saveChangesToFile,  
