@@ -1,14 +1,50 @@
+import {mediaType, openFileDialogFilter} from 'globals/config';
 import fileSystem from 'utils/fileSystem';
 
 import parseDataToSaveFormat from './parseDataToSaveFormat';
 import isProjectNameUsed from './isProjectNameUsed';
 import {isCurrentLoadedProject, setCurrentLoadedProjectName} from './loadProject';
 import {getTempProjectDirectoryPath, getTempProjectJsonFilePath, getSavedProjectFilePath} from './getProjectPaths';
+import {saveVideoToProjectTemp} from './saveFilesToTemp';
 
+
+const saveProjectAssetsToTemp = (projectName, assetsList, callBack) => {
+  assetsList.forEach((asset) => {
+    // strip file:/// from asset.src
+    const assetFileSrc = asset.src.substr("file:///".length);
+
+    console.log(fileSystem.existsSync(assetFileSrc));
+    
+    switch (asset.media_type) {
+      case mediaType.image:
+        break;
+      case mediaType.gif:
+        break;
+      case mediaType.video:
+      default:
+        saveVideoToProjectTemp(assetFileSrc, projectName, asset.id, callBack);  
+        break;
+    }
+
+    // if (asset.media_type === "img") {
+    //   const assetExttensionWithoutDot = fileSystem.getFileExtensionWithoutLeadingDot(assetSrc);
+    //   const isGif = openFileDialogFilter.gifs.extensions.includes(assetExttensionWithoutDot);
+
+    //   if (isGif) {
+
+    //   } else {
+
+    //   }
+
+    // } else if (asset.media_type === "video") {
+      
+    // }
+  });
+};
 
 const saveProjectToLocalDetail = (tempProjectDirPath, projectName, entitiesList, assetsList, callBack) => {
   const jsonForSave = parseDataToSaveFormat(projectName, entitiesList, assetsList);
-  const jsonForSaveStr = JSON.stringify(jsonForSave);  
+  const jsonForSaveStr = JSON.stringify(jsonForSave);
 
   const tempJsonPath = getTempProjectJsonFilePath(projectName);
   fileSystem.writeFile(tempJsonPath, jsonForSaveStr, (err) => {
@@ -21,17 +57,26 @@ const saveProjectToLocalDetail = (tempProjectDirPath, projectName, entitiesList,
       const destProjectPackagePath = getSavedProjectFilePath(projectName);
       fileSystem.createPackage(tempProjectDirPath, destProjectPackagePath, (err) => {
         if (err) {
-          fileSystem.handleGeneralErr(callBack, err)
+          fileSystem.handleGeneralErr(callBack, err);
         } else {
           console.log(`Project file saved in ${destProjectPackagePath}`);
 
           setCurrentLoadedProjectName(projectName);
           
-          fileSystem.handleGeneralErrAndData(callBack, null, {
-            //tempProjectDirPath: tempProjectDirPath,
-            //tempJsonPath: tempJsonPath,
-            destProjectPackagePath: destProjectPackagePath
-          });                
+          // deal with assetsList          
+          saveProjectAssetsToTemp(projectName, assetsList, (err) => {
+            if (err) {
+              fileSystem.handleGeneralErr(callBack, err);
+            } else {
+              console.log(`Assets saved in ${tempProjectDirPath}`);
+
+              fileSystem.handleGeneralErrAndData(callBack, null, {
+                //tempProjectDirPath: tempProjectDirPath,
+                //tempJsonPath: tempJsonPath,
+                destProjectPackagePath: destProjectPackagePath
+              }); 
+            }
+          });                                    
         }
       });          
     }

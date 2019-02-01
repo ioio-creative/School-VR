@@ -9,58 +9,35 @@ const { BrowserWindow, dialog } = electron.remote;
 // The browserWindow argument allows the dialog to attach itself to a parent window, making it modal.
 
 
-function openImageDialog(callBack) {
+function openDialogCommon(fileFilters, dialogMessage, callBack) {
   const browserWindow = BrowserWindow.getFocusedWindow();
   const optionsObj = {
     title: "Open",
     defaultPath: null,
-    filters: [
-      openFileDialogFilter.images
-    ],
+    filters: fileFilters,
     properties: [
       'openFile'
     ],
-    message: "Please select an image file."
+    message: dialogMessage
   };
   dialog.showOpenDialog(browserWindow, optionsObj, (filePaths) => {
     callBack(filePaths);
   });
+}
+
+function openImageDialog(callBack) {
+  openDialogCommon([openFileDialogFilter.images],
+    "Please select an image file.", callBack);  
 }
 
 function openGifDialog(callBack) {
-  const browserWindow = BrowserWindow.getFocusedWindow();
-  const optionsObj = {
-    title: "Open",
-    defaultPath: null,
-    filters: [
-      openFileDialogFilter.images
-    ],
-    properties: [
-      'openFile'
-    ],
-    message: "Please select an image file."
-  };
-  dialog.showOpenDialog(browserWindow, optionsObj, (filePaths) => {
-    callBack(filePaths);
-  });
+  openDialogCommon([openFileDialogFilter.gifs],
+    "Please select a gif file.", callBack);  
 }
 
 function openVideoDialog(callBack) {
-  const browserWindow = BrowserWindow.getFocusedWindow();
-  const optionsObj = {
-    title: "Open",
-    defaultPath: null,
-    filters: [
-      openFileDialogFilter.videos
-    ],
-    properties: [
-      'openFile'
-    ],
-    message: "Please select a video file."
-  };
-  dialog.showOpenDialog(browserWindow, optionsObj, (filePaths) => {
-    callBack(filePaths);
-  });
+  openDialogCommon([openFileDialogFilter.videos],
+    "Please select a video file.", callBack);
 }
 
 

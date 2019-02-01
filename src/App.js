@@ -38,8 +38,6 @@ Object.keys(appDirectory).forEach((appDirectoryKey) => {
   fileSystem.createDirectoryIfNotExistsSync(appDirectory[appDirectoryKey]);
 });
 
-console.log("askjdghd");
-
 /* Note: Using async to load editor page causes some undesirable effects, hence not used. */
 // Code Splitting and React Router v4
 // https://serverless-stack.com/chapters/code-splitting-in-create-react-app.html
