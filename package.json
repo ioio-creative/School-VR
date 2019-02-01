@@ -57,6 +57,10 @@
     ],
     "directories": {
       "buildResources": "assets"
+    },
+    "fileAssociations": {
+      "ext": "ivr",
+      "name": "School-VR Project"
     }
   },
   "author": "ioio-creative",

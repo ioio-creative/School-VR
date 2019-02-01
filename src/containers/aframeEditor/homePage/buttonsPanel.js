@@ -84,8 +84,8 @@ class ButtonsPanel extends Component {
             {/* <button onClick={() => entityFunction.addNewGif()}>
               addNewGif
             </button> */}
-            <button onClick={() => entityFunction.addNewText()}>
-              addNewText
+            <button className="new-text-button" onClick={() => entityFunction.addNewText()}>
+              T
             </button>
             <button onClick={() => entityFunction.addNewTriangle()}>
               addNewTriangle

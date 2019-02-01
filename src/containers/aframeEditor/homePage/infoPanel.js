@@ -49,6 +49,7 @@ function EntityDetails(props) {
 class InfoPanel extends Component {
   constructor(props) {
     super(props);
+    this.updateEntityText = this.updateEntityText.bind(this);
   }
   componentDidMount() {
     Events.emit('disablecontrols');
@@ -59,11 +60,17 @@ class InfoPanel extends Component {
   }
   componentWillUnmount() {
   }
+  updateEntityText(e) {
+    const entityId = this.props.selectedEntity;
+    Events.emit('updateEntityText', entityId, e.target.value);
+  }
   render() {
     const props = this.props;
     const selectedEntity = props.entitiesList[props.selectedEntity];
     if (!selectedEntity) return null;
-
+    const textComponent = selectedEntity.el.getAttribute('text');
+    // if (textComponent)
+    //   console.log(textComponent['value']);
     const staticInfo = (
       <div id="content-panel">
         <div className="panel">
@@ -73,7 +80,7 @@ class InfoPanel extends Component {
           <div className="panel-body">
             <div className="attribute-col">
               <div className="field-label">Text:</div>
-              {/* <input type="text" value={selectedEntity}/> */}
+              {textComponent && <input type="text" value={textComponent['value']} onChange={this.updateEntityText} />}
             </div>
           </div>
         </div>
@@ -89,7 +96,7 @@ class InfoPanel extends Component {
         // no timeline exist, display hints box
         return (
           <Fragment>
-          {staticInfo}
+            {textComponent && staticInfo}
           <div id="info-panel">
             <div className="panel">
               <div className="panel-header">
@@ -113,7 +120,7 @@ class InfoPanel extends Component {
     } else {
       return (
         <Fragment>
-        {staticInfo}
+        {textComponent && staticInfo}
         <div id="info-panel">
           <div className="panel">
             <div className="panel-header">

@@ -28,3 +28,9 @@
 button {
   color: #FFFFFF;
 }
+.new-text-button {
+  font-size: 40px;
+  text-shadow: 10px -5px rgb(110,186,167);
+  width: 1.5em;
+  text-indent: -0.25em;
+}

@@ -11,10 +11,10 @@ import './slidesPanel.css';
 
 const Events = require('vendor/Events.js');
 
-function Items(props) {
-  // let a = props.abouts
-  return (<div className="row"></div>);
-}
+// function Items(props) {
+//   // let a = props.abouts
+//   return (<div className="row"></div>);
+// }
 function FetchSnapshot(props) {
   if (props.data.length) {
     return props.data.map(function(snapshot) {
@@ -94,7 +94,9 @@ class SlidePanel extends Component {
                 <div className="slideControl">
                   <div className="dot"></div>
                   <div className="actions">
-                    <div className="action duplicate" onClick={()=>{
+                    <div className="action duplicate" onClick={(e)=>{
+                      e.preventDefault();
+                      e.stopPropagation();
                       Events.emit('duplicateSlide', slideId);
                     }}>
                       duplicate

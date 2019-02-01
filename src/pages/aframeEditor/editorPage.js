@@ -676,6 +676,11 @@ class EditorPage extends Component {
       removeSlide: (slideId) => {
         self.removeSlide(slideId);
       },
+      updateEntityText: (entityId, text) => {
+        console.log(self.entitiesList[entityId]);
+        self.entitiesList[entityId].el.setAttribute('text', {value: text});
+        self.forceUpdate();
+      },
       newProject: () => {
         try {
             self.inited = false;

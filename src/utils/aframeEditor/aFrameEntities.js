@@ -26,11 +26,11 @@ function addToAsset(el, existingUuidStr) {
   let newid;
   switch (el.tagName) {
     case 'VIDEO':
-      newid = uuid() // 'vid_' + document.querySelectorAll('video').length;
+      newid = 'vid_' + uuid(); // 'vid_' + document.querySelectorAll('video').length;
       el.loop = true;
       break;
     case 'IMG':
-      newid = uuid() // 'img_' + document.querySelectorAll('img').length;
+      newid = 'img_' + uuid(); // 'img_' + document.querySelectorAll('img').length;
       break;
     default:
       console.log('editorFunctions_addToAsset: ???');
@@ -444,7 +444,7 @@ function addNewGif() {
     <input id="selectGif" type="file" onChange={handleUpload} hidden />
     <button onClick={clickBtn}>
       Add a Gif
-      </button>
+    </button>
   </span>;
 }
 
@@ -474,6 +474,7 @@ function addNewVideo() {
         w = 1;
       }
       let newid = addToAsset(vid);
+      console.log(newid);
       var newEl = editor.createNewEntity({
         element: 'a-video'
       });
