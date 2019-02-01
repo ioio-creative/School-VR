@@ -1,7 +1,7 @@
 // https://ourcodeworld.com/articles/read/106/how-to-choose-read-save-delete-or-create-a-file-with-electron-framework
 
 import rimraf from 'rimraf';
-import fx from 'mkdir-recursive';
+import fx from './mkdir-recursive';
 
 import toBase64Str from 'utils/base64/toBase64Str';
 import fromBase64Str from 'utils/base64/fromBase64Str';
