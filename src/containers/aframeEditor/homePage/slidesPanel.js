@@ -91,6 +91,23 @@ class SlidePanel extends Component {
                   });
                 }}
               >
+                <div className="slideControl">
+                  <div className="dot"></div>
+                  <div className="actions">
+                    <div className="action duplicate" onClick={()=>{
+                      Events.emit('duplicateSlide', slideId);
+                    }}>
+                      duplicate
+                    </div>
+                    <div className="action remove" onClick={(e)=>{
+                      e.preventDefault();
+                      e.stopPropagation();
+                      Events.emit('removeSlide', slideId);
+                    }}>
+                      remove
+                    </div>
+                  </div>
+                </div>
                 <div className="preview-imgsequence">
                   {selectedSlide['slideImages'] && selectedSlide['slideImages'].map((src, idx) => {
                     return (<img

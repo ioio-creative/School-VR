@@ -18,6 +18,7 @@ function addToAsset(el) {
     editor.sceneEl.append(assetEl);
   }
   assetEl.append(el);
+
   let newid;
   switch (el.tagName) {
     case 'VIDEO':
@@ -31,6 +32,11 @@ function addToAsset(el) {
       console.log('editorFunctions_addToAsset: ???');
   }
   el.setAttribute('id', newid);
+  Events.emit('addAsset', 
+    (el.tagName === 'VIDEO'? 'video': 'image'),
+    newid,
+    el.src
+  );
   return newid;
 }
 

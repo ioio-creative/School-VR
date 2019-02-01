@@ -29,6 +29,9 @@ const parseDataToSaveFormat = (projectName, entitiesList, assetsList) => {
     resultJson["entities_list"].push(entityEntry);
   });
   // TODO: assets_list
+  assetsList.forEach(asset => {
+    resultJson["assets_list"].push(asset);
+  })
   return resultJson;
 };
 

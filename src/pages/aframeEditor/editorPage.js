@@ -344,6 +344,7 @@ class SaveDebug extends Component{
   componentDidUpdate(prevProps, prevState) {
     const props = this.props;
     const entitiesList = parseDataToSaveFormat(props.projectName, props.entitiesList, props.assetsList);
+    // console.log(props.assetsList);
     // const oldEntitiesList = parseDataToSaveFormat(prevProps.projectName, prevProps.entitiesList, prevProps.assetsList);
     if (prevState.output !== this.state.output) {
       return true;
@@ -400,7 +401,7 @@ class EditorPage extends Component {
     this.entitiesList = {};
     this.slideList = {};
     this.timelineList = {};
-    this.assetsList = {};
+    this.assetsList = [];
     this.selectedEntity = null;
     this.selectedSlide = null;
     this.selectedTimeline = null;
@@ -416,7 +417,9 @@ class EditorPage extends Component {
     this.seekTimeline = this.seekTimeline.bind(this);
     this.previewTimeline = this.previewTimeline.bind(this);
     this.addSlide = this.addSlide.bind(this);
+    this.removeSlide = this.removeSlide.bind(this);
     this.addTimeline = this.addTimeline.bind(this);
+    this.updateAssetsList = this.updateAssetsList.bind(this);
   }
   componentDidMount() {
     this.editor = new Editor();
@@ -655,10 +658,23 @@ class EditorPage extends Component {
         self.forceUpdate();
       },
       undo: () => {
-
+        // alert('Undo');
+        // 
       },
       redo: () => {
-
+        // alert('Redo');
+      },
+      addAsset: (type, id, url) => {
+        // or only query the elements in a-assets when save?
+        self.assetsList.push({
+          "media_type": type,
+          "id": id,
+          "src": url,
+        })
+        console.log(self.assetsList);
+      },
+      removeSlide: (slideId) => {
+        self.removeSlide(slideId);
       },
       newProject: () => {
         try {
@@ -699,6 +715,7 @@ class EditorPage extends Component {
         }
       },
       saveProject: () => {
+        self.updateAssetsList();
         const projectJson = saveProjectToLocal(self.projectName, self.entitiesList, self.assetsList, (err, data) => {          
           if (err) {
             alert(`${err}`);
@@ -835,6 +852,19 @@ class EditorPage extends Component {
     this.selectedSlide = newSlideId;
     this.forceUpdate();
   }
+  removeSlide(slideId) {
+    if (Object.keys(this.slideList).length < 2) return;
+    const oldIdx = Object.keys(this.slideList).indexOf(slideId);
+    let nextSlide = '';
+    if (oldIdx === 0) {
+      nextSlide = Object.keys(this.slideList)[1];
+    } else {
+      nextSlide = Object.keys(this.slideList)[oldIdx - 1];
+    }
+    delete this.slideList[slideId];
+    this.selectedSlide = nextSlide;
+    this.forceUpdate();
+  }
   addTimeline(entityId, slideId, start, duration = 5, newTimelineId, presetAttributes = null) {
     const self = this;
     if (!newTimelineId) {
@@ -966,6 +996,21 @@ class EditorPage extends Component {
     // }
     self.seekTimeline(0);
     this.globalTimeline.play(0);
+  }
+  updateAssetsList() {
+    // query a-assets
+    const assetsEl = document.querySelector('a-asset');
+    if (assetsEl) {
+      this.assetsList.length = 0;
+      const assets = assetsEl.children;
+      for (let asset in assets) {
+        this.assetsList.push({
+          "media_type": (asset.tagName === "img"? "image": "video"),
+          "src": asset.src,
+          "id": asset.id
+        })
+      }
+    }
   }
   // queueUndo(event, ) {
 

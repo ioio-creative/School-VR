@@ -1,5 +1,6 @@
 :root {
   --appBackgroundColor: #0d0c1e;
+  --slidesPanelHeight: 100px;
 }
 #editor {
   background-color: #FFFFFF;

@@ -15,7 +15,7 @@
   position: absolute;
   left: 0;
   /* height: 150px; */
-  bottom: 80px;
+  bottom: var(--slidesPanelHeight);
   right: 0;
   overflow: hidden;
   z-index: 1;

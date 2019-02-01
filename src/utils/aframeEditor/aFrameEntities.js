@@ -40,6 +40,11 @@ function addToAsset(el, existingUuidStr) {
     newid = existingUuidStr;
   }
   el.setAttribute('id', newid);
+  Events.emit('addAsset', 
+    (el.tagName === 'VIDEO'? 'video': 'image'),
+    newid,
+    el.src
+  );
   return newid;
 }
 

@@ -89,7 +89,7 @@ class SystemPanel extends Component {
                     Events.emit('loadProject', text);
                     this.setState({
                       menuOpen: false
-                  });
+                    });
                   })
                 }}>Load</div>
                 <div className="seperator"></div>
@@ -115,10 +115,18 @@ class SystemPanel extends Component {
             {this.state.hoverItem === 'edit' && this.state.menuOpen &&
             <div className="menu-list list-edit">
                 <div className="menu-item" onClick={() => {
-                  alert('developing')
+                  {/* alert('developing') */}
+                  Events.emit('undo');
+                  this.setState({
+                    menuOpen: false
+                  });
                 }}>Undo</div>
                 <div className="menu-item" onClick={() => {
-                  alert('developing')
+                  {/* alert('developing') */}
+                  Events.emit('redo');
+                  this.setState({
+                    menuOpen: false
+                  });
                 }}>Redo</div>
               </div>
             }

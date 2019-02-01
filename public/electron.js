@@ -30,8 +30,8 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1440,
     height: 810,
-    minWidth: 1024,
-    minHeight: 768,
+    minWidth: 800,
+    minHeight: 600,
     frame: false,
     show: false, 
     webPreferences: { webSecurity: false },  // for saving and loading assets via local path
@@ -53,6 +53,7 @@ function createWindow() {
       showMainWindow();
     }, 5000);
   });
+
   function showMainWindow() {
     if (mainWindowReady && splashScreenCountdowned) {
       mainWindow.show();
