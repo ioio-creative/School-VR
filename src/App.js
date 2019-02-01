@@ -31,7 +31,12 @@ faIconsNeed.forEach(iconName => {
 });
 
 // delete any cached temp project files
-fileSystem.myDeleteSync(appDirectory.appTempProjectsDirectory);
+try {
+  fileSystem.myDeleteSync(appDirectory.appTempProjectsDirectory);
+} catch (err) {
+  console.error(err);
+  alert(err);
+}
 
 // create App Data directories if they do not exist
 Object.keys(appDirectory).forEach((appDirectoryKey) => {

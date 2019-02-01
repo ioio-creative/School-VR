@@ -1,6 +1,7 @@
 // https://ourcodeworld.com/articles/read/106/how-to-choose-read-save-delete-or-create-a-file-with-electron-framework
 
 import rimraf from 'rimraf';
+import fx from 'mkdir-recursive';
 
 import toBase64Str from 'utils/base64/toBase64Str';
 import fromBase64Str from 'utils/base64/fromBase64Str';
@@ -66,16 +67,16 @@ const existsSync = (filePath) => {
  * https://stackoverflow.com/questions/16316330/how-to-write-file-if-parent-folder-doesnt-exist
  */
 const writeFile = (filePath, content, callBack) => {
-  const directoriesStr = path.dirname(filePath);
+  const directoriesStr = dirname(filePath);
   const writeFileCallBack = () => {
     fs.writeFile(filePath, content, (err) => {
       handleGeneralErr(callBack, err);
     });
-  }
+  };
   exists(directoriesStr, (err) => {
     if (err) {  // directory does not exist
       //console.log(err);
-      mkdir(directoriesStr, (err) => {    
+      createDirectoryIfNotExists(directoriesStr, (err) => {    
         if (err) {
           handleGeneralErr(callBack, err);
           return;
@@ -89,9 +90,9 @@ const writeFile = (filePath, content, callBack) => {
 };
 
 const writeFileSync = (filePath, content) => {
-  const directoriesStr = path.dirname(filePath);
+  const directoriesStr = dirname(filePath);
   if (!existsSync(directoriesStr)) {
-    mkdirSync(directoriesStr);
+    createDirectoryIfNotExistsSync(directoriesStr);
   }
   fs.writeFileSync(filePath, content);
 };
@@ -123,13 +124,47 @@ const readFileSync = (filePath) => {
   return fs.readFileSync(filePath);
 };
 
+/**
+ * copyFile and copyFileSync is structurally similar to writeFile and writeFileSync
+ * copyFile would create any parent directories in filePath if not exist.
+ * copyFile would replace the file if already exists. (at least that what I think)
+ */
 const copyFile = (src, dest, callBack) => {
-  fs.copyFile(src, dest, (err) => {
-    handleGeneralErr(callBack, err);
+  if (src === dest) {
+    passbackControlToCallBack(callBack, null);
+    return;
+  }
+
+  const destDirectoriesStr = dirname(dest);
+  const copyFileCallBack = () => {
+    fs.copyFile(src, dest, (err) => {
+      handleGeneralErr(callBack, err);
+    });
+  };
+  exists(destDirectoriesStr, (err) => {
+    if (err) {  // directory does not exist
+      createDirectoryIfNotExists(destDirectoriesStr, (err) => {
+        if (err) {
+          handleGeneralErr(callBack, err);
+          return;
+        }
+        copyFileCallBack();
+      });
+    } else {  // directory exists      
+      copyFileCallBack();
+    }
   });
 };
 
 const copyFileSync = (src, dest) => {
+  if (src === dest) {   
+    return;
+  }
+
+  const destDirectoriesStr = dirname(dest);
+  if (!existsSync(destDirectoriesStr)) {
+    createDirectoryIfNotExistsSync(destDirectoriesStr);
+  }
   fs.copyFileSync(src, dest);  
 };
 
@@ -209,7 +244,7 @@ const createPackageWithOptions = (src, dest, options, callBack) => {
   //console.log(asar);  
   asar.createPackageWithOptions(src, dest, options, (err) => {
     if (!err) {
-      console.log(`${src} packaged to ${dest}`);
+      console.log(`fileSystem - createPackageWithOptions: ${src} packaged to ${dest}`);
     }
     
     handleGeneralErr(callBack, err);
@@ -229,24 +264,37 @@ const extractAll = (archive, dest) => {
 
 /* directory api */
 
-const defaultMkDirOptions = {
-  recursive: true
-};
+// somehow this is not working
+// const defaultMkDirOptions = {
+//   recursive: true
+// };
 
+// const mkdir = (dirPath, callBack) => {
+//   fs.mkdir(dirPath, defaultMkDirOptions, (err) => {
+//     handleGeneralErr(callBack, err);
+//   });
+// };
+
+// const mkdirSync = (dirPath) => {
+//   fs.mkdirSync(dirPath, defaultMkDirOptions);
+// }
+
+// use fx instead of fs
 const mkdir = (dirPath, callBack) => {
-  fs.mkdir(dirPath, defaultMkDirOptions, (err) => {
+  fx.mkdir(fs, path, dirPath, (err) => {
     handleGeneralErr(callBack, err);
   });
 };
 
 const mkdirSync = (dirPath) => {
-  fs.mkdirSync(dirPath, defaultMkDirOptions);
+  fx.mkdirSync(fs, path, dirPath);
 }
 
 const createDirectoryIfNotExists = (dirPath, callBack) => {  
   exists(dirPath, (existsErr) => {    
-    if (existsErr) {  // directory does not exist
+    if (existsErr) {  // directory does not exist      
       mkdir(dirPath, (mkDirErr) => {
+        console.log(dirPath);
         handleGeneralErr(callBack, mkDirErr);
       });
     } else {  // directory exists
@@ -374,6 +422,10 @@ const normalize = (filePath) => {
   return path.normalize(filePath);
 }
 
+const dirname = (filePath) => {
+  return path.dirname(filePath);
+}
+
 /* end of path api */
 
 
@@ -434,5 +486,6 @@ export default {
   getFileNameWithoutExtension,
   join,
   resolve,
-  normalize,  
+  normalize,
+  dirname
 };

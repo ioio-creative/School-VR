@@ -93,7 +93,9 @@ class ButtonsPanel extends Component {
             {/* <button onClick={() => entityFunction.addNewVideo()}>
               addNewVideo
             </button> */}
-            {btns.addNewGif()}
+            {entityFunction.addNewImage()}
+            {/* {btns.addNewGif()} */}
+            {entityFunction.addNewGif()}
             {/* {btns.addNewVideo()} */}
             {entityFunction.addNewVideo()}
             {btns.addNewVideoSphere()}

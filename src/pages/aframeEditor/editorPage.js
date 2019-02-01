@@ -14,7 +14,7 @@ import saveProjectToLocal from 'utils/saveLoadProject/saveProjectToLocal';
 import parseDataToSaveFormat from 'utils/saveLoadProject/parseDataToSaveFormat';
 import {TweenMax, TimelineMax, Linear} from 'gsap';
 
-import isProjectNameUsed from 'utils/saveLoadProject/isProjectNameUsed'
+import getExistingProjectNames from 'utils/saveLoadProject/getExistingProjectNames'
 
 import './editorPage.css';
 const Events = require('vendor/Events.js');
@@ -33,27 +33,22 @@ const schema = require('schema/aframe_schema_20181108.json');
 
 // Check if a suggestedProjectName is already used.
 // If name is in use, would suggest a name one.
-// Hence use a callback to set project name.
-// Warning: recursion is used in the getNewProjectName() callback
+// Use a callback to set project name.
 const defaultProjectNamePrefix = "untitled_";
 // must have a trailing number
 function getNewProjectName(callBack, suggestedProjectName = defaultProjectNamePrefix + "1") {
-  let newProjectName = suggestedProjectName;
-  function isProjectNameUsedCallBack(err, isNameUsed) {
+  getExistingProjectNames((err, existingProjectNames) => {
     if (err) {
       alert("Error when calling getNewProjectName().");
     } else {
-      if (isNameUsed) {
+      let newProjectName = suggestedProjectName;
+      while (existingProjectNames.includes(newProjectName)) {
         const lastNumberInNewProjectName = Number.parseInt(newProjectName.substr(defaultProjectNamePrefix.length)) + 1;
         newProjectName = defaultProjectNamePrefix + lastNumberInNewProjectName;
-        isProjectNameUsed(newProjectName, isProjectNameUsedCallBack);
-      } else {
-        callBack(newProjectName);
       }
+      callBack(newProjectName);      
     }
-  };
-
-  isProjectNameUsed(newProjectName, isProjectNameUsedCallBack);
+  });
 }
 
 function getEntityType(entityEl) {
@@ -754,18 +749,21 @@ class EditorPage extends Component {
         }
       },
       saveProject: () => {               
-        const projectJson = saveProjectToLocal(self.projectName, self.entitiesList, self.assetsList, (err, data) => {          
+        saveProjectToLocal(self.projectName, self.entitiesList, self.assetsList, (err, data) => {          
           if (err) {
             alert(`${err}`);
           } else {
-            alert(`Data: ${JSON.stringify(data)}`);
+            const projectJson = data.projectJson;
+            const projectJsonStr = JSON.stringify(projectJson);
+            //console.log(projectJsonStr);        
+
+            // call electron save api here
+            //navigator.clipboard.writeText(projectJsonStr);
+            
+            alert(`Data: ${JSON.stringify(data)}`);            
           }
         });
-        const projectJsonStr = JSON.stringify(projectJson);
-        //console.log(projectJsonStr);        
-
-        // call electron save api here
-        //navigator.clipboard.writeText(projectJsonStr);
+        
       },
       loadProject: (jsonText) => {
         try {

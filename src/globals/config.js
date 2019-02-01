@@ -19,7 +19,7 @@ const mediaType = {
   gif: 'gif'
 };
 
-const tempProjectDirectoryStructure = {
+const projectDirectoryStructure = {
   videoDirectory: 'Videos',
   imageDirectory: 'Images',
   gifDirectory: 'Gifs'
@@ -45,6 +45,6 @@ export default config;
 export {
   mediaType,
   appDirectory,
-  tempProjectDirectoryStructure,
+  projectDirectoryStructure,
   openFileDialogFilter
 };

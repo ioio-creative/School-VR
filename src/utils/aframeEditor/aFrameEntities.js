@@ -44,7 +44,7 @@ function handleDialogFilesSelected(filePaths, callBack) {
   if (filePaths && filePaths[0]) {        
     callBack(filePaths[0]);
   } else {
-    alert('No files are selected!');
+    //alert('No files are selected!');
   }
 }
 

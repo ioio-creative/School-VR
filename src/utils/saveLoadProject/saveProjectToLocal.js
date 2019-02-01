@@ -1,88 +1,167 @@
-import {mediaType, openFileDialogFilter} from 'globals/config';
+import {mediaType} from 'globals/config';
 import fileSystem from 'utils/fileSystem';
 
 import parseDataToSaveFormat from './parseDataToSaveFormat';
 import isProjectNameUsed from './isProjectNameUsed';
 import {isCurrentLoadedProject, setCurrentLoadedProjectName} from './loadProject';
-import {getTempProjectDirectoryPath, getTempProjectJsonFilePath, getSavedProjectFilePath} from './getProjectPaths';
-import {saveVideoToProjectTemp} from './saveFilesToTemp';
+import {
+  getTempProjectDirectoryPath,
+  getTempProjectJsonFilePath,
+  getSavedProjectFilePath,
+  getImageFilePathRelativeToProjectDirectory,
+  getGifFilePathRelativeToProjectDirectory,
+  getVideoFilePathRelativeToProjectDirectory,
+  isAssetPathRelative
+} from './getProjectPaths';
+import {
+  saveImageToProjectTemp,
+  saveGifToProjectTemp,
+  saveVideoToProjectTemp
+} from './saveFilesToTemp';
+
+
+const EOL = require('os').EOL;
 
 
 const saveProjectAssetsToTemp = (projectName, assetsList, callBack) => {
-  assetsList.forEach((asset) => {
-    // strip file:/// from asset.src
-    const assetFileSrc = asset.src.substr("file:///".length);
+  // use keepCheckCallBack to set saveAssetReturnedErrors array
+  // when doing the assetsList.forEach() loop below
+  const saveAssetReturnedErrors = assetsList.map(_ => {
+    return {
+      isCallBackReturned: false,
+      error: null
+    };
+  });
 
-    console.log(fileSystem.existsSync(assetFileSrc));
+  // deal with the errors, if any, from saving each of the assets
+  const dealWithAnyErrors = () => {
+    const isError = saveAssetReturnedErrors.reduce((prevVal, currErrObj) => {
+      return prevVal || (currErrObj.error !== null);
+    }, false);
+    if (isError) {
+      const errMsg = saveAssetReturnedErrors
+        .filter(errObj => errObj !== null)
+        .map(errObj => errObj.error)
+        .join(EOL);
+      callBack(new Error(errMsg));
+    } else {
+      callBack(null);
+    }
+  };
+
+  const keepCheckCallBack = (err, assetIdx) => {
+    saveAssetReturnedErrors[assetIdx] = {
+      isCallBackReturned: true,
+      error: err
+    };
+
+    // console.log(saveAssetReturnedErrors);
+    const areAllSaveAssetCallBacksReturned = saveAssetReturnedErrors.reduce((prevVal, currErrObj) => {
+      return prevVal && currErrObj.isCallBackReturned;
+    }, true);
+
+    // console.log(areAllSaveAssetCallBacksReturned);
+    if (areAllSaveAssetCallBacksReturned) {      
+      dealWithAnyErrors();
+    }
+  };
+
+  assetsList.forEach((asset, idx) => {
+    // strip file:/// from asset.src
+    const strToStrip = "file:///";
+    let assetFileSrc = asset.src;
+    if (assetFileSrc.indexOf(strToStrip) > -1) {
+      assetFileSrc = assetFileSrc.substr("file:///".length);
+    }
     
+    // TODO: check if using decodeURIComponent() here is appropriate
+    // https://stackoverflow.com/questions/747641/what-is-the-difference-between-decodeuricomponent-and-decodeuri
+    
+    // TODO: this check of relative path is not well thought through!!!
+    const fullAssetFilePath = isAssetPathRelative(assetFileSrc) ?
+      fileSystem.join(getTempProjectDirectoryPath(projectName), assetFileSrc) : assetFileSrc;
+    
+    const decodedFullAssetFilePath = decodeURIComponent(fullAssetFilePath);
+
+    let saveFileToProjectTempFunc = null;    
     switch (asset.media_type) {
       case mediaType.image:
+        saveFileToProjectTempFunc = saveImageToProjectTemp;
         break;
       case mediaType.gif:
+        saveFileToProjectTempFunc = saveGifToProjectTemp;  
         break;
       case mediaType.video:
       default:
-        saveVideoToProjectTemp(assetFileSrc, projectName, asset.id, callBack);  
+        saveFileToProjectTempFunc = saveVideoToProjectTemp;
         break;
     }
 
-    // if (asset.media_type === "img") {
-    //   const assetExttensionWithoutDot = fileSystem.getFileExtensionWithoutLeadingDot(assetSrc);
-    //   const isGif = openFileDialogFilter.gifs.extensions.includes(assetExttensionWithoutDot);
-
-    //   if (isGif) {
-
-    //   } else {
-
-    //   }
-
-    // } else if (asset.media_type === "video") {
-      
-    // }
+    saveFileToProjectTempFunc(decodedFullAssetFilePath, projectName, asset.id, (err) => keepCheckCallBack(err, idx));  
   });
 };
 
 const saveProjectToLocalDetail = (tempProjectDirPath, projectName, entitiesList, assetsList, callBack) => {
   const jsonForSave = parseDataToSaveFormat(projectName, entitiesList, assetsList);
-  const jsonForSaveStr = JSON.stringify(jsonForSave);
+  
+  // deal with assetsList          
+  saveProjectAssetsToTemp(projectName, assetsList, (err) => {
+    if (err) {
+      fileSystem.handleGeneralErr(callBack, err);
+    } else {
+      console.log(`saveProjectToLocal - saveProjectToLocalDetail: Assets saved in ${tempProjectDirPath}`);
 
-  const tempJsonPath = getTempProjectJsonFilePath(projectName);
-  fileSystem.writeFile(tempJsonPath, jsonForSaveStr, (err) => {
-    if (err) {          
-      fileSystem.handleGeneralErr(callBack, err)
-    } else {          
-      console.log(`JSON file saved in ${tempJsonPath}`);
+      // TODO: The following modify the objects in the input assetsList directly. Is this alright?
+      // modify assets_list node in jsonForSave to reflect the relative paths of the project folder structure to be zipped
+      jsonForSave.assets_list.forEach((asset) => {
+        let getAssetFilePathRelativeToProjectDirectoryFunc = null;
+        switch (asset.media_type) {
+          case mediaType.image:
+            getAssetFilePathRelativeToProjectDirectoryFunc = getImageFilePathRelativeToProjectDirectory;
+            break;
+          case mediaType.gif:
+            getAssetFilePathRelativeToProjectDirectoryFunc = getGifFilePathRelativeToProjectDirectory;  
+            break;
+          case mediaType.video:
+          default:
+            getAssetFilePathRelativeToProjectDirectoryFunc = getVideoFilePathRelativeToProjectDirectory;
+            break;
+        }
+        
+        const assetFilePathRelativeToProjectDirectory = 
+          getAssetFilePathRelativeToProjectDirectoryFunc(asset.id, fileSystem.getFileExtensionWithLeadingDot(asset.src));
+        asset.src = assetFilePathRelativeToProjectDirectory;
+      });
 
-      // zip and move temp folder to appProjectsDirectory
-      const destProjectPackagePath = getSavedProjectFilePath(projectName);
-      fileSystem.createPackage(tempProjectDirPath, destProjectPackagePath, (err) => {
-        if (err) {
-          fileSystem.handleGeneralErr(callBack, err);
-        } else {
-          console.log(`Project file saved in ${destProjectPackagePath}`);
+      // write project json file
+      const jsonForSaveStr = JSON.stringify(jsonForSave);
+      const tempJsonPath = getTempProjectJsonFilePath(projectName);
+      fileSystem.writeFile(tempJsonPath, jsonForSaveStr, (err) => {
+        if (err) {          
+          fileSystem.handleGeneralErr(callBack, err)
+        } else {          
+          console.log(`saveProjectToLocal - saveProjectToLocalDetail: JSON file saved in ${tempJsonPath}`);
 
-          setCurrentLoadedProjectName(projectName);
-          
-          // deal with assetsList          
-          saveProjectAssetsToTemp(projectName, assetsList, (err) => {
+          // zip and move temp folder to appProjectsDirectory
+          const destProjectPackagePath = getSavedProjectFilePath(projectName);
+          fileSystem.createPackage(tempProjectDirPath, destProjectPackagePath, (err) => {
             if (err) {
               fileSystem.handleGeneralErr(callBack, err);
             } else {
-              console.log(`Assets saved in ${tempProjectDirPath}`);
-
+              console.log(`saveProjectToLocal - saveProjectToLocalDetail: Project file saved in ${destProjectPackagePath}`);
+              setCurrentLoadedProjectName(projectName);          
               fileSystem.handleGeneralErrAndData(callBack, null, {
                 //tempProjectDirPath: tempProjectDirPath,
                 //tempJsonPath: tempJsonPath,
+                jsonForSave: jsonForSave,
                 destProjectPackagePath: destProjectPackagePath
-              }); 
+              });
             }
-          });                                    
+          });
         }
-      });          
+      });
     }
   });
-
-  return jsonForSave;
 };
 
 
