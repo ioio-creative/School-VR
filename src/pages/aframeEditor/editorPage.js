@@ -34,7 +34,7 @@ const schema = require('schema/aframe_schema_20181108.json');
 // Check if a suggestedProjectName is already used.
 // If name is in use, would suggest a name one.
 // Use a callback to set project name.
-const defaultProjectNamePrefix = "untitled_";
+const defaultProjectNamePrefix = "untitled";
 // must have a trailing number
 function getNewProjectName(callBack, suggestedProjectName = defaultProjectNamePrefix + "1") {
   getExistingProjectNames((err, existingProjectNames) => {
@@ -42,10 +42,17 @@ function getNewProjectName(callBack, suggestedProjectName = defaultProjectNamePr
       alert("Error when calling getNewProjectName().");
     } else {
       let newProjectName = suggestedProjectName;
-      while (existingProjectNames.includes(newProjectName)) {
-        const lastNumberInNewProjectName = Number.parseInt(newProjectName.substr(defaultProjectNamePrefix.length)) + 1;
-        newProjectName = defaultProjectNamePrefix + lastNumberInNewProjectName;
+      const existingProjectNamesWhichStartWithDefaultPrefix = 
+        existingProjectNames.filter((name) => name.indexOf(defaultProjectNamePrefix) === 0);
+
+      if (existingProjectNamesWhichStartWithDefaultPrefix.includes(newProjectName)) {
+        let counter = 1;
+        while (existingProjectNamesWhichStartWithDefaultPrefix.includes(newProjectName + counter)) {
+          counter++;
+        }
+        newProjectName = newProjectName + counter;
       }
+
       callBack(newProjectName);      
     }
   });
