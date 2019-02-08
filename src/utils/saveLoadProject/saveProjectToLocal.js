@@ -1,11 +1,14 @@
 import {mediaType} from 'globals/config';
-import fileSystem from 'utils/fileSystem';
+import fileSystem from 'utils/fileSystem/fileSystem';
 
 import parseDataToSaveFormat from './parseDataToSaveFormat';
 import isProjectNameUsed from './isProjectNameUsed';
 import {isCurrentLoadedProject, setCurrentLoadedProjectName} from './loadProject';
 import {
   getTempProjectDirectoryPath,
+  getTempProjectImageDirectoryPath,
+  getTempProjectGifDirectoryPath,
+  getTempProjectVideoDirectoryPath,
   getTempProjectJsonFilePath,
   getSavedProjectFilePath,
   getImageFilePathRelativeToProjectDirectory,
@@ -23,23 +26,26 @@ import {
 const EOL = require('os').EOL;
 
 
-const saveProjectAssetsToTemp = (projectName, assetsList, callBack) => {
-  // use keepCheckCallBack to set saveAssetReturnedErrors array
-  // when doing the assetsList.forEach() loop below
-  const saveAssetReturnedErrors = assetsList.map(_ => {
-    return {
+/* utils */
+
+const getCallBackReturnedDataObjects = (totNumOfObjs) => {
+  const callBackReturnedDataObjects = [];
+  for (let i = 0; i < totNumOfObjs; i++) {
+    callBackReturnedDataObjects.push({
       isCallBackReturned: false,
       error: null
-    };
-  });
+    });
+  }
+  return callBackReturnedDataObjects;
+}
 
-  // deal with the errors, if any, from saving each of the assets
-  const dealWithAnyErrors = () => {
-    const isError = saveAssetReturnedErrors.reduce((prevVal, currErrObj) => {
+const getDealWithAnyCallBackErrorsFunc = (callBackDataObjs, callBack) => {
+  return function() {
+    const isError = callBackDataObjs.reduce((prevVal, currErrObj) => {
       return prevVal || (currErrObj.error !== null);
     }, false);
     if (isError) {
-      const errMsg = saveAssetReturnedErrors
+      const errMsg = callBackDataObjs
         .filter(errObj => errObj !== null)
         .map(errObj => errObj.error)
         .join(EOL);
@@ -47,57 +53,130 @@ const saveProjectAssetsToTemp = (projectName, assetsList, callBack) => {
     } else {
       callBack(null);
     }
-  };
+  }
+}
 
-  const keepCheckCallBack = (err, assetIdx) => {
-    saveAssetReturnedErrors[assetIdx] = {
+/* end of utils */
+
+
+const createProjectAssetTempDirectories = (projectName, callBack) => {
+  const projectAssetTempDirectories = [
+    getTempProjectImageDirectoryPath(projectName),
+    getTempProjectGifDirectoryPath(projectName),
+    getTempProjectVideoDirectoryPath(projectName)
+  ];
+
+  const totNumOfTempDirs = projectAssetTempDirectories.length;
+  let numOfCreateDirCallBackReturned = 0;
+
+  const createDirReturnedErrors = 
+    getCallBackReturnedDataObjects(totNumOfTempDirs);  
+
+  // deal with the errors, if any, from creating each directory
+  const dealWithAnyErrorsFunc = 
+    getDealWithAnyCallBackErrorsFunc(createDirReturnedErrors, callBack);
+
+  const keepCheckCallBackFunc = (err, idx) => {
+    numOfCreateDirCallBackReturned++;
+
+    createDirReturnedErrors[idx] = {
       isCallBackReturned: true,
       error: err
     };
 
-    // console.log(saveAssetReturnedErrors);
-    const areAllSaveAssetCallBacksReturned = saveAssetReturnedErrors.reduce((prevVal, currErrObj) => {
-      return prevVal && currErrObj.isCallBackReturned;
-    }, true);
-
-    // console.log(areAllSaveAssetCallBacksReturned);
-    if (areAllSaveAssetCallBacksReturned) {      
-      dealWithAnyErrors();
+    const areAllCreateDirCallBacksReturned = numOfCreateDirCallBackReturned === totNumOfTempDirs;
+    
+    if (areAllCreateDirCallBacksReturned) {      
+      dealWithAnyErrorsFunc();
     }
   };
 
-  assetsList.forEach((asset, idx) => {
-    // strip file:/// from asset.src
-    const strToStrip = "file:///";
-    let assetFileSrc = asset.src;
-    if (assetFileSrc.indexOf(strToStrip) > -1) {
-      assetFileSrc = assetFileSrc.substr("file:///".length);
-    }
-    
-    // TODO: check if using decodeURIComponent() here is appropriate
-    // https://stackoverflow.com/questions/747641/what-is-the-difference-between-decodeuricomponent-and-decodeuri
-    
-    // TODO: this check of relative path is not well thought through!!!
-    const fullAssetFilePath = isAssetPathRelative(assetFileSrc) ?
-      fileSystem.join(getTempProjectDirectoryPath(projectName), assetFileSrc) : assetFileSrc;
-    
-    const decodedFullAssetFilePath = decodeURIComponent(fullAssetFilePath);
+  projectAssetTempDirectories.forEach((dir, idx) => {
+    fileSystem.createDirectoryIfNotExists(dir, (err) => keepCheckCallBackFunc(err, idx));
+  });
+}
 
-    let saveFileToProjectTempFunc = null;    
-    switch (asset.media_type) {
-      case mediaType.image:
-        saveFileToProjectTempFunc = saveImageToProjectTemp;
-        break;
-      case mediaType.gif:
-        saveFileToProjectTempFunc = saveGifToProjectTemp;  
-        break;
-      case mediaType.video:
-      default:
-        saveFileToProjectTempFunc = saveVideoToProjectTemp;
-        break;
+// saveProjectAssetsToTemp() will do nothing and pass control to callBack
+// if assetsList.length === 0
+const saveProjectAssetsToTemp = (projectName, assetsList, callBack) => {
+  if (!assetsList || assetsList.length === 0) {
+    callBack(null);
+    return;
+  }
+  
+  createProjectAssetTempDirectories(projectName, (err) => {
+    if (err) {
+      fileSystem.handleGeneralErr(err);
+      return;
     }
 
-    saveFileToProjectTempFunc(decodedFullAssetFilePath, projectName, asset.id, (err) => keepCheckCallBack(err, idx));  
+    const totNumOfAssets = assetsList.length;
+    let numOfSaveAssetToTempCallBackReturned = 0;
+
+    // use keepCheckCallBack to set saveAssetReturnedErrors array
+    // when doing the assetsList.forEach() loop below
+    const saveAssetReturnedErrors = getCallBackReturnedDataObjects(totNumOfAssets);
+
+    // deal with the errors, if any, from saving each of the assets
+    const dealWithAnyErrorsFunc = getDealWithAnyCallBackErrorsFunc(saveAssetReturnedErrors, callBack);
+
+    const keepCheckCallBackFunc = (err, assetIdx) => {
+      numOfSaveAssetToTempCallBackReturned++;
+
+      saveAssetReturnedErrors[assetIdx] = {
+        isCallBackReturned: true,
+        error: err
+      };
+      
+      // const areAllSaveAssetCallBacksReturned = saveAssetReturnedErrors.reduce((prevVal, currErrObj) => {
+      //   return prevVal && currErrObj.isCallBackReturned;
+      // }, true);
+      const areAllSaveAssetCallBacksReturned = numOfSaveAssetToTempCallBackReturned === totNumOfAssets;
+
+      // console.log(areAllSaveAssetCallBacksReturned);
+      if (areAllSaveAssetCallBacksReturned) {      
+        dealWithAnyErrorsFunc();
+      }
+    };
+
+    const isAssumeProjectAssetTempDirectoriesExists = true;
+
+    assetsList.forEach((asset, idx) => {
+      // strip file:/// from asset.src
+      const strToStrip = "file:///";
+      let assetFileSrc = asset.src;
+      if (assetFileSrc.indexOf(strToStrip) > -1) {
+        assetFileSrc = assetFileSrc.substr("file:///".length);
+      }
+      
+      // TODO: check if using decodeURIComponent() here is appropriate
+      // https://stackoverflow.com/questions/747641/what-is-the-difference-between-decodeuricomponent-and-decodeuri
+      
+      // TODO: this check of relative path is not well thought through!!!
+      const fullAssetFilePath = isAssetPathRelative(assetFileSrc) ?
+        fileSystem.join(getTempProjectDirectoryPath(projectName), assetFileSrc) : assetFileSrc;
+      
+      const decodedFullAssetFilePath = decodeURIComponent(fullAssetFilePath);
+
+      let saveFileToProjectTempFunc = null;    
+      switch (asset.media_type) {
+        case mediaType.image:
+          saveFileToProjectTempFunc = saveImageToProjectTemp;
+          break;
+        case mediaType.gif:
+          saveFileToProjectTempFunc = saveGifToProjectTemp;  
+          break;
+        case mediaType.video:
+        default:
+          saveFileToProjectTempFunc = saveVideoToProjectTemp;
+          break;
+      }
+
+      saveFileToProjectTempFunc(decodedFullAssetFilePath, projectName, asset.id, 
+        isAssumeProjectAssetTempDirectoriesExists,
+        (err) => keepCheckCallBackFunc(err, idx));  
+    });
+    
   });
 };
 
@@ -186,18 +265,17 @@ const saveProjectToLocal = (projectName, entitiesList, assetsList, callBack) => 
     // check if tempProjectDir already exists, if exists, delete it
     // actually this step may be redundant because I would check isProjectNameUsed
     const tempProjectDirPath = getTempProjectDirectoryPath(projectName);
-    if (!isCurrentLoadedProject(projectName)) {
+    if (!isCurrentLoadedProject(projectName)) {      
       fileSystem.myDelete(tempProjectDirPath, (err) => {
         if (err) {        
           fileSystem.handleGeneralErr(callBack, err);
           return;        
-        }
-        
+        }       
         jsonForSave = saveProjectToLocalDetail(tempProjectDirPath, projectName, entitiesList, assetsList, callBack);
       });
-    } else {
+    } else {      
       jsonForSave = saveProjectToLocalDetail(tempProjectDirPath, projectName, entitiesList, assetsList, callBack);
-    }
+    }    
   });
   
   return jsonForSave;

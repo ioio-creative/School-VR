@@ -2,7 +2,7 @@ import React from 'react';
 import 'aframe-gif-shader';
 import {openImageDialog, openGifDialog, openVideoDialog} from './openFileDialog';
 import {mediaType, openFileDialogFilter} from 'globals/config';
-import fileSystem from 'utils/fileSystem';
+import fileSystem from 'utils/fileSystem/fileSystem';
 
 const Events = require('vendor/Events.js');
 const uuid = require('uuid/v1');
@@ -68,7 +68,7 @@ function addToAsset(el, existingUuidStr) {
       newid = 'img_' + uuid() // 'img_' + document.querySelectorAll('img').length;
       
       const fileExtensionWithoutDot = fileSystem.getFileExtensionWithoutLeadingDot(el.src);
-      const isGif = openFileDialogFilter.gifs.extensions.includes(fileExtensionWithoutDot);
+      const isGif = openFileDialogFilter.gif.extensions.includes(fileExtensionWithoutDot);
       fileMediaType = isGif ? mediaType.gif : mediaType.image;      
 
       break;

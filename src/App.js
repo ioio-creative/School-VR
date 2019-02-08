@@ -6,7 +6,7 @@ import {library} from '@fortawesome/fontawesome-svg-core'
 // import {faArrowsAlt, faArrowsAlt} from '@fortawesome/free-solid-svg-icons'
 
 import {appDirectory} from 'globals/config';
-import fileSystem from 'utils/fileSystem';
+import fileSystem from 'utils/fileSystem/fileSystem';
 
 import asyncLoadingComponent from 'components/asyncLoadingComponent';
 
@@ -39,7 +39,7 @@ try {
 }
 
 // create App Data directories if they do not exist
-Object.keys(appDirectory).forEach((appDirectoryKey) => {
+Object.keys(appDirectory).forEach((appDirectoryKey) => {  
   fileSystem.createDirectoryIfNotExistsSync(appDirectory[appDirectoryKey]);
 });
 

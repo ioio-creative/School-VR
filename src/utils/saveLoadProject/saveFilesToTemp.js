@@ -1,4 +1,4 @@
-import fileSystem from 'utils/fileSystem';
+import fileSystem from 'utils/fileSystem/fileSystem';
 import {
   getTempProjectImageFilePath,
   getTempProjectGifFilePath,
@@ -6,21 +6,30 @@ import {
 } from 'utils/saveLoadProject/getProjectPaths';
 
 
-function saveImageToProjectTemp(srcFilePath, projectName, assetId, callBack) {
+function copyFile(srcFilePath, destFilePath, isAssumeDestDirExists, callBack) {
+  if (isAssumeDestDirExists) {
+    fileSystem.copyFileAssumingDestDirExists(srcFilePath, destFilePath, callBack);
+  } else {
+    fileSystem.copyFile(srcFilePath, destFilePath, callBack);
+  }
+}
+
+
+function saveImageToProjectTemp(srcFilePath, projectName, assetId, isAssumeDestDirExists, callBack) {
   const destFilePath = getTempProjectImageFilePath(projectName, assetId, fileSystem.getFileExtensionWithLeadingDot(srcFilePath));
-  fileSystem.copyFile(srcFilePath, destFilePath, callBack);
+  copyFile(srcFilePath, destFilePath, isAssumeDestDirExists, callBack);
   return destFilePath;
 }
 
-function saveGifToProjectTemp(srcFilePath, projectName, assetId, callBack) {
-  const destFilePath = getTempProjectGifFilePath(projectName, assetId, fileSystem.getFileExtensionWithLeadingDot(srcFilePath));  
-  fileSystem.copyFile(srcFilePath, destFilePath, callBack);
+function saveGifToProjectTemp(srcFilePath, projectName, assetId, isAssumeDestDirExists, callBack) {
+  const destFilePath = getTempProjectGifFilePath(projectName, assetId, fileSystem.getFileExtensionWithLeadingDot(srcFilePath));
+  copyFile(srcFilePath, destFilePath, isAssumeDestDirExists, callBack);
   return destFilePath;
 }
 
-function saveVideoToProjectTemp(srcFilePath, projectName, assetId, callBack) {
+function saveVideoToProjectTemp(srcFilePath, projectName, assetId, isAssumeDestDirExists, callBack) {
   const destFilePath = getTempProjectVideoFilePath(projectName, assetId, fileSystem.getFileExtensionWithLeadingDot(srcFilePath));
-  fileSystem.copyFile(srcFilePath, destFilePath, callBack);
+  copyFile(srcFilePath, destFilePath, isAssumeDestDirExists, callBack);
   return destFilePath;
 }
 

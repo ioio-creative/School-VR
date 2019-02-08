@@ -1,5 +1,5 @@
 import {appDirectory} from 'globals/config';
-import fileSystem from 'utils/fileSystem';
+import fileSystem from 'utils/fileSystem/fileSystem';
 
 const listProjects = (callBack) => {
   const appProjectsDirectory = appDirectory.appProjectsDirectory;

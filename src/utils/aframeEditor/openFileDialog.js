@@ -26,17 +26,17 @@ function openDialogCommon(fileFilters, dialogMessage, callBack) {
 }
 
 function openImageDialog(callBack) {
-  openDialogCommon([openFileDialogFilter.images],
+  openDialogCommon([openFileDialogFilter.image],
     "Please select an image file.", callBack);  
 }
 
 function openGifDialog(callBack) {
-  openDialogCommon([openFileDialogFilter.gifs],
+  openDialogCommon([openFileDialogFilter.gif],
     "Please select a gif file.", callBack);  
 }
 
 function openVideoDialog(callBack) {
-  openDialogCommon([openFileDialogFilter.videos],
+  openDialogCommon([openFileDialogFilter.video],
     "Please select a video file.", callBack);
 }
 

@@ -13,25 +13,46 @@ const appDirectory = {
   appTempProjectsDirectory: path.join(app.getPath('appData'), `${appName}-Temp`, `${appName}-Projects`)
 };
 
-const mediaType = {
-  image: 'image',
-  video: 'video',
-  gif: 'gif'
+// https://electronjs.org/docs/api/dialog
+const Media = {
+  image: {
+    typeName: 'image',
+    directoryUnderProjectDirectory: 'Images',
+    openFileDialogFilter: { name: 'Images', extensions: ['jpg', 'png'] }
+  },
+ gif: {
+  typeName: 'gif',
+  directoryUnderProjectDirectory: 'Gifs',
+  openFileDialogFilter: { name: 'Gifs', extensions: ['gif'] }
+ },
+ video: {
+  typeName: 'video',
+  directoryUnderProjectDirectory: 'Videos',
+  openFileDialogFilter: { name: 'Videos', extensions: ['mp4'] }
+ }
 };
 
-const projectDirectoryStructure = {
-  videoDirectory: 'Videos',
-  imageDirectory: 'Images',
-  gifDirectory: 'Gifs'
+
+/* derivatives from Media */
+
+let mediaType = {},
+  projectDirectoryStructure = {},
+  openFileDialogFilter = {};
+
+for (let key of Object.keys(Media)) {
+  const MediumTypeObj = Media[key];
+  
+  mediaType[key] = MediumTypeObj.typeName;
+  projectDirectoryStructure[key] = MediumTypeObj.directoryUnderProjectDirectory;
+  
+  // https://electronjs.org/docs/api/dialog
+  openFileDialogFilter[key] = MediumTypeObj.openFileDialogFilter;
 }
 
-// https://electronjs.org/docs/api/dialog
-const openFileDialogFilter = {
-  images: { name: 'Images', extensions: ['jpg', 'png'] },
-  gifs: { name: 'Gifs', extensions: ['gif'] },
-  videos: { name: 'Videos', extensions: ['mp4'] },
-  allFiles: { name: 'All Files', extensions: ['*'] }
-};
+openFileDialogFilter.allFiles = { name: 'All Files', extensions: ['*'] };
+
+/* end of derivatives from Media */
+
 
 const config = {
   appName: appName,

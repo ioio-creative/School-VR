@@ -2,9 +2,9 @@
 
 import React, { Component } from 'react';
 
-import mime from 'utils/mime';
+import mime from 'utils/fileSystem/mime';
 
-import fileSystem from 'utils/fileSystem';
+import fileSystem from 'utils/fileSystem/fileSystem';
 import { getAbsoluteUrlFromRelativeUrl } from 'utils/setStaticResourcesPath';
 
 import './style.css';

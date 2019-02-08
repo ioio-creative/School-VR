@@ -60,6 +60,13 @@ const existsSync = (filePath) => {
   return fs.existsSync(filePath);
 };
 
+// for performance reasons
+const writeFileAssumingDestDirExists = (filePath, content, callBack) => {
+  fs.writeFile(filePath, content, (err) => {
+    handleGeneralErr(callBack, err);
+  });
+}
+
 /**
  * writeFile would create any parent directories in filePath if not exist.
  * writeFile would replace the file if already exists. (same behaviour as fs.writeFile)
@@ -89,6 +96,11 @@ const writeFile = (filePath, content, callBack) => {
   });
 };
 
+// for performance reasons
+const writeFileAssumingDestDirExistsSync = (filePath, content) => {
+  fs.writeFileSync(filePath, content);
+}
+
 const writeFileSync = (filePath, content) => {
   const directoriesStr = dirname(filePath);
   if (!existsSync(directoriesStr)) {
@@ -100,8 +112,6 @@ const writeFileSync = (filePath, content) => {
 const createWriteStream = (outputPath) => {
   return fs.createWriteStream(outputPath);
 };
-
-
 
 const rename = (oldPath, newPath, callBack) => {
   fs.rename(oldPath, newPath, (err) => {
@@ -124,6 +134,18 @@ const readFileSync = (filePath) => {
   return fs.readFileSync(filePath);
 };
 
+// for performance reasons
+const copyFileAssumingDestDirExists = (src, dest, callBack) => {
+  if (src === dest) {
+    passbackControlToCallBack(callBack, null);
+    return;
+  }
+
+  fs.copyFile(src, dest, (err) => {
+    handleGeneralErr(callBack, err);
+  });
+}
+
 /**
  * copyFile and copyFileSync is structurally similar to writeFile and writeFileSync
  * copyFile would create any parent directories in filePath if not exist.
@@ -144,17 +166,26 @@ const copyFile = (src, dest, callBack) => {
   exists(destDirectoriesStr, (err) => {
     if (err) {  // directory does not exist
       createDirectoryIfNotExists(destDirectoriesStr, (err) => {
-        if (err) {
+        if (err) {          
           handleGeneralErr(callBack, err);
           return;
-        }
-        copyFileCallBack();
+        }        
+        copyFileCallBack();        
       });
-    } else {  // directory exists      
+    } else {  // directory exists
       copyFileCallBack();
     }
   });
 };
+
+// for performance reasons
+const copyFileAssumingDestDirExistsSync = (src, dest) => {
+  if (src === dest) {    
+    return;
+  }
+
+  fs.copyFileSync(src, dest);
+}
 
 const copyFileSync = (src, dest) => {
   if (src === dest) {   
@@ -294,7 +325,6 @@ const createDirectoryIfNotExists = (dirPath, callBack) => {
   exists(dirPath, (existsErr) => {    
     if (existsErr) {  // directory does not exist      
       mkdir(dirPath, (mkDirErr) => {
-        console.log(dirPath);
         handleGeneralErr(callBack, mkDirErr);
       });
     } else {  // directory exists
@@ -372,18 +402,21 @@ const readdirSync = (dirPath) => {
 /**
  * rimraf api
  * work for both file and directory 
+ * https://github.com/isaacs/rimraf
  */
 
-const defaultFsOptions = fs;
+const defaultMyDeleteOptions = Object.assign({
+  maxBusyTries: 15
+} , fs);
 
 const myDelete = (filePath, callBack) => {
-  rimraf(filePath, defaultFsOptions, (err) => {    
+  rimraf(filePath, defaultMyDeleteOptions, (err) => {    
     handleGeneralErr(callBack, err);        
   });  
 };
 
 const myDeleteSync = (filePath) => {
-  rimraf.sync(filePath, defaultFsOptions);
+  rimraf.sync(filePath, defaultMyDeleteOptions);
 }
 
 /* end of del api */
@@ -438,14 +471,18 @@ export default {
   // file api
   exists,
   existsSync,
+  writeFileAssumingDestDirExists,
   writeFile,
+  writeFileAssumingDestDirExistsSync,
   writeFileSync,
   createWriteStream,
   rename,
   renameSync,
   readFile,
   readFileSync,
+  copyFileAssumingDestDirExists,
   copyFile,
+  copyFileAssumingDestDirExistsSync,
   copyFileSync,
   //deleteFileSafe,
   //deleteFileSafeSync,

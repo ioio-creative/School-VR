@@ -14,7 +14,9 @@ import saveProjectToLocal from 'utils/saveLoadProject/saveProjectToLocal';
 import parseDataToSaveFormat from 'utils/saveLoadProject/parseDataToSaveFormat';
 import {TweenMax, TimelineMax, Linear} from 'gsap';
 
-import getExistingProjectNames from 'utils/saveLoadProject/getExistingProjectNames'
+import getExistingProjectNames from 'utils/saveLoadProject/getExistingProjectNames';
+import isStrAnInt from 'utils/number/isStrAnInt';
+import stricterParseInt from 'utils/number/stricterParseInt';
 
 import './editorPage.css';
 const Events = require('vendor/Events.js');
@@ -34,7 +36,7 @@ const schema = require('schema/aframe_schema_20181108.json');
 // Check if a suggestedProjectName is already used.
 // If name is in use, would suggest a name one.
 // Use a callback to set project name.
-const defaultProjectNamePrefix = "untitled";
+const defaultProjectNamePrefix = "untitled_";
 // must have a trailing number
 function getNewProjectName(callBack, suggestedProjectName = defaultProjectNamePrefix + "1") {
   getExistingProjectNames((err, existingProjectNames) => {
@@ -42,15 +44,30 @@ function getNewProjectName(callBack, suggestedProjectName = defaultProjectNamePr
       alert("Error when calling getNewProjectName().");
     } else {
       let newProjectName = suggestedProjectName;
-      const existingProjectNamesWhichStartWithDefaultPrefix = 
-        existingProjectNames.filter((name) => name.indexOf(defaultProjectNamePrefix) === 0);
+      
+      const existingProjectNamesWhichStartWithDefaultPrefixAndHaveNumericIdx = existingProjectNames
+        .filter((name) => {
+          const idxOfDefaultProjectNamePrefix = name.indexOf(defaultProjectNamePrefix);
+          
+          if (idxOfDefaultProjectNamePrefix !== 0) {
+            return false;
+          }
 
-      if (existingProjectNamesWhichStartWithDefaultPrefix.includes(newProjectName)) {
-        let counter = 1;
-        while (existingProjectNamesWhichStartWithDefaultPrefix.includes(newProjectName + counter)) {
-          counter++;
-        }
-        newProjectName = newProjectName + counter;
+          const projectNameStrippedOfDefaultPrefix = name.substr(defaultProjectNamePrefix.length);
+          return isStrAnInt(projectNameStrippedOfDefaultPrefix);
+        });
+      
+      const existingProjectIndices = existingProjectNamesWhichStartWithDefaultPrefixAndHaveNumericIdx
+        .map((name) => {
+          const projectNameStrippedOfDefaultPrefix = name.substr(defaultProjectNamePrefix.length);
+          return stricterParseInt(projectNameStrippedOfDefaultPrefix);
+        });
+
+      if (existingProjectIndices.length === 0) {
+        newProjectName = `${defaultProjectNamePrefix}1`;
+      } else {
+        const maxExistingProjectIdx = Math.max(...existingProjectIndices);        
+        newProjectName = `${defaultProjectNamePrefix}${maxExistingProjectIdx + 1}`;
       }
 
       callBack(newProjectName);      

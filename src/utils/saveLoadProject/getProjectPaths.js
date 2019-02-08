@@ -1,7 +1,7 @@
 import config from 'globals/config';
 import {appDirectory, projectDirectoryStructure} from 'globals/config';
 
-import fileSystem from 'utils/fileSystem';
+import fileSystem from 'utils/fileSystem/fileSystem';
 
 
 /* temp project */
@@ -12,15 +12,15 @@ function getTempProjectDirectoryPath(projectName) {
 }
 
 function getTempProjectImageDirectoryPath(projectName) {
-  return fileSystem.join(getTempProjectDirectoryPath(projectName), projectDirectoryStructure.imageDirectory);
+  return fileSystem.join(getTempProjectDirectoryPath(projectName), projectDirectoryStructure.image);
 }
 
 function getTempProjectGifDirectoryPath(projectName) {
-  return fileSystem.join(getTempProjectDirectoryPath(projectName), projectDirectoryStructure.gifDirectory);
+  return fileSystem.join(getTempProjectDirectoryPath(projectName), projectDirectoryStructure.gif);
 }
 
 function getTempProjectVideoDirectoryPath(projectName) {
-  return fileSystem.join(getTempProjectDirectoryPath(projectName), projectDirectoryStructure.videoDirectory);
+  return fileSystem.join(getTempProjectDirectoryPath(projectName), projectDirectoryStructure.video);
 }
 
 /* files */
@@ -50,15 +50,15 @@ function getSavedProjectFilePath(projectName) {
 }
 
 function getImageFilePathRelativeToProjectDirectory(assetId, fileExtensionWithDot) {
-  return fileSystem.join(projectDirectoryStructure.imageDirectory, assetId) + fileExtensionWithDot; 
+  return fileSystem.join(projectDirectoryStructure.image, assetId) + fileExtensionWithDot; 
 }
 
 function getGifFilePathRelativeToProjectDirectory(assetId, fileExtensionWithDot) {
-  return fileSystem.join(projectDirectoryStructure.gifDirectory, assetId) + fileExtensionWithDot; 
+  return fileSystem.join(projectDirectoryStructure.gif, assetId) + fileExtensionWithDot; 
 }
 
 function getVideoFilePathRelativeToProjectDirectory(assetId, fileExtensionWithDot) {
-  return fileSystem.join(projectDirectoryStructure.videoDirectory, assetId) + fileExtensionWithDot; 
+  return fileSystem.join(projectDirectoryStructure.video, assetId) + fileExtensionWithDot; 
 }
 
 function isAssetPathRelative(assetPath) {
@@ -79,9 +79,9 @@ export {
   /* temp project */
   // directories
   getTempProjectDirectoryPath,
-  // getTempProjectImageDirectoryPath,
-  // getTempProjectGifDirectoryPath,
-  // getTempProjectVideoDirectoryPath,
+  getTempProjectImageDirectoryPath,
+  getTempProjectGifDirectoryPath,
+  getTempProjectVideoDirectoryPath,
   // files
   getTempProjectJsonFilePath,
   getTempProjectImageFilePath,

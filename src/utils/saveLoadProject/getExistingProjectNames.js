@@ -1,4 +1,4 @@
-import fileSystem from 'utils/fileSystem';
+import fileSystem from 'utils/fileSystem/fileSystem';
 import listProjects from './listProjects';
 
 const getExistingProjectNames = (callBack) => {
