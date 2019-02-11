@@ -225,6 +225,26 @@ const saveChangesToFile = (filepath, content, callBack) => {
   writeFile(filepath, content, callBack);
 };
 
+const stat = (filePath, callBack) => {
+  fs.stat(filePath, (err, stats) => {
+    handleGeneralErrAndData(err, stats);
+  });
+};
+
+const statSync = (filePath) => {
+  return fs.statSync(filePath);
+};
+
+const isDirectory = (filePath, callBack) => {
+  fs.stat(filePath, (err, stats) => {
+    if (err) {
+      handleGeneralErr(err);
+      return;
+    }
+    handleGeneralErrAndData(callBack, null, stats.isDirectory());
+  })
+};
+
 const isDirectorySync = (filePath) => {
   return fs.statSync(filePath).isDirectory();
 };
@@ -358,6 +378,7 @@ const createAndOverwriteDirectoryIfExistsSync = (dirPath) => {
   mkdirSync(dirPath);
 }
 
+// Note: files are just file names, not full paths
 const readdir = (dirPath, callBack) => {
   fs.readdir(dirPath, (err, files) => {
     handleGeneralErrAndData(callBack, err, files);
@@ -486,7 +507,10 @@ export default {
   copyFileSync,
   //deleteFileSafe,
   //deleteFileSafeSync,
-  saveChangesToFile,  
+  saveChangesToFile,
+  stat,
+  statSync,
+  isDirectory,
   isDirectorySync,
   base64Encode,
   base64EncodeSync,

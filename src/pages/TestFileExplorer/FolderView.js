@@ -16,7 +16,8 @@ function FileItem(props) {
   return (
     <div className={addFocusClass("file")}
       onClick={(evnt) => { props.handleClickFunc(evnt, props.idx); }}
-      onDoubleClick={() => { props.handledDoubleClickFunc(props.path, mime.statSync(props.path)); }}>
+      onDoubleClick={() => { props.handledDoubleClickFunc(props.path, mime.statSync(props.path)); }}
+    >
       <div className={addFocusClass("icon")}>
         <img src={getAbsoluteUrlFromRelativeUrl(`fileExplorer/icons/${props.type}.png`)} />
         <div className={addFocusClass("name")}>{props.name}</div>
