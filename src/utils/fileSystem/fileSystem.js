@@ -7,6 +7,7 @@ import toBase64Str from 'utils/base64/toBase64Str';
 import fromBase64Str from 'utils/base64/fromBase64Str';
 
 import isFunction from 'utils/variableType/isFunction';
+import { promised } from 'q';
 
 // https://github.com/electron/asar
 // http://www.tc4shell.com/en/7zip/asar/
@@ -17,6 +18,7 @@ const asar = window.require('asar');
 
 const fs = window.require('fs');
 const path = window.require('path');
+const {promisify} = window.require('util');
 
 
 /* error handling */
@@ -60,12 +62,21 @@ const existsSync = (filePath) => {
   return fs.existsSync(filePath);
 };
 
+const existsPromise = promisify(exists);
+
 // for performance reasons
 const writeFileAssumingDestDirExists = (filePath, content, callBack) => {
   fs.writeFile(filePath, content, (err) => {
     handleGeneralErr(callBack, err);
   });
 }
+
+// for performance reasons
+const writeFileAssumingDestDirExistsSync = (filePath, content) => {
+  fs.writeFileSync(filePath, content);
+}
+
+const writeFileAssumingDestDirExistsPromise = promisify(writeFileAssumingDestDirExists);
 
 /**
  * writeFile would create any parent directories in filePath if not exist.
@@ -96,11 +107,6 @@ const writeFile = (filePath, content, callBack) => {
   });
 };
 
-// for performance reasons
-const writeFileAssumingDestDirExistsSync = (filePath, content) => {
-  fs.writeFileSync(filePath, content);
-}
-
 const writeFileSync = (filePath, content) => {
   const directoriesStr = dirname(filePath);
   if (!existsSync(directoriesStr)) {
@@ -108,6 +114,8 @@ const writeFileSync = (filePath, content) => {
   }
   fs.writeFileSync(filePath, content);
 };
+
+const writeFilePromise = promisify(writeFile);
 
 const createWriteStream = (outputPath) => {
   return fs.createWriteStream(outputPath);
@@ -123,6 +131,8 @@ const renameSync = (oldPath, newPath) => {
   fs.renameSync(oldPath, newPath);
 };
 
+const renamePromise = promisify(rename);
+
 const readFile = (filePath, callBack) => {
   //fs.readFile(filePath, 'utf-8', (err, data) => {
   fs.readFile(filePath, (err, data) => {
@@ -133,6 +143,8 @@ const readFile = (filePath, callBack) => {
 const readFileSync = (filePath) => {
   return fs.readFileSync(filePath);
 };
+
+const readFilePromise = promisify(readFile);
 
 // for performance reasons
 const copyFileAssumingDestDirExists = (src, dest, callBack) => {
@@ -145,6 +157,17 @@ const copyFileAssumingDestDirExists = (src, dest, callBack) => {
     handleGeneralErr(callBack, err);
   });
 }
+
+// for performance reasons
+const copyFileAssumingDestDirExistsSync = (src, dest) => {
+  if (src === dest) {    
+    return;
+  }
+
+  fs.copyFileSync(src, dest);
+}
+
+const copyFileAssumingDestDirExistsPromise = promisify(copyFileAssumingDestDirExists);
 
 /**
  * copyFile and copyFileSync is structurally similar to writeFile and writeFileSync
@@ -178,15 +201,6 @@ const copyFile = (src, dest, callBack) => {
   });
 };
 
-// for performance reasons
-const copyFileAssumingDestDirExistsSync = (src, dest) => {
-  if (src === dest) {    
-    return;
-  }
-
-  fs.copyFileSync(src, dest);
-}
-
 const copyFileSync = (src, dest) => {
   if (src === dest) {   
     return;
@@ -198,6 +212,8 @@ const copyFileSync = (src, dest) => {
   }
   fs.copyFileSync(src, dest);  
 };
+
+const copyFilePromise = promisify(copyFile);
 
 /**
  * fs.unlink() will not work on a directory, empty or otherwise. To remove a directory, use fs.rmdir()
@@ -221,19 +237,28 @@ const copyFileSync = (src, dest) => {
 //   }
 // };
 
-const saveChangesToFile = (filepath, content, callBack) => {
-  writeFile(filepath, content, callBack);
-};
-
+// https://stackoverflow.com/questions/11659054/how-to-access-name-of-file-within-fs-callback-methods
+/**
+ * Note: 
+ * the return Stats object has an additional 'path' property 
+ * compared to the default fs.Stats object
+ * https://stackoverflow.com/questions/11659054/how-to-access-name-of-file-within-fs-callback-methods
+ * https://nodejs.org/dist/latest-v10.x/docs/api/fs.html#fs_class_fs_stats
+ */
 const stat = (filePath, callBack) => {
   fs.stat(filePath, (err, stats) => {
-    handleGeneralErrAndData(err, stats);
+    stats.path = filePath;
+    handleGeneralErrAndData(callBack, err, stats);
   });
 };
 
 const statSync = (filePath) => {
-  return fs.statSync(filePath);
+  const statObj = fs.statSync(filePath);
+  statObj.path = filePath;
+  return statObj;
 };
+
+const statPromise = promisify(stat);
 
 const isDirectory = (filePath, callBack) => {
   fs.stat(filePath, (err, stats) => {
@@ -249,6 +274,8 @@ const isDirectorySync = (filePath) => {
   return fs.statSync(filePath).isDirectory();
 };
 
+const isDirectoryPromise = promisify(isDirectory);
+
 const base64Encode = (filePath, callBack) => {
   readFile(filePath, (err, data) => {
     handleGeneralErrAndData(callBack, err, data);
@@ -263,6 +290,8 @@ const base64EncodeSync = (filePath) => {
   return toBase64Str(data);
 }
 
+const base64EncodePromise = promisify(base64Encode);
+
 const base64Decode = (locationToSaveFile, encodedStr, callBack) => {
   writeFile(locationToSaveFile, 
     fromBase64Str(encodedStr),
@@ -273,6 +302,8 @@ const base64DecodeSync = (locationToSaveFile, encodedStr) => {
   writeFileSync(locationToSaveFile, 
     fromBase64Str(encodedStr));
 };
+
+const base64DecodePromise = promisify(base64Decode);
 
 /* end of file api */
 
@@ -286,9 +317,13 @@ const createPackage = (src, dest, callBack) => {
   createPackageWithOptions(src, dest, {}, callBack);  
 };
 
+const createPackagePromise = promisify(createPackage);
+
 const createPackageWithTransformOption = (src, dest, transformFunc, callBack) => {
   createPackageWithOptions(src, dest, { transform: transformFunc }, callBack);
 };
+
+const createPackageWithTransformOptionPromise = promisify(createPackageWithTransformOption);
 
 // overwrite existing dest
 const createPackageWithOptions = (src, dest, options, callBack) => {
@@ -301,6 +336,8 @@ const createPackageWithOptions = (src, dest, options, callBack) => {
     handleGeneralErr(callBack, err);
   });
 };
+
+const createPackageWithOptionsPromise = promisify(createPackageWithOptions);
 
 const extractAll = (archive, dest) => {
   // asar would cache previous result!
@@ -360,6 +397,8 @@ const createDirectoryIfNotExistsSync = (dirPath) => {
   }
 };
 
+const createDirectoryIfNotExistsPromise = promisify(createDirectoryIfNotExists);
+
 // https://askubuntu.com/questions/517329/overwrite-an-existing-directory
 const createAndOverwriteDirectoryIfExists = (dirPath, callBack) => {
   myDelete(dirPath, (err) => {
@@ -378,6 +417,8 @@ const createAndOverwriteDirectoryIfExistsSync = (dirPath) => {
   mkdirSync(dirPath);
 }
 
+const createAndOverwriteDirectoryIfExistsPromise = promisify(createAndOverwriteDirectoryIfExists);
+
 // Note: files are just file names, not full paths
 const readdir = (dirPath, callBack) => {
   fs.readdir(dirPath, (err, files) => {
@@ -388,6 +429,8 @@ const readdir = (dirPath, callBack) => {
 const readdirSync = (dirPath) => {
   return fs.readdirSync(dirPath);
 }
+
+const readdirPromise = promisify(readdir);
 
 // const rmdir = (dirPath, callBack) => {
 //   fs.rmdir(dirPath, (err) => {
@@ -440,6 +483,8 @@ const myDeleteSync = (filePath) => {
   rimraf.sync(filePath, defaultMyDeleteOptions);
 }
 
+const myDeletePromise = promisify(myDelete);
+
 /* end of del api */
 
 
@@ -485,42 +530,55 @@ const dirname = (filePath) => {
 
 export default {
   // error handling
-  passbackControlToCallBack,
-  handleGeneralErr,
-  handleGeneralErrAndData,
+  // passbackControlToCallBack,
+  // handleGeneralErr,
+  // handleGeneralErrAndData,
 
   // file api
   exists,
   existsSync,
+  existsPromise,
   writeFileAssumingDestDirExists,
-  writeFile,
   writeFileAssumingDestDirExistsSync,
+  writeFileAssumingDestDirExistsPromise,
+  writeFile,  
   writeFileSync,
+  writeFilePromise,
   createWriteStream,
   rename,
   renameSync,
+  renamePromise,
   readFile,
   readFileSync,
+  readFilePromise,
   copyFileAssumingDestDirExists,
-  copyFile,
   copyFileAssumingDestDirExistsSync,
+  copyFileAssumingDestDirExistsPromise,
+  copyFile,  
   copyFileSync,
+  copyFilePromise,
   //deleteFileSafe,
-  //deleteFileSafeSync,
-  saveChangesToFile,
+  //deleteFileSafeSync,  
   stat,
   statSync,
+  statPromise,
   isDirectory,
   isDirectorySync,
+  isDirectoryPromise,
   base64Encode,
   base64EncodeSync,
+  base64EncodePromise,
   base64Decode,
   base64DecodeSync,
+  base64DecodePromise,
 
   // asar - Electron Archive
   createPackage,
+  createPackageWithTransformOptionPromise,
   createPackageWithTransformOption, 
+  createPackageWithTransformOptionPromise,
   createPackageWithOptions,
+  createPackageWithOptionsPromise,
   extractAll,
 
   // directory api
@@ -528,16 +586,20 @@ export default {
   //mkdirSync,
   createDirectoryIfNotExists,
   createDirectoryIfNotExistsSync,
+  createDirectoryIfNotExistsPromise,
   createAndOverwriteDirectoryIfExists,
   createAndOverwriteDirectoryIfExistsSync,
+  createAndOverwriteDirectoryIfExistsPromise,
   readdir,
   readdirSync,
+  readdirPromise,
   //deleteDirectorySafe,
   //deleteDirectorySafeSync,
 
   // rimraf api
   myDelete,
   myDeleteSync,
+  myDeletePromise,
 
   // path api
   sep,

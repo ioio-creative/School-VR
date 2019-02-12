@@ -14,7 +14,7 @@ import saveProjectToLocal from 'utils/saveLoadProject/saveProjectToLocal';
 import parseDataToSaveFormat from 'utils/saveLoadProject/parseDataToSaveFormat';
 import {TweenMax, TimelineMax, Linear} from 'gsap';
 
-import getExistingProjectNames from 'utils/saveLoadProject/getExistingProjectNames';
+import getExistingProjectNamesAsync from 'utils/saveLoadProject/getExistingProjectNamesAsync';
 import isStrAnInt from 'utils/number/isStrAnInt';
 import stricterParseInt from 'utils/number/stricterParseInt';
 
@@ -38,11 +38,9 @@ const schema = require('schema/aframe_schema_20181108.json');
 // Use a callback to set project name.
 const defaultProjectNamePrefix = "untitled_";
 // must have a trailing number
-function getNewProjectName(callBack, suggestedProjectName = defaultProjectNamePrefix + "1") {
-  getExistingProjectNames((err, existingProjectNames) => {
-    if (err) {
-      alert("Error when calling getNewProjectName().");
-    } else {
+function setDefaultProjectName(suggestedProjectName = defaultProjectNamePrefix + "1") {
+  getExistingProjectNamesAsync()
+    .then(existingProjectNames => {      
       let newProjectName = suggestedProjectName;
       
       const existingProjectNamesWhichStartWithDefaultPrefixAndHaveNumericIdx = existingProjectNames
@@ -70,9 +68,9 @@ function getNewProjectName(callBack, suggestedProjectName = defaultProjectNamePr
         newProjectName = `${defaultProjectNamePrefix}${maxExistingProjectIdx + 1}`;
       }
 
-      callBack(newProjectName);      
-    }
-  });
+      Events.emit('setProjectName', newProjectName);
+    })
+    .catch(err => alert(err));  
 }
 
 function getEntityType(entityEl) {
@@ -438,9 +436,7 @@ class EditorPage extends Component {
   constructor(props) {
     super(props);
     this.projectName = null;
-    getNewProjectName((newProjectName) => {      
-      Events.emit('setProjectName', newProjectName);
-    });
+    setDefaultProjectName();
     this.globalTimeline = new TimelineMax({
       paused: true
     });
@@ -749,9 +745,7 @@ class EditorPage extends Component {
             })
             // initialize
             self.projectName = null;
-            getNewProjectName((newProjectName) => {
-              Events.emit('setProjectName', newProjectName);
-            });
+            setDefaultProjectName();
             self.addSlide();
             const scene = document.querySelector('a-scene');
             scene.setAttribute('el-name', 'Background');

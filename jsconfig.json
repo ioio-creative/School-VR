@@ -5,18 +5,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "*": ["src/*"]
+      "*": ["src/*"]      
     }
   }  
-  // "compilerOptions": {
-  //   "baseUrl": "./src"
-  // }
-  // {
-  //   "compilerOptions": {
-  //       "baseUrl": ".",
-  //       "paths": {
-  //           "~/*": ["./src/*"]
-  //       }
-  //   }
-  // }
 }

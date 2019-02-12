@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 
-import getExistingProjectNames from 'utils/saveLoadProject/getExistingProjectNames';
+import listProjectsAsync from 'utils/saveLoadProject/listProjectsAsync';
 
 import './ProjectListPage.css';
 
@@ -30,13 +30,12 @@ function ProjectList(props) {
   }    
 
   const projects = items.map((project, idx) => {
-    console.log(project);
     return (
       <ProjectItem 
-        key={project}
+        key={project.path}
         idx={idx}
         isFocus={props.focusedItemIdx === idx}
-        item={project}
+        item={project.path}
         handleClickFunc={props.handleFileItemClick}
         handledDoubleClickFunc={props.handleFileItemDoubleClick}
       />
@@ -90,17 +89,15 @@ class ProjectListPage extends Component {
 
   enumerateProjects() {
     //const props = this.props;
-
-    getExistingProjectNames((err, projectNames) => {
-      if (err) {
+    listProjectsAsync()
+      .then(projectFileStats => {
+        this.setState({
+          projects: projectFileStats
+        });
+      })
+      .catch(err => {        
         alert(err);
-        return;
-      }
-
-      this.setState({
-        projects: projectNames
       });
-    });
   }
 
   /* event handlers */

@@ -2,7 +2,7 @@ import {mediaType} from 'globals/config';
 import fileSystem from 'utils/fileSystem/fileSystem';
 
 import parseDataToSaveFormat from './parseDataToSaveFormat';
-import isProjectNameUsed from './isProjectNameUsed';
+import isProjectNameUsedAsync from './isProjectNameUsedAsync';
 import {isCurrentLoadedProject, setCurrentLoadedProjectName} from './loadProject';
 import {
   getTempProjectDirectoryPath,
@@ -250,7 +250,7 @@ const saveProjectToLocal = (projectName, entitiesList, assetsList, callBack) => 
   // save in temp folder before zip (in appTempProjectsDirectory)
     
   // check if projectName is already used  
-  isProjectNameUsed(projectName, (err, isNameUsed) => {    
+  isProjectNameUsedAsync(projectName, (err, isNameUsed) => {    
     if (err) {
       fileSystem.handleGeneralErr(callBack, err);
       return;
@@ -263,7 +263,7 @@ const saveProjectToLocal = (projectName, entitiesList, assetsList, callBack) => 
     }
 
     // check if tempProjectDir already exists, if exists, delete it
-    // actually this step may be redundant because I would check isProjectNameUsed
+    // actually this step may be redundant because I would check isProjectNameUsedAsync
     const tempProjectDirPath = getTempProjectDirectoryPath(projectName);
     if (!isCurrentLoadedProject(projectName)) {      
       fileSystem.myDelete(tempProjectDirPath, (err) => {
