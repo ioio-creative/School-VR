@@ -574,6 +574,7 @@ export default {
 
   // asar - Electron Archive
   createPackage,
+  createPackagePromise,
   createPackageWithTransformOptionPromise,
   createPackageWithTransformOption, 
   createPackageWithTransformOptionPromise,

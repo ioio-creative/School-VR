@@ -10,13 +10,15 @@ import AssetsPanel from 'containers/aframeEditor/homePage/assetsPanel';
 import Editor from 'vendor/editor.js';
 import {addEntityAutoType} from 'utils/aframeEditor/aFrameEntities';
 import {roundTo, jsonCopy} from 'utils/aframeEditor/helperfunctions';
-import saveProjectToLocal from 'utils/saveLoadProject/saveProjectToLocal';
+import saveProjectToLocalAsync from 'utils/saveLoadProject/saveProjectToLocalAsync';
 import parseDataToSaveFormat from 'utils/saveLoadProject/parseDataToSaveFormat';
 import {TweenMax, TimelineMax, Linear} from 'gsap';
 
 import getExistingProjectNamesAsync from 'utils/saveLoadProject/getExistingProjectNamesAsync';
 import isStrAnInt from 'utils/number/isStrAnInt';
 import stricterParseInt from 'utils/number/stricterParseInt';
+
+import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 
 import './editorPage.css';
 const Events = require('vendor/Events.js');
@@ -70,7 +72,7 @@ function setDefaultProjectName(suggestedProjectName = defaultProjectNamePrefix +
 
       Events.emit('setProjectName', newProjectName);
     })
-    .catch(err => alert(err));  
+    .catch(err => handleErrorWithUiDefault(err));      
 }
 
 function getEntityType(entityEl) {
@@ -767,10 +769,8 @@ class EditorPage extends Component {
         }
       },
       saveProject: () => {               
-        saveProjectToLocal(self.projectName, self.entitiesList, self.assetsList, (err, data) => {          
-          if (err) {
-            alert(`${err}`);
-          } else {
+        saveProjectToLocalAsync(self.projectName, self.entitiesList, self.assetsList)
+          .then((data) => {
             const projectJson = data.projectJson;
             const projectJsonStr = JSON.stringify(projectJson);
             //console.log(projectJsonStr);        
@@ -778,10 +778,9 @@ class EditorPage extends Component {
             // call electron save api here
             //navigator.clipboard.writeText(projectJsonStr);
             
-            alert(`Data: ${JSON.stringify(data)}`);            
-          }
-        });
-        
+            alert(`Data: ${JSON.stringify(data)}`);
+          })
+          .catch(err => handleErrorWithUiDefault(err));                    
       },
       loadProject: (jsonText) => {
         try {

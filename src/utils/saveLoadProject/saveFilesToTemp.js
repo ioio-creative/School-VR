@@ -6,36 +6,36 @@ import {
 } from 'utils/saveLoadProject/getProjectPaths';
 
 
-function copyFile(srcFilePath, destFilePath, isAssumeDestDirExists, callBack) {
+async function copyFileAsync(srcFilePath, destFilePath, isAssumeDestDirExists) {
   if (isAssumeDestDirExists) {
-    fileSystem.copyFileAssumingDestDirExists(srcFilePath, destFilePath, callBack);
+    await fileSystem.copyFileAssumingDestDirExistsPromise(srcFilePath, destFilePath);
   } else {
-    fileSystem.copyFile(srcFilePath, destFilePath, callBack);
+    await fileSystem.copyFileAsync(srcFilePath, destFilePath);
   }
 }
 
 
-function saveImageToProjectTemp(srcFilePath, projectName, assetId, isAssumeDestDirExists, callBack) {
+async function saveImageToProjectTempAsync(srcFilePath, projectName, assetId, isAssumeDestDirExists) {
   const destFilePath = getTempProjectImageFilePath(projectName, assetId, fileSystem.getFileExtensionWithLeadingDot(srcFilePath));
-  copyFile(srcFilePath, destFilePath, isAssumeDestDirExists, callBack);
+  await copyFileAsync(srcFilePath, destFilePath, isAssumeDestDirExists);
   return destFilePath;
 }
 
-function saveGifToProjectTemp(srcFilePath, projectName, assetId, isAssumeDestDirExists, callBack) {
+async function saveGifToProjectTempAsync(srcFilePath, projectName, assetId, isAssumeDestDirExists) {
   const destFilePath = getTempProjectGifFilePath(projectName, assetId, fileSystem.getFileExtensionWithLeadingDot(srcFilePath));
-  copyFile(srcFilePath, destFilePath, isAssumeDestDirExists, callBack);
+  await copyFileAsync(srcFilePath, destFilePath, isAssumeDestDirExists);
   return destFilePath;
 }
 
-function saveVideoToProjectTemp(srcFilePath, projectName, assetId, isAssumeDestDirExists, callBack) {
+async function saveVideoToProjectTempAsync(srcFilePath, projectName, assetId, isAssumeDestDirExists) {
   const destFilePath = getTempProjectVideoFilePath(projectName, assetId, fileSystem.getFileExtensionWithLeadingDot(srcFilePath));
-  copyFile(srcFilePath, destFilePath, isAssumeDestDirExists, callBack);
+  await copyFileAsync(srcFilePath, destFilePath, isAssumeDestDirExists);
   return destFilePath;
 }
 
 
 export {
-  saveImageToProjectTemp,
-  saveGifToProjectTemp,
-  saveVideoToProjectTemp
+  saveImageToProjectTempAsync,
+  saveGifToProjectTempAsync,
+  saveVideoToProjectTempAsync
 };
