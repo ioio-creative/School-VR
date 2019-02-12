@@ -25,73 +25,12 @@ import {
 } from './saveFilesToTemp';
 
 
-const EOL = require('os').EOL;
-
-
-/* utils */
-
-const getCallBackReturnedDataObjects = (totNumOfObjs) => {
-  const callBackReturnedDataObjects = [];
-  for (let i = 0; i < totNumOfObjs; i++) {
-    callBackReturnedDataObjects.push({
-      isCallBackReturned: false,
-      error: null
-    });
-  }
-  return callBackReturnedDataObjects;
-}
-
-const getDealWithAnyCallBackErrorsFunc = (callBackDataObjs, callBack) => {
-  return function() {
-    const isError = callBackDataObjs.reduce((prevVal, currErrObj) => {
-      return prevVal || (currErrObj.error !== null);
-    }, false);
-    if (isError) {
-      const errMsg = callBackDataObjs
-        .filter(errObj => errObj !== null)
-        .map(errObj => errObj.error)
-        .join(EOL);
-      callBack(new Error(errMsg));
-    } else {
-      callBack(null);
-    }
-  }
-}
-
-/* end of utils */
-
-
 const createProjectAssetTempDirectoriesAsync = async (projectName) => {
   const projectAssetTempDirectories = [
     getTempProjectImageDirectoryPath(projectName),
     getTempProjectGifDirectoryPath(projectName),
     getTempProjectVideoDirectoryPath(projectName)
   ];
-
-  // const totNumOfTempDirs = projectAssetTempDirectories.length;
-  // let numOfCreateDirCallBackReturned = 0;
-
-  // const createDirReturnedErrors = 
-  //   getCallBackReturnedDataObjects(totNumOfTempDirs);  
-
-  // // deal with the errors, if any, from creating each directory
-  // const dealWithAnyErrorsFunc = 
-  //   getDealWithAnyCallBackErrorsFunc(createDirReturnedErrors, callBack);
-
-  // const keepCheckCallBackFunc = (err, idx) => {
-  //   numOfCreateDirCallBackReturned++;
-
-  //   createDirReturnedErrors[idx] = {
-  //     isCallBackReturned: true,
-  //     error: err
-  //   };
-
-  //   const areAllCreateDirCallBacksReturned = numOfCreateDirCallBackReturned === totNumOfTempDirs;
-    
-  //   if (areAllCreateDirCallBacksReturned) {      
-  //     dealWithAnyErrorsFunc();
-  //   }
-  // };
 
   await forEach(projectAssetTempDirectories, async (dir) => {
     await fileSystem.createDirectoryIfNotExistsPromise(dir);

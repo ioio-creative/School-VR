@@ -1,24 +1,28 @@
 import React, {Component} from 'react';
 
 import listProjectsAsync from 'utils/saveLoadProject/listProjectsAsync';
+import {loadProjectAsync} from 'utils/saveLoadProject/loadProject';
+
+import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 
 import './ProjectListPage.css';
 
 
 function ProjectItem(props) {
-  const item = props.item;
+  const project = props.item;
   const addFocusClass = (existingClass) =>
     (existingClass + (props.isFocus ? " focus" : ""));
   return (
     <div className={addFocusClass("file")}
-    
+      onClick={evnt => props.handleClickFunc(evnt, props.idx)}
+      onDoubleClick={_ => props.handleDoubleClickFunc(project)}
     >
       <div className={addFocusClass("icon")}>
         {/* <img src={getAbsoluteUrlFromRelativeUrl(`fileExplorer/icons/${props.type}.png`)} /> */}
-        <div className={addFocusClass("name")}>{item}</div>
+        <div className={addFocusClass("name")}>{project.path}</div>
       </div>
     </div>
-  );  
+  );
 }
 
 
@@ -27,7 +31,7 @@ function ProjectList(props) {
 
   if (items.length === 0) {
     return null;
-  }    
+  }
 
   const projects = items.map((project, idx) => {
     return (
@@ -35,9 +39,9 @@ function ProjectList(props) {
         key={project.path}
         idx={idx}
         isFocus={props.focusedItemIdx === idx}
-        item={project.path}
-        handleClickFunc={props.handleFileItemClick}
-        handledDoubleClickFunc={props.handleFileItemDoubleClick}
+        item={project}
+        handleClickFunc={props.handleItemClickFunc}
+        handleDoubleClickFunc={props.handleItemDoubleClickFunc}
       />
     );
   });
@@ -66,8 +70,8 @@ class ProjectListPage extends Component {
     this.enumerateProjects = this.enumerateProjects.bind(this);
 
     this.handleBackgroundClick = this.handleBackgroundClick.bind(this);
-    this.handleFileItemClick = this.handleFileItemClick.bind(this);
-    this.handleFileItemDoubleClick = this.handleFileItemDoubleClick.bind(this);
+    this.handleProjectItemClick = this.handleProjectItemClick.bind(this);
+    this.handleProjectItemDoubleClick = this.handleProjectItemDoubleClick.bind(this);
 
     this.handleWindowFocus = this.handleWindowFocus.bind(this);  
   }
@@ -112,19 +116,25 @@ class ProjectListPage extends Component {
     }
   }
 
-  // Click on file
-  handleFileItemClick(evnt, fileItemIdx) {
-    if (this.state.focusedItemIdx !== this.fileItemIdx) {
+  // Click on item
+  handleProjectItemClick(evnt, itemIdx) {
+    if (this.state.focusedItemIdx !== itemIdx) {
       this.setState({
-        focusedItemIdx: fileItemIdx
+        focusedItemIdx: itemIdx
       });
     }
     evnt.stopPropagation();
   }
 
-  // Double click on file
-  handleFileItemDoubleClick(filePath, mime) {    
-    this.props.handleFileItemClickFunc(filePath, mime);
+  /**
+   * handleProjectItemDoubleClick
+   * Double click on item
+   * @param {CustomedFileStats} projectFileStat 
+   */
+  handleProjectItemDoubleClick(projectFileStat) {        
+    const projectName = projectFileStat.fileNameWithoutExtension;
+    loadProjectAsync(projectName)
+      .catch(err => handleErrorWithUiDefault(err));
   }
 
   // Refresh when in focus again
@@ -142,6 +152,8 @@ class ProjectListPage extends Component {
       <div className="project-list-page">
         <ProjectList
           items={state.projects}
+          handleItemClickFunc={this.handleProjectItemClick}
+          handleItemDoubleClickFunc={this.handleProjectItemDoubleClick}
         />        
       </div>
     );

@@ -39,8 +39,8 @@ function createWindow() {
 
   splashScreen.loadURL(`file://${path.join(__dirname, 'splash.html')}`);
   //mainWindow.loadURL(isDev ? 'http://localhost:1234/file-explorer' : `file://${path.join(__dirname, '../build/index.html')}`);
-  mainWindow.loadURL(isDev ? 'http://localhost:1234' : `file://${path.join(__dirname, '../build/index.html')}`);
-  //mainWindow.loadURL(isDev ? 'http://localhost:1234/projectlist' : `file://${path.join(__dirname, '../build/index.html')}`);
+  //mainWindow.loadURL(isDev ? 'http://localhost:1234' : `file://${path.join(__dirname, '../build/index.html')}`);
+  mainWindow.loadURL(isDev ? 'http://localhost:1234/projectlist' : `file://${path.join(__dirname, '../build/index.html')}`);
   
   mainWindow.on('ready-to-show', () => {
     mainWindowReady = true;

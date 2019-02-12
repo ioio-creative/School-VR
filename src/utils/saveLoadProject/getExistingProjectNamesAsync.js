@@ -9,17 +9,4 @@ const getExistingProjectNamesAsync = async () => {
   return projectNames;  
 };
 
-// const getExistingProjectNames = (callBack) => {
-//   listProjects((err, projectFiles) => {    
-//     if (err) {
-//       fileSystem.handleGeneralErr(callBack, err);
-//     } else {
-//       const projectNames = projectFiles.map((projectFileNameWithExtension) => {
-//         return fileSystem.getFileNameWithoutExtension(projectFileNameWithExtension);
-//       });
-//       fileSystem.handleGeneralErrAndData(callBack, err, projectNames);
-//     }
-//   });
-// };
-
 export default getExistingProjectNamesAsync;

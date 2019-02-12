@@ -2,12 +2,14 @@
 
 import rimraf from 'rimraf';
 import fx from './mkdir-recursive';
+import {map} from 'p-iteration';
+
+import CustomedFileStats from './CustomedFileStats';
 
 import toBase64Str from 'utils/base64/toBase64Str';
 import fromBase64Str from 'utils/base64/fromBase64Str';
 
 import isFunction from 'utils/variableType/isFunction';
-import { promised } from 'q';
 
 // https://github.com/electron/asar
 // http://www.tc4shell.com/en/7zip/asar/
@@ -237,25 +239,25 @@ const copyFilePromise = promisify(copyFile);
 //   }
 // };
 
-// https://stackoverflow.com/questions/11659054/how-to-access-name-of-file-within-fs-callback-methods
+
 /**
  * Note: 
- * the return Stats object has an additional 'path' property 
+ * the return CustomedFileStats object has an additional 'path' property 
  * compared to the default fs.Stats object
  * https://stackoverflow.com/questions/11659054/how-to-access-name-of-file-within-fs-callback-methods
  * https://nodejs.org/dist/latest-v10.x/docs/api/fs.html#fs_class_fs_stats
  */
+
 const stat = (filePath, callBack) => {
   fs.stat(filePath, (err, stats) => {
-    stats.path = filePath;
-    handleGeneralErrAndData(callBack, err, stats);
+    const customedStatsObj = new CustomedFileStats(stats, filePath);
+    handleGeneralErrAndData(callBack, err, customedStatsObj);
   });
 };
 
 const statSync = (filePath) => {
   const statObj = fs.statSync(filePath);
-  statObj.path = filePath;
-  return statObj;
+  return new CustomedFileStats(statObj, filePath);
 };
 
 const statPromise = promisify(stat);
@@ -419,8 +421,12 @@ const createAndOverwriteDirectoryIfExistsSync = (dirPath) => {
 
 const createAndOverwriteDirectoryIfExistsPromise = promisify(createAndOverwriteDirectoryIfExists);
 
-// Note: files are just file names, not full paths
-const readdir = (dirPath, callBack) => {
+
+/**
+ *  Note:
+ *  files returned by fs.readdir is an array of file name strings
+ */ 
+const readdir = (dirPath, callBack) => {  
   fs.readdir(dirPath, (err, files) => {
     handleGeneralErrAndData(callBack, err, files);
   });
@@ -431,6 +437,27 @@ const readdirSync = (dirPath) => {
 }
 
 const readdirPromise = promisify(readdir);
+
+/**
+ * Note: 
+ * the returned files is an array of CustomedStats objects
+ * instead of the default array of file name strings
+ * https://stackoverflow.com/questions/11659054/how-to-access-name-of-file-within-fs-callback-methods
+ * https://nodejs.org/dist/latest-v10.x/docs/api/fs.html#fs_class_fs_stats
+ */
+const readdirWithStatPromise = async (dirPath) => {
+  const fileNames = await readdirPromise(dirPath);
+  if (!fileNames || fileNames.length === 0) {
+    return [];
+  }
+
+  const fullPaths = fileNames.map(fileName => join(dirPath, fileName)); 
+  const fileStatObjs = await map(fullPaths, async (fileFullPath) => {
+    return await statPromise(fileFullPath);
+  });
+
+  return fileStatObjs;
+}
 
 // const rmdir = (dirPath, callBack) => {
 //   fs.rmdir(dirPath, (err) => {
@@ -594,6 +621,7 @@ export default {
   readdir,
   readdirSync,
   readdirPromise,
+  readdirWithStatPromise,
   //deleteDirectorySafe,
   //deleteDirectorySafeSync,
 
