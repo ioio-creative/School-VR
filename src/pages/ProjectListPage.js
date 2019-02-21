@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 
 import listProjectsAsync from 'utils/saveLoadProject/listProjectsAsync';
-import {loadProjectAsync} from 'utils/saveLoadProject/loadProject';
+import {loadProjectByProjectNameAsync} from 'utils/saveLoadProject/loadProject';
 
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 
@@ -133,7 +133,7 @@ class ProjectListPage extends Component {
    */
   handleProjectItemDoubleClick(projectFileStat) {        
     const projectName = projectFileStat.fileNameWithoutExtension;
-    loadProjectAsync(projectName)
+    loadProjectByProjectNameAsync(projectName)
       .catch(err => handleErrorWithUiDefault(err));
   }
 

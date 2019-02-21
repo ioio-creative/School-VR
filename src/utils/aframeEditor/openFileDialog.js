@@ -1,4 +1,4 @@
-import { openFileDialogFilter } from 'globals/config';
+import { appDirectory, openFileDialogFilter } from 'globals/config';
 
 
 const electron = window.require('electron');
@@ -9,11 +9,11 @@ const { BrowserWindow, dialog } = electron.remote;
 // The browserWindow argument allows the dialog to attach itself to a parent window, making it modal.
 
 
-function openDialogCommon(fileFilters, dialogMessage, callBack) {
+function openDialogCommon(fileFilters, dialogMessage, callBack, defaultPath) {
   const browserWindow = BrowserWindow.getFocusedWindow();
   const optionsObj = {
     title: "Open",
-    defaultPath: null,
+    defaultPath: defaultPath,
     filters: fileFilters,
     properties: [
       'openFile'
@@ -40,9 +40,16 @@ function openVideoDialog(callBack) {
     "Please select a video file.", callBack);
 }
 
+function openSchoolVrFileDialog(callBack) {  
+  openDialogCommon([openFileDialogFilter.schoolVrFile],
+    "Please select a School VR file.", callBack,
+    appDirectory.appProjectsDirectory);
+}
+
 
 export {
   openImageDialog,
   openGifDialog,
-  openVideoDialog
+  openVideoDialog,
+  openSchoolVrFileDialog
 };

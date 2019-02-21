@@ -4,6 +4,7 @@ import {openImageDialog, openGifDialog, openVideoDialog} from './openFileDialog'
 import {mediaType, openFileDialogFilter} from 'globals/config';
 import fileSystem from 'utils/fileSystem/fileSystem';
 
+
 const Events = require('vendor/Events.js');
 const uuid = require('uuid/v1');
 const smalltalk = require('smalltalk');

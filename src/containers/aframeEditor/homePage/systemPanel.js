@@ -6,6 +6,9 @@ import React, {Component} from 'react';
 
 import IPCKeys from 'globals/ipcKeys';
 
+import {openSchoolVrFileDialog} from 'utils/aframeEditor/openFileDialog';
+import {loadProjectByProjectFilePathAsync} from 'utils/saveLoadProject/loadProject';
+
 import './systemPanel.css';
 
 const appName = require('globals/config').default.appName;
@@ -85,11 +88,20 @@ class SystemPanel extends Component {
                   });
                 }}>Save</div>
                 <div className="menu-item" onClick={() => {
-                  navigator.clipboard.readText().then(text => {
+                  {/* navigator.clipboard.readText().then(text => {
                     Events.emit('loadProject', text);
                     this.setState({
                       menuOpen: false
                     });
+                  }); */}
+
+                  openSchoolVrFileDialog(async (filePaths) => {
+                    if (filePaths && filePaths[0]) {
+                      const projectJson = await loadProjectByProjectFilePathAsync(filePaths[0]);
+                      console.log(projectJson);
+                    } else {
+                      //alert('No files are selected!');
+                    }
                   })
                 }}>Load</div>
                 <div className="seperator"></div>
