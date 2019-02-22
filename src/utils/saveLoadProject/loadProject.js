@@ -1,7 +1,7 @@
 import {
   getTempProjectDirectoryPath,
   getTempProjectJsonFilePath,
-  getSavedProjectFilePath,  
+  getSavedProjectFilePath  
 } from './getProjectPaths';
 import fileSystem from 'utils/fileSystem/fileSystem';
 
@@ -31,7 +31,7 @@ const loadProjectByProjectNameAsync = async (projectName) => {
   fileSystem.extractAll(savedProjectFilePath, tempProjectDirectoryPath);
   console.log(`loadProject - loadProjectAsync: Project extracted to ${tempProjectDirectoryPath}`);
 
-  const projectJsonStr = await fileSystem.readFileSync(getTempProjectJsonFilePath(projectName));
+  const projectJsonStr = await fileSystem.readFilePromise(getTempProjectJsonFilePath(projectName));
   return JSON.stringify(projectJsonStr);
 };
 

@@ -10,6 +10,7 @@ import toBase64Str from 'utils/base64/toBase64Str';
 import fromBase64Str from 'utils/base64/fromBase64Str';
 
 import isFunction from 'utils/variableType/isFunction';
+import { Promise } from 'q';
 
 // https://github.com/electron/asar
 // http://www.tc4shell.com/en/7zip/asar/
@@ -21,6 +22,50 @@ const asar = window.require('asar');
 const fs = window.require('fs');
 const path = window.require('path');
 const {promisify} = window.require('util');
+
+
+/* from node.js fs implementation */
+
+// https://github.com/nodejs/node/blob/6e56771f2a9707ddf769358a4338224296a6b5fe/lib/fs.js#L1694
+const maybeCallBack = (cb) => {
+  if (isFunction(cb)) {
+    return cb;
+  }
+
+  //throw new ERR_INVALID_CALLBACK();
+  throw new Error(`Callback: '${cb}' is not a function.`);
+}
+
+const assertEncoding = (encoding) => {
+  if (encoding && !Buffer.isEncoding(encoding)) {
+    //throw new ERR_INVALID_OPT_VALUE_ENCODING(encoding);
+    throw new Error(`Invalid opt value encoding: ${encoding}`);
+  }
+};
+
+const getOptions = (options, defaultOptions) => {
+  if (options === null || options === undefined ||
+      isFunction(options)) {
+    return defaultOptions;
+  }
+
+  if (typeof options === 'string') {
+    defaultOptions = { ...defaultOptions };
+    defaultOptions.encoding = options;
+    options = defaultOptions;
+  } else if (typeof options !== 'object') {
+    //throw new ERR_INVALID_ARG_TYPE('options', ['string', 'Object'], options);
+    throw new Error(`Invalid argument type: 'options: ${options}' should be of one of the types: 'string', 'Object'.`);
+  }
+
+  if (options.encoding !== 'buffer') {
+    assertEncoding(options.encoding);
+  }
+
+  return options;
+}
+
+/* end of from node.js fs implementation */
 
 
 /* error handling */
@@ -135,15 +180,23 @@ const renameSync = (oldPath, newPath) => {
 
 const renamePromise = promisify(rename);
 
-const readFile = (filePath, callBack) => {
-  //fs.readFile(filePath, 'utf-8', (err, data) => {
-  fs.readFile(filePath, (err, data) => {
+// default text file
+const defaultReadFileOptions = {
+  encoding: 'utf8',
+  flag: 'r'
+};
+
+const readFile = (filePath, options, callBack) => {
+  callBack = maybeCallBack(callBack || options);
+  options = getOptions(options, defaultReadFileOptions);
+  fs.readFile(filePath, options, (err, data) => {
     handleGeneralErrAndData(callBack, err, data);
   });
 };
 
-const readFileSync = (filePath) => {
-  return fs.readFileSync(filePath);
+const readFileSync = (filePath, options) => {
+  options = getOptions(options, defaultReadFileOptions);
+  return fs.readFileSync(filePath, defaultReadFileOptions);
 };
 
 const readFilePromise = promisify(readFile);
