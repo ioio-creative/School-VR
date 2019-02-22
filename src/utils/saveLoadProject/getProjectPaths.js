@@ -40,6 +40,11 @@ function getTempProjectVideoFilePath(projectName, assetId, fileExtensionWithDot)
   return fileSystem.join(getTempProjectVideoDirectoryPath(projectName), assetId) + fileExtensionWithDot;
 }
 
+function getTempProjectAssetAbsolutePathFromProvidedPathIfIsRelative(projectName, assetPath) {
+  return isAssetPathRelative(assetPath) ?
+    fileSystem.join(getTempProjectDirectoryPath(projectName), assetPath) : assetPath;
+}
+
 /* end of temp project */
 
 
@@ -87,6 +92,7 @@ export {
   getTempProjectImageFilePath,
   getTempProjectGifFilePath,
   getTempProjectVideoFilePath,
+  getTempProjectAssetAbsolutePathFromProvidedPathIfIsRelative,
   /* end of temp project */
 
   /* saved project */

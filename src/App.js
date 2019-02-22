@@ -7,6 +7,7 @@ import {library} from '@fortawesome/fontawesome-svg-core'
 
 import {appDirectory} from 'globals/config';
 import fileSystem from 'utils/fileSystem/fileSystem';
+import deleteAllTempProjectDirectoriesAsync from 'utils/saveLoadProject/deleteAllTempProjectDirectoriesAsync';
 
 import asyncLoadingComponent from 'components/asyncLoadingComponent';
 
@@ -31,12 +32,7 @@ faIconsNeed.forEach(iconName => {
 });
 
 // delete any cached temp project files
-try {
-  fileSystem.myDeleteSync(appDirectory.appTempProjectsDirectory);
-} catch (err) {
-  console.error(err);
-  alert(err);
-}
+deleteAllTempProjectDirectoriesAsync();
 
 // create App Data directories if they do not exist
 Object.keys(appDirectory).forEach((appDirectoryKey) => {  

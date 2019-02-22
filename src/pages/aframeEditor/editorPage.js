@@ -797,9 +797,9 @@ class EditorPage extends Component {
           })
           .catch(err => handleErrorWithUiDefault(err));                    
       },
-      loadProject: (jsonText) => {
-        try {
-          const data = JSON.parse(jsonText);
+      loadProject: (data) => {
+        try {          
+          console.log(data);
           if (validator.validate(data, schema).valid) {
             self.inited = false;
             // do load data

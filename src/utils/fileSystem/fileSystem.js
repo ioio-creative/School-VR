@@ -79,7 +79,7 @@ const handleGeneralErr = (callBack, err) => {
 };
 
 const handleGeneralErrAndData = (callBack, err, data) => {
-  console.log("fileSystem handleGeneralErrAndData");  
+  console.log("fileSystem - handleGeneralErrAndData");  
   const callBackCall = (newErr, theData) => {
     isFunction(callBack) && callBack(newErr, theData);
   };

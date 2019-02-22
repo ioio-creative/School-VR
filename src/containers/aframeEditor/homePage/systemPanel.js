@@ -97,9 +97,12 @@ class SystemPanel extends Component {
 
                   openSchoolVrFileDialog(async (filePaths) => {
                     if (filePaths && filePaths[0]) {
-                      const projectJson = await loadProjectByProjectFilePathAsync(filePaths[0]);
-                      console.log(projectJson);
-                    } else {
+                      const projectJson = await loadProjectByProjectFilePathAsync(filePaths[0]);                      
+                      Events.emit('loadProject', projectJson);
+                      this.setState({
+                        menuOpen: false
+                      });
+                    } else {                      
                       //alert('No files are selected!');
                     }
                   })

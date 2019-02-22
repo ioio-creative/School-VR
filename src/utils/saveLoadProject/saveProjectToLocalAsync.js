@@ -12,6 +12,7 @@ import {
   getTempProjectGifDirectoryPath,
   getTempProjectVideoDirectoryPath,
   getTempProjectJsonFilePath,
+  getTempProjectAssetAbsolutePathFromProvidedPathIfIsRelative,
   getSavedProjectFilePath,
   getImageFilePathRelativeToProjectDirectory,
   getGifFilePathRelativeToProjectDirectory,
@@ -51,14 +52,14 @@ const saveProjectAssetsToTempAsync = async (projectName, assetsList) => {
   await forEach(assetsList, async (asset) => {
     // strip file:/// from asset.src
     const strToStrip = "file:///";
-    let assetFileSrc = asset.src;
-    if (assetFileSrc.indexOf(strToStrip) > -1) {
+    let assetFileSrc = asset.src;    
+    if (assetFileSrc.includes(strToStrip)) {
       assetFileSrc = assetFileSrc.substr("file:///".length);
     }
     
     // TODO: this check of relative path is not well thought through!!!
-    const fullAssetFilePath = isAssetPathRelative(assetFileSrc) ?
-      fileSystem.join(getTempProjectDirectoryPath(projectName), assetFileSrc) : assetFileSrc;
+    const fullAssetFilePath = 
+      getTempProjectAssetAbsolutePathFromProvidedPathIfIsRelative(projectName, assetFileSrc);      
     
     // TODO: check if using decodeURIComponent() here is appropriate
     // https://stackoverflow.com/questions/747641/what-is-the-difference-between-decodeuricomponent-and-decodeuri
