@@ -436,6 +436,8 @@ class EditorPage extends Component {
     this.showDebug = false;
     this.selectingAssets = false;
     this.currentTime = 0;
+    this.undoList = [];
+    this.redoList = [];
     this.initEvents = this.initEvents.bind(this);
     this.registerEvents = this.registerEvents.bind(this);
     this.unregisterEvents = this.unregisterEvents.bind(this);
@@ -445,6 +447,11 @@ class EditorPage extends Component {
     this.addSlide = this.addSlide.bind(this);
     this.removeSlide = this.removeSlide.bind(this);
     this.addTimeline = this.addTimeline.bind(this);
+    this.queueUndo = this.queueUndo.bind(this);
+    this.queueRedo = this.queueRedo.bind(this);
+    this.undo = this.undo.bind(this);
+    this.redo = this.redo.bind(this);
+    this.emptyRedoList = this.emptyRedoList.bind(this);
     //this.updateAssetsList = this.updateAssetsList.bind(this);
   }
   componentDidMount() {
@@ -456,6 +463,7 @@ class EditorPage extends Component {
       "timeline": {}
     };
     this.inited = true;
+    console.log(process.env.username || process.env.user || process.platform);
   }
   initEvents() {
     const self = this;
@@ -652,6 +660,13 @@ class EditorPage extends Component {
       objectbeforeremoved: entityEl => {
         // store the object to undo / redo list before it is deleted
         const entityId = entityEl.getAttribute('id');
+        if (self.entitiesList[entityId]) {
+          self.queueUndo({
+            'type': 'entityRemove',
+            'entityId': entityId,
+            'entityEl': self.entitiesList[entityId]
+          })
+        }
         removeFromEntitieslist(self.entitiesList, entityId);
         self.updateTimeline();
         self.forceUpdate();
@@ -676,7 +691,7 @@ class EditorPage extends Component {
         } else {
           Events.emit('disablecontrols');
         }
-        self.selectedEntity = (obj? obj.el.getAttribute('id'): obj);
+        self.selectedEntity = (obj? (obj.el? obj.el.getAttribute('id'): null): obj);
         if (self.selectedEntity === null) {
           self.selectedTimeline = null;
           self.selectedTimelinePosition = null;
@@ -684,11 +699,11 @@ class EditorPage extends Component {
         self.forceUpdate();
       },
       undo: () => {
-        // alert('Undo');
+        self.undo();
         // 
       },
       redo: () => {
-        // alert('Redo');
+        self.redo();
       },
       addAsset: (type, id, url) => {
         // or only query the elements in a-assets when save?
@@ -1050,9 +1065,55 @@ class EditorPage extends Component {
   //     }
   //   }    
   // }
-  // queueUndo(event, ) {
+  queueUndo(data) {
+    this.undoList.push(data);
+  }
+  queueRedo(data) {
+    this.redoList.push(data);
+  }
+  undo() {
+    // undo !!!
+    const lastAction = this.undoList.pop();
+    console.log('undo');
+    switch (lastAction['type']) {
+      case 'entityRemove': {
+        const entityId = addToEntitieslist(this.entitiesList, lastAction.entityEl);
+        this.editor.sceneEl.append(lastAction.entityEl.el);
+        lastAction.entityEl.el.object3D.el = lastAction.entityEl.el;
+        this.queueRedo({
+          'type': 'entityAdd',
+          'entityId': entityId,
+          'entityEl': lastAction.entityEl
+        })
+        // this.selectedEntity = lastAction['entityId'];
+        break;
+      }
+    }
+    this.forceUpdate();
+  }
+  redo() {
+    // redo !!!
+    if (this.redoList.length > 0) {
+      const lastAction = this.redoList.pop();
+      switch (lastAction['type']) {
+        case 'entityAdd': {
+          this.queueUndo({
+            'type': 'entityRemove',
+            'entityId': lastAction['entityId'],
+            'entityEl': lastAction['entityEl']
+          })
+          removeFromEntitieslist(this.entitiesList, lastAction['entityId']);
+          // this.editor.sceneEl.append(lastAction.entityEl.el);
+          break;
+        }
+      }
+      this.forceUpdate();
+    }
+  }
+  emptyRedoList() {
+    this.redoList.length = 0;
+  }
 
-  // }
   componentWillUnmount() {
     this.unregisterEvents();
   }
