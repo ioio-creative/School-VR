@@ -155,6 +155,15 @@ function addEntityAutoType(elementType, elementId, entityParent) {
       addNewCamera(elementId, entityParent);
       break;
     };
+    // maybe let the assest call the add function?
+    // case 'a-image': {
+    //   loadImage(elementId, entityParent);
+    //   break;
+    // };
+    // case 'a-video': {
+    //   loadVideo(elementId, entityParent);
+    //   break;
+    // };
     default:
       break;
   }
@@ -426,7 +435,12 @@ function addNewImage() {
     </span>
   );
 }
+function loadImage(elementId) {
+  const newEl = editor.createNewEntity({
+    element: 'a-image'
+  });
 
+}
 function addNewGif() {
   function clickBtn() {
     openGifDialog((filePaths) => {

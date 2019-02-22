@@ -833,8 +833,9 @@ class EditorPage extends Component {
                   "timeline": {}
                 };
               }
-              // set back the name
-              self.entitiesList[entityEntry['id']]['name'] = entityEntry['name'];
+              if (self.entitiesList[entityEntry['id']])
+                // set back the name
+                self.entitiesList[entityEntry['id']]['name'] = entityEntry['name'];
               entityEntry["slides"].forEach(slideEntry => {
                 slideEntry['timelines'].forEach(timelineEntry => {
                   self.addTimeline(
