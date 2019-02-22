@@ -327,12 +327,9 @@
         "media_type": {
           "type": "string",
           "description": "image should have a dimension of power of 2 (e.g. 128 x 128, 512 x 512)",
-          "enum": ["image", "video", "audio"]
+          "enum": ["image", "gif", "video", "audio"]
         },
         "src": {
-          "type": "string"
-        },
-        "name": {
           "type": "string"
         },
         "id": {
