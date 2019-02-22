@@ -798,8 +798,8 @@ class EditorPage extends Component {
           .catch(err => handleErrorWithUiDefault(err));                    
       },
       loadProject: (data) => {
-        try {          
-          console.log(data);
+        try {
+          console.log(JSON.stringify(data));
           if (validator.validate(data, schema).valid) {
             self.inited = false;
             // do load data
