@@ -1,7 +1,7 @@
 // https://github.com/hokein/electron-sample-apps/tree/master/file-explorer
 
 import React, { Component } from 'react';
-import fileSystem from 'utils/fileSystem';
+import fileSystem from 'utils/fileSystem/fileSystem';
 
 import './style.css';
 

@@ -6,7 +6,7 @@ import AddressBar from 'pages/TestFileExplorer/AddressBar';
 import FolderView from 'pages/TestFileExplorer/FolderView';
 
 import config, { appDirectory } from 'globals/config';
-import fileSystem from 'utils/fileSystem';
+import fileSystem from 'utils/fileSystem/fileSystem';
 
 import './bootstrap/css/bootstrap.css';
 import './style.css';

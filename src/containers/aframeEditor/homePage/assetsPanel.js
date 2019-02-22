@@ -11,7 +11,7 @@ import './assetsPanel.css';
 
 const {dialog} = window.require('electron').remote;
 
-const Events = require('vendor/Events.js');
+//const Events = require('vendor/Events.js');
 
 function handleUpload(event, callback) {
   var self = event.target;

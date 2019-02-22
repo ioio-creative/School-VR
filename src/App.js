@@ -6,7 +6,7 @@ import {library} from '@fortawesome/fontawesome-svg-core'
 // import {faArrowsAlt, faArrowsAlt} from '@fortawesome/free-solid-svg-icons'
 
 import {appDirectory} from 'globals/config';
-import fileSystem from 'utils/fileSystem';
+import fileSystem from 'utils/fileSystem/fileSystem';
 
 import asyncLoadingComponent from 'components/asyncLoadingComponent';
 
@@ -39,7 +39,7 @@ try {
 }
 
 // create App Data directories if they do not exist
-Object.keys(appDirectory).forEach((appDirectoryKey) => {
+Object.keys(appDirectory).forEach((appDirectoryKey) => {  
   fileSystem.createDirectoryIfNotExistsSync(appDirectory[appDirectoryKey]);
 });
 
@@ -53,6 +53,7 @@ const PresenterPage = require('pages/aframeEditor/presenterPage').default;
 // const AsyncPresenterPage = asyncLoadingComponent(() => import('pages/aframeEditor/presenterPage'));
 //const AsyncTestSaveLoad = asyncLoadingComponent(() => import('pages/TestSaveLoad'));
 const AsyncTestFileExplorer = asyncLoadingComponent(() => import('pages/TestFileExplorer/TestFileExplorer'));
+const AsyncProjectListPage = asyncLoadingComponent(() => import('pages/ProjectListPage'));
 
 class App extends Component {
   constructor(props) {
@@ -78,6 +79,7 @@ class App extends Component {
             {/* <Route exact path={routes.presenter} render={() => <AsyncPresenterPage />} /> */}
             <Route exact path={routes.presenter} component={PresenterPage} />
             {/* <Route exact path={routes.viewer} component={ViewerPage} /> */}
+            <Route exact path={routes.projectList} component={AsyncProjectListPage} />
             <Redirect to={routes.editor} />
           </Switch>
         </div>

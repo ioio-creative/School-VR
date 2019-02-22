@@ -1,5 +1,5 @@
 import React from 'react';
-import AFRAME from 'aframe';
+import AFRAME from 'aframe';  // do not uncomment as aframe-gif-shader requires AFRAME
 import 'aframe-gif-shader';
 
 const Events = require('vendor/Events.js');
@@ -30,6 +30,7 @@ function addToAsset(el) {
       break;
     default:
       console.log('editorFunctions_addToAsset: ???');
+      break;
   }
   el.setAttribute('id', newid);
   Events.emit('addAsset', 

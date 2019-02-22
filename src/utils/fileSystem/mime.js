@@ -1,6 +1,6 @@
 // https://github.com/hokein/electron-sample-apps/tree/master/file-explorer
 
-import fileSystem from 'utils/fileSystem';
+import fileSystem from './fileSystem';
 
 
 const map = {

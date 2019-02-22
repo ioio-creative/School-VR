@@ -5,6 +5,14 @@ const path = window.require('path');
 
 const appName = app.getName();
 
+
+const config = {
+  appName: appName,
+  appDirectory: appDirectory,
+  schoolVrProjectArchiveExtensionWithLeadingDot: '.ivr',
+  jsonFileExtensionWithLeadingDot: '.json'
+};
+
 const appDirectory = {
   // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname  
   appDataDirectory: path.join(app.getPath('appData'), `${appName}-Data`),  
@@ -13,32 +21,47 @@ const appDirectory = {
   appTempProjectsDirectory: path.join(app.getPath('appData'), `${appName}-Temp`, `${appName}-Projects`)
 };
 
-const mediaType = {
-  image: 'image',
-  video: 'video',
-  gif: 'gif'
+// https://electronjs.org/docs/api/dialog
+const Media = {
+  image: {
+    typeName: 'image',
+    directoryUnderProjectDirectory: 'Images',
+    openFileDialogFilter: { name: 'Images', extensions: ['jpg', 'png'] }
+  },
+  gif: {
+    typeName: 'gif',
+    directoryUnderProjectDirectory: 'Gifs',
+    openFileDialogFilter: { name: 'Gifs', extensions: ['gif'] }
+  },
+  video: {
+    typeName: 'video',
+    directoryUnderProjectDirectory: 'Videos',
+    openFileDialogFilter: { name: 'Videos', extensions: ['mp4'] }
+  }
 };
 
-const projectDirectoryStructure = {
-  videoDirectory: 'Videos',
-  imageDirectory: 'Images',
-  gifDirectory: 'Gifs'
+
+/* derivatives from Media */
+
+let mediaType = {},
+  projectDirectoryStructure = {},
+  openFileDialogFilter = {};
+
+for (let key of Object.keys(Media)) {
+  const MediumTypeObj = Media[key];
+  
+  mediaType[key] = MediumTypeObj.typeName;
+  projectDirectoryStructure[key] = MediumTypeObj.directoryUnderProjectDirectory;
+  
+  // https://electronjs.org/docs/api/dialog
+  openFileDialogFilter[key] = MediumTypeObj.openFileDialogFilter;
 }
 
-// https://electronjs.org/docs/api/dialog
-const openFileDialogFilter = {
-  images: { name: 'Images', extensions: ['jpg', 'png'] },
-  gifs: { name: 'Gifs', extensions: ['gif'] },
-  videos: { name: 'Videos', extensions: ['mp4'] },
-  allFiles: { name: 'All Files', extensions: ['*'] }
-};
+openFileDialogFilter.schoolVrFile = { name: 'School VR Files', extensions: [config.schoolVrProjectArchiveExtensionWithLeadingDot.substr(1)] };
+openFileDialogFilter.allFiles = { name: 'All Files', extensions: ['*'] };
 
-const config = {
-  appName: appName,
-  appDirectory: appDirectory,
-  schoolVrProjectArchiveExtensionWithLeadingDot: '.ivr',
-  jsonFileExtensionWithLeadingDot: '.json'
-};
+/* end of derivatives from Media */
+
 
 export default config;
 

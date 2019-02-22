@@ -10,11 +10,15 @@ import AssetsPanel from 'containers/aframeEditor/homePage/assetsPanel';
 import Editor from 'vendor/editor.js';
 import {addEntityAutoType} from 'utils/aframeEditor/aFrameEntities';
 import {roundTo, jsonCopy} from 'utils/aframeEditor/helperfunctions';
-import saveProjectToLocal from 'utils/saveLoadProject/saveProjectToLocal';
+import saveProjectToLocalAsync from 'utils/saveLoadProject/saveProjectToLocalAsync';
 import parseDataToSaveFormat from 'utils/saveLoadProject/parseDataToSaveFormat';
 import {TweenMax, TimelineMax, Linear} from 'gsap';
 
-import getExistingProjectNames from 'utils/saveLoadProject/getExistingProjectNames'
+import getExistingProjectNamesAsync from 'utils/saveLoadProject/getExistingProjectNamesAsync';
+import isStrAnInt from 'utils/number/isStrAnInt';
+import stricterParseInt from 'utils/number/stricterParseInt';
+
+import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 
 import './editorPage.css';
 const Events = require('vendor/Events.js');
@@ -36,19 +40,39 @@ const schema = require('schema/aframe_schema_20181108.json');
 // Use a callback to set project name.
 const defaultProjectNamePrefix = "untitled_";
 // must have a trailing number
-function getNewProjectName(callBack, suggestedProjectName = defaultProjectNamePrefix + "1") {
-  getExistingProjectNames((err, existingProjectNames) => {
-    if (err) {
-      alert("Error when calling getNewProjectName().");
-    } else {
+function setDefaultProjectName(suggestedProjectName = defaultProjectNamePrefix + "1") {
+  getExistingProjectNamesAsync()
+    .then(existingProjectNames => {      
       let newProjectName = suggestedProjectName;
-      while (existingProjectNames.includes(newProjectName)) {
-        const lastNumberInNewProjectName = Number.parseInt(newProjectName.substr(defaultProjectNamePrefix.length)) + 1;
-        newProjectName = defaultProjectNamePrefix + lastNumberInNewProjectName;
+      
+      const existingProjectNamesWhichStartWithDefaultPrefixAndHaveNumericIdx = existingProjectNames
+        .filter((name) => {
+          const idxOfDefaultProjectNamePrefix = name.indexOf(defaultProjectNamePrefix);
+          
+          if (idxOfDefaultProjectNamePrefix !== 0) {
+            return false;
+          }
+
+          const projectNameStrippedOfDefaultPrefix = name.substr(defaultProjectNamePrefix.length);
+          return isStrAnInt(projectNameStrippedOfDefaultPrefix);
+        });
+      
+      const existingProjectIndices = existingProjectNamesWhichStartWithDefaultPrefixAndHaveNumericIdx
+        .map((name) => {
+          const projectNameStrippedOfDefaultPrefix = name.substr(defaultProjectNamePrefix.length);
+          return stricterParseInt(projectNameStrippedOfDefaultPrefix);
+        });
+
+      if (existingProjectIndices.length === 0) {
+        newProjectName = `${defaultProjectNamePrefix}1`;
+      } else {
+        const maxExistingProjectIdx = Math.max(...existingProjectIndices);        
+        newProjectName = `${defaultProjectNamePrefix}${maxExistingProjectIdx + 1}`;
       }
-      callBack(newProjectName);      
-    }
-  });
+
+      Events.emit('setProjectName', newProjectName);
+    })
+    .catch(err => handleErrorWithUiDefault(err));      
 }
 
 function getEntityType(entityEl) {
@@ -414,9 +438,7 @@ class EditorPage extends Component {
   constructor(props) {
     super(props);
     this.projectName = null;
-    getNewProjectName((newProjectName) => {      
-      Events.emit('setProjectName', newProjectName);
-    });
+    setDefaultProjectName();
     this.globalTimeline = new TimelineMax({
       paused: true
     });
@@ -740,9 +762,7 @@ class EditorPage extends Component {
             })
             // initialize
             self.projectName = null;
-            getNewProjectName((newProjectName) => {
-              Events.emit('setProjectName', newProjectName);
-            });
+            setDefaultProjectName();
             self.addSlide();
             const scene = document.querySelector('a-scene');
             scene.setAttribute('el-name', 'Background');
@@ -764,10 +784,8 @@ class EditorPage extends Component {
         }
       },
       saveProject: () => {               
-        saveProjectToLocal(self.projectName, self.entitiesList, self.assetsList, (err, data) => {          
-          if (err) {
-            alert(`${err}`);
-          } else {
+        saveProjectToLocalAsync(self.projectName, self.entitiesList, self.assetsList)
+          .then((data) => {
             const projectJson = data.projectJson;
             const projectJsonStr = JSON.stringify(projectJson);
             //console.log(projectJsonStr);        
@@ -775,10 +793,9 @@ class EditorPage extends Component {
             // call electron save api here
             //navigator.clipboard.writeText(projectJsonStr);
             
-            alert(`Data: ${JSON.stringify(data)}`);            
-          }
-        });
-        
+            alert(`Data: ${JSON.stringify(data)}`);
+          })
+          .catch(err => handleErrorWithUiDefault(err));                    
       },
       loadProject: (jsonText) => {
         try {

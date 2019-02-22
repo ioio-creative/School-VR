@@ -167,15 +167,24 @@ function mkdirRecursive(root, chunks, mode, callback) {
   }
   var root = path.join(root, chunk);
 
+  /**
+   * Important (added by Chris):
+   * A possible race condition may happen using the following 
+   * fs.exists() check logic.
+   * https://nodejs.org/api/fs.html#fs_fs_access_path_mode_callback
+   * Hence, needed to check err.code === 'EEXIST'
+   */
   return fs.exists(root, function(exists) {
 
-    if (exists === true) { // already done
+    if (exists === true) { // already done      
       return mkdirRecursive(root, chunks, mode, callback);
     }
     return fs.mkdir(root, mode, function(err) {
-
       if (err) {
-        return callback(err);
+        // added by chris
+        if (err.code !== 'EEXIST') {
+          return callback(err);
+        }        
       }
       return mkdirRecursive(root, chunks, mode, callback); // let's magic
     });

@@ -2,6 +2,9 @@
 
 import rimraf from 'rimraf';
 import fx from './mkdir-recursive';
+import {map} from 'p-iteration';
+
+import CustomedFileStats from './CustomedFileStats';
 
 import toBase64Str from 'utils/base64/toBase64Str';
 import fromBase64Str from 'utils/base64/fromBase64Str';
@@ -17,6 +20,7 @@ const asar = window.require('asar');
 
 const fs = window.require('fs');
 const path = window.require('path');
+const {promisify} = window.require('util');
 
 
 /* error handling */
@@ -60,6 +64,22 @@ const existsSync = (filePath) => {
   return fs.existsSync(filePath);
 };
 
+const existsPromise = promisify(exists);
+
+// for performance reasons
+const writeFileAssumingDestDirExists = (filePath, content, callBack) => {
+  fs.writeFile(filePath, content, (err) => {
+    handleGeneralErr(callBack, err);
+  });
+}
+
+// for performance reasons
+const writeFileAssumingDestDirExistsSync = (filePath, content) => {
+  fs.writeFileSync(filePath, content);
+}
+
+const writeFileAssumingDestDirExistsPromise = promisify(writeFileAssumingDestDirExists);
+
 /**
  * writeFile would create any parent directories in filePath if not exist.
  * writeFile would replace the file if already exists. (same behaviour as fs.writeFile)
@@ -97,11 +117,11 @@ const writeFileSync = (filePath, content) => {
   fs.writeFileSync(filePath, content);
 };
 
+const writeFilePromise = promisify(writeFile);
+
 const createWriteStream = (outputPath) => {
   return fs.createWriteStream(outputPath);
 };
-
-
 
 const rename = (oldPath, newPath, callBack) => {
   fs.rename(oldPath, newPath, (err) => {
@@ -113,6 +133,8 @@ const renameSync = (oldPath, newPath) => {
   fs.renameSync(oldPath, newPath);
 };
 
+const renamePromise = promisify(rename);
+
 const readFile = (filePath, callBack) => {
   //fs.readFile(filePath, 'utf-8', (err, data) => {
   fs.readFile(filePath, (err, data) => {
@@ -123,6 +145,31 @@ const readFile = (filePath, callBack) => {
 const readFileSync = (filePath) => {
   return fs.readFileSync(filePath);
 };
+
+const readFilePromise = promisify(readFile);
+
+// for performance reasons
+const copyFileAssumingDestDirExists = (src, dest, callBack) => {
+  if (src === dest) {
+    passbackControlToCallBack(callBack, null);
+    return;
+  }
+
+  fs.copyFile(src, dest, (err) => {
+    handleGeneralErr(callBack, err);
+  });
+}
+
+// for performance reasons
+const copyFileAssumingDestDirExistsSync = (src, dest) => {
+  if (src === dest) {    
+    return;
+  }
+
+  fs.copyFileSync(src, dest);
+}
+
+const copyFileAssumingDestDirExistsPromise = promisify(copyFileAssumingDestDirExists);
 
 /**
  * copyFile and copyFileSync is structurally similar to writeFile and writeFileSync
@@ -144,13 +191,13 @@ const copyFile = (src, dest, callBack) => {
   exists(destDirectoriesStr, (err) => {
     if (err) {  // directory does not exist
       createDirectoryIfNotExists(destDirectoriesStr, (err) => {
-        if (err) {
+        if (err) {          
           handleGeneralErr(callBack, err);
           return;
-        }
-        copyFileCallBack();
+        }        
+        copyFileCallBack();        
       });
-    } else {  // directory exists      
+    } else {  // directory exists
       copyFileCallBack();
     }
   });
@@ -167,6 +214,8 @@ const copyFileSync = (src, dest) => {
   }
   fs.copyFileSync(src, dest);  
 };
+
+const copyFilePromise = promisify(copyFile);
 
 /**
  * fs.unlink() will not work on a directory, empty or otherwise. To remove a directory, use fs.rmdir()
@@ -190,13 +239,44 @@ const copyFileSync = (src, dest) => {
 //   }
 // };
 
-const saveChangesToFile = (filepath, content, callBack) => {
-  writeFile(filepath, content, callBack);
+
+/**
+ * Note: 
+ * the return CustomedFileStats object has an additional 'path' property 
+ * compared to the default fs.Stats object
+ * https://stackoverflow.com/questions/11659054/how-to-access-name-of-file-within-fs-callback-methods
+ * https://nodejs.org/dist/latest-v10.x/docs/api/fs.html#fs_class_fs_stats
+ */
+
+const stat = (filePath, callBack) => {
+  fs.stat(filePath, (err, stats) => {
+    const customedStatsObj = new CustomedFileStats(stats, filePath);
+    handleGeneralErrAndData(callBack, err, customedStatsObj);
+  });
+};
+
+const statSync = (filePath) => {
+  const statObj = fs.statSync(filePath);
+  return new CustomedFileStats(statObj, filePath);
+};
+
+const statPromise = promisify(stat);
+
+const isDirectory = (filePath, callBack) => {
+  fs.stat(filePath, (err, stats) => {
+    if (err) {
+      handleGeneralErr(err);
+      return;
+    }
+    handleGeneralErrAndData(callBack, null, stats.isDirectory());
+  })
 };
 
 const isDirectorySync = (filePath) => {
   return fs.statSync(filePath).isDirectory();
 };
+
+const isDirectoryPromise = promisify(isDirectory);
 
 const base64Encode = (filePath, callBack) => {
   readFile(filePath, (err, data) => {
@@ -212,6 +292,8 @@ const base64EncodeSync = (filePath) => {
   return toBase64Str(data);
 }
 
+const base64EncodePromise = promisify(base64Encode);
+
 const base64Decode = (locationToSaveFile, encodedStr, callBack) => {
   writeFile(locationToSaveFile, 
     fromBase64Str(encodedStr),
@@ -222,6 +304,8 @@ const base64DecodeSync = (locationToSaveFile, encodedStr) => {
   writeFileSync(locationToSaveFile, 
     fromBase64Str(encodedStr));
 };
+
+const base64DecodePromise = promisify(base64Decode);
 
 /* end of file api */
 
@@ -235,9 +319,13 @@ const createPackage = (src, dest, callBack) => {
   createPackageWithOptions(src, dest, {}, callBack);  
 };
 
+const createPackagePromise = promisify(createPackage);
+
 const createPackageWithTransformOption = (src, dest, transformFunc, callBack) => {
   createPackageWithOptions(src, dest, { transform: transformFunc }, callBack);
 };
+
+const createPackageWithTransformOptionPromise = promisify(createPackageWithTransformOption);
 
 // overwrite existing dest
 const createPackageWithOptions = (src, dest, options, callBack) => {
@@ -250,6 +338,8 @@ const createPackageWithOptions = (src, dest, options, callBack) => {
     handleGeneralErr(callBack, err);
   });
 };
+
+const createPackageWithOptionsPromise = promisify(createPackageWithOptions);
 
 const extractAll = (archive, dest) => {
   // asar would cache previous result!
@@ -294,7 +384,6 @@ const createDirectoryIfNotExists = (dirPath, callBack) => {
   exists(dirPath, (existsErr) => {    
     if (existsErr) {  // directory does not exist      
       mkdir(dirPath, (mkDirErr) => {
-        console.log(dirPath);
         handleGeneralErr(callBack, mkDirErr);
       });
     } else {  // directory exists
@@ -309,6 +398,8 @@ const createDirectoryIfNotExistsSync = (dirPath) => {
     mkdirSync(dirPath);
   }
 };
+
+const createDirectoryIfNotExistsPromise = promisify(createDirectoryIfNotExists);
 
 // https://askubuntu.com/questions/517329/overwrite-an-existing-directory
 const createAndOverwriteDirectoryIfExists = (dirPath, callBack) => {
@@ -328,7 +419,14 @@ const createAndOverwriteDirectoryIfExistsSync = (dirPath) => {
   mkdirSync(dirPath);
 }
 
-const readdir = (dirPath, callBack) => {
+const createAndOverwriteDirectoryIfExistsPromise = promisify(createAndOverwriteDirectoryIfExists);
+
+
+/**
+ *  Note:
+ *  files returned by fs.readdir is an array of file name strings
+ */ 
+const readdir = (dirPath, callBack) => {  
   fs.readdir(dirPath, (err, files) => {
     handleGeneralErrAndData(callBack, err, files);
   });
@@ -336,6 +434,29 @@ const readdir = (dirPath, callBack) => {
 
 const readdirSync = (dirPath) => {
   return fs.readdirSync(dirPath);
+}
+
+const readdirPromise = promisify(readdir);
+
+/**
+ * Note: 
+ * the returned files is an array of CustomedStats objects
+ * instead of the default array of file name strings
+ * https://stackoverflow.com/questions/11659054/how-to-access-name-of-file-within-fs-callback-methods
+ * https://nodejs.org/dist/latest-v10.x/docs/api/fs.html#fs_class_fs_stats
+ */
+const readdirWithStatPromise = async (dirPath) => {
+  const fileNames = await readdirPromise(dirPath);
+  if (!fileNames || fileNames.length === 0) {
+    return [];
+  }
+
+  const fullPaths = fileNames.map(fileName => join(dirPath, fileName)); 
+  const fileStatObjs = await map(fullPaths, async (fileFullPath) => {
+    return await statPromise(fileFullPath);
+  });
+
+  return fileStatObjs;
 }
 
 // const rmdir = (dirPath, callBack) => {
@@ -372,19 +493,24 @@ const readdirSync = (dirPath) => {
 /**
  * rimraf api
  * work for both file and directory 
+ * https://github.com/isaacs/rimraf
  */
 
-const defaultFsOptions = fs;
+const defaultMyDeleteOptions = Object.assign({
+  maxBusyTries: 15
+} , fs);
 
 const myDelete = (filePath, callBack) => {
-  rimraf(filePath, defaultFsOptions, (err) => {    
+  rimraf(filePath, defaultMyDeleteOptions, (err) => {    
     handleGeneralErr(callBack, err);        
   });  
 };
 
 const myDeleteSync = (filePath) => {
-  rimraf.sync(filePath, defaultFsOptions);
+  rimraf.sync(filePath, defaultMyDeleteOptions);
 }
+
+const myDeletePromise = promisify(myDelete);
 
 /* end of del api */
 
@@ -431,35 +557,56 @@ const dirname = (filePath) => {
 
 export default {
   // error handling
-  passbackControlToCallBack,
-  handleGeneralErr,
-  handleGeneralErrAndData,
+  // passbackControlToCallBack,
+  // handleGeneralErr,
+  // handleGeneralErrAndData,
 
   // file api
   exists,
   existsSync,
-  writeFile,
+  existsPromise,
+  writeFileAssumingDestDirExists,
+  writeFileAssumingDestDirExistsSync,
+  writeFileAssumingDestDirExistsPromise,
+  writeFile,  
   writeFileSync,
+  writeFilePromise,
   createWriteStream,
   rename,
   renameSync,
+  renamePromise,
   readFile,
   readFileSync,
-  copyFile,
+  readFilePromise,
+  copyFileAssumingDestDirExists,
+  copyFileAssumingDestDirExistsSync,
+  copyFileAssumingDestDirExistsPromise,
+  copyFile,  
   copyFileSync,
+  copyFilePromise,
   //deleteFileSafe,
-  //deleteFileSafeSync,
-  saveChangesToFile,  
+  //deleteFileSafeSync,  
+  stat,
+  statSync,
+  statPromise,
+  isDirectory,
   isDirectorySync,
+  isDirectoryPromise,
   base64Encode,
   base64EncodeSync,
+  base64EncodePromise,
   base64Decode,
   base64DecodeSync,
+  base64DecodePromise,
 
   // asar - Electron Archive
   createPackage,
+  createPackagePromise,
+  createPackageWithTransformOptionPromise,
   createPackageWithTransformOption, 
+  createPackageWithTransformOptionPromise,
   createPackageWithOptions,
+  createPackageWithOptionsPromise,
   extractAll,
 
   // directory api
@@ -467,16 +614,21 @@ export default {
   //mkdirSync,
   createDirectoryIfNotExists,
   createDirectoryIfNotExistsSync,
+  createDirectoryIfNotExistsPromise,
   createAndOverwriteDirectoryIfExists,
   createAndOverwriteDirectoryIfExistsSync,
+  createAndOverwriteDirectoryIfExistsPromise,
   readdir,
   readdirSync,
+  readdirPromise,
+  readdirWithStatPromise,
   //deleteDirectorySafe,
   //deleteDirectorySafeSync,
 
   // rimraf api
   myDelete,
   myDeleteSync,
+  myDeletePromise,
 
   // path api
   sep,
