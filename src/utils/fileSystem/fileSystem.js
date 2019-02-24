@@ -98,6 +98,13 @@ const handleGeneralErrAndData = (callBack, err, data) => {
 
 //const useFileHandle = (filePath, )
 
+/**
+ * !!! Important !!!
+ * Many functions within fileSystem use exists().
+ * That's why I have to keep this callBack(err) API,
+ * which is different from the callBack(null, aBool) API 
+ * returned by existsPromise() below.
+ */
 // https://nodejs.org/api/fs.html#fs_fs_access_path_mode_callback
 const exists = (filePath, callBack) => {
   fs.access(filePath, fs.constants.F_OK, (err) => {
@@ -109,7 +116,18 @@ const existsSync = (filePath) => {
   return fs.existsSync(filePath);
 };
 
-const existsPromise = promisify(exists);
+/**
+ * !!! Interesting !!!
+ * A promisified function should return callBack(err, data)
+ * including data to indicate promise is resolved.
+ * Hence, existsPromise() return callBack(null, aBool),
+ * where aBool is a Boolean indicating if the file exists.
+ */
+const existsPromise = promisify((filePath, callBack) => {
+  fs.access(filePath, fs.constants.F_OK, (err) => {
+    callBack(null, !Boolean(err));  // would throw error if callBack is undefined
+  });
+});
 
 // for performance reasons
 const writeFileAssumingDestDirExists = (filePath, content, callBack) => {
@@ -500,13 +518,13 @@ const readdirPromise = promisify(readdir);
  */
 const readdirWithStatPromise = async (dirPath) => {
   const fileNames = await readdirPromise(dirPath);
-  if (!fileNames || fileNames.length === 0) {
+  if (!Array.isArray(fileNames) || fileNames.length === 0) {
     return [];
   }
 
-  const fullPaths = fileNames.map(fileName => join(dirPath, fileName)); 
-  const fileStatObjs = await map(fullPaths, async (fileFullPath) => {
-    return await statPromise(fileFullPath);
+  const absolutePaths = fileNames.map(fileName => join(dirPath, fileName)); 
+  const fileStatObjs = await map(absolutePaths, async (fileAbsolutePath) => {
+    return await statPromise(fileAbsolutePath);
   });
 
   return fileStatObjs;

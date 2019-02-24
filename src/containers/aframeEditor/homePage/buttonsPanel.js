@@ -88,7 +88,7 @@ class ButtonsPanel extends Component {
               T
             </button>
             <button onClick={() => entityFunction.addNewTriangle()}>
-              addNewTriangle
+              Add a Triangle
             </button>
             {/* <button onClick={() => entityFunction.addNewVideo()}>
               addNewVideo

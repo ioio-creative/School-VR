@@ -96,16 +96,22 @@ class SystemPanel extends Component {
                   }); */}
 
                   openSchoolVrFileDialog(async (filePaths) => {
-                    if (filePaths && filePaths[0]) {
-                      const projectJson = await loadProjectByProjectFilePathAsync(filePaths[0]);                      
-                      Events.emit('loadProject', projectJson);
-                      this.setState({
-                        menuOpen: false
-                      });
+                    if (Array.isArray(filePaths) && filePaths.length > 0) {
+                      try {
+                        const projectJson = await loadProjectByProjectFilePathAsync(filePaths[0]);
+                        Events.emit('loadProject', projectJson);
+                      } catch (err) {
+                        console.error(err);
+                        alert(err);
+                      } finally {
+                        this.setState({
+                          menuOpen: false
+                        });
+                      }
                     } else {                      
                       //alert('No files are selected!');
                     }
-                  })
+                  });
                 }}>Load</div>
                 <div className="seperator"></div>
                 <div className="menu-item" onClick={() => {

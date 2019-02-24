@@ -42,7 +42,7 @@ function adjustWidthAndHeightOfNewlyCreatedElement(elementWidth, elementHeight) 
 }
 
 function handleDialogFilesSelected(filePaths, callBack) {
-  if (filePaths && filePaths[0]) {        
+  if (Array.isArray(filePaths) && filePaths.length > 0) {        
     callBack(filePaths[0]);
   } else {
     //alert('No files are selected!');
