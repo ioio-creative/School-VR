@@ -1,8 +1,15 @@
 import React, {Component} from 'react';
-
+import AFRAME from 'aframe';
 import './aFramePanel.css';
 
 const Events = require('vendor/Events.js');
+
+AFRAME.registerComponent('disable-inspector', {
+  dependencies: ['inspector'],
+  init: function () {
+    this.el.components.inspector.remove();
+  }
+});
 
 class AFramePanel extends Component {
   constructor(props) {
@@ -16,7 +23,7 @@ class AFramePanel extends Component {
   render() {
     return (
     	<div id="aframe-panel">
-	    	<a-scene embedded background="color:#6EBAA7" el-name="Background">
+	    	<a-scene embedded background="color:#6EBAA7" el-name="Background" disable-inspector>
           {/* <a-sky el-name="sky" el-isSystem={true} color="#6EBAA7"></a-sky> */}
           <a-camera position="0 2 5" el-name="Camera" el-isSystem={false} wasd-controls look-controls></a-camera>
           <a-light type="ambient" intensity="0.8" el-name="environment light" el-isSystem={true} color="#EEEEEE"></a-light>

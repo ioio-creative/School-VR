@@ -371,6 +371,54 @@ function addNewText() {
     </button>;
 }
 
+function addNewImageSphere() {
+  function clickBtn() {
+    let fileupload = document.getElementById('select360Image');
+    fileupload.click();
+  }
+  function handleUpload(event) {
+    const self = event.target;
+    if (self.files && self.files[0]) {
+      console.log("filechoose");
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        const img = document.createElement('img');
+        const newid = addToAsset(img);
+        const newEl = editor.createNewEntity({
+          element: 'a-sky'
+        });
+        newEl.setAttribute('src', '#' + newid);
+        // handle the video playing when toogle editor
+        // delete will cause error, comment out first
+        // Events.on('editormodechanged', is_open => {
+        //     if (is_open) {
+        //         newEl.getObject3D('mesh').material.map.image.pause();
+        //     } else {
+        //         newEl.getObject3D('mesh').material.map.image.play();
+        //     }
+        // });
+        // direct use the video without a-asset
+        // newEl.setAttribute('src', e.target.result );
+        // pause on add
+        // newEl.getObject3D('mesh').material.map.image.pause();
+        newEl.setAttribute('position', { x: 0, y: 0, z: 0 });
+        // after the file loaded, clear the input
+        self.value = '';
+        img.setAttribute('src', e.target.result);
+      };
+      reader.readAsDataURL(self.files[0]);
+    } else {
+      console.log('no file choosed');
+    }
+  }
+  return <span key="addNewImageSphere">
+    <input id="select360Image" type="file" onChange={handleUpload} hidden />
+    <button onClick={clickBtn}>
+      Add a 360 Background Image
+      </button>
+  </span>;
+}
+
 function addNewVideoSphere() {
   function clickBtn() {
     let fileupload = document.getElementById('select360Video');
@@ -478,6 +526,6 @@ function takeSnapshot() {
 
 export { addNewBox, addNewCone, addNewCylinder, addNewPlane }
 export { addNewText, addNewTriangle, addNewImage, addNewGif, addNewVideo }
-export { addNewVideoSphere }
+export { addNewVideoSphere, addNewImageSphere }
 export { takeSnapshot }
 export { setControlMode }

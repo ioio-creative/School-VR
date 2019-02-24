@@ -113,7 +113,7 @@ function addEntity(options, parentEl) {
   // return editor.createNewEntity(options, parentEl);
 }
 
-function addEntityAutoType(elementType, elementId, entityParent) {
+function addEntityAutoType(elementType, elementId, entityParent, additionSettings) {
   switch (elementType) {
     case 'a-box': {
       addNewBox(elementId, entityParent);
@@ -148,7 +148,7 @@ function addEntityAutoType(elementType, elementId, entityParent) {
       break;
     };
     case 'a-text': {
-      addNewText(elementId, entityParent);
+      addNewText(elementId, entityParent, additionSettings);
       break;
     };
     case 'a-camera': {
@@ -343,40 +343,57 @@ function addNewTriangle(elementId, entityParent) {
   );
 }
 
-function addNewText(elementId, entityParent) {
+function addNewText(elementId, entityParent, additionSettings) {
 
   if (!elementId) {
     elementId = uuid();
-  }
-  smalltalk.prompt('Enter new text', 'text to display', 'new text')
-    .then((value) => {
-      addEntity({
-        element: 'a-text',
-        components: {
-          id: elementId,
-          geometry: {
-            primitive: 'plane',
-            width: 'auto',
-            height: 'auto',
-          },
-          text: {
-            value: value,
-            width: 10,
-            align: 'center',
-            side: 'double',
-            wrapCount: 15,
-            opacity: 1,
-          },
-          material: {
-            color: '#FFFFFF',
-            opacity: 0,
-            side: 'double',
+    smalltalk.prompt('Enter new text', 'text to display', 'new text')
+      .then((value) => {
+        addEntity({
+          element: 'a-text',
+          components: {
+            id: elementId,
+            text: {
+              value: value,
+              width: 10,
+              align: 'center',
+              side: 'double',
+              wrapCount: 15,
+              opacity: 1,
+            },
+            material: {
+              color: '#FFFFFF',
+              opacity: 0,
+              side: 'double',
+            }
           }
+        },
+          (entityParent ? entityParent['el'] : null)
+        );
+      })
+  } else {
+    addEntity({
+      element: 'a-text',
+      components: {
+        id: elementId,
+        text: {
+          value: additionSettings.value,
+          width: 10,
+          align: 'center',
+          side: 'double',
+          wrapCount: 15,
+          opacity: 1,
+        },
+        material: {
+          color: '#FFFFFF',
+          opacity: 0,
+          side: 'double',
         }
-      },
-        (entityParent ? entityParent['el'] : null)
-      );
-    })
+      }
+    },
+      (entityParent ? entityParent['el'] : null)
+    );
+  }
 }
 
 function addNewCamera(elementId) {
@@ -521,6 +538,54 @@ function addNewVideo() {
   );
 }
 
+function addNewImageSphere() {
+  function clickBtn() {
+    let fileupload = document.getElementById('select360Image');
+    fileupload.click();
+  }
+  function handleUpload(event) {
+    const self = event.target;
+    if (self.files && self.files[0]) {
+      console.log("filechoose");
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        const img = document.createElement('img');
+        const newid = addToAsset(img);
+        const newEl = editor.createNewEntity({
+          element: 'a-sky'
+        });
+        newEl.setAttribute('src', '#' + newid);
+        // handle the video playing when toogle editor
+        // delete will cause error, comment out first
+        // Events.on('editormodechanged', is_open => {
+        //     if (is_open) {
+        //         newEl.getObject3D('mesh').material.map.image.pause();
+        //     } else {
+        //         newEl.getObject3D('mesh').material.map.image.play();
+        //     }
+        // });
+        // direct use the video without a-asset
+        // newEl.setAttribute('src', e.target.result );
+        // pause on add
+        // newEl.getObject3D('mesh').material.map.image.pause();
+        newEl.setAttribute('position', { x: 0, y: 0, z: 0 });
+        // after the file loaded, clear the input
+        self.value = '';
+        img.setAttribute('src', e.target.result);
+      };
+      reader.readAsDataURL(self.files[0]);
+    } else {
+      console.log('no file choosed');
+    }
+  }
+  return <span key="addNewImageSphere">
+    <input id="select360Image" type="file" onChange={handleUpload} hidden />
+    <button onClick={clickBtn}>
+      Add a 360 Background Image
+      </button>
+  </span>;
+}
+
 function addNewVideoSphere() {
   function clickBtn() {
     let fileupload = document.getElementById('select360Video');
@@ -609,6 +674,6 @@ export { addEntity, addEntityAutoType }
 // some predefined entities type
 export { addNewBox, addNewSphere, addNewCone, addNewCylinder, addNewIcosahedron, addNewTetrahedron }
 export { addNewText, addNewPlane, addNewTriangle, addNewImage, addNewGif, addNewVideo }
-export { addNewVideoSphere }
+export { addNewVideoSphere, addNewImageSphere }
 export { takeSnapshot }
 export { setControlMode }

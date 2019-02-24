@@ -8,11 +8,12 @@
 }
 #info-panel {
   position: absolute;
-  top: 230px;
+  top: 130px;
   width: 300px;
   right: 0;
   background-color: var(--panel-body-background-color);
   color: var(--text-color);
+  opacity: 0.8;
 }
 #info-panel .panel-header {
   /* display: flex; */
@@ -254,4 +255,17 @@
   right: 0;
   background-color: var(--panel-body-background-color);
   color: var(--text-color);
+}
+#content-panel + #info-panel {
+  top: 230px;
+}
+#content-panel .attribute-col {
+  display: flex;
+  justify-content: space-between;
+  margin: 15px;
+}
+#content-panel .attribute-col input,
+#content-panel .attribute-col textarea {
+  width: 150px;
+  resize: none;
 }

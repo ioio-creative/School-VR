@@ -78,9 +78,13 @@ class InfoPanel extends Component {
             Content - {selectedEntity['name']}
           </div>
           <div className="panel-body">
-            <div className="attribute-col">
+            {/* <div className="attribute-col">
               <div className="field-label">Text:</div>
               {textComponent && <input type="text" value={textComponent['value']} onChange={this.updateEntityText} />}
+            </div> */}
+            <div className="attribute-col">
+              <div className="field-label">Text:</div>
+              {textComponent && <textarea rows="3" onChange={this.updateEntityText}>{textComponent['value']}</textarea>}
             </div>
           </div>
         </div>

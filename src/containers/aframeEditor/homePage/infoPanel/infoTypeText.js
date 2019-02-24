@@ -168,7 +168,7 @@ class InfoTypeText extends Component {
             <input type="text" value={data.text.opacity} ref={(ref) => this.textOpacityInput = ref} onChange={(event) => this.changeObjectField('text.opacity', event.target.value)} hidden/>
           </div>
         </div>
-        <div className="attribute-col color-col" onClick={() => this.changeTransformMode(null)}>
+        {/* <div className="attribute-col color-col" onClick={() => this.changeTransformMode(null)}>
           <label title={backgroundColor}>
             <div className="field-label">Background Color:</div><div className="color-preview" style={{backgroundColor: backgroundColor}}/>
             <input type="color" value={backgroundColor} onChange={(event) => this.changeObjectField('material.color', event.target.value)} hidden/>
@@ -229,7 +229,7 @@ class InfoTypeText extends Component {
             </div>
             <input type="text" value={data.material.opacity} ref={(ref) => this.backgroundOpacityInput = ref} onChange={(event) => this.changeObjectField('material.opacity', event.target.value)} hidden/>
           </div>
-        </div>
+        </div> */}
       </div>
     );
   }

@@ -19,6 +19,7 @@
   right: 0;
   overflow: hidden;
   z-index: 1;
+  opacity: 0.8;
 }
 #timeline-panel.timepointer-dragging {
   cursor: ew-resize;
