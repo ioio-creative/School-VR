@@ -32,7 +32,10 @@ faIconsNeed.forEach(iconName => {
 });
 
 // delete any cached temp project files
-deleteAllTempProjectDirectoriesAsync();
+deleteAllTempProjectDirectoriesAsync().catch(err => {
+  console.error(err);
+  alert(err);
+});
 
 // create App Data directories if they do not exist
 Object.keys(appDirectory).forEach((appDirectoryKey) => {  
@@ -51,12 +54,7 @@ const PresenterPage = require('pages/aframeEditor/presenterPage').default;
 const AsyncTestFileExplorer = asyncLoadingComponent(() => import('pages/TestFileExplorer/TestFileExplorer'));
 const AsyncProjectListPage = asyncLoadingComponent(() => import('pages/ProjectListPage'));
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-  }
-  componentDidMount() {
-  }
+class App extends Component {  
   render() {    
     return (
       <Fragment>

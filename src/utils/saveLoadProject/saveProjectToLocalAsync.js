@@ -8,16 +8,13 @@ import isProjectNameUsedAsync from './isProjectNameUsedAsync';
 import {isCurrentLoadedProject, setCurrentLoadedProjectName} from './loadProject';
 import {
   getTempProjectDirectoryPath,
-  getTempProjectImageDirectoryPath,
-  getTempProjectGifDirectoryPath,
-  getTempProjectVideoDirectoryPath,
+  getTempProjectAllAssetsDirectoryPaths,
   getTempProjectJsonFilePath,
   getTempProjectAssetAbsolutePathFromProvidedPathIfIsRelative,
   getSavedProjectFilePath,
   getImageFilePathRelativeToProjectDirectory,
   getGifFilePathRelativeToProjectDirectory,
-  getVideoFilePathRelativeToProjectDirectory,
-  isAssetPathRelative
+  getVideoFilePathRelativeToProjectDirectory  
 } from './getProjectPaths';
 import {
   saveImageToProjectTempAsync,
@@ -26,44 +23,110 @@ import {
 } from './saveFilesToTemp';
 
 
-const createProjectAssetTempDirectoriesAsync = async (projectName) => {
-  const projectAssetTempDirectories = [
-    getTempProjectImageDirectoryPath(projectName),
-    getTempProjectGifDirectoryPath(projectName),
-    getTempProjectVideoDirectoryPath(projectName)
-  ];
+const convertProjectAssetSrcToProperAbsolutePath = (projectName, assetSrc) => {
+  // strip file:/// from asset.src
+  const strToStrip = "file:///";  
+  if (assetSrc.includes(strToStrip)) {
+    assetSrc = assetSrc.substr("file:///".length);
+  }
+  
+  // TODO: this check of relative path is not well thought through!!!
+  const absoluteAssetFilePath = 
+    getTempProjectAssetAbsolutePathFromProvidedPathIfIsRelative(projectName, assetSrc);      
+  
+  // TODO: check if using decodeURIComponent() here is appropriate
+  // https://stackoverflow.com/questions/747641/what-is-the-difference-between-decodeuricomponent-and-decodeuri
+  return decodeURIComponent(absoluteAssetFilePath);  
+};
 
-  await forEach(projectAssetTempDirectories, async (dir) => {
+const getAllExistingProjectAssetFileAbsolutePathsInTempAsync = async (projectName) => {
+  const projectAssetTempDirectories = getTempProjectAllAssetsDirectoryPaths(projectName);  
+  const existingAssetFileAbsolutePathsInTemp = [];
+  await forEach(projectAssetTempDirectories, async (assetTempDir) => {    
+    const isAssetTempDirExists = await fileSystem.existsPromise(assetTempDir);        
+    if (!isAssetTempDirExists) {
+      return;
+    }    
+    const assetFileStatObjs = await fileSystem.readdirWithStatPromise(assetTempDir);    
+    for (let assetFileStatObj of assetFileStatObjs) {      
+      existingAssetFileAbsolutePathsInTemp.push(assetFileStatObj.path);      
+    }
+  });
+  return existingAssetFileAbsolutePathsInTemp;
+}
+
+const createProjectAssetTempDirectoriesAsync = async (projectName) => {
+  const projectAssetTempDirectories = getTempProjectAllAssetsDirectoryPaths(projectName);  
+  await forEach(projectAssetTempDirectories, async (dir) => {        
     await fileSystem.createDirectoryIfNotExistsPromise(dir);
   });
-}
+};
+
+const deleteProjectAssetTempDirectoriesAsync = async (projectName) => {
+  const projectAssetTempDirectories = getTempProjectAllAssetsDirectoryPaths(projectName);
+  await forEach(projectAssetTempDirectories, async (dir) => {
+    await fileSystem.myDeletePromise(dir);
+  });
+};
+
+// check assetsList and project asset temp directories,
+// delete any assets not in assetsList
+const deleteNonUsedProjectAssetsFromTempAsync = async (projectName, assetsList) => {
+  if (!Array.isArray(assetsList) || assetsList.length === 0) {
+    await deleteProjectAssetTempDirectoriesAsync(projectName);
+    return;
+  }  
+
+  // check assetsList
+  const normedAssetSrcAbsolutePaths = assetsList.map((asset) => {
+    return fileSystem.normalize(convertProjectAssetSrcToProperAbsolutePath(projectName, asset.src));
+  });
+  const normedAssetSrcAbsolutePathsSet = 
+    new Set(normedAssetSrcAbsolutePaths);
+
+  // check project asset temp directories
+  const existingProjectAssetFileAbsolutePaths = 
+    await getAllExistingProjectAssetFileAbsolutePathsInTempAsync(projectName);  
+  const normedExistingProjectAssetFileAbsolutePaths = 
+    existingProjectAssetFileAbsolutePaths.map((path) => {
+      return fileSystem.normalize(path);
+    });
+  const normedExistingProjectAssetFileAbsolutePathsSet = 
+    new Set(normedExistingProjectAssetFileAbsolutePaths);
+
+  // compare assetsList and project asset temp directories
+  // set difference
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set
+  const existingProjectAssetFilesNotInAssetsListSet = 
+    new Set([...normedExistingProjectAssetFileAbsolutePathsSet].filter(
+      x => !normedAssetSrcAbsolutePathsSet.has(x)
+    ));
+
+  // for debug only
+  // console.log(assetsList);
+  // console.log(normedExistingProjectAssetFileAbsolutePathsSet);
+  // console.log(normedAssetSrcAbsolutePathsSet);
+  // console.log(existingProjectAssetFilesNotInAssetsListSet);
+
+  // delete these no longer used files
+  await forEach([...existingProjectAssetFilesNotInAssetsListSet], async (filePath) => {
+    await fileSystem.myDeletePromise(filePath);
+  });
+};
 
 // saveProjectAssetsToTempAsync() will do nothing and pass control to callBack
 // if assetsList.length === 0
 const saveProjectAssetsToTempAsync = async (projectName, assetsList) => {
-  if (!assetsList || assetsList.length === 0) {    
+  if (!Array.isArray(assetsList) || assetsList.length === 0) {    
     return;
   }
   
-  await createProjectAssetTempDirectoriesAsync(projectName);
+  await createProjectAssetTempDirectoriesAsync(projectName);  
 
   const isAssumeProjectAssetTempDirectoriesExists = true;
 
   await forEach(assetsList, async (asset) => {
-    // strip file:/// from asset.src
-    const strToStrip = "file:///";
-    let assetFileSrc = asset.src;    
-    if (assetFileSrc.includes(strToStrip)) {
-      assetFileSrc = assetFileSrc.substr("file:///".length);
-    }
-    
-    // TODO: this check of relative path is not well thought through!!!
-    const fullAssetFilePath = 
-      getTempProjectAssetAbsolutePathFromProvidedPathIfIsRelative(projectName, assetFileSrc);      
-    
-    // TODO: check if using decodeURIComponent() here is appropriate
-    // https://stackoverflow.com/questions/747641/what-is-the-difference-between-decodeuricomponent-and-decodeuri
-    const decodedFullAssetFilePath = decodeURIComponent(fullAssetFilePath);
+    const assetSrcAbsolutePath = convertProjectAssetSrcToProperAbsolutePath(projectName, asset.src);
 
     let saveFileToProjectTempAsyncFunc = null;    
     switch (asset.media_type) {
@@ -79,7 +142,7 @@ const saveProjectAssetsToTempAsync = async (projectName, assetsList) => {
         break;
     }
 
-    await saveFileToProjectTempAsyncFunc(decodedFullAssetFilePath, projectName, asset.id, 
+    await saveFileToProjectTempAsyncFunc(assetSrcAbsolutePath, projectName, asset.id, 
       isAssumeProjectAssetTempDirectoriesExists);      
   });  
 };
@@ -87,7 +150,10 @@ const saveProjectAssetsToTempAsync = async (projectName, assetsList) => {
 const saveProjectToLocalDetailAsync = async (tempProjectDirPath, projectName, entitiesList, assetsList) => {
   const jsonForSave = parseDataToSaveFormat(projectName, entitiesList, assetsList);
   
-  // deal with assetsList          
+  // deal with assetsList
+  await deleteNonUsedProjectAssetsFromTempAsync(projectName, assetsList);
+  console.log("saveProjectToLocal - deleteNonUsedProjectAssetsFromTempAsync: Done");
+
   await saveProjectAssetsToTempAsync(projectName, assetsList);
   console.log(`saveProjectToLocal - saveProjectToLocalDetail: Assets saved in ${tempProjectDirPath}`);
 

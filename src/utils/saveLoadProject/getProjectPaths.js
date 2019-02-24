@@ -23,6 +23,14 @@ function getTempProjectVideoDirectoryPath(projectName) {
   return fileSystem.join(getTempProjectDirectoryPath(projectName), projectDirectoryStructure.video);
 }
 
+function getTempProjectAllAssetsDirectoryPaths(projectName) {
+  return [
+    getTempProjectImageDirectoryPath(projectName),
+    getTempProjectGifDirectoryPath(projectName),
+    getTempProjectVideoDirectoryPath(projectName)
+  ];
+}
+
 /* files */
 function getTempProjectJsonFilePath(projectName) {
   return fileSystem.join(getTempProjectDirectoryPath(projectName), projectName + config.jsonFileExtensionWithLeadingDot);
@@ -87,6 +95,7 @@ export {
   getTempProjectImageDirectoryPath,
   getTempProjectGifDirectoryPath,
   getTempProjectVideoDirectoryPath,
+  getTempProjectAllAssetsDirectoryPaths,
   // files
   getTempProjectJsonFilePath,
   getTempProjectImageFilePath,

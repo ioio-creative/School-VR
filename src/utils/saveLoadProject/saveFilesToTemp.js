@@ -7,7 +7,7 @@ import {
 
 
 async function copyFileAsync(srcFilePath, destFilePath, isAssumeDestDirExists) {
-  if (isAssumeDestDirExists) {
+  if (isAssumeDestDirExists) {    
     await fileSystem.copyFileAssumingDestDirExistsPromise(srcFilePath, destFilePath);
   } else {
     await fileSystem.copyFileAsync(srcFilePath, destFilePath);
