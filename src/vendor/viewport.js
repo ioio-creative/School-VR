@@ -367,6 +367,8 @@ function Viewport (editor) {
     transformControls.update();
     if (object instanceof THREE.PerspectiveCamera) {
       object.updateProjectionMatrix();
+    } else if (object.children[0] instanceof THREE.PerspectiveCamera) {
+      object.children[0].updateProjectionMatrix();
     }
 
     updateHelpers(object);
