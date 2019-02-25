@@ -6,7 +6,8 @@ import fileSystem from 'utils/fileSystem/fileSystem';
 
 
 const Events = require('vendor/Events.js');
-const uuid = require('uuid/v1');
+const uuid_0 = require('uuid/v1');
+const uuid = _=> 'uuid_' + uuid_0().split('-')[0];
 const smalltalk = require('smalltalk');
 
 
@@ -540,8 +541,9 @@ function addNewVideo() {
 
 function addNewImageSphere() {
   function clickBtn() {
-    let fileupload = document.getElementById('select360Image');
-    fileupload.click();
+    openImageDialog((filePaths) => {
+      handleDialogFilesSelected(filePaths, handleUpload);             
+    });
   }
   function handleUpload(event) {
     const self = event.target;
@@ -588,8 +590,9 @@ function addNewImageSphere() {
 
 function addNewVideoSphere() {
   function clickBtn() {
-    let fileupload = document.getElementById('select360Video');
-    fileupload.click();
+    openVideoDialog((filePaths) => {
+      handleDialogFilesSelected(filePaths, handleUpload);             
+    });
   }
   function handleUpload(event) {
     const self = event.target;

@@ -3,7 +3,8 @@ import AFRAME from 'aframe';  // do not uncomment as aframe-gif-shader requires 
 import 'aframe-gif-shader';
 
 const Events = require('vendor/Events.js');
-const uuid = require('uuid/v1');
+const uuid_0 = require('uuid/v1');
+const uuid = _=> 'uuid_' + uuid_0().split('-')[0];
 
 let editor = null;
 

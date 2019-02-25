@@ -22,7 +22,8 @@ import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefau
 
 import './editorPage.css';
 const Events = require('vendor/Events.js');
-const uuid = require('uuid/v1');
+const uuid_0 = require('uuid/v1');
+const uuid = _=> 'uuid_' + uuid_0().split('-')[0];
 
 /**
  * deepmerge = jquery $.extend
@@ -511,7 +512,12 @@ class EditorPage extends Component {
         }
         if (self.entitiesList[entityId]) {
           if (!self.entitiesList[entityId]['el']['isScene']) {
-            Events.emit('objectselectedfromtimeline', self.entitiesList[entityId]['el']['object3D'], self.showControls);
+            // tmp fix for the camera cannot drag
+            if (self.entitiesList[entityId]['el'].getObject3D('camera')) {
+              Events.emit('objectselectedfromtimeline', self.entitiesList[entityId]['el'].getObject3D('camera'), self.showControls);
+            } else {
+              Events.emit('objectselectedfromtimeline', self.entitiesList[entityId]['el']['object3D'], self.showControls);
+            }
           } else {
             // self.selectedEntity = entityId;
             // self.selectedSlide = slideId;

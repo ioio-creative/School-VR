@@ -333,9 +333,9 @@ Editor.prototype = {
     this.select(this.scene.getObjectById(id, true));
   },
   selectFromTimeline: function (object, enableControls) {
-    // if (this.selected === object) {
-    //   return;
-    // }
+    if (this.selected === object) {
+      return;
+    }
     this.selected = object;
     Events.emit('objectselected', object, enableControls);
   },
