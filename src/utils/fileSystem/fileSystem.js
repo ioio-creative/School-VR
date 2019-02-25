@@ -10,7 +10,6 @@ import toBase64Str from 'utils/base64/toBase64Str';
 import fromBase64Str from 'utils/base64/fromBase64Str';
 
 import isFunction from 'utils/variableType/isFunction';
-import { Promise } from 'q';
 
 // https://github.com/electron/asar
 // http://www.tc4shell.com/en/7zip/asar/
@@ -100,15 +99,16 @@ const handleGeneralErrAndData = (callBack, err, data) => {
 
 /**
  * !!! Important !!!
- * Many functions within fileSystem use exists().
- * That's why I have to keep this callBack(err) API,
- * which is different from the callBack(null, aBool) API 
- * returned by existsPromise() below.
+ * This exists() is different from fs.exists().
+ * It returns callBack(err, data).
+ * err is always null, so that promisifying exists() would not have the reject case.
+ * data is included such that promisified exists() will always be resolved.
+ * data is a Boolean indicating if the file exists. 
  */
 // https://nodejs.org/api/fs.html#fs_fs_access_path_mode_callback
 const exists = (filePath, callBack) => {
   fs.access(filePath, fs.constants.F_OK, (err) => {
-    callBack(err);  // would throw error if callBack is undefined
+    callBack(null, !Boolean(err));  // would throw error if callBack is undefined
   });
 };
 
@@ -116,18 +116,7 @@ const existsSync = (filePath) => {
   return fs.existsSync(filePath);
 };
 
-/**
- * !!! Interesting !!!
- * A promisified function should return callBack(err, data)
- * including data to indicate promise is resolved.
- * Hence, existsPromise() return callBack(null, aBool),
- * where aBool is a Boolean indicating if the file exists.
- */
-const existsPromise = promisify((filePath, callBack) => {
-  fs.access(filePath, fs.constants.F_OK, (err) => {
-    callBack(null, !Boolean(err));  // would throw error if callBack is undefined
-  });
-});
+const existsPromise = promisify(exists);
 
 // for performance reasons
 const writeFileAssumingDestDirExists = (filePath, content, callBack) => {
@@ -156,9 +145,8 @@ const writeFile = (filePath, content, callBack) => {
       handleGeneralErr(callBack, err);
     });
   };
-  exists(directoriesStr, (err) => {
-    if (err) {  // directory does not exist
-      //console.log(err);
+  exists(directoriesStr, (_, isExists) => {
+    if (!isExists) {  // directory does not exist      
       createDirectoryIfNotExists(directoriesStr, (err) => {    
         if (err) {
           handleGeneralErr(callBack, err);
@@ -259,8 +247,8 @@ const copyFile = (src, dest, callBack) => {
       handleGeneralErr(callBack, err);
     });
   };
-  exists(destDirectoriesStr, (err) => {
-    if (err) {  // directory does not exist
+  exists(destDirectoriesStr, (_, isExists) => {
+    if (!isExists) {  // directory does not exist
       createDirectoryIfNotExists(destDirectoriesStr, (err) => {
         if (err) {          
           handleGeneralErr(callBack, err);
@@ -287,28 +275,6 @@ const copyFileSync = (src, dest) => {
 };
 
 const copyFilePromise = promisify(copyFile);
-
-/**
- * fs.unlink() will not work on a directory, empty or otherwise. To remove a directory, use fs.rmdir()
- * https://nodejs.org/api/fs.html#fs_fs_unlink_path_callback
- */
-// const deleteFileSafe = (filePath, callBack) => {
-//   exists(filePath, (err) => {
-//     if (err) {  // file does not exist
-//       passbackControlToCallBack(callBack);
-//     } else {  // file exists      
-//       fs.unlink(filePath, (err) => {
-//         handleGeneralErr(callBack, err);
-//       });
-//     }
-//   });
-// }
-
-// const deleteFileSafeSync = (filePath) => {
-//   if (existsSync(filePath)) {  // file exists    
-//     fs.unlinkSync(filePath);
-//   }
-// };
 
 
 /**
@@ -452,8 +418,8 @@ const mkdirSync = (dirPath) => {
 }
 
 const createDirectoryIfNotExists = (dirPath, callBack) => {  
-  exists(dirPath, (existsErr) => {    
-    if (existsErr) {  // directory does not exist      
+  exists(dirPath, (_, isExists) => {    
+    if (!isExists) {  // directory does not exist      
       mkdir(dirPath, (mkDirErr) => {
         handleGeneralErr(callBack, mkDirErr);
       });
@@ -529,34 +495,6 @@ const readdirWithStatPromise = async (dirPath) => {
 
   return fileStatObjs;
 }
-
-// const rmdir = (dirPath, callBack) => {
-//   fs.rmdir(dirPath, (err) => {
-//     handleGeneralErr(callBack, err);
-//   });
-// };
-
-// const rmdirSync = (dirPath) => {
-//   fs.rmdirSync(dirPath);
-// };
-
-// const deleteDirectorySafe = (dirPath, callBack) => {  
-//   exists(dirPath, (err) => {
-//     if (err) {  // dir does not exist
-//       passbackControlToCallBack(callBack);      
-//     } else {  // dir exists      
-//       fs.rmdir(dirPath, (err) => {
-//         handleGeneralErr(callBack, err);        
-//       });
-//     }
-//   });
-// }
-
-// const deleteDirectorySafeSync = (dirPath) => {
-//   if (existsSync(dirPath)) {  // dir exists    
-//     fs.rmdirSync(dirPath);
-//   }
-// };
 
 /* end of directory api */
 
