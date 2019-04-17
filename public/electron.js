@@ -6,10 +6,27 @@ const BrowserWindow = electron.BrowserWindow;
 const path = require('path');
 //const url = require('url');
 const isDev = require('electron-is-dev');
+const {fork} = require('child_process');
 
-const {registerMainWindowToIpcMain, deregisterMainWindowFromIpcMain} = require('./js/ipcMain.js');
+const {registerMainWindowToIpcMain, deregisterMainWindowFromIpcMain} = require('./scripts/ipcMain.js');
+
+
+/* constants */
+
+const webServerPort = 9990;
+const webServerRootDirPath = __dirname;  // public folder
+
+/* end of constants */
+
+
+/* global variables */
 
 let mainWindow;
+// https://fabiofranchino.com/blog/use-electron-as-local-webserver/
+let webServerProcess = fork(`${__dirname}/server.js`);
+
+/* end of global variables */
+
 
 function createWindow() {
   const Menu = electron.Menu;
@@ -111,7 +128,22 @@ function createWindow() {
   /* end of setting up menu for hot keys purpose only */
 }
 
-app.on('ready', createWindow);
+function startWebServer() {
+  // https://nodejs.org/api/child_process.html#child_process_subprocess_send_message_sendhandle_options_callback
+  webServerProcess.send({
+    address: 'create-server',
+    port: webServerPort,
+    rootDirPath: webServerRootDirPath
+  });
+}
+
+
+/* app lifecycles */
+
+app.on('ready', _ => {
+  startWebServer();
+  createWindow();
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -125,4 +157,4 @@ app.on('activate', () => {
   }
 });
 
-
+/* end of app lifecycles */
