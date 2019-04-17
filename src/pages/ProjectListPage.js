@@ -1,7 +1,13 @@
 import React, {Component} from 'react';
+import {Link} from 'react-router-dom';
 
+import MenuComponent from 'components/menuComponent';
+
+import routes from 'globals/routes';
 import listProjectsAsync from 'utils/saveLoadProject/listProjectsAsync';
 import {loadProjectByProjectNameAsync} from 'utils/saveLoadProject/loadProject';
+import {invokeIfIsFunction} from 'utils/variableType/isFunction';
+import {getAbsoluteUrlFromRelativeUrl} from 'utils/setStaticResourcesPath';
 
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 
@@ -12,15 +18,40 @@ function ProjectItem(props) {
   const project = props.item;
   const addFocusClass = (existingClass) =>
     (existingClass + (props.isFocus ? " focus" : ""));
-  return (
-    <div className={addFocusClass("file")}
-      onClick={evnt => props.handleClickFunc(evnt, props.idx)}
-      onDoubleClick={_ => props.handleDoubleClickFunc(project)}
+
+  function handleItemClick() {
+    invokeIfIsFunction(props.onClick);
+  }
+
+  function handleItemDoubleClick() {
+    invokeIfIsFunction(props.onDoubleClick);
+  }
+
+  return (    
+    <div className="project-item"
+      onClick={handleItemClick}
+      onDoubleClick={handleItemDoubleClick}
     >
-      <div className={addFocusClass("icon")}>
-        {/* <img src={getAbsoluteUrlFromRelativeUrl(`fileExplorer/icons/${props.type}.png`)} /> */}
-        <div className={addFocusClass("name")}>{project.path}</div>
+      <div className="project-info-container">
+        <div className="project-info">
+          <div className="project-image">
+            <img src={getAbsoluteUrlFromRelativeUrl("images/test1.jpg")} alt={"test"}/>
+          </div>
+          <div className="project-info-text-container">
+            <div className="project-info-text">
+              <div className="project-name">{"site_visit_2018"}</div>
+              <div className="project-lastupdate">{`Last edited 2018/11/13`}</div>
+            </div>
+          </div>
+        </div>
       </div>
+      {/* <div className="project-handles-container">
+        <div className="project-handles">
+          <div className="project-preview">{"Preview"}</div>
+          <div className="project-options">{"Options"}</div>
+          <div className="project-edit">{"Edit"}</div>
+        </div>
+      </div> */}
     </div>
   );
 }
@@ -34,23 +65,33 @@ function ProjectList(props) {
   }
 
   const projects = items.map((project, idx) => {
+    //console.log(project);
     return (
       <ProjectItem 
         key={project.path}
         idx={idx}
         isFocus={props.focusedItemIdx === idx}
         item={project}
-        handleClickFunc={props.handleItemClickFunc}
-        handleDoubleClickFunc={props.handleItemDoubleClickFunc}
+        onClick={props.handleItemClickFunc}
+        onDoubleClick={props.handleItemDoubleClickFunc}
       />
     );
   });
 
-  return (
+  /*
+  <ul className="projects-listing">
+    <li className="project-block create-new-project" onClick={null}>
+      <Link to={routes.editor}>
+        <div className="project-content-wrapper">+</div>
+      </Link>
+    </li>
+    {projects}
+  </ul>
+  */
+
+  return (      
     <div className="project-list">
-      <div className="project-list-container">
-        {projects}
-      </div>
+      {projects}
     </div>
   );
 }
@@ -66,15 +107,10 @@ class ProjectListPage extends Component {
       projects: [],
       focusedItemIdx: this.defaultFocusedItemIdx
     };
-
-    this.enumerateProjects = this.enumerateProjects.bind(this);
-
-    this.handleBackgroundClick = this.handleBackgroundClick.bind(this);
-    this.handleProjectItemClick = this.handleProjectItemClick.bind(this);
-    this.handleProjectItemDoubleClick = this.handleProjectItemDoubleClick.bind(this);
-
-    this.handleWindowFocus = this.handleWindowFocus.bind(this);  
   }
+
+
+  /* react lifecycles */
 
   componentDidMount() {
     window.addEventListener('focus', this.handleWindowFocus);
@@ -91,7 +127,12 @@ class ProjectListPage extends Component {
   //   }
   // }
 
-  enumerateProjects() {
+  /* end of react lifecycles */
+
+
+  /* methods */
+
+  enumerateProjects = _ => {
     //const props = this.props;
     listProjectsAsync()
       .then(projectFileStats => {
@@ -104,11 +145,14 @@ class ProjectListPage extends Component {
       });
   }
 
+  /* end of methods */
+
+
   /* event handlers */
 
   // Click on blank
   // Note: It's important to have the background <ul> element has height 100%
-  handleBackgroundClick() {
+  handleBackgroundClick = _ => {
     if (this.state.focusedItemIdx !== this.defaultFocusedItemIdx) {
       this.setState({
         focusedItemIdx: this.defaultFocusedItemIdx
@@ -117,7 +161,7 @@ class ProjectListPage extends Component {
   }
 
   // Click on item
-  handleProjectItemClick(evnt, itemIdx) {
+  handleProjectItemClick = (evnt, itemIdx) => {
     if (this.state.focusedItemIdx !== itemIdx) {
       this.setState({
         focusedItemIdx: itemIdx
@@ -131,14 +175,14 @@ class ProjectListPage extends Component {
    * Double click on item
    * @param {CustomedFileStats} projectFileStat 
    */
-  handleProjectItemDoubleClick(projectFileStat) {        
+  handleProjectItemDoubleClick = (projectFileStat) => {        
     const projectName = projectFileStat.fileNameWithoutExtension;
     loadProjectByProjectNameAsync(projectName)
       .catch(err => handleErrorWithUiDefault(err));
   }
 
   // Refresh when in focus again
-  handleWindowFocus() {
+  handleWindowFocus = _ => {
     this.enumerateProjects();
   }
 
@@ -147,14 +191,39 @@ class ProjectListPage extends Component {
   render() {
     //const props = this.props;
     const state = this.state;
-    
+
     return (
-      <div className="project-list-page">
+      <div id="project-list-page">
+        <MenuComponent 
+          menuButtons={[
+            /*{
+              text: 'File',
+              // onClick: _=> { console.log('file') },
+              children: [
+                {
+                  text: 'New',
+                  onClick: _=>{ console.log('new') }
+                },
+                {
+                  text: 'Open',
+                  onClick: _=>{ console.log('open') }
+                },
+                {
+                  text: '-'
+                },
+                {
+                  text: 'Exit',
+                  onClick: _=>{ console.log('exit') }
+                }
+              ]
+            }*/
+          ]}
+        />
         <ProjectList
           items={state.projects}
           handleItemClickFunc={this.handleProjectItemClick}
           handleItemDoubleClickFunc={this.handleProjectItemDoubleClick}
-        />        
+        />
       </div>
     );
   }

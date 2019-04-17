@@ -13,8 +13,12 @@ const {registerMainWindowToIpcMain, deregisterMainWindowFromIpcMain} = require('
 
 /* constants */
 
-const webServerPort = 9990;
+const webServerPort = 1413;
 const webServerRootDirPath = __dirname;  // public folder
+
+const splashScreenDurationInMillis = 2000;
+
+const developmentServerPort = process.env.PORT || 1234;
 
 /* end of constants */
 
@@ -23,7 +27,7 @@ const webServerRootDirPath = __dirname;  // public folder
 
 let mainWindow;
 // https://fabiofranchino.com/blog/use-electron-as-local-webserver/
-let webServerProcess = fork(`${__dirname}/server.js`);
+let webServerProcess = fork(`${path.join(__dirname, 'server.js')}`);
 
 /* end of global variables */
 
@@ -41,8 +45,10 @@ function createWindow() {
     frame: false,
     skipTaskbar: true,
     show: false
-  })
-  /* setting up mainWindow */  
+  });
+  
+  
+  /* setting up mainWindow */
 
   mainWindow = new BrowserWindow({
     width: 1440,
@@ -55,29 +61,31 @@ function createWindow() {
   });
 
   splashScreen.loadURL(`file://${path.join(__dirname, 'splash.html')}`);
-  //mainWindow.loadURL(isDev ? 'http://localhost:1234/file-explorer' : `file://${path.join(__dirname, '../build/index.html')}`);
-  mainWindow.loadURL(isDev ? 'http://localhost:1234' : `file://${path.join(__dirname, '../build/index.html')}`);
-  //mainWindow.loadURL(isDev ? 'http://localhost:1234/projectlist' : `file://${path.join(__dirname, '../build/index.html')}`);
+  //mainWindow.loadURL(isDev ? `http://localhost:${developmentServerPort}/file-explorer` : `file://${path.join(__dirname, '../build/index.html')}`);
+  //mainWindow.loadURL(isDev ? `http://localhost:${developmentServerPort}` : `file://${path.join(__dirname, '../build/index.html')}`);
+  mainWindow.loadURL(isDev ? `http://localhost:${developmentServerPort}/projectlist` : `file://${path.join(__dirname, '../build/index.html')}`);
   
-  mainWindow.on('ready-to-show', () => {
-    mainWindowReady = true;
-    showMainWindow();
-  });
-
-  splashScreen.on('ready-to-show', () => {
-    splashScreen.show();
-    setTimeout(_=>{
-      splashScreenCountdowned = true;
-      showMainWindow();
-    }, 5000);
-  });
-
   function showMainWindow() {
     if (mainWindowReady && splashScreenCountdowned) {
       mainWindow.show();
-      splashScreen.close();
+      splashScreen.close();      
     }
   }
+
+  splashScreen.on('ready-to-show', () => {    
+    splashScreen.show();
+    setTimeout(_ => {
+      splashScreenCountdowned = true;
+      showMainWindow();      
+    }, splashScreenDurationInMillis);
+  });
+
+  /* main window lifecycles */
+
+  mainWindow.on('ready-to-show', () => {    
+    mainWindowReady = true;
+    showMainWindow();
+  });    
 
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -91,6 +99,8 @@ function createWindow() {
   mainWindow.on('unmaximize', () => {
     mainWindow.webContents.send('unmaximize');
   });
+
+  /* end of main window lifecycles */
 
   registerMainWindowToIpcMain(mainWindow);
 
