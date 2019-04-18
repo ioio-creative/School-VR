@@ -1,4 +1,7 @@
 #project-list-page {
+  --defaultFastTransitionDuration: 0.4s;
+  --defaultFastTransition: all var(--defaultFastTransitionDuration);
+
   background-image: linear-gradient(190DEG, #2b435e, #0c4a61);
   height: 100%;
   padding-top: 30px;
@@ -11,9 +14,14 @@
   grid-gap: 0rem;
 
   padding: 1rem;
+
+  height: 100%;
+  overflow-x: hidden;
 }
 
-#project-list-page .project-item {  
+#project-list-page .project-item {
+  --projectImageHeight: 65%;
+
   border-radius: 5px;
   background-color: #0a1d34;  
   margin: 1rem;  
@@ -27,6 +35,7 @@
   padding-top: 83%;
 }
 
+/* project-info-container */
 #project-list-page .project-info-container {
   position: absolute;
   top: 0;
@@ -35,9 +44,7 @@
   height: 100%;  
 }
 
-#project-list-page .project-info {
-  --projectImageHeight: 65%;
-
+#project-list-page .project-info {  
   position: relative;
   width: 100%;
   height: 100%;
@@ -82,6 +89,92 @@
   font-size: 0.75em;
   color: grey;
 }
+/* end of project-info-container */
+
+/* project-handles-container */
+#project-list-page .project-handles-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  transition: var(--defaultFastTransition);
+}
+
+#project-list-page .project-handles-container.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+#project-list-page .project-handles-container.hide {
+  opacity: 0;
+  visibility: hidden;
+}
+
+#project-list-page .project-handles {
+  --topButtonTop: 7.5%;
+  --leftRightMargin: 5%;
+
+  position: relative;
+  width: 100%;
+  height: var(--projectImageHeight);
+
+  text-align: center;
+  color: #04608a;
+
+  font-size: 1em;
+
+  opacity: 0.70;
+  /* filter: blur(24px); */
+  background-color: #c9eaf4;  
+}
+
+#project-list-page .project-preview-container {
+  position: absolute;
+  top: var(--topButtonTop);
+  left: var(--leftRightMargin);
+
+  width: 25%;
+  height: 15%;
+  border-radius: 50px;
+  background-color: #4f2d8d;
+  
+  color: #ffffff;
+}
+
+#project-list-page .project-preview {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+}
+
+#project-list-page .project-options {
+  position: absolute;
+  top: var(--topButtonTop);
+  right: var(--leftRightMargin);
+}
+
+#project-list-page .project-edit-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#project-list-page .project-edit {
+  
+}
+
+/* end of project-handles-container */
+
+
+
+
+
 
 #project-list-page .project-list .project-item .project-content-wrapper {
   /* position: absolute;
