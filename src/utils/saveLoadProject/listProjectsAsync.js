@@ -3,6 +3,9 @@ import {filter} from 'p-iteration';
 import config, {appDirectory} from 'globals/config';
 import fileSystem from 'utils/fileSystem/fileSystem';
 
+import Project from 'utils/saveLoadProject/Project';
+
+
 const compareFileStatsByAccessTimeAsc = (fileStat1, fileStat2) => {
   if (fileStat1.atimeMs < fileStat2.atimeMs) {
     return -1;
@@ -18,7 +21,7 @@ const compareFileStatsByAccessTimeDesc = (fileStat1, fileStat2) => {
 };
 
 /**
- * Return array of fs.Stats objects
+ * Return array of Project objects
  */
 const listProjectsAsync = async () => {
   const appProjectsDirectory = appDirectory.appProjectsDirectory;  
@@ -45,7 +48,9 @@ const listProjectsAsync = async () => {
   const sortedFileStatObjs = 
     filteredFileStatObjs.sort(compareFileStatsByAccessTimeDesc);
   
-  return sortedFileStatObjs;
+  //return sortedFileStatObjs;
+  return sortedFileStatObjs.map(fileStatObj => new Project(null, null, fileStatObj));
 };
+
 
 export default listProjectsAsync;

@@ -1,11 +1,5 @@
-import {
-  getTempProjectDirectoryPath,
-  getTempProjectJsonFilePath,
-  getTempProjectAssetAbsolutePathFromProvidedPathIfIsRelative,
-  getSavedProjectFilePath  
-} from './getProjectPaths';
 import fileSystem from 'utils/fileSystem/fileSystem';
-import deleteAllTempProjectDirectoriesAsync from 'utils/saveLoadProject/deleteAllTempProjectDirectoriesAsync';
+import Project from './Project';
 
 
 let currentLoadedProjectName = undefined;
@@ -25,30 +19,9 @@ const isCurrentLoadedProject = (aProjectName) => {
 };
 
 const loadProjectByProjectNameAsync = async (projectName) => {
-  await deleteAllTempProjectDirectoriesAsync();
-
   setCurrentLoadedProjectName(projectName);
-
-  const savedProjectFilePath = getSavedProjectFilePath(projectName);
-  const tempProjectDirectoryPath = getTempProjectDirectoryPath(projectName);
-
-  fileSystem.extractAll(savedProjectFilePath, tempProjectDirectoryPath);
-  console.log(`loadProject - loadProjectByProjectNameAsync: Project extracted to ${tempProjectDirectoryPath}`);
-
-  const projectJsonStr = await fileSystem.readFilePromise(getTempProjectJsonFilePath(projectName));
-  //console.log(projectJsonStr);
-  console.log(`loadProject - loadProjectByProjectNameAsync: Project ${projectName} json loaded.`);
-  
-  const projectJson = JSON.parse(projectJsonStr);
-  
-  // change any relative file path in assets to absolute path
-  const assetsList = projectJson.assets_list;
-  assetsList.forEach((asset) => {
-    asset.src = 
-      getTempProjectAssetAbsolutePathFromProvidedPathIfIsRelative(projectName, asset.src);
-  });
-
-  return projectJson;
+  const project = new Project(projectName);
+  return await project.loadProjectByNameAsync();
 };
 
 const loadProjectByProjectFilePathAsync = async (projectFilePath) => {

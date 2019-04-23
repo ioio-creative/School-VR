@@ -1,4 +1,4 @@
-import React, {Component, Fragment} from 'react';
+import React, {Component} from 'react';
 import SystemPanel from 'containers/aframeEditor/homePage/systemPanel';
 import ButtonsPanel from 'containers/aframeEditor/homePage/buttonsPanel';
 import AFramePanel from 'containers/aframeEditor/homePage/aFramePanel';
@@ -10,11 +10,11 @@ import AssetsPanel from 'containers/aframeEditor/homePage/assetsPanel';
 import Editor from 'vendor/editor.js';
 import {addEntityAutoType} from 'utils/aframeEditor/aFrameEntities';
 import {roundTo, jsonCopy} from 'utils/aframeEditor/helperfunctions';
-import saveProjectToLocalAsync from 'utils/saveLoadProject/saveProjectToLocalAsync';
+import {saveProjectToLocalAsync} from 'utils/saveLoadProject/saveProject';
 import parseDataToSaveFormat from 'utils/saveLoadProject/parseDataToSaveFormat';
 import {TweenMax, TimelineMax, Linear} from 'gsap';
 
-import getExistingProjectNamesAsync from 'utils/saveLoadProject/getExistingProjectNamesAsync';
+import Project from 'utils/saveLoadProject/Project';
 import isStrAnInt from 'utils/number/isStrAnInt';
 import stricterParseInt from 'utils/number/stricterParseInt';
 
@@ -42,7 +42,7 @@ const schema = require('schema/aframe_schema_20181108.json');
 const defaultProjectNamePrefix = "untitled_";
 // must have a trailing number
 function setDefaultProjectName(suggestedProjectName = defaultProjectNamePrefix + "1") {
-  getExistingProjectNamesAsync()
+  Project.getExistingProjectNamesAsync()
     .then(existingProjectNames => {      
       let newProjectName = suggestedProjectName;
       
