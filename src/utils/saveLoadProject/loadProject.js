@@ -1,5 +1,5 @@
 import fileSystem from 'utils/fileSystem/fileSystem';
-import Project from './Project';
+import ProjectFile from './ProjectFile';
 
 
 let currentLoadedProjectName = undefined;
@@ -20,8 +20,8 @@ const isCurrentLoadedProject = (aProjectName) => {
 
 const loadProjectByProjectNameAsync = async (projectName) => {
   setCurrentLoadedProjectName(projectName);
-  const project = new Project(projectName);
-  return await project.loadProjectByNameAsync();
+  const projectFile = new ProjectFile(projectName);
+  return await projectFile.loadProjectByNameAsync();
 };
 
 const loadProjectByProjectFilePathAsync = async (projectFilePath) => {

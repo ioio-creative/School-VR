@@ -8,7 +8,7 @@ import {isCurrentLoadedProject, setCurrentLoadedProjectName} from './loadProject
 import parseDataToSaveFormat from './parseDataToSaveFormat';
 
 
-class Project {
+class ProjectFile {
   /**
    * 
    * @param {String} projectName
@@ -63,8 +63,18 @@ class Project {
       this.tempProjectVideoDirectoryPath
     ];
     // temp project files
-    this.tempProjectJsonFilePath = fileSystem.join(this.tempProjectDirectoryPath, this.name + config.jsonFileExtensionWithLeadingDot);    
+    this.tempProjectJsonFilePath = fileSystem.join(this.tempProjectDirectoryPath, this.name + config.jsonFileExtensionWithLeadingDot);
+
+    // fileStats properties
+    if (this.projectFileStats) {
+      this.lastModifiedDateTime = this.projectFileStats.mtime;
+    }
   }
+
+
+  /* getters or setters */
+
+  /* end of getters or setters */  
 
 
   /* methods */
@@ -113,7 +123,6 @@ class Project {
   }
   /* end of getProjectPath */
 
-
   /* saveFilesToTemp */
   static async copyFileAsync(srcFilePath, destFilePath, isAssumeDestDirExists) {
     if (isAssumeDestDirExists) {    
@@ -152,14 +161,14 @@ class Project {
 
   async isProjectFileExistAsync() {
     const projectName = this.name;
-    const existingProjectNames = await Project.getExistingProjectNamesAsync();
+    const existingProjectNames = await ProjectFile.getExistingProjectNamesAsync();
     const isTheNamedProjectExist = existingProjectNames.includes(projectName);
     return isTheNamedProjectExist;
   }
 
   async isProjectNameUsedAsync() {
     const projectName = this.name;
-    const existingProjectNames = await Project.getExistingProjectNamesAsync();
+    const existingProjectNames = await ProjectFile.getExistingProjectNamesAsync();
     const isNameUsed = !isCurrentLoadedProject(projectName) && existingProjectNames.includes(projectName);
     return isNameUsed;
   }   
@@ -313,14 +322,14 @@ class Project {
       let getAssetFilePathRelativeToProjectDirectoryFunc = null;
       switch (asset.media_type) {
         case mediaType.image:
-          getAssetFilePathRelativeToProjectDirectoryFunc = Project.getImageFilePathRelativeToProjectDirectory;
+          getAssetFilePathRelativeToProjectDirectoryFunc = ProjectFile.getImageFilePathRelativeToProjectDirectory;
           break;
         case mediaType.gif:
-          getAssetFilePathRelativeToProjectDirectoryFunc = Project.getGifFilePathRelativeToProjectDirectory;  
+          getAssetFilePathRelativeToProjectDirectoryFunc = ProjectFile.getGifFilePathRelativeToProjectDirectory;  
           break;
         case mediaType.video:
         default:
-          getAssetFilePathRelativeToProjectDirectoryFunc = Project.getVideoFilePathRelativeToProjectDirectory;
+          getAssetFilePathRelativeToProjectDirectoryFunc = ProjectFile.getVideoFilePathRelativeToProjectDirectory;
           break;
       }
       
@@ -379,9 +388,8 @@ class Project {
   /* end of saveProject */
 
   /* loadProject */
-
   async loadProjectByNameAsync() {    
-    await Project.deleteAllTempProjectDirectoriesAsync();
+    await ProjectFile.deleteAllTempProjectDirectoriesAsync();
   
     setCurrentLoadedProjectName(this.name);
   
@@ -410,9 +418,10 @@ class Project {
   async loadProjectByFilePathAsync(projectFilePath) {
     return await this.loadProjectByProjectNameAsync(fileSystem.getFileNameWithoutExtension(projectFilePath));
   };
-
   /* end of loadProject */
+
+  /* end of methods */
 }
 
 
-export default Project;
+export default ProjectFile;

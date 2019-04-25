@@ -29,6 +29,11 @@ Editor.prototype = {
   onDomLoaded: function () {
     this.sceneEl = AFRAME.scenes[0];
 
+    if (!this.sceneEl) {
+      setTimeout(this.onDomLoaded.bind(this), 100);
+      return;
+    }
+
     if (this.sceneEl.hasLoaded) {
       this.onSceneLoaded();
     } else {

@@ -3,22 +3,26 @@ import {filter} from 'p-iteration';
 import config, {appDirectory} from 'globals/config';
 import fileSystem from 'utils/fileSystem/fileSystem';
 
-import Project from 'utils/saveLoadProject/Project';
+import ProjectFile from 'utils/saveLoadProject/ProjectFile';
 
 
-const compareFileStatsByAccessTimeAsc = (fileStat1, fileStat2) => {
-  if (fileStat1.atimeMs < fileStat2.atimeMs) {
-    return -1;
-  } else if (fileStat1.atimeMs > fileStat2.atimeMs) {
-    return 1;
-  } else {
-    return 0;
-  }
+const funcFactoryForCompareFileStatsByProperty = (fileStatPropSelectFunc, isOrderByDesc) => {
+  return (fileStat1, fileStat2) => {
+    let valueToReturn = 0;
+
+    const [fileStat1Prop, fileStat2Prop] = [fileStat1, fileStat2].map(fileStat => fileStatPropSelectFunc(fileStat));    
+    if (fileStat1Prop < fileStat2Prop) {
+      valueToReturn = -1;
+    } else if (fileStat1Prop > fileStat2Prop) {
+      valueToReturn = 1;
+    } else {
+      valueToReturn = 0;
+    }
+
+    return isOrderByDesc ? -1 * valueToReturn : valueToReturn;
+  };
 };
 
-const compareFileStatsByAccessTimeDesc = (fileStat1, fileStat2) => {
-  return -1 * compareFileStatsByAccessTimeAsc(fileStat1, fileStat2);
-};
 
 /**
  * Return array of Project objects
@@ -45,11 +49,16 @@ const listProjectsAsync = async () => {
     return true;
   });
 
+  // const compareFileStatsByAccessTimeAsc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.atimeMs, false);
+  // const compareFileStatsByAccessTimeDesc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.atimeMs, true);
+
+  const compareFileStatsByModifiedTimeDesc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.mtimeMs, true);
+
   const sortedFileStatObjs = 
-    filteredFileStatObjs.sort(compareFileStatsByAccessTimeDesc);
+    filteredFileStatObjs.sort(compareFileStatsByModifiedTimeDesc);
   
   //return sortedFileStatObjs;
-  return sortedFileStatObjs.map(fileStatObj => new Project(null, null, fileStatObj));
+  return sortedFileStatObjs.map(fileStatObj => new ProjectFile(null, null, fileStatObj));
 };
 
 

@@ -14,7 +14,7 @@ import {saveProjectToLocalAsync} from 'utils/saveLoadProject/saveProject';
 import parseDataToSaveFormat from 'utils/saveLoadProject/parseDataToSaveFormat';
 import {TweenMax, TimelineMax, Linear} from 'gsap';
 
-import Project from 'utils/saveLoadProject/Project';
+import ProjectFile from 'utils/saveLoadProject/ProjectFile';
 import isStrAnInt from 'utils/number/isStrAnInt';
 import stricterParseInt from 'utils/number/stricterParseInt';
 
@@ -42,7 +42,7 @@ const schema = require('schema/aframe_schema_20181108.json');
 const defaultProjectNamePrefix = "untitled_";
 // must have a trailing number
 function setDefaultProjectName(suggestedProjectName = defaultProjectNamePrefix + "1") {
-  Project.getExistingProjectNamesAsync()
+  ProjectFile.getExistingProjectNamesAsync()
     .then(existingProjectNames => {      
       let newProjectName = suggestedProjectName;
       

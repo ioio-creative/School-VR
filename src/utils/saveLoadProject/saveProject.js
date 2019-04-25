@@ -1,8 +1,8 @@
-import Project from './Project';
+import ProjectFile from './ProjectFile';
 
 
 const saveProjectToLocalAsync = async (projectName, entitiesList, assetsList) => {
-  const project = new Project(projectName);
+  const project = new ProjectFile(projectName);
   return await project.saveToLocalAsync(entitiesList, assetsList);
 };
 

@@ -7,7 +7,7 @@ import {library} from '@fortawesome/fontawesome-svg-core'
 
 import {appDirectory} from 'globals/config';
 import fileSystem from 'utils/fileSystem/fileSystem';
-import Project from 'utils/saveLoadProject/Project';
+import ProjectFile from 'utils/saveLoadProject/ProjectFile';
 
 import asyncLoadingComponent from 'components/asyncLoadingComponent';
 
@@ -32,7 +32,7 @@ faIconsNeed.forEach(iconName => {
 });
 
 // delete any cached temp project files
-Project.deleteAllTempProjectDirectoriesAsync().catch(err => {
+ProjectFile.deleteAllTempProjectDirectoriesAsync().catch(err => {
   console.error(err);
   alert(err);
 });

@@ -80,7 +80,7 @@ class ProjectItem extends Component {
         onDoubleClick={this.handleItemDoubleClick}
         // https://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_onmousemove_leave_out     
         onMouseEnter={this.handleItemMouseEnter}      
-        //onMouseLeave={this.handleItemMouseLeave}
+        onMouseLeave={this.handleItemMouseLeave}
       >
         <div className="project-info-container">
           <div className="project-info">
@@ -133,19 +133,13 @@ function ProjectList(props) {
     );
   });
 
-  /*
-  <ul className="projects-listing">
-    <li className="project-block create-new-project" onClick={null}>
-      <Link to={routes.editor}>
-        <div className="project-content-wrapper">+</div>
-      </Link>
-    </li>
-    {projects}
-  </ul>
-  */
-
   return (      
     <div className="project-list">
+      <div className="project-item create-new-project">
+        <Link to={routes.editor}>
+          <div className="create-new-project-content">+</div>
+        </Link>
+      </div>
       {projects}
     </div>
   );
