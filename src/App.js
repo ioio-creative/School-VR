@@ -69,12 +69,13 @@ class App extends Component {
         <div id="App">
           <Switch>
             <Route exact path="/file-explorer" render={() => <AsyncTestFileExplorer />} />
-            <Route exact path={routes.editor} component={EditorPage} />
+            <Route exact path={routes.editorByProjectName} component={EditorPage} />
             {/* <Route exact path={routes.presenter} render={() => <AsyncPresenterPage />} /> */}
             <Route exact path={routes.presenter} component={PresenterPage} />
             {/* <Route exact path={routes.viewer} component={ViewerPage} /> */}
             <Route exact path={routes.projectList} component={AsyncProjectListPage} />
-            <Redirect to={routes.editor} />
+            <Route exact path={routes.home} component={AsyncProjectListPage} />
+            <Redirect to={routes.editorByProjectName} />
           </Switch>
         </div>
       </Fragment>

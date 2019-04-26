@@ -19,6 +19,7 @@ import isStrAnInt from 'utils/number/isStrAnInt';
 import stricterParseInt from 'utils/number/stricterParseInt';
 
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
+import loadProjectInEditorPageAsync from './loadProjectInEditorPageAsync';
 
 import './editorPage.css';
 const Events = require('vendor/Events.js');
@@ -477,7 +478,7 @@ class EditorPage extends Component {
     this.emptyRedoList = this.emptyRedoList.bind(this);
     //this.updateAssetsList = this.updateAssetsList.bind(this);
   }
-  componentDidMount() {
+  async componentDidMount() {    
     this.editor = new Editor();
     this.initEvents();
     Events.emit('addSlide');
@@ -487,6 +488,8 @@ class EditorPage extends Component {
     };
     this.inited = true;
     console.log(process.env.username || process.env.user || process.platform);
+    
+    await loadProjectInEditorPageAsync(this);
   }
   initEvents() {
     const self = this;

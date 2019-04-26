@@ -1,37 +1,34 @@
-import fileSystem from 'utils/fileSystem/fileSystem';
 import ProjectFile from './ProjectFile';
 
 
-let currentLoadedProjectName = undefined;
+let currentLoadedProjectFilePath = null;
 
-// const getCurrentLoadedProjectName = () => {
-//   return currentLoadedProjectName;
-// };
 
 // Note: may not be good idea to expose this method
 // but it's used in saveProjectToLocal.js
-const setCurrentLoadedProjectName = (aProjectName) => {
-  currentLoadedProjectName = aProjectName;
+const setCurrentLoadedProjectFilePath = (projectFilePath) => {
+  currentLoadedProjectFilePath = projectFilePath;
 };
 
-const isCurrentLoadedProject = (aProjectName) => {
-  return currentLoadedProjectName === aProjectName;
-};
-
-const loadProjectByProjectNameAsync = async (projectName) => {
-  setCurrentLoadedProjectName(projectName);
-  const projectFile = new ProjectFile(projectName);
-  return await projectFile.loadProjectByNameAsync();
+const isCurrentLoadedProject = (aFilePath) => {
+  return currentLoadedProjectFilePath === aFilePath;
 };
 
 const loadProjectByProjectFilePathAsync = async (projectFilePath) => {
-  return await loadProjectByProjectNameAsync(fileSystem.getFileNameWithoutExtension(projectFilePath));
+  setCurrentLoadedProjectFilePath(projectFilePath);
+  const projectFile = new ProjectFile(null, projectFilePath, null);
+  const projectJson = await projectFile.loadProjectByFilePathAsync();
+  return projectJson;
 };
 
-export {
-  //getCurrentLoadedProjectName,
-  setCurrentLoadedProjectName,
-  isCurrentLoadedProject,
-  loadProjectByProjectNameAsync,
-  loadProjectByProjectFilePathAsync
+const loadCurrentLoadedProjectAsync = async () => {
+  return await loadProjectByProjectFilePathAsync(currentLoadedProjectFilePath);
+};
+
+
+export {  
+  setCurrentLoadedProjectFilePath,
+  isCurrentLoadedProject,  
+  loadProjectByProjectFilePathAsync,
+  loadCurrentLoadedProjectAsync
 };

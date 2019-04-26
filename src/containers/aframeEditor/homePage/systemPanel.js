@@ -3,7 +3,9 @@
   File | Edit | XXX | YYY        x
 */
 import React, {Component} from 'react';
+import {Link} from 'react-router-dom';
 
+import routes from 'globals/routes';
 import IPCKeys from 'globals/ipcKeys';
 
 import {openSchoolVrFileDialog} from 'utils/aframeEditor/openFileDialog';
@@ -74,7 +76,11 @@ class SystemPanel extends Component {
             </button>
             {this.state.hoverItem === 'file' && this.state.menuOpen &&
               <div className="menu-list list-file">
-              <div className="menu-item" onClick={() => {
+                {/* added by chris, to be removed */}
+                <div className="menu-item">
+                  <Link to={routes.home}>Home</Link>
+                </div>
+                <div className="menu-item" onClick={() => {
                   Events.emit('newProject');
                   this.setState({
                     menuOpen: false

@@ -56,9 +56,10 @@ const listProjectsAsync = async () => {
 
   const sortedFileStatObjs = 
     filteredFileStatObjs.sort(compareFileStatsByModifiedTimeDesc);
+
+  const sortedProjectFileObjs = sortedFileStatObjs.map(fileStatObj => new ProjectFile(null, null, fileStatObj));
   
-  //return sortedFileStatObjs;
-  return sortedFileStatObjs.map(fileStatObj => new ProjectFile(null, null, fileStatObj));
+  return sortedProjectFileObjs;
 };
 
 

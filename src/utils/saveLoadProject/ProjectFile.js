@@ -4,7 +4,7 @@ import fileSystem from 'utils/fileSystem/fileSystem';
 import CustomedFileStats from 'utils/fileSystem/CustomedFileStats';
 import isNonEmptyArray from 'utils/variableType/isNotEmptyArray';
 import listProjectsAsync from './listProjectsAsync';
-import {isCurrentLoadedProject, setCurrentLoadedProjectName} from './loadProject';
+import {isCurrentLoadedProject, setCurrentLoadedProjectFilePath} from './loadProject';
 import parseDataToSaveFormat from './parseDataToSaveFormat';
 
 
@@ -22,7 +22,8 @@ class ProjectFile {
     this.name = "";
     // saved project
     this.savedProjectFilePath = ""; 
-    this.projectFileStats = null; 
+    this.projectFileStats = null;
+    this.projectJson = null;  // set in loadProjectByFilePathAsync
     
     if (projectName) {
       this.name = projectName;
@@ -68,6 +69,7 @@ class ProjectFile {
     // fileStats properties
     if (this.projectFileStats) {
       this.lastModifiedDateTime = this.projectFileStats.mtime;
+      this.path = this.projectFileStats.path;
     }
   }
 
@@ -94,7 +96,7 @@ class ProjectFile {
   }
 
   getTempProjectAssetAbsolutePathFromProvidedPathIfIsRelative(assetPath) {    
-    return this.isAssetPathRelative(assetPath) ?
+    return ProjectFile.isAssetPathRelative(assetPath) ?
       fileSystem.join(this.tempProjectImageDirectoryPath, assetPath) : assetPath;
   }
 
@@ -349,7 +351,7 @@ class ProjectFile {
     await fileSystem.createPackagePromise(this.tempProjectDirectoryPath, destProjectPackagePath);
     console.log(`saveProjectToLocal - saveProjectToLocalDetail: Project file saved in ${destProjectPackagePath}`);
         
-    setCurrentLoadedProjectName(projectName);
+    setCurrentLoadedProjectFilePath(destProjectPackagePath);
     
     return {
       //tempProjectDirectoryPath: this.tempProjectDirectoryPath,
@@ -387,21 +389,26 @@ class ProjectFile {
   }
   /* end of saveProject */
 
-  /* loadProject */
-  async loadProjectByNameAsync() {    
-    await ProjectFile.deleteAllTempProjectDirectoriesAsync();
-  
-    setCurrentLoadedProjectName(this.name);
-  
+  /* loadProject */  
+  async loadProjectByFilePathAsync() {
     const savedProjectFilePath = this.savedProjectFilePath;
+
+    if (!this.savedProjectFilePath) {
+      return null;
+    }
+
     const tempProjectDirectoryPath = this.tempProjectDirectoryPath;
-  
+
+    setCurrentLoadedProjectFilePath(savedProjectFilePath);
+
+    await ProjectFile.deleteAllTempProjectDirectoriesAsync();    
+    
     fileSystem.extractAll(savedProjectFilePath, tempProjectDirectoryPath);
     console.log(`loadProject - loadProjectByProjectNameAsync: Project extracted to ${tempProjectDirectoryPath}`);
   
     const projectJsonStr = await fileSystem.readFilePromise(this.tempProjectJsonFilePath);
     //console.log(projectJsonStr);
-    console.log(`loadProject - loadProjectByProjectNameAsync: Project ${this.name} json loaded.`);
+    console.log(`loadProject - loadProjectByProjectNameAsync: Project ${savedProjectFilePath} json loaded.`);
     
     const projectJson = JSON.parse(projectJsonStr);
     
@@ -412,12 +419,10 @@ class ProjectFile {
         this.getTempProjectAssetAbsolutePathFromProvidedPathIfIsRelative(asset.src);
     });
   
-    return projectJson;
-  };
-  
-  async loadProjectByFilePathAsync(projectFilePath) {
-    return await this.loadProjectByProjectNameAsync(fileSystem.getFileNameWithoutExtension(projectFilePath));
-  };
+    this.projectJson = projectJson;
+
+    return projectJson
+  }
   /* end of loadProject */
 
   /* end of methods */

@@ -1,6 +1,9 @@
 const routes = {
     home: "/",
-    editor: "/editor",
+    editorByProjectName: "/editor/:projectName",
+    editorByProjectNameWithValue: function (projectName) {
+      return `/editor/${projectName}`;
+    },
     presenter: "/presenter",
     viewer: "/viewer",
     projectList: "/projectlist",

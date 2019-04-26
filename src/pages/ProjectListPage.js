@@ -5,10 +5,10 @@ import MenuComponent from 'components/menuComponent';
 
 import routes from 'globals/routes';
 import listProjectsAsync from 'utils/saveLoadProject/listProjectsAsync';
-import {loadProjectByProjectNameAsync} from 'utils/saveLoadProject/loadProject';
+import {setCurrentLoadedProjectFilePath} from 'utils/saveLoadProject/loadProject';
 import {invokeIfIsFunction} from 'utils/variableType/isFunction';
+import {formatDateTime} from 'utils/dateTime/formatDateTime';
 import {getAbsoluteUrlFromRelativeUrl} from 'utils/setStaticResourcesPath';
-
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 
 import './ProjectListPage.css';
@@ -47,20 +47,19 @@ class ProjectItem extends Component {
 
   /* event handlers */
 
-  handleItemClick = _ => {
-    invokeIfIsFunction(this.props.onClick);
-  }
-
-  handleItemDoubleClick = _ => {
-    invokeIfIsFunction(this.props.onDoubleClick);
-  }
-
   handleItemMouseEnter = _ => {    
     this.showProjectHandles();    
   }
 
   handleItemMouseLeave = _ => {
     this.hideProjectHandles();    
+  }
+
+  handleProjectEditButtonClick = _ => {
+    const props = this.props;
+    const project = props.item;
+    setCurrentLoadedProjectFilePath(project.savedProjectFilePath);
+    props.history.push(routes.editorByProjectNameWithValue(project.name));
   }
 
   /* end of event handlers */
@@ -71,13 +70,9 @@ class ProjectItem extends Component {
     const state = this.state;
 
     const project = props.item;
-    const addFocusClass = (existingClass) =>
-      (existingClass + (props.isFocus ? " focus" : ""));
 
     return (    
       <div className="project-item"
-        onClick={this.handleItemClick}
-        onDoubleClick={this.handleItemDoubleClick}
         // https://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_onmousemove_leave_out     
         onMouseEnter={this.handleItemMouseEnter}      
         onMouseLeave={this.handleItemMouseLeave}
@@ -89,8 +84,8 @@ class ProjectItem extends Component {
             </div>
             <div className="project-info-text-container">
               <div className="project-info-text">
-                <div className="project-name">{"site_visit_2018"}</div>
-                <div className="project-lastupdate">{`Last edited 2018/11/13`}</div>
+                <div className="project-name">{project.name}</div>
+                <div className="project-lastupdate">{`Last edited ${project.lastModifiedDateTime ? formatDateTime(project.lastModifiedDateTime) : ""}`}</div>
               </div>
             </div>
           </div>
@@ -102,7 +97,10 @@ class ProjectItem extends Component {
             </div>
             <div className="project-options">Options</div>
             <div className="project-edit-container">
-              <div className="project-edit">Edit</div>
+              <div className="project-edit"
+                onClick={this.handleProjectEditButtonClick}>
+                Edit
+              </div>
             </div>
           </div>
         </div>
@@ -119,24 +117,23 @@ function ProjectList(props) {
     return null;
   }
 
-  const projects = items.map((project, idx) => {
-    //console.log(project);
+  const history = props.history;
+
+  const projects = items.map((project) => {  
     return (
       <ProjectItem 
         key={project.path}
-        idx={idx}
-        isFocus={props.focusedItemIdx === idx}
         item={project}
-        onClick={props.handleItemClickFunc}
-        onDoubleClick={props.handleItemDoubleClickFunc}
+
+        history={history}
       />
     );
   });
 
-  return (      
+  return (
     <div className="project-list">
       <div className="project-item create-new-project">
-        <Link to={routes.editor}>
+        <Link to={routes.editorByProjectNameWithValue(null)}>
           <div className="create-new-project-content">+</div>
         </Link>
       </div>
@@ -150,11 +147,8 @@ class ProjectListPage extends Component {
   constructor(props) {
     super(props);
 
-    this.defaultFocusedItemIdx = -1;
-
     this.state = {
-      projects: [],
-      focusedItemIdx: this.defaultFocusedItemIdx
+      projects: []  // array of ProjectFile objects     
     };
   }
 
@@ -162,19 +156,8 @@ class ProjectListPage extends Component {
   /* react lifecycles */
 
   componentDidMount() {
-    window.addEventListener('focus', this.handleWindowFocus);
     this.enumerateProjects();
   }
-
-  componentWillUnmount() {
-    window.removeEventListener('focus', this.handleWindowFocus);
-  }
-
-  // componentDidUpdate(prevProps, prevState) {
-  //   if (this.props.currentPath !== prevProps.currentPath) {
-  //     this.enumerateProjects();
-  //   }
-  // }
 
   /* end of react lifecycles */
 
@@ -190,7 +173,7 @@ class ProjectListPage extends Component {
         });
       })
       .catch(err => {        
-        alert(err);
+        handleErrorWithUiDefault(err);
       });
   }
 
@@ -199,46 +182,15 @@ class ProjectListPage extends Component {
 
   /* event handlers */
 
-  // Click on blank
-  // Note: It's important to have the background <ul> element has height 100%
-  handleBackgroundClick = _ => {
-    if (this.state.focusedItemIdx !== this.defaultFocusedItemIdx) {
-      this.setState({
-        focusedItemIdx: this.defaultFocusedItemIdx
-      });
-    }
-  }
-
   // Click on item
   handleProjectItemClick = (evnt, itemIdx) => {
-    // if (this.state.focusedItemIdx !== itemIdx) {
-    //   this.setState({
-    //     focusedItemIdx: itemIdx
-    //   });
-    // }
-    // evnt.stopPropagation();
-  }
-
-  /**
-   * handleProjectItemDoubleClick
-   * Double click on item
-   * @param {CustomedFileStats} projectFileStat 
-   */
-  handleProjectItemDoubleClick = (projectFileStat) => {        
-    // const projectName = projectFileStat.fileNameWithoutExtension;
-    // loadProjectByProjectNameAsync(projectName)
-    //   .catch(err => handleErrorWithUiDefault(err));
-  }
-
-  // Refresh when in focus again
-  handleWindowFocus = _ => {
-    this.enumerateProjects();
+    
   }
 
   /* end of event handlers */
 
   render() {
-    //const props = this.props;
+    const props = this.props;
     const state = this.state;
 
     return (
@@ -268,10 +220,11 @@ class ProjectListPage extends Component {
             }*/
           ]}
         />
-        <ProjectList
+        <ProjectList          
           items={state.projects}
           handleItemClickFunc={this.handleProjectItemClick}
-          handleItemDoubleClickFunc={this.handleProjectItemDoubleClick}
+          
+          history={props.history}
         />
       </div>
     );

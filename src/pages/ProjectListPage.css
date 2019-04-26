@@ -195,4 +195,10 @@
   
 }
 
+#project-list-page .project-preview,
+#project-list-page .project-options,
+#project-list-page .project-edit {
+  cursor: pointer;
+}
+
 /* end of project-handles-container */
