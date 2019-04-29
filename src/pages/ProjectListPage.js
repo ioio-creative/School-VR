@@ -5,8 +5,6 @@ import MenuComponent from 'components/menuComponent';
 
 import routes from 'globals/routes';
 import listProjectsAsync from 'utils/saveLoadProject/listProjectsAsync';
-import {setCurrentLoadedProjectFilePath} from 'utils/saveLoadProject/loadProject';
-import {invokeIfIsFunction} from 'utils/variableType/isFunction';
 import {formatDateTime} from 'utils/dateTime/formatDateTime';
 import {getAbsoluteUrlFromRelativeUrl} from 'utils/setStaticResourcesPath';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
@@ -55,13 +53,6 @@ class ProjectItem extends Component {
     this.hideProjectHandles();    
   }
 
-  handleProjectEditButtonClick = _ => {
-    const props = this.props;
-    const project = props.item;
-    setCurrentLoadedProjectFilePath(project.savedProjectFilePath);
-    props.history.push(routes.editorByProjectNameWithValue(project.name));
-  }
-
   /* end of event handlers */
 
 
@@ -97,9 +88,8 @@ class ProjectItem extends Component {
             </div>
             <div className="project-options">Options</div>
             <div className="project-edit-container">
-              <div className="project-edit"
-                onClick={this.handleProjectEditButtonClick}>
-                Edit
+              <div className="project-edit">
+                <Link to={routes.editorWithProjectFilePathQuery(project.path)}>Edit</Link>                
               </div>
             </div>
           </div>
@@ -133,7 +123,7 @@ function ProjectList(props) {
   return (
     <div className="project-list">
       <div className="project-item create-new-project">
-        <Link to={routes.editorByProjectNameWithValue(null)}>
+        <Link to={routes.editor}>
           <div className="create-new-project-content">+</div>
         </Link>
       </div>
