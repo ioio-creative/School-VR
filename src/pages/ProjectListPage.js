@@ -86,7 +86,9 @@ class ProjectItem extends Component {
             <div className="project-preview-container">
               <div className="project-preview">Preview</div>
             </div>
-            <div className="project-options">Options</div>
+            <div className="project-options-container">
+              <div className="project-options">Options</div>
+            </div>            
             <div className="project-edit-container">
               <div className="project-edit">
                 <Link to={routes.editorWithProjectFilePathQuery(project.path)}>Edit</Link>                
@@ -210,12 +212,16 @@ class ProjectListPage extends Component {
             }*/
           ]}
         />
-        <ProjectList          
-          items={state.projects}
-          handleItemClickFunc={this.handleProjectItemClick}
-          
-          history={props.history}
-        />
+        <div className="outer-container">
+          <div class="inner-container">
+            <ProjectList          
+              items={state.projects}
+              handleItemClickFunc={this.handleProjectItemClick}
+              
+              history={props.history}
+            />
+          </div>
+        </div>        
       </div>
     );
   }

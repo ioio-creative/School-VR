@@ -8,9 +8,13 @@ import Mousetrap from 'mousetrap';
 import Events from 'vendor/Events.js';
 
 import config from 'globals/config';
+import IPCKeys from 'globals/ipcKeys';
 import {invokeIfIsFunction} from 'utils/variableType/isFunction';
 
 import './menuComponent.css';
+
+const remote = window.require('electron').remote;
+const ipcRenderer = window.require('electron').ipcRenderer;
 
 
 const appName = config.appName;
@@ -62,6 +66,20 @@ class MenuComponent extends Component {
     this.setState({
       menuOpen: false
     })
+  }
+
+  handleBtnMinAppClick = (e) => {
+    const win = remote.getCurrentWindow();
+    win.minimize();
+  }
+
+  handleBtnMaxAppClick = (e) => {
+    ipcRenderer.send(IPCKeys.toggleMaximize);
+  }
+
+  handleBtnCloseAppClick = (e) => {
+    const win = remote.getCurrentWindow();
+    win.close();
   }
 
   /* end of event handlers */
@@ -128,11 +146,9 @@ class MenuComponent extends Component {
           <div className="app-name">{appName}</div>
         </div>
         <div id="system-buttons">
-          <button id="btn-min-app"></button>
-          <button id="btn-max-app" onClick={_ => {
-            Events.emit('toggleMaximize');
-          }}></button>
-          <button id="btn-close-app"></button>
+          <button id="btn-min-app" onClick={this.handleBtnMinAppClick} />
+          <button id="btn-max-app" onClick={this.handleBtnMaxAppClick} />
+          <button id="btn-close-app" onClick={this.handleBtnCloseAppClick} />
         </div>
       </div>
     );
