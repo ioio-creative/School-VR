@@ -71,7 +71,7 @@ class ProjectItem extends Component {
         <div className="project-info-container">
           <div className="project-info">
             <div className="project-image">
-              <img src={getAbsoluteUrlFromRelativeUrl("images/test1.jpg")} alt={"test"}/>
+              <img src={getAbsoluteUrlFromRelativeUrl("images/ProjectListPage/test1.jpg")} alt={"test"}/>
             </div>
             <div className="project-info-text-container">
               <div className="project-info-text">
@@ -102,36 +102,47 @@ class ProjectItem extends Component {
 }
 
   
-function ProjectList(props) {
-  const items = props.items;
+class ProjectList extends Component {
+  render() {
+    const props = this.props;
 
-  if (items.length === 0) {
-    return null;
-  }
+    const items = props.items;
 
-  const history = props.history;
+    if (items.length === 0) {
+      return null;
+    }
 
-  const projects = items.map((project) => {  
+    const history = props.history;
+    
+    function projectFilterPredicate(project) {
+      return project.name.includes(props.projectSearchText);
+    }
+
+    const projects = items;
+    const filteredProjects = projects.filter(projectFilterPredicate);
+
+    const filteredProjectElements = filteredProjects.map((project) => {  
+      return (
+        <ProjectItem 
+          key={project.path}
+          item={project}
+
+          history={history}
+        />
+      );
+    });
+
     return (
-      <ProjectItem 
-        key={project.path}
-        item={project}
-
-        history={history}
-      />
-    );
-  });
-
-  return (
-    <div className="project-list">
-      <div className="project-item create-new-project">
-        <Link to={routes.editor}>
-          <div className="create-new-project-content">+</div>
-        </Link>
+      <div className="project-list" onScroll={this.handleProjectListScroll}>
+        <div className="project-item create-new-project">
+          <Link to={routes.editor}>
+            <div className="create-new-project-content">+</div>
+          </Link>
+        </div>
+        {filteredProjectElements}
       </div>
-      {projects}
-    </div>
-  );
+    );
+  }
 }
 
 
@@ -139,8 +150,14 @@ class ProjectListPage extends Component {
   constructor(props) {
     super(props);
 
+    // ref
+    this.createNewProjectBlock = null;
+    this.setCreateNewProjectBlockRef = element => this.createNewProjectBlock = element;
+
+    // state
     this.state = {
-      projects: []  // array of ProjectFile objects     
+      projects: [],  // array of ProjectFile objects
+      projectSearchText: ""
     };
   }
 
@@ -172,11 +189,16 @@ class ProjectListPage extends Component {
   /* end of methods */
 
 
-  /* event handlers */
+  /* event handlers */  
 
-  // Click on item
-  handleProjectItemClick = (evnt, itemIdx) => {
-    
+  handleOuterContainerScroll = (event) => {
+    console.log(event.target.scrollTop);
+  }  
+
+  handleProjectSearchTxtChange = (event) => {
+    this.setState({
+      projectSearchText: event.target.value
+    });
   }
 
   /* end of event handlers */
@@ -212,12 +234,22 @@ class ProjectListPage extends Component {
             }*/
           ]}
         />
-        <div className="outer-container">
+        <div className="outer-container" onScroll={this.handleOuterContainerScroll}>
           <div class="inner-container">
+            <div className="project-top">              
+              <div className="project-search">
+                <input type="text" name="projectSearchTxt"
+                  placeholder="project name"
+                  value={state.projectSearchText}
+                  onChange={this.handleProjectSearchTxtChange}
+                />             
+              </div>
+            </div>
             <ProjectList          
               items={state.projects}
-              handleItemClickFunc={this.handleProjectItemClick}
+              projectSearchText={state.projectSearchText}
               
+
               history={props.history}
             />
           </div>

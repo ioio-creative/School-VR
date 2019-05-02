@@ -57,13 +57,35 @@
 /* end of container */
 
 
+#project-list-page .project-top {
+  height: 100px;
+  width: 100%;
+
+  position: relative;
+}
+
+#project-list-page .project-search {
+  position: absolute;
+  top: 50%;
+  right: 0;
+
+  transform: translateY(-50%);
+}
+
+#project-list-page .project-search input[type="text"] {
+  border-radius: 50px;
+  width: 300px;
+  height: 25px;
+
+  padding-left: 5%;
+  padding-right: 5%;
+}
+
 #project-list-page .project-list {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   /* grid-auto-rows: minmax(200px, auto); */
-  grid-gap: 0rem;
-
-  padding: 1rem;
+  grid-gap: 2rem;
 
   /* height: 100%;
   overflow-x: hidden; */
@@ -74,7 +96,7 @@
 
   border-radius: 5px;
   background-color: #0a1d34;  
-  margin: 1rem;  
+  margin: 0;  
   color: #ffffff;
 
   position: relative;
@@ -82,7 +104,7 @@
     https://www.w3schools.com/howto/howto_css_aspect_ratio.asp
     somehow this is the magic number that make it square-like
   */  
-  padding-top: 83%;
+  padding-top: 90%;
 }
 
 /* create new project button in project-item */
