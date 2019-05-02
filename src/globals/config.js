@@ -63,11 +63,32 @@ openFileDialogFilter.allFiles = { name: 'All Files', extensions: ['*'] };
 /* end of derivatives from Media */
 
 
+let paramsReadFromExternalConfig = {
+  something: 1,
+};
+let setParamsReadFromExternalConfig = (configObj) => {
+  paramsReadFromExternalConfig = {...paramsReadFromExternalConfig, ...configObj};  
+};
+
+
+/* to prove that export is "pass-by-reference"*/
+// let something = 1;
+// let changeSomething = (val) => {
+//   something = val;
+// };
+
 export default config;
 
 export {
   mediaType,
   appDirectory,
   projectDirectoryStructure,
-  openFileDialogFilter
+  openFileDialogFilter,
+  // something,
+  // changeSomething,
+
+  paramsReadFromExternalConfig,
+  setParamsReadFromExternalConfig
 };
+
+// something = 2;

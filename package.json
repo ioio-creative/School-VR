@@ -13,6 +13,7 @@
     "deepmerge": "^2.2.1",
     "electron-is-dev": "^1.0.1",
     "gsap": "^2.0.2",
+    "jsonc-parser": "^2.1.0",
     "jsonschema": "^1.2.4",
     "moment": "^2.24.0",
     "mousetrap": "^1.6.3",

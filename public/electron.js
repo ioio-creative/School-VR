@@ -7,18 +7,24 @@ const path = require('path');
 //const url = require('url');
 const isDev = require('electron-is-dev');
 const {fork} = require('child_process');
+const fs = require('fs');
 
-const {registerMainWindowToIpcMain, deregisterMainWindowFromIpcMain} = require('./scripts/ipcMain.js');
+const jsoncParser = require('jsonc-parser');
+
+const {registerMainWindowToIpcMain, deregisterMainWindowFromIpcMain, setParamsFromExternalConfigForReact} = require('./scripts/ipcMain.js');
 
 
 /* constants */
 
-const webServerPort = 1413;
-const webServerRootDirPath = __dirname;  // public folder
+const configFilePath = 'config.jsonc';
 
-const splashScreenDurationInMillis = 2000;
+// default values
+let webServerPort = 1413;
+let webServerRootDirPath = __dirname;  // public folder
 
-const developmentServerPort = process.env.PORT || 1234;
+let splashScreenDurationInMillis = 2000;
+
+let developmentServerPort = process.env.PORT || 1234;
 
 /* end of constants */
 
@@ -31,6 +37,40 @@ let webServerProcess = fork(`${path.join(__dirname, 'server.js')}`);
 
 /* end of global variables */
 
+
+// default text file
+const defaultReadFileOptions = {
+  encoding: 'utf8',
+  flag: 'r'
+};
+
+function readConfigFile(configFile) {
+  fs.readFile(configFile,  defaultReadFileOptions, (err, data) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+
+    try {      
+      const configObj = jsoncParser.parse(data);
+      const configObjForElectron = configObj.electron;
+      const configObjForReact = configObj.react;      
+
+      // set some global variables
+      developmentServerPort = configObjForElectron.developmentServerPort || developmentServerPort;
+
+      webServerPort = configObjForElectron.webServerPort || webServerPort;
+      webServerRootDirPath = configObjForElectron.webServerRootDirPath || webServerRootDirPath;      
+
+      splashScreenDurationInMillis = configObjForElectron.splashScreenDurationInMillis || splashScreenDurationInMillis;
+
+
+      setParamsFromExternalConfigForReact(configObjForReact);
+    } catch (err) {
+      console.error(err);
+    }    
+  });
+}
 
 function createWindow() {
   const Menu = electron.Menu;
@@ -151,8 +191,10 @@ function startWebServer() {
 /* app lifecycles */
 
 app.on('ready', _ => {
+  readConfigFile(configFilePath);
+
   startWebServer();
-  createWindow();
+  createWindow();  
 });
 
 app.on('window-all-closed', () => {

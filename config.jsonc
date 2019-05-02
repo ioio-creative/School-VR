@@ -1,0 +1,15 @@
+{
+  // electron
+  "electron": {
+    "developmentServerPort": 1234,
+
+    "webServerPort": 1413,  
+    "webServerRootDirPath": "",  // public folder
+    
+    "splashScreenDurationInMillis": 2000
+  },
+  // react
+  "react": {
+    "something": "something"
+  }
+}

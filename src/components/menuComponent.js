@@ -13,8 +13,8 @@ import {invokeIfIsFunction} from 'utils/variableType/isFunction';
 
 import './menuComponent.css';
 
-const remote = window.require('electron').remote;
-const ipcRenderer = window.require('electron').ipcRenderer;
+const electron = window.require('electron');
+const ipcRenderer = electron.ipcRenderer;
 
 
 const appName = config.appName;
@@ -69,8 +69,7 @@ class MenuComponent extends Component {
   }
 
   handleBtnMinAppClick = (e) => {
-    const win = remote.getCurrentWindow();
-    win.minimize();
+    ipcRenderer.send(IPCKeys.minimize);
   }
 
   handleBtnMaxAppClick = (e) => {
@@ -78,8 +77,7 @@ class MenuComponent extends Component {
   }
 
   handleBtnCloseAppClick = (e) => {
-    const win = remote.getCurrentWindow();
-    win.close();
+    ipcRenderer.send(IPCKeys.close);
   }
 
   /* end of event handlers */

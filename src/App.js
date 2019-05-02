@@ -5,7 +5,8 @@ import routes from 'globals/routes';
 import {library} from '@fortawesome/fontawesome-svg-core'
 // import {faArrowsAlt, faArrowsAlt} from '@fortawesome/free-solid-svg-icons'
 
-import {appDirectory} from 'globals/config';
+import {appDirectory, setParamsReadFromExternalConfig} from 'globals/config';
+import IPCKeys from 'globals/ipcKeys';
 import fileSystem from 'utils/fileSystem/fileSystem';
 import ProjectFile from 'utils/saveLoadProject/ProjectFile';
 
@@ -15,6 +16,17 @@ import asyncLoadingComponent from 'components/asyncLoadingComponent';
 // import PresenterPage from 'pages/aframeEditor/presenterPage';
 
 import './App.css';
+
+const electron = window.require ? window.require('electron') : null;
+const ipc = electron ? electron.ipcRenderer : null;
+
+if (ipc) {
+  ipc.on(IPCKeys.setParamsFromExternalConfig, (event, arg) => {    
+    setParamsReadFromExternalConfig(arg);    
+  });
+  ipc.send(IPCKeys.reactAppLoaded, true);  
+}
+
 
 const faIconsNeed = [
   "faArrowsAlt",

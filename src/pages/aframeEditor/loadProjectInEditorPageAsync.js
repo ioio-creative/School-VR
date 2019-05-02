@@ -7,13 +7,13 @@ export default async function loadProjectInEditorPageAsync(editorPage) {
   const searchObj = getSearchObjectFromHistory(editorPage.props.history);
   const projectFilePathToLoad = getProjectFilePathFromSearchObject(searchObj);
   
-  console.log("project path to load: " + projectFilePathToLoad);
+  //console.log("project path to load: " + projectFilePathToLoad);
   
   if (!projectFilePathToLoad) {
     return null;
   }
 
   const projectJsonData = await loadProjectByProjectFilePathAsync(projectFilePathToLoad);
-  console.log(projectJsonData);
+  //console.log(projectJsonData);
   editorPage.events.loadProject(projectJsonData);
 };

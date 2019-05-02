@@ -17,9 +17,8 @@ const appName = require('globals/config').default.appName;
 
 const Events = require('vendor/Events.js');
 
-const remote = window.require('electron').remote;
-
-const ipcRenderer = window.require('electron').ipcRenderer;
+const electron = window.require('electron');
+const ipcRenderer = electron.ipcRenderer;
 const smalltalk = require('smalltalk');
 
 
@@ -207,15 +206,13 @@ class SystemPanel extends Component {
         </div>
         <div id="system-buttons">
           <button id="btn-min-app" onClick={() => {
-            const win = remote.getCurrentWindow();
-            win.minimize();
+            ipcRenderer.send(IPCKeys.minimize);
           }} />
           <button id="btn-max-app" onClick={()=>{
             ipcRenderer.send(IPCKeys.toggleMaximize);
           }} />
           <button id="btn-close-app" onClick={()=>{
-            const win = remote.getCurrentWindow();
-            win.close();
+            ipcRenderer.send(IPCKeys.close);
           }} />
         </div>
       </div>

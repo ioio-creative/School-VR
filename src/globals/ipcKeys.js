@@ -1,6 +1,13 @@
-const IPCKeys = {
+const IPCKeys = {  
+  // send
+  close: 'close',
+  minimize: 'minimize',
   toggleMaximize: 'toggleMaximize',
-  toggleDevTools: 'toggleDevTools'  
+  toggleDevTools: 'toggleDevTools',
+  reactAppLoaded: 'reactAppLoaded',
+
+  // on
+  setParamsFromExternalConfig: 'setParamsFromExternalConfig'
 };
 
 export default IPCKeys;
