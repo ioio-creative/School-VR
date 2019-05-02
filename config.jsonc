@@ -1,4 +1,6 @@
 {
+  /* This file is read in public/electron.js */
+
   // electron
   "electron": {
     "developmentServerPort": 1234,
