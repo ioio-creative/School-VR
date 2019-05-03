@@ -5,7 +5,7 @@ import MenuComponent from 'components/menuComponent';
 import CrossButton from 'components/crossButton';
 
 import routes from 'globals/routes';
-import listProjectsAsync from 'utils/saveLoadProject/listProjectsAsync';
+import listProjectsAsync, {funcFactoryForCompareFileStatsByProperty} from 'utils/saveLoadProject/listProjectsAsync';
 import {formatDateTime} from 'utils/dateTime/formatDateTime';
 import {getAbsoluteUrlFromRelativeUrl} from 'utils/setStaticResourcesPath';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
@@ -148,6 +148,125 @@ class ProjectList extends Component {
 }
 
 
+// https://www.w3schools.com/howto/tryit.asp?filename=tryhow_custom_select
+class ProjectOrderSelect extends Component {
+  constructor(props) {
+    super(props);
+
+    // ref
+    this.customSelectContainer = null;
+    this.setCustomSelectContainerRef = element => this.customSelectContainer = element;
+
+    this.customSelect = null;
+    this.setCustomSelectRef = element => this.customSelect = element;
+  }
+
+
+  /* react life-cycle */
+
+  componentDidMount() {
+    this.createCustomSelectStyle();
+
+    /*if the user clicks anywhere outside the select box,
+    then close all select boxes:*/
+    document.addEventListener("click", this.closeAllSelect);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener("click", this.closeAllSelect);
+  }
+
+  /* end of react life-cycle */
+
+
+  /* methods */
+
+  createCustomSelectStyle = _ => {
+    const self = this;
+    
+    /*create a new DIV that will act as the selected item:*/
+    const a = document.createElement("DIV");
+    a.setAttribute("class", "select-selected");
+    a.innerHTML = this.customSelect.options[this.customSelect.selectedIndex].innerHTML;
+    this.customSelectContainer.appendChild(a);
+    /*create a new DIV that will contain the option list:*/
+    const b = document.createElement("DIV");
+    b.setAttribute("class", "select-items select-hide");
+    for (let j = 1; j < this.customSelect.length; j++) {
+      /*for each option in the original select element,
+      create a new DIV that will act as an option item:*/
+      const c = document.createElement("DIV");
+      c.innerHTML = this.customSelect.options[j].innerHTML;
+      c.addEventListener("click", function(e) {
+          /*when an item is clicked, update the original select box,
+          and the selected item:*/          
+          const s = this.parentNode.parentNode.getElementsByTagName("select")[0];
+          const h = this.parentNode.previousSibling;
+          for (let i = 0; i < s.length; i++) {
+            if (s.options[i].innerHTML == this.innerHTML) {
+              s.selectedIndex = i;
+              h.innerHTML = this.innerHTML;
+              const y = this.parentNode.getElementsByClassName("same-as-selected");
+              for (let k = 0; k < y.length; k++) {
+                y[k].removeAttribute("class");
+              }
+              this.setAttribute("class", "same-as-selected");
+              break;
+            }
+          }
+          h.click();
+      });
+      b.appendChild(c);
+    }
+    this.customSelectContainer.appendChild(b);
+    a.addEventListener("click", function(e) {
+        /*when the select box is clicked, close any other select boxes,
+        and open/close the current select box:*/
+        e.stopPropagation();
+        self.closeAllSelect(this);
+        this.nextSibling.classList.toggle("select-hide");
+        this.classList.toggle("select-arrow-active");
+      });
+  }
+
+  closeAllSelect = (elmnt) => {
+    /*a function that will close all select boxes in the document,
+    except the current select box:*/
+    var x, y, i, arrNo = [];
+    x = document.getElementsByClassName("select-items");
+    y = document.getElementsByClassName("select-selected");
+    for (i = 0; i < y.length; i++) {
+      if (elmnt == y[i]) {
+        arrNo.push(i)
+      } else {
+        y[i].classList.remove("select-arrow-active");
+      }
+    }
+    for (i = 0; i < x.length; i++) {
+      if (arrNo.indexOf(i)) {
+        x[i].classList.add("select-hide");
+      }
+    }
+  }
+
+  /* end of methods */
+
+
+  render() {
+    return (
+      <div className="project-order-select custom-select" ref={this.setCustomSelectContainerRef}>
+        <select ref={this.setCustomSelectRef}>
+          <option value="most-recent">Most recent</option> 
+          <option value="least-recent">Least recent</option>
+          <option value="by-name">By name</option>
+          <option value="by-name-reverse">By name reverse</option>
+        </select>
+      </div>
+    )
+  }
+}
+
+
 class ProjectListPage extends Component {
   constructor(props) {
     super(props);
@@ -266,7 +385,12 @@ class ProjectListPage extends Component {
         />
         <div className="outer-container" onScroll={this.handleOuterContainerScroll}>
           <div class="inner-container">
-            <div className="project-top">              
+            <div className="project-top">
+              <div className="project-order">
+                <ProjectOrderSelect
+
+                />
+              </div>           
               <div className="project-search">
                 <input type="text" name="projectSearchTxt"
                   placeholder="project name"

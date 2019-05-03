@@ -2,10 +2,21 @@
   --defaultFastTransitionDuration: 0.4s;
   --defaultFastTransition: all var(--defaultFastTransitionDuration);
 
+  --projectTopZIndex: 1;
+
   background-image: linear-gradient(190DEG, #2b435e, #0c4a61);
   height: 100%;
   padding-top: 30px;
 }
+
+
+/* general */
+
+#project-list-page .upside-down {
+  transform: rotate(-180DEG);
+}
+
+/* end of general */
 
 
 #project-list-page .outer-container {
@@ -78,24 +89,104 @@
 }
 
 #project-list-page .project-top {
+  --elementHeight: 25px;
+
   height: 100px;
   width: 100%;
 
   position: relative;
+  z-index: var(--projectTopZIndex);
 }
 
+#project-list-page .project-order,
 #project-list-page .project-search {
   position: absolute;
   top: 50%;
-  right: 0;
-
   transform: translateY(-50%);
+}
+
+#project-list-page .project-order {
+  left: 0;  
+}
+
+#project-list-page .project-order-select {
+  width: 200px;
+  /* height: var(--elementHeight); */
+}
+
+/* project order select https://www.w3schools.com/howto/howto_custom_select.asp */
+/*the container must be positioned relative:*/
+#project-list-page .custom-select {
+  --backgroundColor: DodgerBlue;
+
+  position: relative;
+  /* font-family: Arial; */
+}
+
+#project-list-page .custom-select select {
+  display: none; /*hide original SELECT element:*/
+}
+
+#project-list-page .select-selected {  
+  background-color: var(--backgroundColor);
+}
+
+/*style the arrow inside the select element:*/
+#project-list-page .select-selected:after {
+  position: absolute;
+  content: "";
+  top: 14px;
+  right: 10px;
+  width: 0;
+  height: 0;
+  border: 6px solid transparent;
+  border-color: #fff transparent transparent transparent;
+}
+
+/*point the arrow upwards when the select box is open (active):*/
+#project-list-page .select-selected.select-arrow-active:after {
+  border-color: transparent transparent #fff transparent;
+  top: 7px;
+}
+
+/*style the items (options), including the selected item:*/
+#project-list-page .select-items div,.select-selected {
+  color: #ffffff;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-color: transparent transparent rgba(0, 0, 0, 0.1) transparent;
+  cursor: pointer;
+  user-select: none;
+}
+
+/*style items (options):*/
+#project-list-page .select-items {
+  position: absolute;
+  background-color: var(--backgroundColor);
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 99;
+}
+
+/*hide the items when the select box is closed:*/
+#project-list-page .select-hide {
+  display: none;
+}
+
+#project-list-page .select-items div:hover, .same-as-selected {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+/* end of project order select */
+
+#project-list-page .project-search {
+  right: 0;
 }
 
 #project-list-page .project-search input[type="text"] {
   border-radius: 50px;
   width: 300px;
-  height: 25px;
+  height: var(--elementHeight);
 
   padding-left: 5%;
   padding-right: 5%;

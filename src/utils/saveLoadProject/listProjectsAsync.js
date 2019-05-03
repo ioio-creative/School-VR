@@ -49,13 +49,12 @@ const listProjectsAsync = async () => {
     return true;
   });
 
-  // const compareFileStatsByAccessTimeAsc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.atimeMs, false);
-  // const compareFileStatsByAccessTimeDesc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.atimeMs, true);
-
-  const compareFileStatsByModifiedTimeDesc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.mtimeMs, true);
+  //const compareFileStatsByAccessTimeAsc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.atimeMs, false);
+  const compareFileStatsByAccessTimeDesc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.atimeMs, true);
+  //const compareFileStatsByModifiedTimeDesc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.mtimeMs, true);
 
   const sortedFileStatObjs = 
-    filteredFileStatObjs.sort(compareFileStatsByModifiedTimeDesc);
+    filteredFileStatObjs.sort(compareFileStatsByAccessTimeDesc);
 
   const sortedProjectFileObjs = sortedFileStatObjs.map(fileStatObj => new ProjectFile(null, null, fileStatObj));
   
@@ -64,3 +63,7 @@ const listProjectsAsync = async () => {
 
 
 export default listProjectsAsync;
+
+export {
+  funcFactoryForCompareFileStatsByProperty
+};
