@@ -2,12 +2,14 @@ import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 
 import MenuComponent from 'components/menuComponent';
+import CrossButton from 'components/crossButton';
 
 import routes from 'globals/routes';
 import listProjectsAsync from 'utils/saveLoadProject/listProjectsAsync';
 import {formatDateTime} from 'utils/dateTime/formatDateTime';
 import {getAbsoluteUrlFromRelativeUrl} from 'utils/setStaticResourcesPath';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
+import isInViewport from 'utils/ui/isInViewport';
 
 import './ProjectListPage.css';
 
@@ -103,6 +105,14 @@ class ProjectItem extends Component {
 
   
 class ProjectList extends Component {
+  projectFilterPredicate = project => {
+    const projectSearchText = this.props.projectSearchText;
+    if (projectSearchText === "") {
+      return true;
+    }
+    return project.name.includes(projectSearchText);
+  }
+
   render() {
     const props = this.props;
 
@@ -112,29 +122,21 @@ class ProjectList extends Component {
       return null;
     }
 
-    const history = props.history;
-    
-    function projectFilterPredicate(project) {
-      return project.name.includes(props.projectSearchText);
-    }
-
     const projects = items;
-    const filteredProjects = projects.filter(projectFilterPredicate);
+    const filteredProjects = projects.filter(this.projectFilterPredicate);
 
     const filteredProjectElements = filteredProjects.map((project) => {  
       return (
         <ProjectItem 
           key={project.path}
           item={project}
-
-          history={history}
         />
       );
     });
 
     return (
       <div className="project-list" onScroll={this.handleProjectListScroll}>
-        <div className="project-item create-new-project">
+        <div className="project-item create-new-project" ref={props.setCreateNewProjectBlockRefFunc}>
           <Link to={routes.editor}>
             <div className="create-new-project-content">+</div>
           </Link>
@@ -157,7 +159,8 @@ class ProjectListPage extends Component {
     // state
     this.state = {
       projects: [],  // array of ProjectFile objects
-      projectSearchText: ""
+      projectSearchText: "",
+      isShowSmallProjectNewButton: false,
     };
   }
 
@@ -186,19 +189,46 @@ class ProjectListPage extends Component {
       });
   }
 
+  showSmallProjectNewButton = _ => {
+    if (!this.state.isShowSmallProjectNewButton) {
+      this.setState({
+        isShowSmallProjectNewButton: true
+      });
+    }
+  }
+
+  hideSmallProjectNewButton = _ => {
+    if (this.state.isShowSmallProjectNewButton) {
+      this.setState({
+        isShowSmallProjectNewButton: false
+      });
+    }
+  }
+
   /* end of methods */
 
 
   /* event handlers */  
 
   handleOuterContainerScroll = (event) => {
-    console.log(event.target.scrollTop);
+    if (this.createNewProjectBlock) {
+      const isCreateNewProjectBlockInViewport = isInViewport(this.createNewProjectBlock);
+      if (isCreateNewProjectBlockInViewport) {
+        this.hideSmallProjectNewButton();
+      } else {
+        this.showSmallProjectNewButton();
+      }
+    }    
   }  
 
   handleProjectSearchTxtChange = (event) => {
     this.setState({
       projectSearchText: event.target.value
     });
+  }
+
+  handleSmallProjectNewButtonClick = _ => {
+    this.props.history.push(routes.editor);
   }
 
   /* end of event handlers */
@@ -248,9 +278,19 @@ class ProjectListPage extends Component {
             <ProjectList          
               items={state.projects}
               projectSearchText={state.projectSearchText}
-              
-
-              history={props.history}
+              setCreateNewProjectBlockRefFunc={this.setCreateNewProjectBlockRef}
+            />
+          </div>
+          <div className={`project-new ${state.isShowSmallProjectNewButton ? 'show' : 'hide'}`}>
+            <CrossButton
+              backgroundBorderRadius="50%"
+              backgroundSize="64px"
+              backgroundColor="white"
+              strokeLength="25px"
+              strokeThickness="5px"
+              strokeColor="#205178"
+              onClick={this.handleSmallProjectNewButtonClick}
+              rotationInDeg={45}
             />
           </div>
         </div>        
