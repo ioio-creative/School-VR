@@ -10,6 +10,7 @@ import {formatDateTime} from 'utils/dateTime/formatDateTime';
 import {getAbsoluteUrlFromRelativeUrl} from 'utils/setStaticResourcesPath';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 import isInViewport from 'utils/ui/isInViewport';
+import {openSchoolVrFileDialog} from 'utils/aframeEditor/openFileDialog';
 
 import './ProjectListPage.css';
 
@@ -78,7 +79,7 @@ class ProjectItem extends Component {
             <div className="project-info-text-container">
               <div className="project-info-text">
                 <div className="project-name">{project.name}</div>
-                <div className="project-lastupdate">{`Last edited ${project.lastModifiedDateTime ? formatDateTime(project.lastModifiedDateTime) : ""}`}</div>
+                <div className="project-lastupdate">{`Last accessed ${project.atime ? formatDateTime(project.atime) : ""}`}</div>
               </div>
             </div>
           </div>
@@ -123,9 +124,29 @@ class ProjectList extends Component {
     }
 
     const projects = items;
+
+    // filter projects
     const filteredProjects = projects.filter(this.projectFilterPredicate);
 
-    const filteredProjectElements = filteredProjects.map((project) => {  
+    // order projects
+    let compareProjectFunc;
+    switch (props.projectOrderSelectValue) {
+      case "most-recent":
+        compareProjectFunc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.atimeMs, false);
+        break;
+      case "least-recent":
+        compareProjectFunc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.atimeMs, true);
+        break;
+      case "by-name":
+        compareProjectFunc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.name, true);
+        break;
+      case "by-name-reverse":
+        compareProjectFunc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.name, false);
+        break;
+    }
+    const orderedFilteredProjects = compareProjectFunc ? filteredProjects.sort(compareProjectFunc) : filteredProjects;
+
+    const displayedProjectElements = orderedFilteredProjects.map((project) => {  
       return (
         <ProjectItem 
           key={project.path}
@@ -141,7 +162,7 @@ class ProjectList extends Component {
             <div className="create-new-project-content">+</div>
           </Link>
         </div>
-        {filteredProjectElements}
+        {displayedProjectElements}
       </div>
     );
   }
@@ -159,6 +180,11 @@ class ProjectOrderSelect extends Component {
 
     this.customSelect = null;
     this.setCustomSelectRef = element => this.customSelect = element;
+
+    // state
+    this.state = {
+      selectedValue: "most-recent"
+    };
   }
 
 
@@ -179,6 +205,20 @@ class ProjectOrderSelect extends Component {
   /* end of react life-cycle */
 
 
+  /* event handlers */
+
+  handleProjectOrderSelectChange = (newSelectedValue) => {
+    if (newSelectedValue !== this.state.selectedValue) {
+      this.setState({
+        selectedValue: newSelectedValue
+      });
+      this.props.handleSelectChangeFunc(newSelectedValue);
+    }
+  }
+
+  /* end of event handlers */
+
+
   /* methods */
 
   createCustomSelectStyle = _ => {
@@ -196,7 +236,9 @@ class ProjectOrderSelect extends Component {
       /*for each option in the original select element,
       create a new DIV that will act as an option item:*/
       const c = document.createElement("DIV");
-      c.innerHTML = this.customSelect.options[j].innerHTML;
+      const cValue = this.customSelect.options[j].getAttribute("value");
+      c.innerHTML = this.customSelect.options[j].innerHTML;      
+      c.setAttribute("data-value", cValue);
       c.addEventListener("click", function(e) {
           /*when an item is clicked, update the original select box,
           and the selected item:*/          
@@ -215,6 +257,8 @@ class ProjectOrderSelect extends Component {
             }
           }
           h.click();
+
+          self.handleProjectOrderSelectChange(cValue);
       });
       b.appendChild(c);
     }
@@ -253,9 +297,11 @@ class ProjectOrderSelect extends Component {
 
 
   render() {
+    const state = this.state;
     return (
       <div className="project-order-select custom-select" ref={this.setCustomSelectContainerRef}>
         <select ref={this.setCustomSelectRef}>
+          <option value="most-recent">Most recent</option> 
           <option value="most-recent">Most recent</option> 
           <option value="least-recent">Least recent</option>
           <option value="by-name">By name</option>
@@ -278,6 +324,7 @@ class ProjectListPage extends Component {
     // state
     this.state = {
       projects: [],  // array of ProjectFile objects
+      projectOrderSelectValue: "most-recent",
       projectSearchText: "",
       isShowSmallProjectNewButton: false,
     };
@@ -338,12 +385,22 @@ class ProjectListPage extends Component {
         this.showSmallProjectNewButton();
       }
     }    
-  }  
+  }
+
+  handleProjectOrderSelectChange = (newSelectedValue) => {
+    if (newSelectedValue !== this.state.projectOrderSelectValue) {
+      this.setState({
+        projectOrderSelectValue: newSelectedValue
+      });      
+    }
+  }
 
   handleProjectSearchTxtChange = (event) => {
-    this.setState({
-      projectSearchText: event.target.value
-    });
+    if (event.target.value !== this.state.projectSearchText) {
+      this.setState({
+        projectSearchText: event.target.value
+      });
+    }
   }
 
   handleSmallProjectNewButtonClick = _ => {
@@ -354,7 +411,7 @@ class ProjectListPage extends Component {
 
   render() {
     const props = this.props;
-    const state = this.state;
+    const state = this.state;    
 
     return (
       <div id="project-list-page">
@@ -388,7 +445,7 @@ class ProjectListPage extends Component {
             <div className="project-top">
               <div className="project-order">
                 <ProjectOrderSelect
-
+                  handleSelectChangeFunc={this.handleProjectOrderSelectChange}
                 />
               </div>           
               <div className="project-search">
@@ -401,6 +458,7 @@ class ProjectListPage extends Component {
             </div>
             <ProjectList          
               items={state.projects}
+              projectOrderSelectValue={state.projectOrderSelectValue}
               projectSearchText={state.projectSearchText}
               setCreateNewProjectBlockRefFunc={this.setCreateNewProjectBlockRef}
             />

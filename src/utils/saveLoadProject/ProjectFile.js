@@ -68,7 +68,11 @@ class ProjectFile {
 
     // fileStats properties
     if (this.projectFileStats) {
-      this.lastModifiedDateTime = this.projectFileStats.mtime;
+      // https://nodejs.org/api/fs.html#fs_stats_ctime
+      this.atime = this.projectFileStats.atime;
+      this.atimeMs = this.projectFileStats.atimeMs;
+      this.mtime = this.projectFileStats.mtime;
+      this.mtimeMs = this.projectFileStats.mtimeMs;
       this.path = this.projectFileStats.path;
     }
   }

@@ -15,7 +15,7 @@ const jsoncParser = require('jsonc-parser');
 
 /* constants */
 
-const configFilePath = 'config.jsonc';
+const configFilePath = './config.jsonc';
 
 // default values
 let webServerPort = 1413;
