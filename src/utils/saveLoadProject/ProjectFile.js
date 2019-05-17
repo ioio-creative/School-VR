@@ -2,7 +2,7 @@ import {forEach} from 'p-iteration';
 import config, {mediaType, appDirectory, projectDirectoryStructure} from 'globals/config';
 import fileSystem from 'utils/fileSystem/fileSystem';
 import CustomedFileStats from 'utils/fileSystem/CustomedFileStats';
-import isNonEmptyArray from 'utils/variableType/isNotEmptyArray';
+import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 import listProjectsAsync from './listProjectsAsync';
 import {isCurrentLoadedProject, setCurrentLoadedProjectFilePath} from './loadProject';
 import parseDataToSaveFormat from './parseDataToSaveFormat';

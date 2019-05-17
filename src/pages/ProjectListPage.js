@@ -4,6 +4,7 @@ import {Link} from 'react-router-dom';
 import MenuComponent from 'components/menuComponent';
 import CrossButton from 'components/crossButton';
 
+import IPCKeys from 'globals/ipcKeys';
 import routes from 'globals/routes';
 import listProjectsAsync, {funcFactoryForCompareFileStatsByProperty} from 'utils/saveLoadProject/listProjectsAsync';
 import {formatDateTime} from 'utils/dateTime/formatDateTime';
@@ -11,8 +12,12 @@ import {getAbsoluteUrlFromRelativeUrl} from 'utils/setStaticResourcesPath';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 import isInViewport from 'utils/ui/isInViewport';
 import {openSchoolVrFileDialog} from 'utils/aframeEditor/openFileDialog';
+import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 
 import './ProjectListPage.css';
+
+const electron = window.require('electron');
+const ipcRenderer = electron.ipcRenderer;
 
 
 class ProjectItem extends Component {
@@ -119,9 +124,10 @@ class ProjectList extends Component {
 
     const items = props.items;
 
-    if (items.length === 0) {
-      return null;
-    }
+    // should still show new project button
+    // if (items.length === 0) {
+    //   return null;
+    // }
 
     const projects = items;
 
@@ -301,6 +307,7 @@ class ProjectOrderSelect extends Component {
     return (
       <div className="project-order-select custom-select" ref={this.setCustomSelectContainerRef}>
         <select ref={this.setCustomSelectRef}>
+          {/* first option is default option */}
           <option value="most-recent">Most recent</option> 
           <option value="most-recent">Most recent</option> 
           <option value="least-recent">Least recent</option>
@@ -310,6 +317,59 @@ class ProjectOrderSelect extends Component {
       </div>
     )
   }
+}
+
+
+function Menu(props) {
+  /* event handlers */
+
+  function handleBtnNewClick(event) {
+    props.history.push(routes.editor);
+  };
+
+  function handleBtnOpenClick(event) {
+    openSchoolVrFileDialog(async (filePaths) => {
+      if (isNonEmptyArray(filePaths)) {        
+        props.history.push(routes.editorWithProjectFilePathQuery(filePaths[0]));        
+      } else {                      
+        //alert('No files are selected!');
+      }
+    });
+  };
+
+  function handleBtnExitClick(event) {
+    ipcRenderer.send(IPCKeys.close);
+  };
+
+  /* end of event handlers */
+
+  return (
+    <MenuComponent 
+      menuButtons={[
+        {
+          text: 'File',
+          // onClick: _=> { console.log('file') },
+          children: [
+            {
+              text: 'New',
+              onClick: handleBtnNewClick
+            },
+            {
+              text: 'Open',
+              onClick: handleBtnOpenClick
+            },
+            {
+              text: '-'
+            },
+            {
+              text: 'Exit',
+              onClick: handleBtnExitClick
+            }
+          ]
+        }
+      ]}
+    />
+  );
 }
 
 
@@ -414,34 +474,12 @@ class ProjectListPage extends Component {
     const state = this.state;    
 
     return (
-      <div id="project-list-page">
-        <MenuComponent 
-          menuButtons={[
-            /*{
-              text: 'File',
-              // onClick: _=> { console.log('file') },
-              children: [
-                {
-                  text: 'New',
-                  onClick: _=>{ console.log('new') }
-                },
-                {
-                  text: 'Open',
-                  onClick: _=>{ console.log('open') }
-                },
-                {
-                  text: '-'
-                },
-                {
-                  text: 'Exit',
-                  onClick: _=>{ console.log('exit') }
-                }
-              ]
-            }*/
-          ]}
-        />
+      <div id="project-list-page">        
         <div className="outer-container" onScroll={this.handleOuterContainerScroll}>
           <div class="inner-container">
+            <Menu 
+              history={props.history}
+            />
             <div className="project-top">
               <div className="project-order">
                 <ProjectOrderSelect

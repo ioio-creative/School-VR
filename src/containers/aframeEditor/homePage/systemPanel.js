@@ -10,6 +10,7 @@ import IPCKeys from 'globals/ipcKeys';
 
 import {openSchoolVrFileDialog} from 'utils/aframeEditor/openFileDialog';
 import {loadProjectByProjectFilePathAsync} from 'utils/saveLoadProject/loadProject';
+import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 
 import './systemPanel.css';
 
@@ -101,7 +102,7 @@ class SystemPanel extends Component {
                   }); */}
 
                   openSchoolVrFileDialog(async (filePaths) => {
-                    if (Array.isArray(filePaths) && filePaths.length > 0) {
+                    if (isNonEmptyArray(filePaths)) {
                       try {
                         const projectJson = await loadProjectByProjectFilePathAsync(filePaths[0]);
                         Events.emit('loadProject', projectJson);
