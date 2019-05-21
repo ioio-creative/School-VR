@@ -174,6 +174,38 @@ const createWriteStream = (outputPath) => {
   return fs.createWriteStream(outputPath);
 };
 
+const appendFile = (filePath, content, callBack) => {
+  const directoriesStr = dirname(filePath);
+  const appendFileCallBack = () => {
+    fs.appendFile(filePath, content, (err) => {
+      handleGeneralErr(callBack, err);
+    });
+  };
+  exists(directoriesStr, (_, isExists) => {
+    if (!isExists) {  // directory does not exist      
+      createDirectoryIfNotExists(directoriesStr, (err) => {    
+        if (err) {
+          handleGeneralErr(callBack, err);
+          return;
+        }    
+        appendFileCallBack();
+      });      
+    } else {  // directory exists
+      appendFileCallBack();
+    }
+  });
+}
+
+const appendFileSync = (filePath, content) => {
+  const directoriesStr = dirname(filePath);
+  if (!existsSync(directoriesStr)) {
+    createDirectoryIfNotExistsSync(directoriesStr);
+  }
+  fs.appendFileSync(filePath, content);
+}
+
+const appendFilePromise = promisify(appendFile);
+
 const rename = (oldPath, newPath, callBack) => {
   fs.rename(oldPath, newPath, (err) => {
     handleGeneralErr(callBack, err);
@@ -206,6 +238,10 @@ const readFileSync = (filePath, options) => {
 };
 
 const readFilePromise = promisify(readFile);
+
+const createReadStream = (filePath) => {
+  return fs.createReadStream(filePath);
+};
 
 // for performance reasons
 const copyFileAssumingDestDirExists = (src, dest, callBack) => {
@@ -581,12 +617,16 @@ export default {
   writeFileSync,
   writeFilePromise,
   createWriteStream,
+  appendFile,
+  appendFileSync,
+  appendFilePromise,
   rename,
   renameSync,
   renamePromise,
   readFile,
   readFileSync,
   readFilePromise,
+  createReadStream,
   copyFileAssumingDestDirExists,
   copyFileAssumingDestDirExistsSync,
   copyFileAssumingDestDirExistsPromise,
