@@ -4,7 +4,10 @@ const IPCKeys = {
   minimize: 'minimize',
   toggleMaximize: 'toggleMaximize',
   toggleDevTools: 'toggleDevTools',
+  
   reactAppLoaded: 'reactAppLoaded',
+
+  saveProject: 'saveProject',
 
   // on
   setParamsFromExternalConfig: 'setParamsFromExternalConfig'

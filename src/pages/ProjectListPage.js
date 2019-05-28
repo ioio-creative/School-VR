@@ -16,8 +16,7 @@ import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 
 import './ProjectListPage.css';
 
-const electron = window.require('electron');
-const ipcRenderer = electron.ipcRenderer;
+const ipcRenderer = window.require('electron').ipcRenderer;
 
 
 class ProjectItem extends Component {

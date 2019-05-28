@@ -247,4 +247,24 @@ ipcMain.on('reactAppLoaded', (event, arg) => {
   }
 });
 
+
+ipcMain.on('saveProject', (event, arg) => {
+  saveProjectToLocalAsync(arg.projectName, arg.entitiesList, arg.assetsList)
+    .then((data) => {
+      const projectJson = data.projectJson;      
+      ipcMain.send('saveProjectResponse', {
+        err: null,
+        data: {
+          projectJson: projectJson
+        }
+      });
+    })
+    .catch(err => {
+      ipcMain.send('saveProjectResponse', {
+        err: err,
+        data: null
+      });
+    });
+});
+
 /* end of ipc main event listeners */

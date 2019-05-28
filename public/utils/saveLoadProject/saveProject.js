@@ -1,4 +1,4 @@
-import ProjectFile from './ProjectFile';
+const ProjectFile = require('./ProjectFile');
 
 
 const saveProjectToLocalAsync = async (projectName, entitiesList, assetsList) => {
@@ -7,6 +7,6 @@ const saveProjectToLocalAsync = async (projectName, entitiesList, assetsList) =>
 };
 
 
-export {
+module.exports = {
   saveProjectToLocalAsync
 };

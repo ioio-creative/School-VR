@@ -1,26 +1,26 @@
 // https://ourcodeworld.com/articles/read/106/how-to-choose-read-save-delete-or-create-a-file-with-electron-framework
 
-import rimraf from 'rimraf';
-import fx from './mkdir-recursive';
-import {map} from 'p-iteration';
+const rimraf = require('rimraf');
+const fx = require('./mkdir-recursive');
+const {map} = require('p-iteration');
 
-import CustomedFileStats from './CustomedFileStats';
+const CustomedFileStats = require('./CustomedFileStats');
 
-import toBase64Str from 'utils/base64/toBase64Str';
-import fromBase64Str from 'utils/base64/fromBase64Str';
+const toBase64Str = require('../base64/toBase64Str');
+const fromBase64Str = require('../base64/fromBase64Str');
 
-import isFunction from 'utils/variableType/isFunction';
+const {isFunction} = require('../variableType/isFunction');
 
 // https://github.com/electron/asar
 // http://www.tc4shell.com/en/7zip/asar/
 // Somehow using the "import" syntax would result in the following error:
 // "Module not found: Can't resolve 'original-fs' in 'E:\Documents\Projects\Electron\School-VR\node_modules\asar\lib'"
 //import asar from 'asar';
-const asar = window.require('asar');
+const asar = require('asar');
 
-const fs = window.require('fs');
-const path = window.require('path');
-const {promisify} = window.require('util');
+const fs = require('fs');
+const path = require('path');
+const {promisify} = require('util');
 
 
 /* from node.js fs implementation */
@@ -600,7 +600,7 @@ const dirname = (filePath) => {
 /* end of path api */
 
 
-export default {
+module.exports = {
   // error handling
   // passbackControlToCallBack,
   // handleGeneralErr,

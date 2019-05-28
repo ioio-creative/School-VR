@@ -10,7 +10,6 @@ import AssetsPanel from 'containers/aframeEditor/homePage/assetsPanel';
 import Editor from 'vendor/editor.js';
 import {addEntityAutoType} from 'utils/aframeEditor/aFrameEntities';
 import {roundTo, jsonCopy} from 'utils/aframeEditor/helperfunctions';
-import {saveProjectToLocalAsync} from 'utils/saveLoadProject/saveProject';
 import parseDataToSaveFormat from 'utils/saveLoadProject/parseDataToSaveFormat';
 import {TweenMax, TimelineMax, Linear} from 'gsap';
 
@@ -20,8 +19,10 @@ import stricterParseInt from 'utils/number/stricterParseInt';
 
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 import loadProjectInEditorPageAsync from './loadProjectInEditorPageAsync';
+import ipcHelper from 'utils/ipcHelper';
 
 import './editorPage.css';
+
 const Events = require('vendor/Events.js');
 const uuid_0 = require('uuid/v1');
 const uuid = _=> 'uuid_' + uuid_0().split('-')[0];
@@ -792,19 +793,21 @@ class EditorPage extends Component {
           alert(e);
         }
       },
-      saveProject: () => {               
-        saveProjectToLocalAsync(self.projectName, self.entitiesList, self.assetsList)
-          .then((data) => {
-            const projectJson = data.projectJson;
-            const projectJsonStr = JSON.stringify(projectJson);
-            //console.log(projectJsonStr);        
+      saveProject: () => {
+        ipcHelper.saveProject(self.projectName, self.entitiesList, self.assetsList, (err, data) => {
+          if (err) {
+            handleErrorWithUiDefault(err);
+          }
 
-            // call electron save api here
-            //navigator.clipboard.writeText(projectJsonStr);
-            
-            alert(`Data: ${JSON.stringify(data)}`);
-          })
-          .catch(err => handleErrorWithUiDefault(err));                    
+          const projectJson = data.projectJson;
+          const projectJsonStr = JSON.stringify(projectJson);
+          //console.log(projectJsonStr);        
+
+          // call electron save api here
+          //navigator.clipboard.writeText(projectJsonStr);
+          
+          alert(`Data: ${JSON.stringify(data)}`);
+        });                           
       },
       loadProject: (data) => {
         try {

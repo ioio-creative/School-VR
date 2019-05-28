@@ -1,4 +1,4 @@
-import ProjectFile from './ProjectFile';
+const ProjectFile = require('./ProjectFile');
 
 
 let currentLoadedProjectFilePath = null;
@@ -26,7 +26,7 @@ const loadCurrentLoadedProjectAsync = async () => {
 };
 
 
-export {  
+module.exports = {
   setCurrentLoadedProjectFilePath,
   isCurrentLoadedProject,  
   loadProjectByProjectFilePathAsync,

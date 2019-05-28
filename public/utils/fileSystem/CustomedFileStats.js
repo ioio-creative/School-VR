@@ -1,4 +1,5 @@
-import fileSystem from 'utils/fileSystem/fileSystem';
+const fileSystem = require('./fileSystem');
+
 
 class CustomedFileStats {
   /**
@@ -31,4 +32,4 @@ class CustomedFileStats {
   }
 }
 
-export default CustomedFileStats;
+module.exports.CustomedFileStats = CustomedFileStats;

@@ -1,9 +1,9 @@
-import {filter} from 'p-iteration';
+const {filter} = require('p-iteration');
 
-import config, {appDirectory} from 'globals/config';
-import fileSystem from 'utils/fileSystem/fileSystem';
+const {config, appDirectory} = require('../../globals/config');
+const fileSystem = require('../fileSystem/fileSystem');
 
-import ProjectFile from 'utils/saveLoadProject/ProjectFile';
+const ProjectFile = require('./ProjectFile');
 
 
 const funcFactoryForCompareFileStatsByProperty = (fileStatPropSelectFunc, isOrderByDesc) => {
@@ -62,8 +62,7 @@ const listProjectsAsync = async () => {
 };
 
 
-export default listProjectsAsync;
-
-export {
+module.exports = {
+  listProjectsAsync,
   funcFactoryForCompareFileStatsByProperty
 };

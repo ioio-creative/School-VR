@@ -1,6 +1,6 @@
 // https://github.com/hokein/electron-sample-apps/tree/master/file-explorer
 
-import fileSystem from './fileSystem';
+const fileSystem = require('./fileSystem');
 
 
 const map = {
@@ -48,6 +48,5 @@ const statSync = (filepath) => {
   return result;
 };
 
-export default {
-  statSync
-};
+
+module.exports.statSync = statSync;

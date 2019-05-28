@@ -1,11 +1,11 @@
-import {forEach} from 'p-iteration';
-import config, {mediaType, appDirectory, projectDirectoryStructure} from 'globals/config';
-import fileSystem from 'utils/fileSystem/fileSystem';
-import CustomedFileStats from 'utils/fileSystem/CustomedFileStats';
-import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
-import listProjectsAsync from './listProjectsAsync';
-import {isCurrentLoadedProject, setCurrentLoadedProjectFilePath} from './loadProject';
-import parseDataToSaveFormat from './parseDataToSaveFormat';
+const {forEach} = require('p-iteration');
+const {config, mediaType, appDirectory, projectDirectoryStructure} = require('../../globals/config');
+const fileSystem = require('../utils/fileSystem/fileSystem');
+const CustomedFileStats = require('../utils/fileSystem/CustomedFileStats');
+const isNonEmptyArray = require('../utils/variableType/isNonEmptyArray');
+const listProjectsAsync = require('./listProjectsAsync');
+const {isCurrentLoadedProject, setCurrentLoadedProjectFilePath} = require('./loadProject');
+const parseDataToSaveFormat = require('./parseDataToSaveFormat');
 
 
 class ProjectFile {
@@ -433,4 +433,4 @@ class ProjectFile {
 }
 
 
-export default ProjectFile;
+module.exports.ProjectFile = ProjectFile;

@@ -35,4 +35,4 @@ const parseDataToSaveFormat = (projectName, entitiesList, assetsList) => {
   return resultJson;
 };
 
-export default parseDataToSaveFormat;
+module.exports.parseDataToSaveFormat = parseDataToSaveFormat;

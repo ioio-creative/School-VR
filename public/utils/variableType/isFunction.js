@@ -21,8 +21,7 @@ function invokeIfIsFunction(obj) {
 }
 
 
-export default isFunction;
-
-export {
+module.exports = {
+  isFunction,
   invokeIfIsFunction
 };
