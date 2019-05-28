@@ -14,8 +14,9 @@ function invokeIfIsFunction(obj) {
       const argumentsArray = Array.prototype.slice.call(arguments);
       const argumentsForFunc = argumentsArray.slice(1);
       obj(...argumentsForFunc);
-    }   
-    obj();
+    } else {
+      obj();
+    }
   }
 }
 
