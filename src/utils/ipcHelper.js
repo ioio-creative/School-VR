@@ -33,7 +33,7 @@ const getParamsFromExternalConfig = (callBack) => {
 
 /* saveLoadProject */
 
-const listProjects = () => {
+const listProjects = (callBack) => {
   ipc.once('listProjectsResponse', (event, arg) => {
     callBack(arg.err, arg.data);
   });

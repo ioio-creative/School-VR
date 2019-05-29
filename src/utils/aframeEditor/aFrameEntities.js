@@ -1,7 +1,7 @@
 import React from 'react';
 import 'aframe-gif-shader';
 import {mediaType, openFileDialogFilter} from 'globals/config';
-import fileHelper from 'utils/fileHelper/fileHelper';
+import {getFileExtensionWithoutLeadingDot} from 'utils/fileHelper/fileHelper';
 import ipcHelper from 'utils/ipcHelper';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
@@ -76,7 +76,7 @@ function addToAsset(el, existingUuidStr) {
     case 'IMG':
       newid = 'img_' + uuid() // 'img_' + document.querySelectorAll('img').length;
       
-      const fileExtensionWithoutDot = fileHelper.getFileExtensionWithoutLeadingDot(el.src);
+      const fileExtensionWithoutDot = getFileExtensionWithoutLeadingDot(el.src);
       const isGif = openFileDialogFilter.gif.extensions.includes(fileExtensionWithoutDot);
       fileMediaType = isGif ? mediaType.gif : mediaType.image;      
 

@@ -1,6 +1,7 @@
 import getSearchObjectFromHistory from 'utils/queryString/getSearchObjectFromHistory';
 import getProjectFilePathFromSearchObject from 'utils/queryString/getProjectFilePathFromSearchObject';
 import ipcHelper from 'utils/ipcHelper';
+import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 
 
 export default async function loadProjectInEditorPageAsync(editorPage) {
