@@ -1,8 +1,10 @@
 import React from 'react';
 import 'aframe-gif-shader';
-import {openImageDialog, openGifDialog, openVideoDialog} from './openFileDialog';
 import {mediaType, openFileDialogFilter} from 'globals/config';
-import fileSystem from 'utils/fileSystem/fileSystem';
+import fileHelper from 'utils/fileHelper/fileHelper';
+import ipcHelper from 'utils/ipcHelper';
+import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
+import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 
 
 const Events = require('vendor/Events.js');
@@ -42,8 +44,13 @@ function adjustWidthAndHeightOfNewlyCreatedElement(elementWidth, elementHeight) 
   };
 }
 
-function handleDialogFilesSelected(filePaths, callBack) {
-  if (Array.isArray(filePaths) && filePaths.length > 0) {        
+function handleDialogFilesSelected(err, filePaths, callBack) {
+  if (err) {
+    handleErrorWithUiDefault(err);
+    return;
+  }
+
+  if (isNonEmptyArray(filePaths)) {        
     callBack(filePaths[0]);
   } else {
     //alert('No files are selected!');
@@ -69,7 +76,7 @@ function addToAsset(el, existingUuidStr) {
     case 'IMG':
       newid = 'img_' + uuid() // 'img_' + document.querySelectorAll('img').length;
       
-      const fileExtensionWithoutDot = fileSystem.getFileExtensionWithoutLeadingDot(el.src);
+      const fileExtensionWithoutDot = fileHelper.getFileExtensionWithoutLeadingDot(el.src);
       const isGif = openFileDialogFilter.gif.extensions.includes(fileExtensionWithoutDot);
       fileMediaType = isGif ? mediaType.gif : mediaType.image;      
 
@@ -424,8 +431,8 @@ function addNewCamera(elementId) {
 
 function addNewImage() {
   function clickBtn() {
-    openImageDialog((filePaths) => {
-      handleDialogFilesSelected(filePaths, handleUpload);             
+    ipcHelper.openImageDialog((err, filePaths) => {
+      handleDialogFilesSelected(err, filePaths, handleUpload);
     });
   }
   function handleUpload(filePath) {      
@@ -461,8 +468,8 @@ function loadImage(elementId) {
 }
 function addNewGif() {
   function clickBtn() {
-    openGifDialog((filePaths) => {
-      handleDialogFilesSelected(filePaths, handleUpload);
+    ipcHelper.openGifDialog((err, filePaths) => {
+      handleDialogFilesSelected(err, filePaths, handleUpload);
     });
   }
   function handleUpload(filePath) {
@@ -494,8 +501,8 @@ function addNewGif() {
 
 function addNewVideo() {
   function clickBtn() {
-    openVideoDialog((filePaths) => {
-      handleDialogFilesSelected(filePaths, handleUpload);             
+    ipcHelper.openVideoDialog((err, filePaths) => {
+      handleDialogFilesSelected(err, filePaths, handleUpload);             
     });
   }
   function handleUpload(filePath) {
@@ -541,8 +548,8 @@ function addNewVideo() {
 
 function addNewImageSphere() {
   function clickBtn() {
-    openImageDialog((filePaths) => {
-      handleDialogFilesSelected(filePaths, handleUpload);             
+    ipcHelper.openImageDialog((err, filePaths) => {
+      handleDialogFilesSelected(err, filePaths, handleUpload);             
     });
   }
   function handleUpload(event) {
@@ -590,8 +597,8 @@ function addNewImageSphere() {
 
 function addNewVideoSphere() {
   function clickBtn() {
-    openVideoDialog((filePaths) => {
-      handleDialogFilesSelected(filePaths, handleUpload);             
+    ipcHelper.openVideoDialog((err, filePaths) => {
+      handleDialogFilesSelected(err, filePaths, handleUpload);             
     });
   }
   function handleUpload(event) {

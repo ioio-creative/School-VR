@@ -8,7 +8,7 @@ import Mousetrap from 'mousetrap';
 import Events from 'vendor/Events.js';
 
 import config from 'globals/config';
-import IPCKeys from 'globals/ipcKeys';
+import ipcHelper from 'utils/ipcHelper';
 import {invokeIfIsFunction} from 'utils/variableType/isFunction';
 
 import './menuComponent.css';
@@ -69,15 +69,15 @@ class MenuComponent extends Component {
   }
 
   handleBtnMinAppClick = (e) => {
-    ipcRenderer.send(IPCKeys.minimize);
+    ipcHelper.minimizeWindow();
   }
 
   handleBtnMaxAppClick = (e) => {
-    ipcRenderer.send(IPCKeys.toggleMaximize);
+    ipcHelper.toggleMaximizeWindow();
   }
 
   handleBtnCloseAppClick = (e) => {
-    ipcRenderer.send(IPCKeys.close);
+    ipcHelper.closeWindow();
   }
 
   /* end of event handlers */

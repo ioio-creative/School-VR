@@ -1,6 +1,6 @@
 import getSearchObjectFromHistory from 'utils/queryString/getSearchObjectFromHistory';
 import getProjectFilePathFromSearchObject from 'utils/queryString/getProjectFilePathFromSearchObject';
-import {loadProjectByProjectFilePathAsync} from 'utils/saveLoadProject/loadProject';
+import ipcHelper from 'utils/ipcHelper';
 
 
 export default async function loadProjectInEditorPageAsync(editorPage) {
@@ -13,7 +13,14 @@ export default async function loadProjectInEditorPageAsync(editorPage) {
     return null;
   }
 
-  const projectJsonData = await loadProjectByProjectFilePathAsync(projectFilePathToLoad);
-  //console.log(projectJsonData);
-  editorPage.events.loadProject(projectJsonData);
+  ipcHelper.loadProjectByProjectFilePath(projectFilePathToLoad, (err, data) => {
+    if (err) {
+      handleErrorWithUiDefault(err);
+      return;                         
+    }
+    
+    const projectJsonData = data.projectJson;
+    //console.log(projectJsonData);
+    editorPage.events.loadProject(projectJsonData);    
+  });  
 };

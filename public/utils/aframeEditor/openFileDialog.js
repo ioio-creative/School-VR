@@ -1,9 +1,7 @@
 import { appDirectory, openFileDialogFilter } from 'globals/config';
 
-
-const electron = window.require('electron');
-const { BrowserWindow, dialog } = electron.remote;
-
+//const { BrowserWindow, dialog } = require('electron').remote;
+const { BrowserWindow, dialog } = require('electron');
 
 // https://electronjs.org/docs/api/dialog
 // The browserWindow argument allows the dialog to attach itself to a parent window, making it modal.
@@ -47,7 +45,7 @@ function openSchoolVrFileDialog(callBack) {
 }
 
 
-export {
+module.exports = {
   openImageDialog,
   openGifDialog,
   openVideoDialog,

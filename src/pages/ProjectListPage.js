@@ -4,19 +4,16 @@ import {Link} from 'react-router-dom';
 import MenuComponent from 'components/menuComponent';
 import CrossButton from 'components/crossButton';
 
-import IPCKeys from 'globals/ipcKeys';
+import ipcHelper from 'utils/ipcHelper';
 import routes from 'globals/routes';
-import listProjectsAsync, {funcFactoryForCompareFileStatsByProperty} from 'utils/saveLoadProject/listProjectsAsync';
+import {funcFactoryForCompareFileStatsByProperty} from 'utils/saveLoadProjectHelper/listProjectsAsync';
 import {formatDateTime} from 'utils/dateTime/formatDateTime';
 import {getAbsoluteUrlFromRelativeUrl} from 'utils/setStaticResourcesPath';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 import isInViewport from 'utils/ui/isInViewport';
-import {openSchoolVrFileDialog} from 'utils/aframeEditor/openFileDialog';
 import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 
 import './ProjectListPage.css';
-
-const ipcRenderer = window.require('electron').ipcRenderer;
 
 
 class ProjectItem extends Component {
@@ -327,17 +324,23 @@ function Menu(props) {
   };
 
   function handleBtnOpenClick(event) {
-    openSchoolVrFileDialog(async (filePaths) => {
+    ipcHelper.openSchoolVrFileDialog((err, data) => {
+      if (err) {
+        handleErrorWithUiDefault(err);
+        return;
+      }
+
+      const filePaths = data.filePaths;
       if (isNonEmptyArray(filePaths)) {        
         props.history.push(routes.editorWithProjectFilePathQuery(filePaths[0]));        
       } else {                      
         //alert('No files are selected!');
       }
-    });
+    });    
   };
 
   function handleBtnExitClick(event) {
-    ipcRenderer.send(IPCKeys.close);
+    ipcHelper.closeWindow();
   };
 
   /* end of event handlers */
@@ -403,15 +406,17 @@ class ProjectListPage extends Component {
 
   enumerateProjects = _ => {
     //const props = this.props;
-    listProjectsAsync()
-      .then(projectFileStats => {
-        this.setState({
-          projects: projectFileStats
-        });
-      })
-      .catch(err => {        
+    ipcHelper.listProjects((err, data) => {
+      if (err) {
         handleErrorWithUiDefault(err);
+        return;
+      }
+
+      const projectFileStats = data.projectFileObjs;
+      this.setState({
+        projects: projectFileStats
       });
+    });    
   }
 
   showSmallProjectNewButton = _ => {

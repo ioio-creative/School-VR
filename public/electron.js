@@ -12,6 +12,12 @@ const fs = require('fs');
 
 const jsoncParser = require('jsonc-parser');
 
+const {ProjectFile} = require('utils/saveLoadProject/ProjectFile');
+const {openImageDialog, openGifDialog, openVideoDialog, openSchoolVrFileDialog} = 
+  require('utils/aframeEditor/openFileDialog');
+const {listProjectsAsync} = require('utils/saveLoadProject/listProjectsAsync');
+const {parseDataToSaveFormat} = require('utils/saveLoadProject/parseDataToSaveFormat');
+
 
 /* constants */
 
@@ -217,6 +223,8 @@ function getSenderWindowFromEvent(ipcEvent) {
 //   event.sender.send('actionReply', result);
 // });
 
+// electron window api
+
 ipcMain.on('close', (event, arg) => {  
   const senderWindow = getSenderWindowFromEvent(event);  
   senderWindow.close();  
@@ -241,30 +249,160 @@ ipcMain.on('toggleDevTools', (event, arg) => {
 });
 
 
-ipcMain.on('reactAppLoaded', (event, arg) => {
-  if (arg === true) {    
-    event.sender.send('setParamsFromExternalConfig', paramsFromExternalConfigForReact);
-  }
+ipcMain.on('getParamsFromExternalConfig', (event, arg) => { 
+  event.sender.send('getParamsFromExternalConfigResponse', {
+    err: null,
+    data: paramsFromExternalConfigForReact
+  });
 });
 
+// saveLoadProject
 
-ipcMain.on('saveProject', (event, arg) => {
-  saveProjectToLocalAsync(arg.projectName, arg.entitiesList, arg.assetsList)
-    .then((data) => {
-      const projectJson = data.projectJson;      
-      ipcMain.send('saveProjectResponse', {
+ipcMain.on('listProjects', async (event, arg) => {  
+  listProjectsAsync()
+    .then((projectFileObjs) => {      
+      event.sender.send('listProjectsResponse', {
         err: null,
         data: {
-          projectJson: projectJson
+          projectFileObjs: projectFileObjs
         }
       });
     })
     .catch(err => {
-      ipcMain.send('saveProjectResponse', {
+      event.sender.send('listProjectsResponse', {
         err: err,
         data: null
       });
     });
+});
+
+ipcMain.on('getExistingProjectNames', async (event, arg) => {  
+  ProjectFile.getExistingProjectNamesAsync()
+    .then((existingProjectNames) => {      
+      event.sender.send('getExistingProjectNamesResponse', {
+        err: null,
+        data: {
+          existingProjectNames: existingProjectNames
+        }
+      });
+    })
+    .catch(err => {
+      event.sender.send('getExistingProjectNamesResponse', {
+        err: err,
+        data: null
+      });
+    });
+});
+
+ipcMain.on('saveProject', (event, arg) => {
+  saveProjectToLocalAsync(arg.projectName, arg.entitiesList, arg.assetsList)
+    .then((data) => {      
+      event.sender.send('saveProjectResponse', {
+        err: null,
+        data: {
+          projectJson: data
+        }
+      });
+    })
+    .catch(err => {
+      event.sender.send('saveProjectResponse', {
+        err: err,
+        data: null
+      });
+    });
+});
+
+ipcMain.on('parseDataToSaveFormat', (event, arg) => {
+  parseDataToSaveFormat(arg.projectName, arg.entitiesList, arg.assetsList)
+    .then((data) => {           
+      event.sender.send('parseDataToSaveFormatResponse', {
+        err: null,
+        data: {
+          projectJson: data
+        }
+      });
+    })
+    .catch(err => {
+      event.sender.send('parseDataToSaveFormatResponse', {
+        err: err,
+        data: null
+      });
+    });
+});
+
+ipcMain.on('loadProjectByProjectFilePath', (event, arg) => {
+  const filePath = arg;
+  loadProjectByProjectFilePathAsync(filePath)
+    .then((data) =>{
+      event.sender.send('loadProjectByProjectFilePathResponse', {
+        err: null,
+        data: {
+          projectJson: data
+        }
+      });
+    })
+    .catch(err => {
+      event.sender.send('loadProjectByProjectFilePathResponse', {
+        err: err,
+        data: null
+      });
+    });
+});
+
+ipcMain.on('deleteAllTempProjectDirectories', (event, arg) => {
+  ProjectFile.deleteAllTempProjectDirectoriesAsync()
+    .then(() => {
+      event.sender.send('deleteAllTempProjectDirectoriesResponse', {
+        err: null,        
+      });
+    })
+    .catch(err => {
+      event.sender.send('deleteAllTempProjectDirectoriesResponse', {
+        err: err,       
+      });
+    });
+});
+
+// window dialog
+
+ipcMain.on('openImageDialog', (event, args) => {
+  openImageDialog((filePaths) => {
+    event.send.send('openImageDialogResponse', {
+      data: {
+        filePaths: filePaths
+      }
+    });
+  });
+});
+
+ipcMain.on('openGifDialog', (event, args) => {
+  openGifDialog((filePaths) => {
+    event.send.send('openGifDialogResponse', {
+      data: {
+        filePaths: filePaths
+      }
+    });
+  });
+});
+
+ipcMain.on('openVideoDialog', (event, args) => {
+  openVideoDialog((filePaths) => {
+    event.send.send('openVideoDialogResponse', {
+      data: {
+        filePaths: filePaths
+      }
+    });
+  });
+});
+
+ipcMain.on('openSchoolVrFileDialog', (event, args) => {
+  openSchoolVrFileDialog((filePaths) => {
+    event.send.send('openSchoolVrFileDialogResponse', {
+      data: {
+        filePaths: filePaths
+      }
+    });
+  });
 });
 
 /* end of ipc main event listeners */

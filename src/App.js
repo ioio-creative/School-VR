@@ -6,9 +6,9 @@ import {library} from '@fortawesome/fontawesome-svg-core'
 // import {faArrowsAlt, faArrowsAlt} from '@fortawesome/free-solid-svg-icons'
 
 import {appDirectory, setParamsReadFromExternalConfig} from 'globals/config';
-import IPCKeys from 'globals/ipcKeys';
+import ipcHelper from 'utils/ipcHelper';
 import fileSystem from 'utils/fileSystem/fileSystem';
-import ProjectFile from 'utils/saveLoadProject/ProjectFile';
+import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 
 import asyncLoadingComponent from 'components/asyncLoadingComponent';
 
@@ -17,15 +17,15 @@ import asyncLoadingComponent from 'components/asyncLoadingComponent';
 
 import './App.css';
 
-const electron = window.require ? window.require('electron') : null;
-const ipc = electron ? electron.ipcRenderer : null;
 
-if (ipc) {
-  ipc.on(IPCKeys.setParamsFromExternalConfig, (event, arg) => {    
-    setParamsReadFromExternalConfig(arg);    
-  });
-  ipc.send(IPCKeys.reactAppLoaded, true);  
-}
+ipcHelper.getParamsFromExternalConfig((err, data) => {
+  if (err) {
+    handleErrorWithUiDefault(err);
+    return;
+  }
+
+  setParamsReadFromExternalConfig(data);
+});
 
 
 const faIconsNeed = [
@@ -44,9 +44,8 @@ faIconsNeed.forEach(iconName => {
 });
 
 // delete any cached temp project files
-ProjectFile.deleteAllTempProjectDirectoriesAsync().catch(err => {
-  console.error(err);
-  alert(err);
+ipcHelper.deleteAllTempProjectDirectories((err) => {
+  handleErrorWithUiDefault(err);
 });
 
 // create App Data directories if they do not exist

@@ -10,10 +10,8 @@ import AssetsPanel from 'containers/aframeEditor/homePage/assetsPanel';
 import Editor from 'vendor/editor.js';
 import {addEntityAutoType} from 'utils/aframeEditor/aFrameEntities';
 import {roundTo, jsonCopy} from 'utils/aframeEditor/helperfunctions';
-import parseDataToSaveFormat from 'utils/saveLoadProject/parseDataToSaveFormat';
 import {TweenMax, TimelineMax, Linear} from 'gsap';
 
-import ProjectFile from 'utils/saveLoadProject/ProjectFile';
 import isStrAnInt from 'utils/number/isStrAnInt';
 import stricterParseInt from 'utils/number/stricterParseInt';
 
@@ -25,7 +23,7 @@ import './editorPage.css';
 
 const Events = require('vendor/Events.js');
 const uuid_0 = require('uuid/v1');
-const uuid = _=> 'uuid_' + uuid_0().split('-')[0];
+const uuid = _ => 'uuid_' + uuid_0().split('-')[0];
 
 /**
  * deepmerge = jquery $.extend
@@ -44,38 +42,43 @@ const schema = require('schema/aframe_schema_20181108.json');
 const defaultProjectNamePrefix = "untitled_";
 // must have a trailing number
 function setDefaultProjectName(suggestedProjectName = defaultProjectNamePrefix + "1") {
-  ProjectFile.getExistingProjectNamesAsync()
-    .then(existingProjectNames => {      
-      let newProjectName = suggestedProjectName;
+  ipcHelper.getExistingProjectNames((err, data) => {
+    if (err) {
+      handleErrorWithUiDefault(err);
+      return;
+    }
+
+    const existingProjectNames = data.existingProjectNames;
+
+    let newProjectName = suggestedProjectName;
       
-      const existingProjectNamesWhichStartWithDefaultPrefixAndHaveNumericIdx = existingProjectNames
-        .filter((name) => {
-          const idxOfDefaultProjectNamePrefix = name.indexOf(defaultProjectNamePrefix);
-          
-          if (idxOfDefaultProjectNamePrefix !== 0) {
-            return false;
-          }
+    const existingProjectNamesWhichStartWithDefaultPrefixAndHaveNumericIdx = existingProjectNames
+      .filter((name) => {
+        const idxOfDefaultProjectNamePrefix = name.indexOf(defaultProjectNamePrefix);
+        
+        if (idxOfDefaultProjectNamePrefix !== 0) {
+          return false;
+        }
 
-          const projectNameStrippedOfDefaultPrefix = name.substr(defaultProjectNamePrefix.length);
-          return isStrAnInt(projectNameStrippedOfDefaultPrefix);
-        });
-      
-      const existingProjectIndices = existingProjectNamesWhichStartWithDefaultPrefixAndHaveNumericIdx
-        .map((name) => {
-          const projectNameStrippedOfDefaultPrefix = name.substr(defaultProjectNamePrefix.length);
-          return stricterParseInt(projectNameStrippedOfDefaultPrefix);
-        });
+        const projectNameStrippedOfDefaultPrefix = name.substr(defaultProjectNamePrefix.length);
+        return isStrAnInt(projectNameStrippedOfDefaultPrefix);
+      });
+    
+    const existingProjectIndices = existingProjectNamesWhichStartWithDefaultPrefixAndHaveNumericIdx
+      .map((name) => {
+        const projectNameStrippedOfDefaultPrefix = name.substr(defaultProjectNamePrefix.length);
+        return stricterParseInt(projectNameStrippedOfDefaultPrefix);
+      });
 
-      if (existingProjectIndices.length === 0) {
-        newProjectName = `${defaultProjectNamePrefix}1`;
-      } else {
-        const maxExistingProjectIdx = Math.max(...existingProjectIndices);        
-        newProjectName = `${defaultProjectNamePrefix}${maxExistingProjectIdx + 1}`;
-      }
+    if (existingProjectIndices.length === 0) {
+      newProjectName = `${defaultProjectNamePrefix}1`;
+    } else {
+      const maxExistingProjectIdx = Math.max(...existingProjectIndices);        
+      newProjectName = `${defaultProjectNamePrefix}${maxExistingProjectIdx + 1}`;
+    }
 
-      Events.emit('setProjectName', newProjectName);
-    })
-    .catch(err => handleErrorWithUiDefault(err));      
+    Events.emit('setProjectName', newProjectName);
+  });         
 }
 
 function getEntityType(entityEl) {
@@ -386,23 +389,36 @@ function getPrevNextTimeline(allTimeline, start) {
 class SaveDebug extends Component{
   constructor(props) {
     super(props);
-    const entitiesList = parseDataToSaveFormat(props.projectName, props.entitiesList, props.assetsList);
-    this.state = {
-      output: JSON.stringify(entitiesList, null, 2)
-    };
+    ipcHelper.parseDataToSaveFormat(props.projectName, props.entitiesList, props.assetsList, (err, data) => {
+      if (err) {
+        handleErrorWithUiDefault(err);
+        return;
+      }
+
+      this.state = {
+        output: JSON.stringify(data.projectJson, null, 2)
+      };
+    });    
   }
   componentDidUpdate(prevProps, prevState) {
     const props = this.props;
-    const entitiesList = parseDataToSaveFormat(props.projectName, props.entitiesList, props.assetsList);
-    // console.log(props.assetsList);
-    // const oldEntitiesList = parseDataToSaveFormat(prevProps.projectName, prevProps.entitiesList, prevProps.assetsList);
-    if (prevState.output !== this.state.output) {
-      return true;
-    } else if (JSON.stringify(entitiesList, null, 2) !== this.state.output) {
-      this.setState({
-        output: JSON.stringify(entitiesList, null, 2)
-      });
-    }
+    ipcHelper.parseDataToSaveFormat(props.projectName, props.entitiesList, props.assetsList, (err, data) => {
+      if (err) {
+        handleErrorWithUiDefault(err);
+        return;
+      }
+
+      const projectJson = data.projectJson;
+      // console.log(props.assetsList);
+      // const oldEntitiesList = parseDataToSaveFormat(prevProps.projectName, prevProps.entitiesList, prevProps.assetsList);
+      if (prevState.output !== this.state.output) {
+        return true;
+      } else if (JSON.stringify(projectJson, null, 2) !== this.state.output) {
+        this.setState({
+          output: JSON.stringify(projectJson, null, 2)
+        });
+      }
+    });    
   }
   render() {
     return (<div id="save-debug-panel">

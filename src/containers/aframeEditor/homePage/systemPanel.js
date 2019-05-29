@@ -6,13 +6,12 @@ import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 
 import routes from 'globals/routes';
-import IPCKeys from 'globals/ipcKeys';
+import ipcHelper from 'utils/ipcHelper';
 
-import {openSchoolVrFileDialog} from 'utils/aframeEditor/openFileDialog';
-import {loadProjectByProjectFilePathAsync} from 'utils/saveLoadProject/loadProject';
 import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 
 import './systemPanel.css';
+import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 
 const appName = require('globals/config').default.appName;
 
@@ -101,23 +100,30 @@ class SystemPanel extends Component {
                     });
                   }); */}
 
-                  openSchoolVrFileDialog(async (filePaths) => {
+                  ipcHelper.openSchoolVrFileDialog((err, data) => {
+                    if (err) {
+                      handleErrorWithUiDefault(err);
+                      return;
+                    }
+
+                    const filePaths = data;
                     if (isNonEmptyArray(filePaths)) {
-                      try {
-                        const projectJson = await loadProjectByProjectFilePathAsync(filePaths[0]);
-                        Events.emit('loadProject', projectJson);
-                      } catch (err) {
-                        console.error(err);
-                        alert(err);
-                      } finally {
+                      ipcHelper.loadProjectByProjectFilePath(filePaths[0], (err, data) => {
+                        if (err) {
+                          handleErrorWithUiDefault(err);                          
+                        } else {
+                          const projectJson = data.projectJson;
+                          Events.emit('loadProject', projectJson);
+                        }
+                        
                         this.setState({
                           menuOpen: false
                         });
-                      }
+                      });
                     } else {                      
                       //alert('No files are selected!');
                     }
-                  });
+                  });   
                 }}>Load</div>
                 <div className="seperator"></div>
                 <div className="menu-item" onClick={() => {
@@ -182,7 +188,7 @@ class SystemPanel extends Component {
                   Toggle S/L Debug
                 </div>
                 <div className="menu-item" onClick={() => {
-                  ipcRenderer.send(IPCKeys.toggleDevTools);
+                  ipcHelper.toggleDevTools();
                   this.setState({
                     menuOpen: false
                   });
@@ -207,13 +213,13 @@ class SystemPanel extends Component {
         </div>
         <div id="system-buttons">
           <button id="btn-min-app" onClick={() => {
-            ipcRenderer.send(IPCKeys.minimize);
+            ipcHelper.minimizeWindow();
           }} />
           <button id="btn-max-app" onClick={()=>{
-            ipcRenderer.send(IPCKeys.toggleMaximize);
+            ipcHelper.toggleMaximizeWindow();
           }} />
           <button id="btn-close-app" onClick={()=>{
-            ipcRenderer.send(IPCKeys.close);
+            ipcHelper.closeWindow();
           }} />
         </div>
       </div>
