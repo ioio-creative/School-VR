@@ -1,7 +1,7 @@
 // https://github.com/hokein/electron-sample-apps/tree/master/file-explorer
 
 import React, { Component } from 'react';
-import fileSystem from 'utils/fileSystem/fileSystem';
+import fileHelper from 'utils/fileHelper/fileHelper';
 
 import './style.css';
 
@@ -45,13 +45,13 @@ class AddressBar extends Component {
     const props = this.props;
 
     // Split path into separate elements
-    const pathItems = fileSystem.normalize(props.currentPath).split(fileSystem.sep);    
+    const pathItems = fileHelper.normalize(props.currentPath).split(fileHelper.sep);    
     
     // Customise path items
     const customisedPathItems = pathItems.map((pathItem, idx) => {
       return {
         name: pathItem,
-        path: pathItems.slice(0, idx + 1).join(fileSystem.sep)
+        path: pathItems.slice(0, idx + 1).join(fileHelper.sep)
       };
     });
     

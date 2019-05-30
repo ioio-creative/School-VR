@@ -7,7 +7,6 @@ import {library} from '@fortawesome/fontawesome-svg-core'
 
 import {appDirectory, setParamsReadFromExternalConfig} from 'globals/config';
 import ipcHelper from 'utils/ipcHelper';
-import fileSystem from 'utils/fileSystem/fileSystem';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 
 import asyncLoadingComponent from 'components/asyncLoadingComponent';
@@ -49,8 +48,9 @@ ipcHelper.deleteAllTempProjectDirectories((err) => {
 });
 
 // create App Data directories if they do not exist
-Object.keys(appDirectory).forEach((appDirectoryKey) => {  
-  fileSystem.createDirectoryIfNotExistsSync(appDirectory[appDirectoryKey]);
+const appDirectoryPaths = Object.keys(appDirectory).map(appDirectoryKey => appDirectory[appDirectoryKey]);
+ipcHelper.createDirectoriesIfNotExists(appDirectoryPaths, () => {
+  console.log('App directories created.');
 });
 
 /* Note: Using async to load editor page causes some undesirable effects, hence not used. */

@@ -353,7 +353,7 @@ const isDirectoryPromise = promisify(isDirectory);
 
 const base64Encode = (filePath, callBack) => {
   readFile(filePath, (err, data) => {
-    handleGeneralErrAndData(callBack, err, data);
+    handleGeneralErrAndData(callBack, err, toBase64Str(data));
   });
 };
 
@@ -500,8 +500,8 @@ const createAndOverwriteDirectoryIfExistsPromise = promisify(createAndOverwriteD
  *  files returned by fs.readdir is an array of file name strings
  */ 
 const readdir = (dirPath, callBack) => {  
-  fs.readdir(dirPath, (err, files) => {
-    handleGeneralErrAndData(callBack, err, files);
+  fs.readdir(dirPath, (err, fileNames) => {
+    handleGeneralErrAndData(callBack, err, fileNames);
   });
 };
 

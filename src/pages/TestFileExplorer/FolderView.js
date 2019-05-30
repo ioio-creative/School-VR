@@ -2,10 +2,10 @@
 
 import React, { Component } from 'react';
 
-import mime from 'utils/fileSystem/mime';
-
-import fileSystem from 'utils/fileSystem/fileSystem';
+import ipcHelper from 'utils/ipcHelper';
+import fileHelper from 'utils/fileHelper/fileHelper';
 import { getAbsoluteUrlFromRelativeUrl } from 'utils/setStaticResourcesPath';
+import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 
 import './style.css';
 
@@ -16,7 +16,16 @@ function FileItem(props) {
   return (
     <div className={addFocusClass("file")}
       onClick={(evnt) => { props.handleClickFunc(evnt, props.idx); }}
-      onDoubleClick={() => { props.handledDoubleClickFunc(props.path, mime.statSync(props.path)); }}
+      onDoubleClick={() => {
+        ipcHelper.mimeStat(props.path, (err, data) => {
+          if (err) {
+            handleErrorWithUiDefault(err);
+            return;
+          }
+
+          props.handledDoubleClickFunc(props.path, data.mimeStat);
+        });
+      }}
     >
       <div className={addFocusClass("icon")}>
         <img src={getAbsoluteUrlFromRelativeUrl(`fileExplorer/icons/${props.type}.png`)} />
@@ -64,19 +73,22 @@ class FolderView extends Component {
   enumerateDirectory() {
     const props = this.props;
 
-    fileSystem.readdir(props.currentPath, (error, files) => {
+    ipcHelper.readdir(props.currentPath, (error, fileNames) => {
       if (error) {
-        console.log(error);
-        window.alert(error);
+        handleErrorWithUiDefault(error);
         return;
       }
 
-      const customisedFiles = files.map((file) => {
-        return mime.statSync(fileSystem.join(props.currentPath, file))
-      });
-
-      this.setState({
-        files: customisedFiles
+      ipcHelper.mimeStats(fileNames.map(fileName => fileHelper.join(props.currentPath, fileName)), (err, data) => {
+        if (err) {
+          handleErrorWithUiDefault(error);
+          return;
+        }
+      
+        const customisedFiles = data.mimeStats;
+        this.setState({
+          files: customisedFiles
+        });
       });
     });    
   }

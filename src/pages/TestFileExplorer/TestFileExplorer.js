@@ -6,10 +6,12 @@ import AddressBar from 'pages/TestFileExplorer/AddressBar';
 import FolderView from 'pages/TestFileExplorer/FolderView';
 
 import config, { appDirectory } from 'globals/config';
-import fileSystem from 'utils/fileSystem/fileSystem';
+import fileHelper from 'utils/fileHelper/fileHelper';
+import ipcHelper from 'utils/ipcHelper';
 
 import './bootstrap/css/bootstrap.css';
 import './style.css';
+import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 
 const electron = window.require('electron');
 const { app, BrowserWindow, shell } = electron.remote;
@@ -82,11 +84,16 @@ class TestFileExplorer extends Component {
         const src = filePath;
         const dest = filePath + config.schoolVrProjectArchiveExtensionWithLeadingDot;
 
-        fileSystem.createPackage(src, dest, () => {          
+        ipcHelper.createPackage(src, dest, (err) => {
+          if (err) {
+            handleErrorWithUiDefault(err);
+            return;
+          }
+
           this.setState({
             // this shows the normalized version of the path ... , not what I want
-            //currentPath: fileSystem.join(filePath, '..')
-            currentPath: filePath + fileSystem.sep + '..'
+            //currentPath: fileHelper.join(filePath, '..')
+            currentPath: filePath + fileHelper.sep + '..'
           });
         });
       } else {
@@ -98,26 +105,37 @@ class TestFileExplorer extends Component {
       }      
     } else if (filePath.includes(config.schoolVrProjectArchiveExtensionWithLeadingDot)) {  // test unpackaging
       const archive = filePath;
-      const dest = fileSystem.join(config.appTempDirectory, fileSystem.getFileNameWithoutExtension(filePath));      
-      fileSystem.extractAll(archive, dest);
-    } else if (mime.type === 'image') {  // test base64 encode / decode
-      fileSystem.base64Encode(mime.path, (err, data) => {
+      const dest = fileHelper.join(config.appTempDirectory, fileHelper.getFileNameWithoutExtension(filePath));      
+      ipcHelper.extractAll(archive, dest, (err) => {
         if (err) {
-          console.error(err);
-        } else {
-          //console.log(data);
-          const pathToSave = fileSystem.join(config.appDataDirectory, 'test_images', 'test1' + fileSystem.getFileExtensionWithLeadingDot(mime.path));
-          //console.log(pathToSave);
-          if (fileSystem.resolve(pathToSave) !== fileSystem.resolve(mime.path)) {
-            fileSystem.base64Decode(
-              pathToSave,
-              data,
-              (err) => { console.error(err); }
-            );
-          } else {
-            shell.openItem(mime.path);      
-          }
+          handleErrorWithUiDefault(err);
         }
+      });
+    } else if (mime.type === 'image') {  // test base64 encode / decode
+      ipcHelper.base64Encode(mime.path, (err, data) => {
+        if (err) {
+          handleErrorWithUiDefault(err);
+          return;
+        }
+        
+        const encodedStr = data.encodedStr;
+        //console.log(encodedStr);
+        const pathToSave = fileHelper.join(config.appDataDirectory, 'test_images', 'test1' + fileHelper.getFileExtensionWithLeadingDot(mime.path));
+        //console.log(pathToSave);
+        if (fileHelper.resolve(pathToSave) !== fileHelper.resolve(mime.path)) {
+          ipcHelper.base64Decode(
+            pathToSave,
+            encodedStr,
+            (err) => {
+              if (err) {
+                handleErrorWithUiDefault(err);
+                return;
+              }
+            }
+          );
+        } else {
+          shell.openItem(mime.path);      
+        }        
       });      
     } else {      
       shell.openItem(mime.path);

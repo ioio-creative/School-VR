@@ -2,10 +2,9 @@
 
 import React, { Component } from 'react';
 
-import fileSystem from 'utils/fileSystem';
-
-const electron = window.require('electron');
-const dialog = electron.remote.dialog;
+import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
+import ipcHelper from 'utils/ipcHelper';
+import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 
 
 class TestSaveLoad extends Component {
@@ -23,21 +22,28 @@ class TestSaveLoad extends Component {
   /* event handlers */
 
   handleSelectFileClick() {
-    dialog.showOpenDialog((fileNames) => {
-      if (fileNames === undefined) {
+    ipcHelper.showOpenDialog((err, data) => {
+      if (err) {
+        handleErrorWithUiDefault(err);
+        return;
+      }
+
+      const filePaths = data.filePaths;
+
+      if (!isNonEmptyArray(filePaths)) {
         console.log("No file selected");
       } else {
-        this.actualFileTxt.current.value = fileNames[0];
+        this.actualFileTxt.current.value = filePaths[0];
         const self = this;
         const callBack = function(err, data) {
           if (err) {
-            alert("An error ocurred reading the file :" + err.message);
+            handleErrorWithUiDefault(err);
             return;
           }
       
-          self.contentEditorTxt.current.value = data;
+          self.contentEditorTxt.current.value = data.content;
         };
-        fileSystem.readFile(fileNames[0], callBack);
+        ipcHelper.readFile(filePaths[0], callBack);        
       }
     });
   }
@@ -47,14 +53,13 @@ class TestSaveLoad extends Component {
     if (actualFilePath) {
       const callBack = (err) => {
         if (err) {
-          alert("An error ocurred updating the file" + err.message);
-          console.log(err);
+          handleErrorWithUiDefault(err);
           return;
         }
     
         alert("The file has been succesfully saved");
       }
-      fileSystem.writeFile(actualFilePath, this.contentEditorTxt.current.value, callBack);      
+      ipcHelper.writeFile(actualFilePath, this.contentEditorTxt.current.value, callBack);            
     } else {
       alert("Please select a file first");
     }
@@ -66,13 +71,12 @@ class TestSaveLoad extends Component {
     if (actualFilePath) {
       const callBack = (err) => {
         if (err) {
-          alert("An error ocurred updating the file" + err.message);
-          console.log(err);
+          handleErrorWithUiDefault(err);
           return;
         }
       };
       
-      fileSystem.deleteFile(actualFilePath, callBack);
+      ipcHelper.deleteFile(actualFilePath, callBack);
       this.actualFileTxt.current.value = "";
       this.contentEditorTxt.current.value = "";
     } else {
@@ -83,21 +87,21 @@ class TestSaveLoad extends Component {
   handleCreateNewFileClick() {
     const content = this.contentEditorTxt.current.value;
 
-    dialog.showSaveDialog((fileName) => {
-      if (fileName === undefined) {
+    ipcHelper.showSaveDialog((filePath) => {
+      if (filePath === undefined) {
         console.log("You didn't save the file");
         return;
       }
 
-      console.log(fileName);
+      console.log(filePath);
 
       const callBack = (err) => {
         if (err) {
-          alert("An error ocurred creating the file " + err.message)
+          handleErrorWithUiDefault(err);
         }
         alert("The file has been succesfully saved");
       };
-      fileSystem.writeFile(fileName, content, callBack);
+      ipcHelper.writeFile(filePath, content, callBack);
     });
   }
 

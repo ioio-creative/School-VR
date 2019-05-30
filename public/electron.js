@@ -3,15 +3,18 @@ const app = electron.app;
 const ipcMain = electron.ipcMain;
 const BrowserWindow = electron.BrowserWindow;
 //const globalShortcut = electron.globalShortcut;
+const dialog = electron.dialog;
 
 const path = require('path');
 //const url = require('url');
 const isDev = require('electron-is-dev');
 const {fork} = require('child_process');
-const fs = require('fs');
+const {forEach} = require('p-iteration');
 
 const jsoncParser = require('jsonc-parser');
 
+const mime = require('utils/fileSystem/mime');
+const fileSystem = require('utils/fileSystem/fileSystem');
 const {ProjectFile} = require('utils/saveLoadProject/ProjectFile');
 const {openImageDialog, openGifDialog, openVideoDialog, openSchoolVrFileDialog} = 
   require('utils/aframeEditor/openFileDialog');
@@ -44,35 +47,19 @@ let paramsFromExternalConfigForReact;
 /* end of global variables */
 
 
-// default text file
-const defaultReadFileOptions = {
-  encoding: 'utf8',
-  flag: 'r'
-};
+async function readConfigFile(configFile) {
+  const data = await fileSystem.readFilePromise(configFile);
+  const configObj = jsoncParser.parse(data);
+  const configObjForElectron = configObj.electron;
+  paramsFromExternalConfigForReact = configObj.react;      
 
-function readConfigFile(configFile) {
-  fs.readFile(configFile,  defaultReadFileOptions, (err, data) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
+  // set some global variables
+  developmentServerPort = configObjForElectron.developmentServerPort || developmentServerPort;
 
-    try {      
-      const configObj = jsoncParser.parse(data);
-      const configObjForElectron = configObj.electron;
-      paramsFromExternalConfigForReact = configObj.react;      
+  webServerPort = configObjForElectron.webServerPort || webServerPort;
+  webServerRootDirPath = configObjForElectron.webServerRootDirPath || webServerRootDirPath;      
 
-      // set some global variables
-      developmentServerPort = configObjForElectron.developmentServerPort || developmentServerPort;
-
-      webServerPort = configObjForElectron.webServerPort || webServerPort;
-      webServerRootDirPath = configObjForElectron.webServerRootDirPath || webServerRootDirPath;      
-
-      splashScreenDurationInMillis = configObjForElectron.splashScreenDurationInMillis || splashScreenDurationInMillis;      
-    } catch (err) {
-      console.error(err);
-    }    
-  });
+  splashScreenDurationInMillis = configObjForElectron.splashScreenDurationInMillis || splashScreenDurationInMillis;          
 }
 
 function createWindow() {
@@ -190,8 +177,12 @@ function startWebServer() {
 
 /* app lifecycles */
 
-app.on('ready', _ => {
-  readConfigFile(configFilePath);
+app.on('ready', async _ => {
+  try {
+    await readConfigFile(configFilePath);
+  } catch (err) {
+    console.error(err);
+  }
 
   startWebServer();
   createWindow();  
@@ -254,6 +245,182 @@ ipcMain.on('getParamsFromExternalConfig', (event, arg) => {
     err: null,
     data: paramsFromExternalConfigForReact
   });
+});
+
+// fileSystem
+
+ipcMain.on('mimeStat', (event, arg) => {
+  const filePath = arg;
+  try {
+    const mimeStat = mime.statSync(filePath);
+    event.sender.send('mimeStatResponse', {
+      err: null,
+      data: {
+        mimeStat: mimeStat
+      }
+    });
+  } catch (err) {
+    event.sender.send('mimeStatResponse', {
+      err: err,
+      data: null
+    });
+  }  
+});
+
+ipcMain.on('mimeStats', (event, arg) => {
+  const filePaths = arg;
+  try {
+    const mimeStats = filePaths.map(filePath => mime.statSync(filePath));
+    event.sender.send('mimeStatsResponse', {
+      err: null,
+      data: {
+        mimeStats: mimeStats
+      }
+    });
+  } catch (err) {
+    event.sender.send('mimeStatsResponse', {
+      err: err,
+      data: null
+    });
+  }  
+});
+
+ipcMain.on('base64Encode', async (event, arg) => {
+  const filePath = arg;
+  try {
+    const encodedStr = await fileSystem.base64EncodePromise(filePath);
+    event.sender.send('base64EncodeResponse', {
+      err: null,
+      data: {
+        encodedStr: encodedStr
+      }
+    });
+  } catch (err) {
+    event.sender.send('base64EncodeResponse', {
+      err: err,
+      data: null
+    });
+  }  
+});
+
+ipcMain.on('base64Decode', async (event, arg) => {  
+  try {
+    await fileSystem.base64DecodePromise(arg.locationToSaveFile, arg.encodedStr);
+    event.sender.send('base64DecodeResponse', {
+      err: null,      
+    });
+  } catch (err) {
+    event.sender.send('base64DecodeResponse', {
+      err: err,      
+    });
+  }  
+});
+
+ipcMain.on('createPackage', async (event, arg) => {  
+  try {
+    await fileSystem.createPackagePromise(arg.src, arg.dest);
+    event.sender.send('createPackageResponse', {
+      err: null,      
+    });
+  } catch (err) {
+    event.sender.send('createPackageResponse', {
+      err: err,      
+    });
+  }
+});
+
+ipcMain.on('extractAll', (event, arg) => {  
+  try {
+    fileSystem.extractAll(arg.archive, arg.dest);
+    event.sender.send('extractAllResponse', {
+      err: null,      
+    });
+  } catch (err) {
+    event.sender.send('extractAllResponse', {
+      err: err,      
+    });
+  }
+});
+
+ipcMain.on('readdir', async (event, arg) => {  
+  try {
+    const dirPath = arg;
+    const fileNames = await fileSystem.readdirPromise(dirPath);
+    event.sender.send('readdirResponse', {
+      err: null,
+      data: {
+        fileNames: fileNames
+      }   
+    });
+  } catch (err) {
+    event.sender.send('readdirResponse', {
+      err: err,
+      data: null
+    });
+  }
+});
+
+ipcMain.on('createDirectoriesIfNotExists', async (event, arg) => {
+  const directoryPaths = arg;
+  try {
+    await forEach(directoryPaths, async (directoryPath) => {
+      await fileSystem.createDirectoryIfNotExistsPromise(directoryPath);
+    });
+    event.sender.send('createDirectoriesIfNotExistsResponse', {
+      err: null,
+      data: null
+    });
+  } catch (err) {
+    event.sender.send('createDirectoriesIfNotExistsResponse', {
+      err: err,
+      data: null
+    });
+  }  
+});
+
+ipcMain.on('readFile', async (event, arg) => {
+  try {
+    const filePath = arg;
+    const content = await fileSystem.readFilePromise(filePath);
+    event.sender.send('readFileResponse', {
+      err: null,
+      data: {
+        content: content
+      }
+    });
+  } catch (err) {
+    event.sender.send('readFileResponse', {
+      err: err,
+      data: null
+    });
+  } 
+});
+
+ipcMain.on('writeFile', async (event, arg) => {
+  try {
+    await fileSystem.writeFilePromise(arg.filePath, arg.content);    
+    event.sender.send('writeFileResponse', {
+      err: null      
+    });
+  } catch (err) {
+    event.sender.send('writeFileResponse', {
+      err: err      
+    });
+  } 
+});
+
+ipcMain.on('deleteFile', async (event, arg) => {
+  try {
+    const filePath = arg;
+    await fileSystem.myDeletePromise(filePath);    
+    event.sender.send('deleteFileResponse', {
+      err: null
+    });
+  } catch (err) {
+    event.sender.send('deleteFileResponse', {
+      err: err      
+    });
+  } 
 });
 
 // saveLoadProject
@@ -367,7 +534,7 @@ ipcMain.on('deleteAllTempProjectDirectories', (event, arg) => {
 
 ipcMain.on('openImageDialog', (event, args) => {
   openImageDialog((filePaths) => {
-    event.send.send('openImageDialogResponse', {
+    event.sender.send('openImageDialogResponse', {
       data: {
         filePaths: filePaths
       }
@@ -377,7 +544,7 @@ ipcMain.on('openImageDialog', (event, args) => {
 
 ipcMain.on('openGifDialog', (event, args) => {
   openGifDialog((filePaths) => {
-    event.send.send('openGifDialogResponse', {
+    event.sender.send('openGifDialogResponse', {
       data: {
         filePaths: filePaths
       }
@@ -387,7 +554,7 @@ ipcMain.on('openGifDialog', (event, args) => {
 
 ipcMain.on('openVideoDialog', (event, args) => {
   openVideoDialog((filePaths) => {
-    event.send.send('openVideoDialogResponse', {
+    event.sender.send('openVideoDialogResponse', {
       data: {
         filePaths: filePaths
       }
@@ -397,9 +564,31 @@ ipcMain.on('openVideoDialog', (event, args) => {
 
 ipcMain.on('openSchoolVrFileDialog', (event, args) => {
   openSchoolVrFileDialog((filePaths) => {
-    event.send.send('openSchoolVrFileDialogResponse', {
+    event.sender.send('openSchoolVrFileDialogResponse', {
       data: {
         filePaths: filePaths
+      }
+    });
+  });
+});
+
+// vanilla electron dialog
+
+ipcMain.on('showOpenDialog', (event, args) => {
+  dialog.showOpenDialog((filePaths) => {
+    event.sender.send('showOpenDialogResponse', {
+      data: {
+        filePaths: filePaths
+      }
+    });
+  });
+});
+
+ipcMain.on('showSaveDialog', (event, args) => {
+  dialog.showOpenDialog((filePath) => {
+    event.sender.send('showSaveDialogResponse', {
+      data: {
+        filePath: filePath
       }
     });
   });

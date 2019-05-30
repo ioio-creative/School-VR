@@ -23,26 +23,22 @@ const statSync = (filepath) => {
     path: filepath
   };
 
-  try {    
-    if (fileSystem.isDirectorySync(filepath)) {
-      result.type = 'folder';
-    } else {
-      const ext = fileSystem.getFileExtensionWithoutLeadingDot(filepath);
-      result.type = cached[ext];
-      if (!result.type) {
-        for (let key in map) {
-          if (map[key].includes(ext.toLowerCase())) {
-            cached[ext] = result.type = key;
-            break;
-          }
+  if (fileSystem.isDirectorySync(filepath)) {
+    result.type = 'folder';
+  } else {
+    const ext = fileSystem.getFileExtensionWithoutLeadingDot(filepath);
+    result.type = cached[ext];
+    if (!result.type) {
+      for (let key in map) {
+        if (map[key].includes(ext.toLowerCase())) {
+          cached[ext] = result.type = key;
+          break;
         }
-
-        if (!result.type)
-          result.type = 'blank';
       }
+
+      if (!result.type)
+        result.type = 'blank';
     }
-  } catch (e) {
-    window.alert(e);
   }
 
   return result;
