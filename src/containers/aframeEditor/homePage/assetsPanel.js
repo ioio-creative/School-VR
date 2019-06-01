@@ -7,9 +7,11 @@
 */
 import React, {Component} from 'react';
 
-import './assetsPanel.css';
+import ipcHelper from 'utils/ipcHelper';
+import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
+import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 
-const {dialog} = window.require('electron').remote;
+import './assetsPanel.css';
 
 //const Events = require('vendor/Events.js');
 
@@ -28,7 +30,7 @@ function handleUpload(event, callback) {
   }
 }
 function handleUploadThroughElectron(callback) {
-  const src = dialog.showOpenDialog({
+  ipcHelper.showOpenDialog({
     properties: [
       'openFile'
     ],
@@ -37,12 +39,22 @@ function handleUploadThroughElectron(callback) {
       {name: 'Movies', extensions: ['mp4']},
       {name: 'All Files', extensions: ['*']}
     ]
-  });
-  callback({
-    src: src,
-    width: 'test',
-    height: 'test'
-  });
+  }, (err, data) => {
+    if (err) {
+      handleErrorWithUiDefault(err);
+      return;
+    }
+    const filePaths = data.filePaths;
+    if (!isNonEmptyArray(filePaths)) {
+      console.log("No file selected");
+    } else {
+      callback({
+        src: filePaths[0],
+        width: 'test',
+        height: 'test'
+      });
+    }
+  });  
 }
 // if have time, this one seems funny
 // http://www.html5rocks.com/en/tutorials/canvas/imagefilters/
@@ -114,7 +126,7 @@ class AssetsPanel extends Component {
     });
   }
   render() {
-    const props = this.props;
+    //const props = this.props;
     const self = this;
     return (
       <div id="assets-panel">

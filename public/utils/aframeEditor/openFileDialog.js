@@ -1,4 +1,4 @@
-import { appDirectory, openFileDialogFilter } from 'globals/config';
+const { appDirectory, openFileDialogFilter } = require('../../globals/config');
 
 //const { BrowserWindow, dialog } = require('electron').remote;
 const { BrowserWindow, dialog } = require('electron');

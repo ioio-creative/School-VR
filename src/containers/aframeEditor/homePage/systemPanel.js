@@ -17,42 +17,64 @@ const appName = require('globals/config').default.appName;
 
 const Events = require('vendor/Events.js');
 
-const electron = window.require('electron');
-const ipcRenderer = electron.ipcRenderer;
 const smalltalk = require('smalltalk');
 
 
 class SystemPanel extends Component {
   constructor(props) {
     super(props);
+    
     this.state = {
       menuOpen: false,
       hoverItem: null,
       snapshot: []
     };
-    const self = this;
-    this.clickEvent = function(event) {
-      if (!self.menuWrap.contains(event.target)) {
-        self.setState({
-          menuOpen: false
-        });
-      }
-    }
+
+    this.clickEvent = this.clickEvent.bind(this);
+    this.handleWindowMaximize = this.handleWindowMaximize;
+    this.handleWindowUnmaximize = this.handleWindowUnmaximize;
   }
+
+
+  /* react lifecycles */
+
   componentDidMount() {
-    ipcRenderer.on('maximize', () => {
-      const bodyClassList = document.body.classList;
-      bodyClassList.add("maximized");
-    })
-    ipcRenderer.on('unmaximize', () => {
-      const bodyClassList = document.body.classList;
-      bodyClassList.remove("maximized");
-    })
+    ipcHelper.addListener('maximize', this.handleWindowMaximize);      
+    ipcHelper.addListener('unmaximize', this.handleWindowUnmaximize);
     document.addEventListener('click', this.clickEvent);
   }
+
   componentWillUnmount() {
+    ipcHelper.removeListener('maximize', this.handleWindowMaximize);      
+    ipcHelper.removeListener('unmaximize', this.handleWindowUnmaximize);
     document.removeEventListener('click', this.clickEvent);
   }
+
+  /* end of react lifecycles */
+
+
+  /* event handlers */
+
+  clickEvent(event) {
+    if (!this.menuWrap.contains(event.target)) {
+      this.setState({
+        menuOpen: false
+      });
+    }
+  }
+
+  handleWindowMaximize(event, arg) {
+    const bodyClassList = document.body.classList;
+    bodyClassList.add("maximized");
+  }
+
+  handleWindowUnmaximize(event, arg) {
+    const bodyClassList = document.body.classList;
+    bodyClassList.remove("maximized");
+  }
+
+  /* end of event handlers */
+  
   render() {
     return (
       <div id="system-panel">

@@ -8,13 +8,13 @@ import FolderView from 'pages/TestFileExplorer/FolderView';
 import config, { appDirectory } from 'globals/config';
 import fileHelper from 'utils/fileHelper/fileHelper';
 import ipcHelper from 'utils/ipcHelper';
+import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 
 import './bootstrap/css/bootstrap.css';
 import './style.css';
-import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 
 const electron = window.require('electron');
-const { app, BrowserWindow, shell } = electron.remote;
+const { BrowserWindow } = electron.remote;
 
 
 let aboutWindow;
@@ -63,7 +63,7 @@ class TestFileExplorer extends Component {
   getAbsolutePathFromHome(path) {
     let absolutePath = path;
     if (path.indexOf('~') === 0) {      
-      absolutePath = path.replace('~', app.getPath('home'));
+      absolutePath = path.replace('~', appDirectory.homeDirectory);
     }
     return absolutePath;
   }
@@ -134,11 +134,11 @@ class TestFileExplorer extends Component {
             }
           );
         } else {
-          shell.openItem(mime.path);      
+          ipcHelper.shellOpenItem(mime.path);      
         }        
       });      
     } else {      
-      shell.openItem(mime.path);
+      ipcHelper.shellOpenItem(mime.path);
     }
   }
 
@@ -153,15 +153,22 @@ class TestFileExplorer extends Component {
   }
 
   handleAboutButtonClick() {
-    const params = {
+    const options = {
       toolbar: false,
       //resizable: false,
       show: true,
       height: 600,
       width: 800
     };
-    aboutWindow = new BrowserWindow(params);
-    aboutWindow.loadURL('https://github.com/hokein/electron-sample-apps/tree/master/file-explorer');
+    ipcHelper.newBrowserWindow(options, 'https://github.com/hokein/electron-sample-apps/tree/master/file-explorer',
+      (err, data) => {
+        if (err) {
+          handleErrorWithUiDefault(err);
+          return;
+        }
+        aboutWindow = data.newWindow;
+      }
+    );    
   }
 
   /* end of event handlers */

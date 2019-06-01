@@ -5,7 +5,7 @@ import routes from 'globals/routes';
 import {library} from '@fortawesome/fontawesome-svg-core'
 // import {faArrowsAlt, faArrowsAlt} from '@fortawesome/free-solid-svg-icons'
 
-import {appDirectory, setParamsReadFromExternalConfig} from 'globals/config';
+import {setAppData, appDirectory, setParamsReadFromExternalConfig} from 'globals/config';
 import ipcHelper from 'utils/ipcHelper';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 
@@ -16,6 +16,34 @@ import asyncLoadingComponent from 'components/asyncLoadingComponent';
 
 import './App.css';
 
+
+ipcHelper.getAppData((err, data) => {
+  if (err) {
+    handleErrorWithUiDefault(err);
+    return;
+  }
+
+  setAppData(data.appName, data.homePath, data.appDataPath, data.documentsPath, _ => {
+    // delete any cached temp project files
+    ipcHelper.deleteAllTempProjectDirectories((err) => {
+      if (err) {
+        handleErrorWithUiDefault(err);
+        return;
+      }
+
+      // create App Data directories if they do not exist
+      const appDirectoryPaths = Object.keys(appDirectory).map(appDirectoryKey => appDirectory[appDirectoryKey]);
+      ipcHelper.createDirectoriesIfNotExists(appDirectoryPaths, (err) => {
+        if (err) {
+          handleErrorWithUiDefault(err);
+          return;
+        }
+        
+        console.log('App directories created.');
+      });
+    });    
+  });
+})
 
 ipcHelper.getParamsFromExternalConfig((err, data) => {
   if (err) {
@@ -42,16 +70,6 @@ faIconsNeed.forEach(iconName => {
   library.add(icon);
 });
 
-// delete any cached temp project files
-ipcHelper.deleteAllTempProjectDirectories((err) => {
-  handleErrorWithUiDefault(err);
-});
-
-// create App Data directories if they do not exist
-const appDirectoryPaths = Object.keys(appDirectory).map(appDirectoryKey => appDirectory[appDirectoryKey]);
-ipcHelper.createDirectoriesIfNotExists(appDirectoryPaths, () => {
-  console.log('App directories created.');
-});
 
 /* Note: Using async to load editor page causes some undesirable effects, hence not used. */
 // Code Splitting and React Router v4

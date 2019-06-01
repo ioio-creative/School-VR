@@ -1,8 +1,8 @@
 const {forEach} = require('p-iteration');
 const {config, mediaType, appDirectory, projectDirectoryStructure} = require('../../globals/config');
-const fileSystem = require('../utils/fileSystem/fileSystem');
-const CustomedFileStats = require('../utils/fileSystem/CustomedFileStats');
-const isNonEmptyArray = require('../utils/variableType/isNonEmptyArray');
+const fileSystem = require('../fileSystem/fileSystem');
+const CustomedFileStats = require('../fileSystem/CustomedFileStats');
+const isNonEmptyArray = require('../variableType/isNonEmptyArray');
 const listProjectsAsync = require('./listProjectsAsync');
 const {isCurrentLoadedProject, setCurrentLoadedProjectFilePath} = require('./loadProject');
 const parseDataToSaveFormat = require('./parseDataToSaveFormat');

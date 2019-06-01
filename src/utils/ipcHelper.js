@@ -1,8 +1,65 @@
+import isFunction from 'utils/variableType/isFunction';
+
+
 const electron = window.require ? window.require('electron') : null;
 const ipc = electron ? electron.ipcRenderer : null;
 
 
+/* listeners */
+
+const addListener = (channel, listener) => {
+  ipc.on(channel, listener);
+}
+
+const removeListener = (channel, listener) => {
+  ipc.removeListener(channel, listener);
+}
+
+/* end of listeners */
+
+
+const getParamsFromExternalConfig = (callBack) => {
+  ipc.once('getParamsFromExternalConfigResponse', (event, arg) => {    
+    callBack(arg.err, arg.data);    
+  });
+  ipc.send('getParamsFromExternalConfig');
+};
+
+
+/* app */
+
+const getAppData = (callBack) => {
+  ipc.once('getAppDataResponse', (event, arg) => {
+    callBack(arg.err, arg.data);
+  });
+  ipc.send('getAppData');
+};
+
+/* end of app */
+
+
+/* shell */
+
+const shellOpenItem = (filePath) => {
+  ipc.send('shellOpenItem');
+};
+
+/* end of shell */
+
+
 /* electron window api */
+
+const newBrowserWindow = (windowOptions, url, callBack) => {
+  if (isFunction(callBack)) {
+    ipc.once('newBrowserWindowResponse', (err, data) => {
+      callBack(err, data);
+    });
+  }
+  ipc.send('newBrowserWindow', {
+    windowOptions: windowOptions,
+    url: url
+  });
+}
 
 const closeWindow = () => {
   ipc.send('close');
@@ -21,14 +78,6 @@ const toggleDevTools = () => {
 };
 
 /* end of electron window api */
-
-
-const getParamsFromExternalConfig = (callBack) => {
-  ipc.once('getParamsFromExternalConfigResponse', (event, arg) => {    
-    callBack(arg.err, arg.data);    
-  });
-  ipc.send('getParamsFromExternalConfig');
-};
 
 
 /* fileSystem */
@@ -218,31 +267,42 @@ const openSchoolVrFileDialog = (callBack) => {
 
 /* vanilla electron dialog */
 
-const showOpenDialog = (callBack) => {
+const showOpenDialog = (options, callBack) => {
   ipc.once('showOpenDialogResponse', (event, arg) => {
     callBack(arg.err, arg.data);
   });
-  ipc.send('showOpenDialog');
+  ipc.send('showOpenDialog', options);
 };
 
-const showSaveDialog = (callBack) => {
+const showSaveDialog = (options, callBack) => {
   ipc.once('showSaveDialogResponse', (event, arg) => {
     callBack(arg.err, arg.data);
   });
-  ipc.send('showSaveDialog');
+  ipc.send('showSaveDialog', options);
 }
 
 /* end of vanilla electron dialog */
 
 
 export default {
+  // listeners
+  addListener,
+  removeListener,
+
+  getParamsFromExternalConfig,
+
+  // app
+  getAppData,
+
+  // shell
+  shellOpenItem,
+
   // electron window api
+  newBrowserWindow,
   closeWindow,
   minimizeWindow,
   toggleMaximizeWindow,
-  toggleDevTools,
-
-  getParamsFromExternalConfig,
+  toggleDevTools,  
 
   // fileSystem
   mimeStat,
@@ -251,6 +311,7 @@ export default {
   base64Decode,
   createPackage,
   extractAll,
+  readdir,
   createDirectoriesIfNotExists,
   readFile,
   writeFile,

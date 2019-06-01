@@ -4,6 +4,7 @@ const ipcMain = electron.ipcMain;
 const BrowserWindow = electron.BrowserWindow;
 //const globalShortcut = electron.globalShortcut;
 const dialog = electron.dialog;
+const shell = electron.shell;
 
 const path = require('path');
 //const url = require('url');
@@ -13,13 +14,13 @@ const {forEach} = require('p-iteration');
 
 const jsoncParser = require('jsonc-parser');
 
-const mime = require('utils/fileSystem/mime');
-const fileSystem = require('utils/fileSystem/fileSystem');
-const {ProjectFile} = require('utils/saveLoadProject/ProjectFile');
+const mime = require('./utils/fileSystem/mime');
+const fileSystem = require('./utils/fileSystem/fileSystem');
+const {ProjectFile} = require('./utils/saveLoadProject/ProjectFile');
 const {openImageDialog, openGifDialog, openVideoDialog, openSchoolVrFileDialog} = 
-  require('utils/aframeEditor/openFileDialog');
-const {listProjectsAsync} = require('utils/saveLoadProject/listProjectsAsync');
-const {parseDataToSaveFormat} = require('utils/saveLoadProject/parseDataToSaveFormat');
+  require('./utils/aframeEditor/openFileDialog');
+const {listProjectsAsync} = require('./utils/saveLoadProject/listProjectsAsync');
+const {parseDataToSaveFormat} = require('./utils/saveLoadProject/parseDataToSaveFormat');
 
 
 /* constants */
@@ -214,7 +215,49 @@ function getSenderWindowFromEvent(ipcEvent) {
 //   event.sender.send('actionReply', result);
 // });
 
+ipcMain.on('getParamsFromExternalConfig', (event, arg) => { 
+  event.sender.send('getParamsFromExternalConfigResponse', {
+    err: null,
+    data: paramsFromExternalConfigForReact
+  });
+});
+
+// app
+
+// // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname
+ipcMain.on('getAppData', (event, arg) => {
+  const data = {
+    appName: app.getName(),
+    homePath: app.getPath('home'),
+    appDataPath: app.getPath('appData'),
+    documentsPath: app.getPath('documents')
+  };
+  event.sender.send('getAppDataResponse', {
+    err: null,
+    data: data
+  });
+});
+
+// shell
+ipcMain.on('shellOpenItem', (event, arg) => {
+  const filePath = arg;
+  shell.openItem(filePath);
+});
+
 // electron window api
+
+ipcMain.on('newBrowserWindow', (event, arg) => {
+  const windowOptions = arg.windowOptions;
+  const url = arg.url;
+  const newWindow = new BrowserWindow(windowOptions);
+  newWindow.loadURL(url);
+  event.sender.send('newBrowserWindowResponse', {
+    err: null,
+    data: {
+      newWindow: newWindow
+    }
+  });
+});
 
 ipcMain.on('close', (event, arg) => {  
   const senderWindow = getSenderWindowFromEvent(event);  
@@ -237,14 +280,6 @@ ipcMain.on('toggleMaximize', (event, arg) => {
 
 ipcMain.on('toggleDevTools', (event, arg) => {
   event.sender.toggleDevTools();
-});
-
-
-ipcMain.on('getParamsFromExternalConfig', (event, arg) => { 
-  event.sender.send('getParamsFromExternalConfigResponse', {
-    err: null,
-    data: paramsFromExternalConfigForReact
-  });
 });
 
 // fileSystem
@@ -575,7 +610,8 @@ ipcMain.on('openSchoolVrFileDialog', (event, args) => {
 // vanilla electron dialog
 
 ipcMain.on('showOpenDialog', (event, args) => {
-  dialog.showOpenDialog((filePaths) => {
+  const options = args;
+  dialog.showOpenDialog(options, (filePaths) => {
     event.sender.send('showOpenDialogResponse', {
       data: {
         filePaths: filePaths
@@ -585,7 +621,8 @@ ipcMain.on('showOpenDialog', (event, args) => {
 });
 
 ipcMain.on('showSaveDialog', (event, args) => {
-  dialog.showOpenDialog((filePath) => {
+  const options = args;
+  dialog.showOpenDialog(options, (filePath) => {
     event.sender.send('showSaveDialogResponse', {
       data: {
         filePath: filePath

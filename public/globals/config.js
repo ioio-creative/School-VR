@@ -1,24 +1,23 @@
 const electron = require('electron');
-const remote = electron.remote;
-const { app } = remote;
-const path = require('path');
+const { app } = electron;
+const fileSystem = require('../utils/fileSystem/fileSystem');
+
 
 const appName = app.getName();
 
+const appDirectory = {
+  // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname  
+  appDataDirectory: fileSystem.join(app.getPath('appData'), `${appName}-Data`),  
+  appProjectsDirectory: fileSystem.join(app.getPath('documents'), `${appName}-Projects`),  
+  appTempDirectory: fileSystem.join(app.getPath('appData'), `${appName}-Temp`),
+  appTempProjectsDirectory: fileSystem.join(app.getPath('appData'), `${appName}-Temp`, `${appName}-Projects`)
+};
 
 const config = {
   appName: appName,
   appDirectory: appDirectory,
   schoolVrProjectArchiveExtensionWithLeadingDot: '.ivr',
   jsonFileExtensionWithLeadingDot: '.json'
-};
-
-const appDirectory = {
-  // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname  
-  appDataDirectory: path.join(app.getPath('appData'), `${appName}-Data`),  
-  appProjectsDirectory: path.join(app.getPath('documents'), `${appName}-Projects`),  
-  appTempDirectory: path.join(app.getPath('appData'), `${appName}-Temp`),
-  appTempProjectsDirectory: path.join(app.getPath('appData'), `${appName}-Temp`, `${appName}-Projects`)
 };
 
 // https://electronjs.org/docs/api/dialog
@@ -77,7 +76,7 @@ let setParamsReadFromExternalConfig = (configObj) => {
 //   something = val;
 // };
 
-modules.exports.config = {
+module.exports.config = {
   config,
   mediaType,
   appDirectory,

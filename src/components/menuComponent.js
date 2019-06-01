@@ -13,9 +13,6 @@ import {invokeIfIsFunction} from 'utils/variableType/isFunction';
 
 import './menuComponent.css';
 
-const electron = window.require('electron');
-const ipcRenderer = electron.ipcRenderer;
-
 
 const appName = config.appName;
 

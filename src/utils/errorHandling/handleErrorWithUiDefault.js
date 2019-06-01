@@ -1,4 +1,5 @@
 export default function handleErrorWithUiDefault(err) {
-  console.error(err);
-  window.alert(err);
+  const stringifiedErr = JSON.stringify(err);
+  console.error(stringifiedErr);
+  window.alert(stringifiedErr);
 };

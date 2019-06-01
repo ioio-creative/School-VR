@@ -480,7 +480,7 @@ class ProjectListPage extends Component {
     return (
       <div id="project-list-page">        
         <div className="outer-container" onScroll={this.handleOuterContainerScroll}>
-          <div class="inner-container">
+          <div className="inner-container">
             <Menu 
               history={props.history}
             />

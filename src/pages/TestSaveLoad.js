@@ -22,7 +22,7 @@ class TestSaveLoad extends Component {
   /* event handlers */
 
   handleSelectFileClick() {
-    ipcHelper.showOpenDialog((err, data) => {
+    ipcHelper.showOpenDialog(null, (err, data) => {
       if (err) {
         handleErrorWithUiDefault(err);
         return;
