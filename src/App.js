@@ -15,6 +15,7 @@ import asyncLoadingComponent from 'components/asyncLoadingComponent';
 // import PresenterPage from 'pages/aframeEditor/presenterPage';
 
 import './App.css';
+import { SceneContextProvider } from 'globals/contexts/sceneContext';
 
 
 ipcHelper.getAppData((err, data) => {
@@ -86,7 +87,7 @@ const AsyncProjectListPage = asyncLoadingComponent(() => import('pages/ProjectLi
 class App extends Component {  
   render() {    
     return (
-      <Fragment>
+      <SceneContextProvider>
         {/* <div className="window-resizer border-left"></div>
         <div className="window-resizer border-right"></div>
         <div className="window-resizer border-top"></div>
@@ -107,7 +108,7 @@ class App extends Component {
             <Redirect to={routes.home} />
           </Switch>
         </div>
-      </Fragment>
+      </SceneContextProvider>
     );
   }
 }

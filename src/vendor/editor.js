@@ -1,5 +1,6 @@
 // import * as THREE from 'three';
 import AFRAME from 'aframe';
+const AFrameExtras = require('aframe-extras');
 // use the THREE in aframe
 const THREE = AFRAME.THREE;
 const tween = AFRAME.TWEEN;
@@ -31,9 +32,8 @@ Editor.prototype = {
 
     if (!this.sceneEl) {
       setTimeout(this.onDomLoaded.bind(this), 100);
-      return;
+      return; 
     }
-
     if (this.sceneEl.hasLoaded) {
       this.onSceneLoaded();
     } else {
@@ -76,13 +76,13 @@ Editor.prototype = {
       this.EDITOR_CAMERA = this.editorCameraEl.getObject3D('camera');
       this.initUI();
       this.initModules();
+      Events.emit('editor-load',this);
     });
     this.editorCameraEl.setAttribute('camera', {far: 10000, fov: 50, near: 0.05, active: true});
     this.editorCameraEl.setAttribute('data-aframe-editor', 'camera');
     this.editorCameraEl.setAttribute('wasd-controls', true);
     AFRAME.scenes[0].appendChild(this.editorCameraEl);
 
-    Events.emit('editor-load',this);
   },
 
   initModules: function () {
@@ -131,13 +131,13 @@ Editor.prototype = {
       this.addObject(event.target.object3D);
     });
 
-    Events.on('selectedentitycomponentchanged', event => {
-      this.addObject(event.target.object3D);
-    });
+    // Events.on('selectedentitycomponentchanged', event => {
+    //   this.addObject(event.target.object3D);
+    // });
 
-    Events.on('selectedentitycomponentcreated', event => {
-      this.addObject(event.target.object3D);
-    });
+    // Events.on('selectedentitycomponentcreated', event => {
+    //   this.addObject(event.target.object3D);
+    // });
 
     this.scene.add(this.sceneHelpers);
 
@@ -148,15 +148,18 @@ Editor.prototype = {
   removeObject: function (object) {
     const el = object.el;
     Events.emit('objectbeforeremoved', el);
-    el.pause();
-    this.deselect();
-    // Remove just the helper as the object will be deleted by Aframe
-    this.removeHelpers(object);
-
-    Events.emit('objectremoved', object);
-    // need to do delete if the object still exist
-    if (el.parentNode) {
-      el.parentNode.removeChild(el);
+    if (el) {
+      el.pause();
+      this.deselect();
+      // Remove just the helper as the object will be deleted by Aframe
+      this.removeHelpers(el.object3D);
+  
+      // need to do delete if the object still exist
+      if (el.parentNode) {
+        el.parentNode.removeChild(el);
+      }
+      // el.destroy();
+      Events.emit('objectremoved', el.object3D);
     }
   },
 
@@ -229,17 +232,28 @@ Editor.prototype = {
     }
   },
 
-  selectEntity: function (entity, emit) {
+  selectEntity: function (entity) {
+    // console.log(entity);
+    if (entity && entity.parentEl !== AFRAME.scenes[0]) {
+      entity = entity.parentEl;
+    }
     this.selectedEntity = entity;
     if (entity) {
       this.select(entity.object3D);
     } else {
       this.select(null);
     }
+    Events.emit('enablecontrols', false);
 
-    if (emit === undefined) {
-      Events.emit('entityselected', entity);
-    }
+    // edited: 07052019
+    // forgot the reason to add these two lines
+    // comment out since it will trigger select twice times
+    // if (emit === undefined) {
+    //   Events.emit('entityselected', entity);
+    // }
+  },
+  enableControls: function(isEnable) {
+    Events.emit('enablecontrols', !!isEnable);
   },
   initEvents: function () {
     window.addEventListener('keydown', evt => {
@@ -281,6 +295,10 @@ Editor.prototype = {
     });
 
     const editorinstance = this;
+    
+    Events.on('getEditorInstance', callback => {
+      callback(editorinstance);
+    });
     document.addEventListener('child-detached', event => {
       var entity = event.detail.el;
       editorinstance.removeObject(entity.object3D);
@@ -338,9 +356,9 @@ Editor.prototype = {
     this.select(this.scene.getObjectById(id, true));
   },
   selectFromTimeline: function (object, enableControls) {
-    if (this.selected === object) {
-      return;
-    }
+    // if (this.selected === object) {
+    //   return;
+    // }
     this.selected = object;
     Events.emit('objectselected', object, enableControls);
   },
@@ -381,6 +399,7 @@ Editor.prototype = {
     // Ensure the components are loaded before update the UI
     entity.addEventListener('loaded', () => {
       this.addEntity(entity);
+      entity.object3D.el = entity;
     });
 
     // this.sceneEl.appendChild(entity);
@@ -442,7 +461,7 @@ Editor.prototype = {
       viewCamera.components['look-controls'].pitchObject.rotation.z = c.rot_z;
 
     }).onComplete(function(){
-      console.log('animate complete');
+      // console.log('animate complete');
       Events.emit('objectchanged',viewCamera);
       // update the info box if camera is selected
       if (editorinstance.selected && editorinstance.selected.el === viewCamera) {

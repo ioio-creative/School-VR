@@ -2,9 +2,15 @@
   info generation of right panel
 */
 import React, {Component} from 'react';
-import {roundTo, addToAsset, rgba2hex} from 'utils/aframeEditor/helperfunctions';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
+import {roundTo, addToAsset, rgba2hex} from 'globals/helperfunctions';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+// import {SketchPicker} from 'react-color';
+import TransformMode from './transformMode';
+import ColorPicker from './colorPicker';
+import OpacityPicker from './opacityPicker';
+
 import {Rnd as ResizableAndDraggable} from 'react-rnd';
+// import ABox from 'utils/aBox';
 
 import './infoTypeBox.css';
 
@@ -14,46 +20,74 @@ class InfoTypeBox extends Component {
   constructor(props) {
     super(props);
     const self = this;
+    this.editor = null;
     this.state = {
-      editorMode: null
+      editorMode: null,
+      displayColorPicker: false,
+      // color: props.timelineObj[props.timelinePosition]['material']['color'],
+      additionalAttributes: {}
+      // const color = rgba2hex(data.material.color)
     };
     this.changeObjectField = this.changeObjectField.bind(this);
+    this.changeObjectMultipleFields = this.changeObjectMultipleFields.bind(this);
     this.changeTransformMode = this.changeTransformMode.bind(this);
     this.events = {
-      transformmodechanged: (mode) => {
-        self.setState({
-          editorMode: mode
-        });
-      }
+      // transformmodechanged: (mode) => {
+      //   self.setState({
+      //     editorMode: mode
+      //   });
+      // }
     };
+
+    // this.handleClick = this.handleClick.bind(this);
+    // this.handleClose = this.handleClose.bind(this);
+    // this.handleChange = this.handleChange.bind(this);
   }
   componentDidMount() {
-    for (let eventName in this.events) {
-      Events.on(eventName, this.events[eventName]);
+    const props = this.props;
+
+    if (props.animatableAttributes.position) {
+      this.changeTransformMode('translate');
+    } else if (props.animatableAttributes.rotation) {
+      this.changeTransformMode('rotate');
+    } else if (props.animatableAttributes.scale) {
+      this.changeTransformMode('scale');
     }
-    Events.emit('gettransformmode', mode => {
-      if (this.state.editorMode !== mode) {
-        this.changeTransformMode(mode);
-      }
+    Events.on('editor-load', obj => {
+      this.editor = obj;
     })
+      // Events.emit('transformmodechanged', 'translate');
   }
+  // static getDerivedStateFromProps(nextProps, nextState) {
+  //   console.log('getDerivedStateFromProps');
+  //   return {
+  //     displayColorPicker: false,
+  //     color: nextProps.timelineObj[nextProps.timelinePosition]['material']['color']
+  //   }
+  // }
   componentDidUpdate(prevProps, prevState) {
     const props = this.props;
-    const self = this;
+    const state = this.state;
+    // console.log(props, prevProps);
+    // console.log(props.timelineObj.id, prevProps.timelineObj.id);
+    // console.log(props.timelinePosition, prevProps.timelinePosition);
     if (
-      props.selectedEntity !== prevProps.selectedEntity ||
-      props.selectedSlide !== prevProps.selectedSlide ||
-      props.selectedTimeline !== prevProps.selectedTimeline ||
+      props.timelineObj.id !== prevProps.timelineObj.id ||
       props.timelinePosition !== prevProps.timelinePosition
     ) {
-      this.changeTransformMode(null);
-    } else {
-      Events.emit('gettransformmode', mode => {
-        if (self.state.editorMode !== mode) {
-          self.changeTransformMode(mode);
-        }
-      })
+      // console.log('reset');
+      // this.changeTransformMode(null);
+      if (props.animatableAttributes.position) {
+        this.changeTransformMode('translate');
+      } else if (props.animatableAttributes.rotation) {
+        this.changeTransformMode('rotate');
+      } else if (props.animatableAttributes.scale) {
+        this.changeTransformMode('scale');
+      }
     }
+
+    if (state.additionalAttributes.radiusTop !== props.timelineObj[props.timelinePosition])
+    return true;
   }
   componentWillUnmount() {
     for (let eventName in this.events) {
@@ -61,6 +95,7 @@ class InfoTypeBox extends Component {
     }
   }
   changeTransformMode(transformMode) {
+    // const sceneContext = props.sceneContext;
     this.setState({
       editorMode: transformMode
     });
@@ -72,103 +107,200 @@ class InfoTypeBox extends Component {
     }
   }
   changeObjectField(field, value) {
+    const props = this.props;
     const tmp = {};
-    tmp[field] = value;
-    Events.emit('updateSelectedEntityAttribute', tmp);
+    let pointer = tmp;
+    field.split('.').forEach((key, idx, arr) => {
+      if (idx === arr.length - 1) {
+        pointer[key] = value
+      } else {
+        pointer[key] = {}
+        pointer = pointer[key]
+      }
+    })
+    // tmp[field] = value;
+    // console.log(tmp);
+    props.sceneContext.updateTimelinePositionAttributes(
+      tmp
+    );
+    // Events.emit('updateSelectedEntityAttribute', tmp);
+
   }
+  changeObjectMultipleFields(objs) {
+    const props = this.props;
+    const tmp = {};
+    Object.keys(objs).forEach(field => {
+      const value = objs[field];
+      let pointer = tmp;
+      field.split('.').forEach((key, idx, arr) => {
+        if (idx === arr.length - 1) {
+          pointer[key] = value
+        } else {
+          if (!pointer[key])
+            pointer[key] = {}
+          pointer = pointer[key]
+        }
+      })
+      // console.log(tmp);
+      // console.log(pointer);
+    })
+    // tmp[field] = value;
+    props.sceneContext.updateTimelinePositionAttributes(
+      tmp
+    );
+    // Events.emit('updateSelectedEntityAttribute', tmp);
+
+  }
+  
   render() {
     const props = this.props;
+    const state = this.state;
+    const currentEntity = props.sceneContext.getCurrentEntity();
     const data = props.timelineObj[props.timelinePosition];
-    const color = rgba2hex(data.material.color);
+
+    // const color = rgba2hex(data.material.color);
+
+    const animatableAttributes = props.animatableAttributes;
+    const transformModes = [];
+    if (animatableAttributes.position) {
+      transformModes.push('translate');
+    }
+    if (animatableAttributes.rotation) {
+      transformModes.push('rotate');
+    }
+    if (animatableAttributes.scale) {
+      transformModes.push('scale');
+    }
+    // ABox
     return (
       <div className="animatable-params">
-        <div className="vec3D-btn-col">
-          <button 
-            className={(this.state.editorMode === "translate"? "selected": "")}
-            onClick={()=>{this.changeTransformMode('translate')}}
-            title="Translate"
-          >
-            <FontAwesomeIcon icon="arrows-alt" />
-          </button>
-          <button 
-            className={(this.state.editorMode === "rotate"? "selected": "")}
-            onClick={()=>{this.changeTransformMode('rotate')}}
-            title="Rotate"
-          >
-            <FontAwesomeIcon icon="sync-alt" />
-          </button>
-          <button 
-            className={(this.state.editorMode === "scale"? "selected": "")}
-            onClick={()=>{this.changeTransformMode('scale')}}
-            title="Scale"
-          >
-            <FontAwesomeIcon icon="expand-arrows-alt" />
-          </button>
-        </div>
-        <div className="attribute-col color-col" onClick={() => this.changeTransformMode(null)}>
-          <label title={color}>
-            <div className="field-label">Color:</div><div className="color-preview" style={{backgroundColor: color}}/>
-            <input type="color" value={color} onChange={(event) => this.changeObjectField('material.color', event.target.value)} hidden/>
-          </label>
-        </div>
-        <div className="attribute-col opacity-col" onClick={() => this.changeTransformMode(null)}>
-          <div className="field-label">Opacity:</div>
-          <div className="opacity-control">
-            <div className="hide-button" onClick={() => {
-              // ~~! int value of the opposite opacity, 0 -> 1, 0.x -> 0
-              this.changeObjectField('material.opacity', ~~!data.material.opacity);              
-            }}>
-              {data.material.opacity?
-                <FontAwesomeIcon icon="eye-slash" />:
-                <FontAwesomeIcon icon="eye" />
-              }
-            </div>
-            <div className="opacity-drag-control"
-              title={data.material.opacity * 100 + '%'}
-              ref={ref=> this.opacityControl = ref}
-              onClick={(event) => {
-
-                const clickPercent = (event.clientX - event.currentTarget.getBoundingClientRect().left) / event.currentTarget.getBoundingClientRect().width;
-                this.changeObjectField('material.opacity', roundTo(clickPercent, 2));
+        {transformModes.length && 
+          <div className="vec3D-btn-col">
+            <TransformMode 
+              modes={transformModes} 
+              onUpdate={(newPosition, newRotation, newScale) => {
+                this.changeObjectMultipleFields({
+                  'position': newPosition,
+                  'rotation': newRotation,
+                  'scale': newScale
+                });
               }}
-            >
-              <ResizableAndDraggable
-                className="current-opacity"
-                disableDragging={true}
-                bounds="parent"
-                minWidth="0%"
-                maxWidth="100%"
-                default={{
-                  x: 0,
-                  y: 0
-                }}
-                size={{
-                  height: 24,
-                  width: data.material.opacity * 100 + '%'
-                }}
-                dragAxis='x'
-                enableResizing={{
-                  top: false, right: true, bottom: false, left: false,
-                  topRight: false, bottomRight: false, bottomLeft: false, topLeft: false
-                }}
-                onResizeStart={(event, dir, ref, delta,pos)=>{
-
-                }}
-                onResize={(event, dir, ref, delta, pos)=>{
-                }}
-                onResizeStop={(event, dir, ref, delta, pos)=>{
-                  console.log(delta.width, this.opacityControl.getBoundingClientRect().width);
-                  // this.opacityInput.value = delta.width;
-                  // this.opacityInput.value = (150 + delta.width) / 150;
-                  this.changeObjectField('material.opacity', roundTo(data.material.opacity + delta.width / this.opacityControl.getBoundingClientRect().width, 2));
-                }}
-              >
-                <div className="current-opacity" />
-              </ResizableAndDraggable>  
-            </div>
-            <input type="text" value={data.material.opacity} ref={(ref) => this.opacityInput = ref} onChange={(event) => this.changeObjectField('material.opacity', event.target.value)} hidden/>
+            />
           </div>
-        </div>
+        }
+        {animatableAttributes.material && animatableAttributes.material.indexOf('color') !== -1 &&
+          <div className="attribute-col color-col" onClick={() => this.changeTransformMode(null)}>
+            <div title={rgba2hex(data.material.color)}>
+              <div className="field-label">Color:</div>
+              <ColorPicker key={props.timelineObj.id}
+                field={'material'}
+                color={rgba2hex(data.material.color)} 
+                timelineId={props.timelineObj.id} 
+                timelinePosition={props.timelinePosition} 
+                onUpdate={(newColor) => {
+                  this.changeObjectField('material.color', newColor)
+                }}
+                currentEntity={currentEntity}
+              />
+            </div>
+            {/* <input type="color" value={color} onInput={(event) => this.changeObjectField('material.color', event.target.value)} hidden/> */}
+          </div>
+        }
+        {animatableAttributes.material && animatableAttributes.material.indexOf('opacity') !== -1 &&
+          <div className="attribute-col opacity-col" onClick={() => this.changeTransformMode(null)}>
+            <div className="field-label">Opacity:</div>
+            <OpacityPicker key={props.timelineObj.id}
+              field={'material'}
+              opacity={data.material.opacity} 
+              timelineId={props.timelineObj.id} 
+              timelinePosition={props.timelinePosition} 
+              onUpdate={(newOpacity) => {
+                this.changeObjectField('material.opacity', newOpacity)
+              }}
+              currentEntity={currentEntity}
+            />
+          </div>
+        }
+        {animatableAttributes.text && animatableAttributes.text.indexOf('color') !== -1 &&
+          <div className="attribute-col color-col" onClick={() => this.changeTransformMode(null)}>
+            <div title={data.text.color}>
+              <div className="field-label">Text Color:</div>
+              <ColorPicker key={props.timelineObj.id}
+                field={'text'}
+                color={data.text.color} 
+                timelineId={props.timelineObj.id} 
+                timelinePosition={props.timelinePosition} 
+                onUpdate={(newColor) => {
+                  this.changeObjectField('text.color', newColor)
+                }}
+                currentEntity={currentEntity}
+              />
+            </div>
+            {/* <input type="color" value={color} onInput={(event) => this.changeObjectField('material.color', event.target.value)} hidden/> */}
+          </div>
+        }
+        {animatableAttributes.text && animatableAttributes.text.indexOf('opacity') !== -1 &&
+          <div className="attribute-col opacity-col" onClick={() => this.changeTransformMode(null)}>
+            <div className="field-label">Text Opacity:</div>
+            <OpacityPicker key={props.timelineObj.id}
+              field={'text'}
+              opacity={data.text.opacity} 
+              timelineId={props.timelineObj.id} 
+              timelinePosition={props.timelinePosition} 
+              onUpdate={(newOpacity) => {
+                this.changeObjectField('text.opacity', newOpacity)
+              }}
+              currentEntity={currentEntity}
+            />
+          </div>
+        }
+        {animatableAttributes.geometry && animatableAttributes.geometry.indexOf('radiusTop') !== -1 &&
+          <div className="attribute-col opacity-col" onClick={() => this.changeTransformMode(null)}>
+            <div className="field-label">Radius Top:</div>
+            <input type="text" value={state.additionalAttributes.radiusTop} onInput={(e) => {
+              currentEntity.el.setAttribute('geometry', {
+                radiusTop: e.currentTarget.value
+              })
+              this.setState((prevState) => {
+                return {
+                  additionalAttributes: {
+                    ...prevState.additionalAttributes,
+                    radiusTop: e.currentTarget.value
+                  }
+                }
+              })
+            }} onBlur={(e) => {
+              this.changeObjectField('geometry.radiusTop', state.additionalAttributes.radiusTop)
+            }} />
+          </div>
+        }
+        {animatableAttributes.geometry && animatableAttributes.geometry.indexOf('radiusBottom') !== -1 &&
+          <div className="attribute-col opacity-col" onClick={() => this.changeTransformMode(null)}>
+            <div className="field-label">Radius Bottom:</div>
+            <input type="text" value={state.additionalAttributes.radiusBottom} onInput={(e) => {
+              currentEntity.el.setAttribute('geometry', {
+                radiusBottom: e.currentTarget.value
+              })
+              this.setState((prevState) => {
+                return {
+                  additionalAttributes: {
+                    ...prevState.additionalAttributes,
+                    radiusBottom: e.currentTarget.value
+                  }
+                }
+              })
+            }} onBlur={(e) => {
+              this.changeObjectField('geometry.radiusBottom', state.additionalAttributes.radiusBottom)
+            }} />
+          </div>
+        }
+        {animatableAttributes.cameraPreview &&
+        <div className="attribute-col preview-col">
+          <canvas ref={ref=>{
+            {/* props.model.setEditorInstance(this.editor) */}
+            props.model.setCameraPreviewEl(ref)
+          }} />
+        </div>}
       </div>
     );
   }

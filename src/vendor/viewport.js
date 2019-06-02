@@ -44,10 +44,8 @@ function Viewport (editor) {
   var selectionBox = new THREE.BoxHelper();
   selectionBox.material.depthTest = false;
   selectionBox.material.transparent = true;
-  // selectionBox.material.color.set(0x1faaf2);
-  selectionBox.material.color.set(0xFF0000);
+  selectionBox.material.color.set(0x1faaf2);
   selectionBox.visible = false;
-  // selectionBox.geometry.scale.multiplyScalar(1.02);
   sceneHelpers.add(selectionBox);
 
   var objectPositionOnDown = null;
@@ -192,19 +190,19 @@ function Viewport (editor) {
 
           if (object.userData.object !== undefined) {
             // helper
-            editor.selectEntity(object.userData.object.el);
+            editor.selectEntity(object.userData.object.el, false);
           } else {
-            editor.selectEntity(object.el);
+            editor.selectEntity(object.el, false);
           }
 
           break;
         }
 
         if (!selected) {
-          editor.selectEntity(null);
+          editor.selectEntity(null, false);
         }
       } else {
-        editor.selectEntity(null);
+        editor.selectEntity(null, false);
       }
     }
   }
@@ -367,8 +365,6 @@ function Viewport (editor) {
     transformControls.update();
     if (object instanceof THREE.PerspectiveCamera) {
       object.updateProjectionMatrix();
-    } else if (object.children[0] instanceof THREE.PerspectiveCamera) {
-      object.children[0].updateProjectionMatrix();
     }
 
     updateHelpers(object);
@@ -407,10 +403,16 @@ function Viewport (editor) {
     transformControls.showZ = false;
     // disableControls();    
   })
+  // Events.on('enablecontrols', active => {
+  //   transformControls.showX = true;
+  //   transformControls.showY = true;
+  //   transformControls.showZ = true;
+  //   // enableControls();
+  // })
   Events.on('enablecontrols', active => {
-    transformControls.showX = true;
-    transformControls.showY = true;
-    transformControls.showZ = true;
+    transformControls.showX = active;
+    transformControls.showY = active;
+    transformControls.showZ = active;
     // enableControls();
   })
 

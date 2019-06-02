@@ -2,7 +2,7 @@
   info generation of right panel
 */
 import React, {Component} from 'react';
-import {roundTo, addToAsset} from 'utils/aframeEditor/helperfunctions';
+import {roundTo, addToAsset} from 'globals/helperfunctions';
 
 var Events = require('vendor/Events.js');
 let editor = null;

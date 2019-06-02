@@ -4,33 +4,98 @@
   left: 0;
   right: 0;
   z-index: 1;
-  background-color: var(--appBackgroundColor);
+  background-color: rgba(13, 12, 30, 0.8);
+  display: flex;
 }
 #buttons-panel button {
   background-color: transparent;
   border: 1px solid transparent;
+  cursor: pointer;
+  vertical-align: middle;
 }
 #buttons-panel button:hover {
   border: 1px solid #444444;
 }
-.buttons-list {
-  float: left;
+#buttons-panel .buttons-list {
   border-left: 1px solid #b4b1b1;
+  /* flex: 1 0; */
 }
-.buttons-list:nth-child(1) {
-  float: left;
+#buttons-panel .buttons-list.buttons-3d {
+  flex: 0 0 auto;
+}
+#buttons-panel .buttons-list:nth-child(1) {
   border-left: 0;
 }
-.buttons-list-wrapper {
+#buttons-panel .buttons-list-wrapper {
   width: 100%;
-  padding-left: 15px;
+  padding: 0 15px;
 }
-button {
+#buttons-panel button {
   color: #FFFFFF;
 }
-.new-text-button {
-  font-size: 40px;
-  text-shadow: 10px -5px rgb(110,186,167);
-  width: 1.5em;
-  text-indent: -0.25em;
+#button-cone #cone-linear-gradient stop {
+  transition: all 0.4s;
+}
+#button-cone:hover #cone-linear-gradient stop:nth-child(1) {
+  stop-color:#5faaa6;
+}
+#button-cone:hover #cone-linear-gradient stop:nth-child(2) {
+  stop-color:#79c0bd;
+}
+#button-cone:hover #cone-linear-gradient stop:nth-child(3) {
+  stop-color:#93d7d5;
+}
+#button-cone:hover #cone-linear-gradient stop:nth-child(4) {
+  stop-color:#9de0de;
+}
+#button-pyramid polygon {
+  transition: all 0.4s;
+}
+#button-pyramid:hover polygon:nth-child(1) {
+  fill: #5faaa6;
+}
+#button-pyramid:hover polygon:nth-child(2) {
+  fill: #9de0de;
+}
+#button-cylinder path {
+  transition: all 0.4s;
+}
+#button-cylinder:hover path:nth-child(1) {
+  fill: #5faaa6
+}
+#button-cylinder:hover path:nth-child(2) {
+  fill: #9de0de;
+}
+#button-ball #ball-linear-gradient stop {
+  transition: all 0.4s;
+}
+#button-ball:hover #ball-linear-gradient stop:nth-child(1) {
+  stop-color: #5faaa6;
+}
+#button-ball:hover #ball-linear-gradient stop:nth-child(2) {
+  stop-color: #75bdba;
+}
+#button-ball:hover #ball-linear-gradient stop:nth-child(3) {
+  stop-color: #8bd0ce;
+}
+#button-ball:hover #ball-linear-gradient stop:nth-child(4) {
+  stop-color: #98dcda;
+}
+#button-ball:hover #ball-linear-gradient stop:nth-child(5) {
+  stop-color: #9de0de;
+}
+#button-ball:hover #ball-linear-gradient stop:nth-child(6) {
+  stop-color: #9de0de;
+}
+#button-box polygon {
+  transition: all 0.4s;
+}
+#button-box:hover polygon:nth-child(1) {
+  fill: #5faaa6;
+}
+#button-box:hover polygon:nth-child(2) {
+  fill: #90baba;
+}
+#button-box:hover polygon:nth-child(3) {
+  fill: #9de0de;
 }

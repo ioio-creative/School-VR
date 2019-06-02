@@ -2,7 +2,13 @@ import isFunction from 'utils/variableType/isFunction';
 
 
 const electron = window.require ? window.require('electron') : null;
-const ipc = electron ? electron.ipcRenderer : null;
+const dummyFunc = _=>{ console.log('not in electron app, no ipc') };
+const ipc = electron ? electron.ipcRenderer : {
+  on: dummyFunc,
+  removeListener: dummyFunc,
+  once: dummyFunc,
+  send: dummyFunc
+};
 
 
 /* listeners */

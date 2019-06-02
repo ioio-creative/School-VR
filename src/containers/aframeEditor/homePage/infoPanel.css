@@ -8,12 +8,11 @@
 }
 #info-panel {
   position: absolute;
-  top: 130px;
+  top: 120px;
   width: 300px;
   right: 0;
   background-color: var(--panel-body-background-color);
   color: var(--text-color);
-  opacity: 0.8;
 }
 #info-panel .panel-header {
   /* display: flex; */
@@ -110,7 +109,8 @@
 #info-panel .attribute-col {
   margin: 10px 0;
 }
-#info-panel .color-col label {
+#info-panel .color-col label,
+#info-panel .color-col > div {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -248,6 +248,39 @@
 }
 
 
+#info-panel .hue-horizontal > div > div {
+  height: 22px !important;
+}
+
+#info-panel .timelines-col {
+  max-height: 235px;
+  overflow: auto;
+  margin-right: -15px;
+  padding-right: 15px;
+}
+#info-panel .timelines-col::-webkit-scrollbar {
+  width: 5px;
+}
+#info-panel .timelines-col::-webkit-scrollbar-thumb {
+  background-color: #F00;
+}
+#info-panel .timeline-btns-col {
+  display: flex;
+  margin: 8px 0;
+}
+#info-panel .timeline-btns-col .new-timeline-btn:hover {
+  background-color: #505050;
+  color: #ffffff;
+}
+#info-panel .timeline-btns-col .new-timeline-btn:first-child {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+#info-panel .timeline-btns-col .new-timeline-btn:last-child {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
 #content-panel {
   position: absolute;
   top: 120px;
@@ -255,17 +288,33 @@
   right: 0;
   background-color: var(--panel-body-background-color);
   color: var(--text-color);
+  z-index: 1;
 }
+
 #content-panel + #info-panel {
-  top: 230px;
+  top: 200px;
 }
-#content-panel .attribute-col {
+
+#content-panel .panel-header {
+  background-color: var(--panel-header-background-color);
+}
+#content-panel .panel-body {
   display: flex;
-  justify-content: space-between;
-  margin: 15px;
+  padding: 5px;
 }
-#content-panel .attribute-col input,
-#content-panel .attribute-col textarea {
-  width: 150px;
-  resize: none;
+#content-panel .attribute-button {
+  flex: 0 0 40px;
+  height: 40px;
+  margin-right: 5px;
+  background-color: #CCCCCC;
+  overflow: hidden;
 }
+#content-panel .field-label {
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  background-color: #FFF;
+}
+/* #content-panel input {
+  display: none;
+} */

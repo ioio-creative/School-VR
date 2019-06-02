@@ -7,9 +7,14 @@
    ==========
 */
 import React, {Component, Fragment} from 'react';
+
+import {withSceneContext} from 'globals/contexts/sceneContext';
+
 import Draggable from 'react-draggable';
+// import {Resizable} from 'react-resizable';
 import {Rnd as ResizableAndDraggable} from 'react-rnd';
 // import EntitiesList from 'containers/panelItem/entitiesList';
+import {roundTo, jsonCopy} from 'globals/helperfunctions';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 
 import './timelinePanel.css';
@@ -31,7 +36,7 @@ function getScaleIndicatorText(totaltime, scale, elWidth) {
   return listEl;
 }
 
-class timelinePanel extends Component {
+class TimelinePanel extends Component {
   constructor(props) {
     super(props);
     this.scaleLimit = {
@@ -41,7 +46,9 @@ class timelinePanel extends Component {
     this.state = {
       timeScale: 25,
       editingName: null,
-      timelineListElWidth: 0
+      timelineListElWidth: 0,
+      entitiesList: [],
+      fetchedEntitiesList: {}
     };
     this.entitiesList = {
       scrollLeft: 0,
@@ -52,16 +59,42 @@ class timelinePanel extends Component {
     this.resizableAndDraggable = {};
     this.dragging = false;
     this.handleScroll = this.handleScroll.bind(this);
+    this.handleWheel = this.handleWheel.bind(this);
     this.handleResize = this.handleResize.bind(this);
     this.changeCurrentTime = this.changeCurrentTime.bind(this);
+    this.deleteEntity = this.deleteEntity.bind(this);
     // this.selectEntityTimelinePosition = this.selectEntityTimelinePosition.bind(this)
   }
   componentDidMount() {
     window.addEventListener('resize', this.handleResize);
+    this.timelineListEl.addEventListener('wheel', this.handleWheel, {passive: false});
     this.handleResize();
+  }
+  componentDidUpdate() {
+    // console.log('componentDidUpdate');
+    
+    // this.forceUpdate();
+  }
+  static getDerivedStateFromProps(nextProps, prevState) {
+    // fetch the sceneContext
+    const currentEntitiesList = nextProps.sceneContext.getEntitiesList();
+    const fetchedList = {};
+    currentEntitiesList.forEach(entity => {
+      const entityId = entity['id'];
+      fetchedList[entityId] = jsonCopy(entity);
+      fetchedList[entityId]['timelines'] = {};
+      entity.timelines.forEach(timeline => {
+        fetchedList[entityId]['timelines'][timeline['id']] = timeline;
+      })
+    })
+    return {
+      entitiesList: currentEntitiesList,
+      fetchedEntitiesList: fetchedList
+    };
   }
   componentWillUnmount() {
     window.removeEventListener('resize', this.handleResize);
+    this.timelineListEl.removeEventListener('wheel', this.handleWheel);
   }
   handleResize(event) {
     this.setState({
@@ -73,7 +106,7 @@ class timelinePanel extends Component {
       scrollLeft: event.currentTarget.scrollLeft,
       scrollTop: event.currentTarget.scrollTop
     }
-    // console.log(this.entitiesList);
+    // console.log('handleScroll', this.entitiesList);
     if (this.needUpdate) {
       window.cancelAnimationFrame(this.needUpdate);
     }
@@ -82,32 +115,34 @@ class timelinePanel extends Component {
       self.recalculateFreezeElPosition();
     });
   }
+  handleWheel(event) {
+    // seems need handle the horizontal scroll too...
+    event.preventDefault();
+    // edge no scrollBy ...
+    if (event.shiftKey) {
+      this.timelineListEl.scrollLeft += Math.sign(event.deltaY) * 32;
+    } else {
+      this.timelineListEl.scrollTop += Math.sign(event.deltaY) * 32;
+    }
+  }
   changeCurrentTime(event, data) {
     // this.setState({
     //   'currentTime': data.x / this.state.timeScale
     // })
     this.currentTime= data.x / this.state.timeScale;
-    Events.emit('setTimelineTime', data.x / this.state.timeScale);
+    this.props.sceneContext.updateCurrentTime(this.currentTime);
+    // Events.emit('setTimelineTime', data.x / this.state.timeScale);
     // console.log(this.timePointer);
   }
   startChangeTimelineTime(event, entityId, timelineId) {
-    // this.setState({
-    //   selectedTimeline: timelineId
-    // })
-    this.selectEntityTimelinePosition(event, entityId, timelineId, this.props.selectedTimelinePosition);
-    // this.selectEntity(event, entityId, timelineId);
-    // this.sortedTimeline = this.props.entities[entityId]['timeline'].sort((tlA, tlB) => tlA.start > tlB.start);
-    const selectedTimeline = this.props.entitiesList[entityId]['slide'][this.props.selectedSlide]['timeline'][timelineId];
+    const allTimeline = this.state.fetchedEntitiesList[entityId]['timelines'];
+    const selectedTimeline = allTimeline[timelineId];
     this.lastValidStart = selectedTimeline['start'];
     this.initialWidth = selectedTimeline['duration'];
     this.lastValidWidth = 0;
   }
-  changeTimelineTime(event, entityId, timelineId, xPos, width) {
-    // console.log(data);
-    if (width === undefined) {
-      width = this.lastValidWidth;
-    }
-    const allTimeline = this.props.entitiesList[entityId]['slide'][this.props.selectedSlide]['timeline'];
+  changeTimelineTime(event, entityId, timelineId, xPos, width = this.lastValidWidth) {
+    const allTimeline = this.state.fetchedEntitiesList[entityId]['timelines'];
     const newStartTime = Math.round(xPos / this.state.timeScale);
     // const thisTimeline = allTimeline[timelineId];
     const newEndTime = Math.round(newStartTime + this.initialWidth + width / this.state.timeScale);
@@ -130,53 +165,34 @@ class timelinePanel extends Component {
       this.lastValidWidth = width;
     }
   }
-  changedTimelineTime(event, entityId, timelineId, xPos, width) {
-    if (width === undefined) {
-      width = this.lastValidWidth;
-    }
-    const allTimeline = this.props.entitiesList[entityId]['slide'][this.props.selectedSlide]['timeline'];
-    const newStartTime = Math.round(xPos / this.state.timeScale);
-    // const thisTimeline = allTimeline[timelineId];
-    const newEndTime = Math.round(newStartTime + this.initialWidth + width / this.state.timeScale);
-    // thisTimeline.start = newStartTime;
-    // save the time data if not overlapping others
-    let isValid = newStartTime < newEndTime;
-    Object.keys(allTimeline).filter(tl => tl !== timelineId).forEach(searchTimelineId => {
-      const searchTimeline = allTimeline[searchTimelineId];
-      const tlStart = searchTimeline.start;
-      const tlEnd = tlStart + searchTimeline.duration;
-      if (newEndTime > tlStart && newStartTime < tlEnd) {
-        isValid = false;
-      }
-    })
-    if (newStartTime < 0) {
-      isValid = false;
-    }
-    if (isValid) {
-      this.lastValidStart = newStartTime;
-      this.lastValidWidth = width;
-    }
+  changedTimelineTime(event, entityId, timelineId, xPos, width = this.lastValidWidth) {
+    this.changeTimelineTime(event, entityId, timelineId, xPos, width);
     // hack the draggable position ...
-    this.resizableAndDraggable[timelineId]['draggable']['state']['x'] = this.lastValidStart * this.state.timeScale;
-    Events.emit('updateTimeline', entityId, this.props.selectedSlide, timelineId, this.lastValidStart, this.initialWidth + this.lastValidWidth / this.state.timeScale);
+    this.resizableAndDraggable[entityId][timelineId]['draggable']['state']['x'] = this.lastValidStart * this.state.timeScale;
+    // Events.emit('updateTimeline', entityId, this.props.selectedSlide, timelineId, this.lastValidStart, this.initialWidth + this.lastValidWidth / this.state.timeScale);
+    this.props.sceneContext.updateTimeline({
+      start: this.lastValidStart,
+      duration: this.initialWidth + this.lastValidWidth / this.state.timeScale
+    }, timelineId);
   }
   addTimeline(event, entityId, slideId) {
     if (event.target === event.currentTarget) {
       const newStartTime = Math.floor((event.clientX - event.currentTarget.getBoundingClientRect().left) / this.state.timeScale);
-      Events.emit('addTimeline', entityId, slideId, newStartTime);
+      this.props.sceneContext.addTimeline(entityId, newStartTime);
+      // Events.emit('addTimeline', entityId, slideId, newStartTime);
     }
   }
   changeEntityName(event, entityId) {
-    Events.emit('updateEntityName', entityId, event.currentTarget.value);
+    // Events.emit('updateEntityName', entityId, event.currentTarget.value);
+    // this.props.sceneContext.selectEntity(entityId); // selectEntity
+    // this.props.sceneContext.updateEntity(); // selectEntity
+    this.props.sceneContext.updateEntity(event.target.value, entityId); // selectEntity
   }
   selectEntity(event, entityId) {
-    // console.log(event.currentTarget);
-    Events.emit('objectselected', this.props.entitiesList[entityId]['el']['object3D']);
-    this.setState({
-      // 'updated': uuid(),
-      selectedTimeline: null
-    })
-    // this.props.entities[entityId]['el'].setAttribute('el-name', event.currentTarget.value);
+    this.props.sceneContext.selectEntity(entityId); // selectEntity
+  }
+  deleteEntity(entityId) {
+    this.props.sceneContext.deleteEntity(entityId); // selectEntity
   }
   // selectEntityTimeline(event, entityId, timelineId) {
   //   // event.stopPropagation();
@@ -184,24 +200,38 @@ class timelinePanel extends Component {
   //   // Events.emit('objectselected', this.props.entities[entityId]['el']['object3D']);
   //   event.stopPropagation();
   // }
-  selectEntityTimelinePosition(event, entityId, timelineId, position) {
-    Events.emit('setTimelinePositionSelected', entityId, this.props.selectedSlide, timelineId, position);
+  selectEntityTimelinePosition(event, entityId, timelineId, dir) {
+    // console.log(entityId, this.props.selectedSlide);
+    // Events.emit('setTimelinePositionSelected', entityId, this.props.selectedSlide, timelineId, position);
+    // this.props.sceneContext.selectEntity(entityId);
+    // this.props.sceneContext.selectTimeline(timelineId);
+    const position = (
+      dir === "left"? "startAttribute" :
+      dir === "right"? "endAttribute" :
+      ""
+    );
+    this.props.sceneContext.selectTimelinePosition(position, timelineId, entityId);
     event.preventDefault();
     event.stopPropagation();
   }
   changeTimeScale(scale) {
+    const state = this.state;
+    const entitiesList = state.fetchedEntitiesList;
     const projectedScale = (this.state.timeScale >= 50? 5 * scale: scale);
     const newTimeScale = Math.min(Math.max(this.state.timeScale + projectedScale, this.scaleLimit.min), this.scaleLimit.max);
     this.setState({
       timeScale: newTimeScale
     })
     this.timePointer.current.state.x = newTimeScale * this.props.currentTime;
-    for (let timelineId in this.resizableAndDraggable) {
-      if (this.resizableAndDraggable[timelineId]) {
-        const draggable = this.resizableAndDraggable[timelineId]["draggable"];
-        const entity = this.props.entitiesList[this.timelineEntity[timelineId]];
-        const timeline = entity["slide"][this.props.selectedSlide]['timeline'][timelineId];
-        draggable.state.x = newTimeScale * timeline.start;
+    for (let entityId in this.resizableAndDraggable) {
+      const entity = entitiesList[entityId];
+      const timelines = this.resizableAndDraggable[entityId];
+      for (let timelineId in timelines) {
+        if (timelines[timelineId]) {
+          const draggable = timelines[timelineId]["draggable"];
+          const timeline = entity['timelines'][timelineId];
+          draggable.state.x = newTimeScale * timeline.start;
+        }
       }
     }
   }
@@ -209,17 +239,22 @@ class timelinePanel extends Component {
     const entitiesList = this.entitiesList;
     const timeIndicatorWrap = this.timeIndicatorWrap;
     const entitiesListWrap = this.entitiesListWrap;
-    entitiesListWrap.style.marginTop = -entitiesList.scrollTop + "px";
-    timeIndicatorWrap.style.marginLeft = -entitiesList.scrollLeft + "px";
+    entitiesListWrap.style.marginTop = -entitiesList.scrollTop + 'px';
+    timeIndicatorWrap.style.marginLeft = -entitiesList.scrollLeft + 'px';
   }
   render() {
     const props = this.props;
-    const entitiesList = props.entitiesList;
-    const selectedEntity = props.selectedEntity;
-    const totalTime = props.totalTime;
-    const currentTime = props.currentTime;
+    const state = this.state;
+    const sceneContext = props.sceneContext;
+    const entitiesList = state.entitiesList;
+    const selectedEntityId = sceneContext.getCurrentEntityId();
+    const selectedTimelineId = sceneContext.getCurrentTimelineId();
+    const selectedTimelinePosition = sceneContext.getCurrentTimelinePosition();
+    const totalTime = sceneContext.getSlideTotalTime();
+    const currentTime = sceneContext.getCurrentTime();
+    // console.log(currentTime);
     return (
-      <div id="timeline-panel" className={"panel opened" + (props.editorEnabled? ' editor-enabled': ' editor-disabled')} onClick={(event)=>{
+      <div id="timeline-panel" className="panel opened" onClick={(event)=>{
           this.contextMenu.style.display = 'none';
           {/* this.selectEntityTimelinePosition(event); */}
         }}
@@ -232,7 +267,7 @@ class timelinePanel extends Component {
               {
                 Math.floor(currentTime / 60).toString().padStart(2,'0') + ':' + 
                 Math.floor(Math.round((currentTime * 100) % 6000) / 100).toString().padStart(2,'0') + '.' + 
-                (Math.round(currentTime % 60 * 100) % 100).toString().padEnd(2,'0')
+                (Math.round(currentTime % 60 * 100) % 100).toString().padStart(2,'0')
               }
             </span>
             <span>&nbsp;/&nbsp;</span>
@@ -242,60 +277,69 @@ class timelinePanel extends Component {
           </div>
           <div className="preview-timeline"
             onClick={() => {
-              Events.emit('previewTimeline');
+              /* todo */
+              // Events.emit('previewTimeline');
+              sceneContext.playSlide();
             }}
           >
             <FontAwesomeIcon icon="play" />
           </div>
           <div className="toggle-panel" onClick={() => {
             this.timelinePanel.classList.toggle('opened');
+            let newY= 0;
+            if (selectedEntityId !== undefined) {
+              const selectedEntityIdx = entitiesList.findIndex(el => el.id === selectedEntityId);
+              newY = (entitiesList.length - selectedEntityIdx - 1) * 32;
+            }
+            this.timelineListEl.scrollTo(this.timelineListEl.scrollLeft, newY);
           }} />
           <div className="time-scale-controls">
-            <button disabled={(this.scaleLimit.min === this.state.timeScale)} onClick={() => { this.changeTimeScale(-1); }}>-</button>
-            <button disabled={(this.scaleLimit.max === this.state.timeScale)} onClick={() => { this.changeTimeScale(1); }}>+</button>
+            <button disabled={(this.scaleLimit.min === state.timeScale)} onClick={() => { this.changeTimeScale(-1); }}>-</button>
+            <button disabled={(this.scaleLimit.max === state.timeScale)} onClick={() => { this.changeTimeScale(1); }}>+</button>
           </div>
         </div>
         <div className="panel-body">
-          <div className="totaltime-data" onClick={()=> Events.emit('previewTimeline')}>
+          {/* <div className="totaltime-data" onClick={()=> Events.emit('previewTimeline')}>
             &nbsp;
-          </div>
+          </div> */}
           <div className="time-scaler">
             <div className="scroll-wrap" ref={ref => this.timeIndicatorWrap = ref}>
               <Draggable 
                 ref={this.timePointer}
-                axis="x" grid={[this.state.timeScale, 0]}
-                bounds={{left: 0, right: totalTime * this.state.timeScale}}
-                position={{x: props.currentTime * this.state.timeScale, y: 0}}
+                axis="x" grid={[state.timeScale, 0]}
+                bounds={{left: 0, right: totalTime * state.timeScale}}
+                position={{x: currentTime * state.timeScale, y: 0}}
                 onStart={()=>this.timelinePanel.classList.add('timepointer-dragging')}
                 onDrag={this.changeCurrentTime} 
                 onStop={()=>this.timelinePanel.classList.remove('timepointer-dragging')}
               >
                 <div className="time-pointer" />
               </Draggable>
-              {getScaleIndicatorText(totalTime, this.state.timeScale, this.state.timelineListElWidth)}
+              {getScaleIndicatorText(totalTime, state.timeScale, state.timelineListElWidth)}
             </div>
           </div>
           <div className="entities-list">
             <div className="scroll-wrap" ref={ref => this.entitiesListWrap = ref}>
-              {entitiesList && Object.keys(entitiesList).reverse().map((entityId) => {
-                const entity = entitiesList[entityId];
+              {entitiesList.slice(0).reverse().map((entity) => {
+                const entityId = entity['id'];
                 return (
-                  <div key={entityId} className={"entity-row" + (selectedEntity === entityId? ' selected': '')}>
-                    {!entity.isSystem && entity['type'] !== 'a-camera' && selectedEntity === entityId &&
+                  <div key={entityId} className={"entity-row" + (selectedEntityId === entityId? ' selected': '')}>
+                    {!entity.isSystem && entity['type'] !== 'a-camera' && selectedEntityId === entityId &&
                       <div className="delete-btn" onClick={() => {
-                        Events.emit('deleteEntity', props.selectedEntity);
+                        {/* Events.emit('deleteEntity', props.selectedEntityId); */}
+                        this.deleteEntity(entityId);
                       }}>
                         <FontAwesomeIcon icon="trash-alt" />
                       </div>
                     }
                     <div className="entity-name"
                       onClick={(event) => {
-                        console.log('Ctrl pressed: ', event.ctrlKey);
-                        this.selectEntityTimelinePosition(event, entityId)
+                        {/* console.log('Ctrl pressed: ', event.ctrlKey); */}
+                        this.selectEntity(event, entityId)
                       }}
                       onDoubleClick={(event) => this.setState({editingName: entityId})}
                     >
-                      {this.state.editingName == entityId ? 
+                      {state.editingName == entityId ? 
                         <input type="text" 
                           onChange={(event) => this.changeEntityName(event, entityId)} 
                           onBlur={(event) => this.setState({editingName: null})}
@@ -317,54 +361,70 @@ class timelinePanel extends Component {
             </div>
           </div>
           <div className="timeline-list" onScroll={this.handleScroll} ref={ref=> this.timelineListEl = ref}>
-            {entitiesList && Object.keys(entitiesList).reverse().map((entityId) => {
-              const entity = entitiesList[entityId];
-              const selectedSlide = props.selectedSlide;
-              let selectedTimeline = {};
-              if (entity['slide'][selectedSlide]) {
-                selectedTimeline = entity['slide'][selectedSlide]['timeline'];
-              }
+            {/* slice(0) to shallow copy */}
+            {entitiesList.slice(0).reverse().map((entity) => {
+              const entityId = entity['id'];
+              {/* const selectedSlide = props.selectedSlide; */}
+              const entityTimelines = sceneContext.getTimelinesList(entityId);
+              // if (entity['slide'][selectedSlide]) {
+              //   entityTimelines = entity['slide'][selectedSlide]['timeline'];
+              // }
+              {/* console.log(state.timelineListElWidth, totalTime * state.timeScale); */}
+              this.resizableAndDraggable[entityId] = {};
               return (
                 <div key={entityId} 
                   className={"entity-row" + 
-                    (selectedEntity === entityId? ' selected': '') +
-                    (" item-count-" + Object.keys(selectedTimeline).length)
+                    (selectedEntityId === entityId? ' selected': '') +
+                    (" item-count-" + entityTimelines.length)
                   }
+                  style={{
+                    width: Math.max(state.timelineListElWidth, (Math.ceil(totalTime / 5) * 5 + 1) * state.timeScale) - 5
+                  }}
                 >
                   <div className="entity-timeline" onClick={(event) => {
                       if (!this.dragging) {
                         event.preventDefault();
-                        this.addTimeline(event, entityId, selectedSlide);
+                        this.addTimeline(event, entityId);
                       }
                     }}
                     empty-text="Add animation +"
-                    style={{width: Math.max(this.state.timelineListElWidth, totalTime * this.state.timeScale)}}
+                    style={{width: Math.max(state.timelineListElWidth, (Math.ceil(totalTime / 5) * 5 + 1) * state.timeScale) - 5}}
                   >
-                    {Object.keys(selectedTimeline).map((timelineId) => {
+                    {entityTimelines.map((timelineData) => {
                       const self = this;
-                      const timelineData = selectedTimeline[timelineId];
-                      this.timelineEntity[timelineId] = entityId;
+                      // const timelineData = selectedTimeline[timelineId];
+                      const timelineId = timelineData['id'];
+                      // this.timelineEntity[timelineId] = entityId;
                       return (
                         <ResizableAndDraggable
-                          ref={(ref)=>this.resizableAndDraggable[timelineId] = ref}
+                          ref={(ref)=>this.resizableAndDraggable[entityId][timelineId] = ref}
                           key={timelineId}
-                          className={selectedEntity === entityId && props.selectedTimeline === timelineId? "time-span selected": "time-span"}
+                          className={`time-span${((selectedEntityId === entityId && selectedTimelineId === timelineId)? " selected": "")}`}
                           default={{
-                            x: timelineData.start * self.state.timeScale,
-                            y: 0,
+                            x: timelineData.start * state.timeScale,
+                            y: 5,
                             height: 24,
-                            width: timelineData.duration * this.state.timeScale
+                            width: timelineData.duration * state.timeScale
                           }}
                           size={{
                             height: 24,
-                            width: timelineData.duration * this.state.timeScale
+                            width: timelineData.duration * state.timeScale
                           }}
-                          resizeGrid={[self.state.timeScale, 0]}
-                          dragGrid={[self.state.timeScale, 0]}
+                          resizeGrid={[state.timeScale, 0]}
+                          dragGrid={[state.timeScale, 0]}
                           dragAxis='x'
                           enableResizing={{
                             top: false, right: true, bottom: false, left: true,
                             topRight: false, bottomRight: false, bottomLeft: false, topLeft: false
+                          }}
+                          // remove the style assigned by the js, let css handle it
+                          resizeHandleStyles={{
+                            left: {top: '',left: '',width: '',height: '',cursor: ''},
+                            right: {top: '',right: '',width: '',height: '',cursor: ''}
+                          }}
+                          resizeHandleClasses={{
+                            left: `position-select start-attribute resize-handle${(selectedEntityId === entityId && selectedTimelineId === timelineId && selectedTimelinePosition === "startAttribute")? ' selected': ''}`,
+                            right: `position-select end-attribute resize-handle${(selectedEntityId === entityId && selectedTimelineId === timelineId && selectedTimelinePosition === "endAttribute")? ' selected': ''}`
                           }}
                           onClick={(event) =>{
                             if (!self.dragging) {
@@ -373,32 +433,40 @@ class timelinePanel extends Component {
                           }}
                           onDragStart={(event, data)=>{
                             event.preventDefault();
+                            this.selectEntityTimelinePosition(event, entityId, timelineId);
                             self.dragging = true;
                             self.startChangeTimelineTime(event, entityId, timelineId);
                           }}
                           onDrag={(event, data) => {
-                            self.changeTimelineTime(event, entityId, timelineId, data.lastX);
+                            this.changeTimelineTime(event, entityId, timelineId, data.lastX);
                           }}
                           onDragStop={(event, data) => {
-                            self.changedTimelineTime(event, entityId, timelineId, data.lastX);
+                            this.changedTimelineTime(event, entityId, timelineId, data.lastX);
                             setTimeout(function(){
                               self.dragging = false;
                             }, 0);
                           }}
-                          onResizeStart={(event, dir, ref, delta,pos)=>{
+                          onResizeStart={(event, dir, ref, delta, pos)=>{
                             event.preventDefault();
-                            self.dragging = true;
+                            this.selectEntityTimelinePosition(event, entityId, timelineId, dir);
+                            this.dragging = true;
                             {/* console.log('onResizeStart: ', event, dir, ref, delta,pos); */}
-                            self.startChangeTimelineTime(event, entityId, timelineId);
+                            this.startChangeTimelineTime(event, entityId, timelineId);
+                            ref.classList.add('resizing');
                           }}
                           onResize={(event, dir, ref, delta, pos)=>{
                             {/* console.log('onResize: ', event, dir, ref, delta, pos); */}
-                            self.changeTimelineTime(event, entityId, timelineId, pos.x, delta.width);
+                            this.changeTimelineTime(event, entityId, timelineId, pos.x, delta.width);
+                            {/* !ref.classList.contains('resizing') && ref.classList.add('resizing'); */}
+                            {/* ref.style.cursor = "col-resize"; */}
+                            {/* ref.classList.add('resizing'); */}
                           }}
                           onResizeStop={(event, dir, ref, delta, pos)=>{
                             {/* console.log('onResizeStop: ', event, dir, ref, delta, pos); */}
                             event.preventDefault();
-                            self.changedTimelineTime(event, entityId, timelineId, pos.x, delta.width);
+                            ref.classList.remove('resizing');
+                            {/* ref.style.cursor = ""; */}
+                            this.changedTimelineTime(event, entityId, timelineId, pos.x, delta.width);
                             setTimeout(function(){
                               self.dragging = false;
                             }, 0);
@@ -407,14 +475,14 @@ class timelinePanel extends Component {
                           title={timelineData.start + ' - ' + (timelineData.start + timelineData.duration)}
                         >
                           <div className="drag-handle"></div>
-                          <div 
-                            className={"position-select start-attribute" + (selectedEntity === entityId && props.selectedTimeline === timelineId && props.selectedTimelinePosition === "startAttribute"? " selected": "")}
+                          {/* <div 
+                            className={"position-select start-attribute" + (props.selectedTimeline === timelineId && props.selectedTimelinePosition === "startAttribute"? " selected": "")}
                             onClick={(event) => this.selectEntityTimelinePosition(event, entityId, timelineId, "startAttribute") }
                           />
                           <div 
-                            className={"position-select end-attribute" + (selectedEntity === entityId && props.selectedTimeline === timelineId && props.selectedTimelinePosition === "endAttribute"? " selected": "")}
+                            className={"position-select end-attribute" + (props.selectedTimeline === timelineId && props.selectedTimelinePosition === "endAttribute"? " selected": "")}
                             onClick={(event) => this.selectEntityTimelinePosition(event, entityId, timelineId, "endAttribute") }
-                          />
+                          /> */}
                         </ResizableAndDraggable>
                       );
                     })}
@@ -431,4 +499,4 @@ class timelinePanel extends Component {
     );
   }
 }
-export default timelinePanel;
+export default withSceneContext(TimelinePanel);

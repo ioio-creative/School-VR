@@ -4,38 +4,29 @@
 */
 import React, {Component} from 'react';
 
-import Mousetrap from 'mousetrap';
-import Events from 'vendor/Events.js';
-
-import config from 'globals/config';
-import ipcHelper from 'utils/ipcHelper';
-import {invokeIfIsFunction} from 'utils/variableType/isFunction';
+import {withSceneContext} from 'globals/contexts/sceneContext';
 
 import './menuComponent.css';
 
+const Mousetrap = require('mousetrap');
 
-const appName = config.appName;
+const Events = require('vendor/Events.js');
 
+const appName = 'School VR';
 
 class MenuComponent extends Component {
   constructor(props) {
     super(props);
-    
-    // state
     this.state = {
       menuOpen: false,
       hoverItem: null,
     };
-    
-    // variables
-    this.buttons = [];    
+    this.buttons = [];
+
+    this.onClick = this.onClick.bind(this);
   }
-
-
-  /* react lifecycles */
-
   componentDidMount() {
-    document.addEventListener('click', this.handleClick);
+    document.addEventListener('click', this.onClick);
     const self = this;
     Mousetrap.bind('alt', (e) => {
       e.preventDefault();
@@ -46,82 +37,80 @@ class MenuComponent extends Component {
         }
       })
     })
+    Mousetrap.bind('ctrl+z', (e) => {
+      e.preventDefault();
+      self.props.sceneContext.undo()
+    })
+    Mousetrap.bind('ctrl+y', (e) => {
+      e.preventDefault();
+      self.props.sceneContext.redo()
+    })
   }
-
-  componentWillUnmount() {
-    document.removeEventListener('click', this.handleClick);
-    
-    Mousetrap.reset();
-  }
-
-  /* end of react lifecycles */
-
-
-  /* event handlers */
-
-  handleClick = (e) => {
+  onClick(e) {
     this.setState({
       menuOpen: false
     })
   }
-
-  handleBtnMinAppClick = (e) => {
-    ipcHelper.minimizeWindow();
+  componentWillUnmount() {
+    document.removeEventListener('click', this.onClick);
+    Mousetrap.reset();
   }
-
-  handleBtnMaxAppClick = (e) => {
-    ipcHelper.toggleMaximizeWindow();
-  }
-
-  handleBtnCloseAppClick = (e) => {
-    ipcHelper.closeWindow();
-  }
-
-  /* end of event handlers */
-
-  
   render() {
     const props = this.props;
     const state = this.state;
     this.buttons.length = 0;
+    const projectName = '';//props.sceneContext.getProjectName();
+    const appName = '';//props.sceneContext.getAppName();
     return (
       <div id="system-panel">
         <div id="app-icon"></div>
         {/* <div id="app-name">School VR</div> */}
         <div id="app-buttons">
           {props.menuButtons.map((rootBtn, idx) => {
-            return <div className={`menu-group${state.menuOpen && state.hoverItem === idx? ' hover': ''}`} key={idx}>
+            return <div className={`menu-group${rootBtn.disabled? ' disabled': ''}${state.menuOpen && state.hoverItem === idx? ' hover': ''}`} key={idx}>
               <button
-                onMouseEnter={_ => {
-                  this.setState({
-                    hoverItem: idx
-                  })
+                onMouseEnter={()=> {
+                  if (!rootBtn.disabled) {
+                    this.setState({
+                      hoverItem: idx
+                    })
+                  }
                 }}
                 onClick={(e) => {
                   e.nativeEvent.stopImmediatePropagation();
-                  invokeIfIsFunction(rootBtn.onClick);                    
-                  this.setState((currentState) => {
-                    return {
-                      menuOpen: !currentState.menuOpen
+                  if (!rootBtn.disabled) {
+                    if (typeof(rootBtn.onClick) === 'function') {
+                      rootBtn.onClick();
                     }
-                  })
+                    this.setState((currentState) => {
+                      return {
+                        menuOpen: !currentState.menuOpen
+                      }
+                    })
+                  }
                 }}
               >
-                {rootBtn.text}
+                {rootBtn.label}
               </button>
               {rootBtn.children && rootBtn.children.length && state.menuOpen && state.hoverItem === idx &&
-                <div className="menu-list">
+                <div className="menu-list" onClick={(e) => {
+                  e.nativeEvent.stopImmediatePropagation(); 
+                }} >
                   {rootBtn.children.map((childBtn, childIdx) => {
-                    if (childBtn.text === '-') {
-                      return <div className="seperator" key={childIdx}></div>;
+                    if (childBtn.label === '-') {
+                      return <div className={`seperator${childBtn.disabled? ' disabled': ''}`} key={childIdx} />;
                     } else {
-                      return <div className="menu-item" key={childIdx} onClick={_ => {
-                        invokeIfIsFunction(childBtn.onClick);                        
-                        this.setState({
-                          menuOpen: false
-                        });
+                      return <div className={`menu-item${childBtn.disabled? ' disabled': ''}`} key={childIdx} onClick={(e) => {
+                        if (!childBtn.disabled) {
+                          if (typeof(childBtn.onClick) === 'function') {
+                            childBtn.onClick();
+                          }
+                          this.setState({
+                            menuOpen: false
+                          });
+                        }
                       }}>
-                        {childBtn.text}
+                        {childBtn.label}
                       </div>
                     }
                   })}
@@ -130,23 +119,26 @@ class MenuComponent extends Component {
             </div>
           })}
         </div>
-        <div id="app-name" title={this.props.projectName + ' - ' + appName}>
-          <div className="project-name" onClick={_ => {
-            let newProjectName = prompt('Enter New Project Name');
+        <div id="app-name" title={`${projectName? projectName + ' - ': ''}${appName}`}>
+          {projectName && <div className="project-name" onClick={()=>{
+            let newProjectName = prompt('Enter New Project Name', projectName);
             if (newProjectName) {
-              Events.emit('setProjectName', newProjectName, 'testing');
+              props.sceneContext.setProjectName(newProjectName);
             }
-          }}>{this.props.projectName}</div>
-          <div className="hyphen">-</div>
+          }}>{projectName}</div>
+          }
+          {projectName && <div className="hyphen">-</div>}
           <div className="app-name">{appName}</div>
         </div>
         <div id="system-buttons">
-          <button id="btn-min-app" onClick={this.handleBtnMinAppClick} />
-          <button id="btn-max-app" onClick={this.handleBtnMaxAppClick} />
-          <button id="btn-close-app" onClick={this.handleBtnCloseAppClick} />
+          <button id="btn-min-app"></button>
+          <button id="btn-max-app" onClick={()=>{
+            Events.emit('toggleMaximize');
+          }}></button>
+          <button id="btn-close-app"></button>
         </div>
       </div>
     );
   }
 }
-export default MenuComponent;
+export default withSceneContext(MenuComponent);

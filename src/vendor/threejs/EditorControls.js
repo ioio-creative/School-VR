@@ -85,14 +85,23 @@ const EditorControls = function ( object, domElement ) {
 	this.zoom = function ( delta ) {
 
 		var distance = object.position.distanceTo( center );
+		// added maxDistance when the camera zoom out
+		// 5000 = radius of the a-sky, a-videosphere
+		// minDistance just prevent user zoom too close
+		var minDistance = 1;
+		var maxDistance = 4999;
 
 		delta.multiplyScalar( distance * scope.zoomSpeed );
 
-		if ( delta.length() > distance ) return;
-
 		delta.applyMatrix3( normalMatrix.getNormalMatrix( object.matrix ) );
 
-		object.position.add( delta );
+		var newPosition = object.position.clone();
+		newPosition.add(delta);
+		var newPositionToCenter = newPosition.distanceTo(center);
+		if ( newPositionToCenter < maxDistance && newPositionToCenter > minDistance) {
+			// use "set" performance should be better then "add" again
+			object.position.set(newPosition.x, newPosition.y, newPosition.z);
+		}
 
 		scope.dispatchEvent( changeEvent );
 

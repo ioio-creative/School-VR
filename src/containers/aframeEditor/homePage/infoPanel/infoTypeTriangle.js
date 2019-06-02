@@ -2,321 +2,178 @@
   info generation of right panel
 */
 import React, {Component} from 'react';
-import {roundTo, addToAsset, rgba2hex, polygonArea} from 'utils/aframeEditor/helperfunctions';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {Rnd as ResizableAndDraggable} from 'react-rnd';
-import Draggable from 'react-draggable';
-
-import './infoTypeTriangle.css';
+import {roundTo, addToAsset} from 'globals/helperfunctions';
 
 var Events = require('vendor/Events.js');
+let editor = null;
+
+Events.on('editor-load', obj => {
+    editor = obj;
+});
+
+function fetchDataFromEl(el) {
+  let result = {};
+  let geo = el.getAttribute('geometry');
+  result['geometry'] = {
+  	vertexA:{x:geo.vertexA.x,y:geo.vertexA.y,z:geo.vertexA.z},
+  	vertexB:{x:geo.vertexB.x,y:geo.vertexB.y,z:geo.vertexB.z},
+  	vertexC:{x:geo.vertexC.x,y:geo.vertexC.y,z:geo.vertexC.z}
+  };
+  let position = el.getAttribute('position');
+  result['position'] = {x:roundTo(position.x,1),y:roundTo(position.y,1),z:roundTo(position.z,1)};
+  let rotation = el.getAttribute('rotation');
+  result['rotation'] = {x:roundTo(rotation.x,1),y:roundTo(rotation.y,1),z:roundTo(rotation.z,1)};
+  let scale = el.getAttribute('scale');
+  result['scale'] = {x:roundTo(scale.x,1),y:roundTo(scale.y,1),z:roundTo(scale.z,1)};
+  result['material'] = {};
+  let color = el.getAttribute('material').color;
+  result['material']['color'] = color;
+  let texture = el.getAttribute('material').src;
+  result['texture'] = (typeof(texture) == "object"? texture.src: texture);
+  result['textureClass'] = (result['texture']? 'texturePreview': 'texturePreview noTexture');
+  result['el'] = el;
+  return result;
+}
 
 class InfoTypeTriangle extends Component {
   constructor(props) {
     super(props);
-    const self = this;
     this.state = {
-      editorMode: null,
-      vertexAX: 0, 
-      vertexAY: 0,
-      vertexBX: 0, 
-      vertexBY: 0,
-      vertexCX: 0, 
-      vertexCY: 0,
+      el: props.el
     };
+    this.eventListener = Array();
+    this.changeObjectTexture = this.changeObjectTexture.bind(this);
     this.changeObjectField = this.changeObjectField.bind(this);
-    this.changeTransformMode = this.changeTransformMode.bind(this);
-    this.events = {
-      transformmodechanged: (mode) => {
+    this.deleteObject = this.deleteObject.bind(this);
+  }
+  componentDidMount() {
+    let self = this;
+    // later need to add event emit when change value
+    this.setState({
+      data: fetchDataFromEl(this.state.el)
+    });
+    let evt = {
+      'refreshsidebarobject3d': function(obj) {
+        // console.log('refreshsidebarobject3d',obj);
         self.setState({
-          editorMode: mode
+          data: fetchDataFromEl(self.state.el)
         });
       }
     };
-  }
-  componentDidMount() {
-    const props = this.props;
-    for (let eventName in this.events) {
-      Events.on(eventName, this.events[eventName]);
+    for (var emitter in evt) {
+      Events.on(emitter, evt[emitter]);
     }
-    Events.emit('gettransformmode', mode => {
-      if (this.state.editorMode !== mode) {
-        this.changeTransformMode(mode);
-      }
-    })
+    // evt.forEach() = Events.on('refreshsidebarobject3d', )
+    this.eventListener = evt;
+  }
+  componentWillReceiveProps(newProps) {
+    let self = this;
+    // later need to add event emit when change value
     this.setState({
-      vertexAX: props.timelineObj[props.timelinePosition]['geometry']['vertexA']['x'],
-      vertexAY: props.timelineObj[props.timelinePosition]['geometry']['vertexA']['y'],
-      vertexBX: props.timelineObj[props.timelinePosition]['geometry']['vertexB']['x'],
-      vertexBY: props.timelineObj[props.timelinePosition]['geometry']['vertexB']['y'],
-      vertexCX: props.timelineObj[props.timelinePosition]['geometry']['vertexC']['x'],
-      vertexCY: props.timelineObj[props.timelinePosition]['geometry']['vertexC']['y'],
-    })
-  }
-  componentDidUpdate(prevProps, prevState) {
-    const props = this.props;
-    const self = this;
-    if (
-      props.selectedEntity !== prevProps.selectedEntity ||
-      props.selectedSlide !== prevProps.selectedSlide ||
-      props.selectedTimeline !== prevProps.selectedTimeline ||
-      props.timelinePosition !== prevProps.timelinePosition
-    ) {
-      this.changeTransformMode(null);
-    } else {
-      Events.emit('gettransformmode', mode => {
-        if (self.state.editorMode !== mode) {
-          self.changeTransformMode(mode);
-        }
-      })
-    }
-
-    if (prevState.vertexAX === this.state.vertexAX &&
-      prevState.vertexAY === this.state.vertexAY &&
-      prevState.vertexBX === this.state.vertexBX &&
-      prevState.vertexBY === this.state.vertexBY &&
-      prevState.vertexCX === this.state.vertexCX &&
-      prevState.vertexCY === this.state.vertexCY) {
-        if (props.timelineObj[props.timelinePosition]['geometry']['vertexA']['x'] !== this.state.vertexAX ||
-          props.timelineObj[props.timelinePosition]['geometry']['vertexA']['y'] !== this.state.vertexAY ||
-          props.timelineObj[props.timelinePosition]['geometry']['vertexB']['x'] !== this.state.vertexBX ||
-          props.timelineObj[props.timelinePosition]['geometry']['vertexB']['y'] !== this.state.vertexBY ||
-          props.timelineObj[props.timelinePosition]['geometry']['vertexC']['x'] !== this.state.vertexCX ||
-          props.timelineObj[props.timelinePosition]['geometry']['vertexC']['y'] !== this.state.vertexCY) {
-            this.setState({
-              vertexAX: props.timelineObj[props.timelinePosition]['geometry']['vertexA']['x'],
-              vertexAY: props.timelineObj[props.timelinePosition]['geometry']['vertexA']['y'],
-              vertexBX: props.timelineObj[props.timelinePosition]['geometry']['vertexB']['x'],
-              vertexBY: props.timelineObj[props.timelinePosition]['geometry']['vertexB']['y'],
-              vertexCX: props.timelineObj[props.timelinePosition]['geometry']['vertexC']['x'],
-              vertexCY: props.timelineObj[props.timelinePosition]['geometry']['vertexC']['y']
-            });
-          }
-    }
+      el: newProps.el
+    });
+    this.setState({
+      data: fetchDataFromEl(newProps.el)
+    });
   }
   componentWillUnmount() {
-    for (let eventName in this.events) {
-      Events.removeListener(eventName, this.events[eventName]);
+    for (var emitter in this.eventListener) {
+      Events.removeListener(emitter,this.eventListener[emitter]);
     }
   }
-  changeTransformMode(transformMode) {
+  deleteObject() {
+    editor.deselect();
+    this.state.el.parentNode.removeChild(this.state.el);
+  }
+  changeObjectField(event) {
+    let field = event.target.getAttribute('data-value').split('.');
+    let tmp = this.state.data[field[0]];
+    tmp[field[1]] = event.target.value;
+    this.state.el.setAttribute(field[0], tmp);
+    this.state.data[field[0]][field[1]] = event.target.value;
     this.setState({
-      editorMode: transformMode
-    });
-    if (transformMode) {
-      Events.emit('enablecontrols');
-      Events.emit('transformmodechanged', transformMode);
-    } else {
-      Events.emit('disablecontrols');
+      data: this.state.data
+    })
+    Events.emit('objectchanged',this.state.el.object3D);
+  }
+  changeObjectTexture(event) {
+    let evt = event.target;
+    let self = this;
+    if (evt.files && evt.files[0]) {
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        let img = new Image();
+        img.onload = function(){
+          let w = this.width;
+          let h = this.height;
+          if (w>h) {
+              w = w/h;
+              h = 1;
+          } else {
+              h = h/w;
+              w = 1;
+          }
+          let newid = addToAsset(img);
+
+          self.state.el.setAttribute('material',{
+            src: '#'+ newid
+          });
+          self.state.data.texture = e.target.result;
+          self.setState({
+            data: self.state.data
+          })
+        }
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(evt.files[0]);
     }
-  }
-  changeObjectField(field, value) {
-    const tmp = {};
-    tmp[field] = value;
-    Events.emit('updateSelectedEntityAttribute', tmp);
-  }
-  changeObjectVertexField(field, value) {
-    const tmp = {};
-    const parsedValue = value.split(' ');
-    tmp[field] = {
-      x: parsedValue[0],
-      y: parsedValue[1],
-      z: parsedValue[2]
-    };
-    Events.emit('updateSelectedEntityAttribute', tmp);
+    
   }
   render() {
-    const props = this.props;
-    const data = props.timelineObj[props.timelinePosition];
-    const color = rgba2hex(data.material.color);
-    const isTriangleValid = polygonArea([
-      {x: this.state.vertexAX, y: this.state.vertexAY},
-      {x: this.state.vertexBX, y: this.state.vertexBY},
-      {x: this.state.vertexCX, y: this.state.vertexCY},
-    ]) > 0;
+    let data = this.state.data;
+    if (!data) return null;
     return (
-      <div className="animatable-params">
-        <div className="vec3D-btn-col">
-          <button 
-            className={(this.state.editorMode === "translate"? "selected": "")}
-            onClick={()=>{this.changeTransformMode('translate')}}
-            title="Translate"
-          >
-            <FontAwesomeIcon icon="arrows-alt" />
-          </button>
-          <button 
-            className={(this.state.editorMode === "rotate"? "selected": "")}
-            onClick={()=>{this.changeTransformMode('rotate')}}
-            title="Rotate"
-          >
-            <FontAwesomeIcon icon="sync-alt" />
-          </button>
-          <button 
-            className={(this.state.editorMode === "scale"? "selected": "")}
-            onClick={()=>{this.changeTransformMode('scale')}}
-            title="Scale"
-          >
-            <FontAwesomeIcon icon="expand-arrows-alt" />
-          </button>
-        </div>
-        <div className="attribute-col color-col" onClick={() => this.changeTransformMode(null)}>
-          <label title={color}>
-            <div className="field-label">Color:</div><div className="color-preview" style={{backgroundColor: color}}/>
-            <input type="color" value={color} onChange={(event) => this.changeObjectField('material.color', event.target.value)} hidden/>
-          </label>
-        </div>
-        <div className="attribute-col opacity-col" onClick={() => this.changeTransformMode(null)}>
-          <div className="field-label">Opacity:</div>
-          <div className="opacity-control">
-            <div className="hide-button" onClick={() => {
-              // ~~! int value of the opposite opacity, 0 -> 1, 0.x -> 0
-              this.changeObjectField('material.opacity', ~~!data.material.opacity);              
-            }}>
-              {data.material.opacity?
-                <FontAwesomeIcon icon="eye-slash" />:
-                <FontAwesomeIcon icon="eye" />
-              }
-            </div>
-            <div className="opacity-drag-control"
-              title={data.material.opacity * 100 + '%'}
-              ref={ref=> this.opacityControl = ref}
-              onClick={(event) => {
-
-                const clickPercent = (event.clientX - event.currentTarget.getBoundingClientRect().left) / event.currentTarget.getBoundingClientRect().width;
-                this.changeObjectField('material.opacity', roundTo(clickPercent, 2));
-              }}
-            >
-              <ResizableAndDraggable
-                className="current-opacity"
-                disableDragging={true}
-                bounds="parent"
-                minWidth="0%"
-                maxWidth="100%"
-                default={{
-                  x: 0,
-                  y: 0
-                }}
-                size={{
-                  height: 24,
-                  width: data.material.opacity * 100 + '%'
-                }}
-                dragAxis='x'
-                enableResizing={{
-                  top: false, right: true, bottom: false, left: false,
-                  topRight: false, bottomRight: false, bottomLeft: false, topLeft: false
-                }}
-                onResizeStart={(event, dir, ref, delta,pos)=>{
-
-                }}
-                onResize={(event, dir, ref, delta, pos)=>{
-                }}
-                onResizeStop={(event, dir, ref, delta, pos)=>{
-                  this.changeObjectField('material.opacity', roundTo(data.material.opacity + delta.width / this.opacityControl.getBoundingClientRect().width, 2));
-                }}
-              >
-                <div className="current-opacity" />
-              </ResizableAndDraggable>  
-            </div>
-            <input type="text" value={data.material.opacity} ref={(ref) => this.opacityInput = ref} onChange={(event) => this.changeObjectField('material.opacity', event.target.value)} hidden/>
+      <div>
+        <div>
+          <div>Triangle <span onClick={this.deleteObject} className="el-remove-btn">Delete</span></div>
+          <div>
+            position: 
+            <input className="textInput" value={data.position.x} data-value="position.x" onChange={this.changeObjectField} />
+            <input className="textInput" value={data.position.y} data-value="position.y" onChange={this.changeObjectField} />
+            <input className="textInput" value={data.position.z} data-value="position.z" onChange={this.changeObjectField} />
           </div>
-        </div>
-        <div className="attribute-col triangle-col" onClick={() => this.changeTransformMode(null)}>
-          <div className="field-label">Vertex:</div>
-          <div className="triangle-wrap">
-          <Draggable 
-              grid = {[50, 50]}
-              bounds = {{left: 0, top: 0, right: 100, bottom: 100}}
-              position = {{x: (parseFloat(data.geometry.vertexA.x) + 0.5) * 100, y: 100 - (parseFloat(data.geometry.vertexA.y) + 0.5) * 100}}
-              onDrag={(event,data) => {
-                const newX = Math.round(data.x / 50) * 0.5 - 0.5;
-                const newY = (2 - Math.round(data.y / 50)) * 0.5 - 0.5;
-                this.setState((prevState) => {
-                  if (prevState.vertexAX !== newX || prevState.vertexAY !== newY) {
-                    return {
-                      vertexAX: newX, 
-                      vertexAY: newY
-                    }
-                  }
-                });
-              }}
-              onStop={(event, data)=> {
-                const newX = Math.round(data.x / 50) * 0.5 - 0.5;
-                const newY = (2 - Math.round(data.y / 50)) * 0.5 - 0.5;
-                this.changeObjectField('geometry.vertexA', {x: newX, y: newY, z: 0});
-              }}
-            >
-              <div className="controlDot" />
-            </Draggable>
-            <Draggable 
-              grid = {[50, 50]}
-              bounds = {{left: 0, top: 0, right: 100, bottom: 100}}
-              position = {{x: (parseFloat(data.geometry.vertexB.x) + 0.5) * 100, y: 100 - (parseFloat(data.geometry.vertexB.y) + 0.5) * 100}}
-              onDrag={(event,data) => {
-                const newX = Math.round(data.x / 50) * 0.5 - 0.5;
-                const newY = (2 - Math.round(data.y / 50)) * 0.5 - 0.5;
-                this.setState((prevState) => {
-                  if (prevState.vertexBX !== newX || prevState.vertexBY !== newY) {
-                    return {
-                      vertexBX: newX, 
-                      vertexBY: newY
-                    }
-                  }
-                });
-              }}
-              onStop={(event, data)=> {
-                const newX = Math.round(data.x / 50) * 0.5 - 0.5;
-                const newY = (2 - Math.round(data.y / 50)) * 0.5 - 0.5;
-                this.changeObjectField('geometry.vertexB', {x: newX, y: newY, z: 0});
-              }}
-            >
-              <div className="controlDot" />
-            </Draggable>
-            <Draggable 
-              grid = {[50, 50]}
-              bounds = {{left: 0, top: 0, right: 100, bottom: 100}}
-              position = {{x: (parseFloat(data.geometry.vertexC.x) + 0.5) * 100, y: 100 - (parseFloat(data.geometry.vertexC.y) + 0.5) * 100}}
-              onDrag={(event,data) => {
-                const newX = Math.round(data.x / 50) * 0.5 - 0.5;
-                const newY = (2 - Math.round(data.y / 50)) * 0.5 - 0.5;
-                this.setState((prevState) => {
-                  if (prevState.vertexCX !== newX || prevState.vertexCY !== newY) {
-                    return {
-                      vertexCX: newX, 
-                      vertexCY: newY
-                    }
-                  }
-                });
-              }}
-              onStop={(event, data)=> {
-                const newX = Math.round(data.x / 50) * 0.5 - 0.5;
-                const newY = (2 - Math.round(data.y / 50)) * 0.5 - 0.5;
-                this.changeObjectField('geometry.vertexC', {x: newX, y: newY, z: 0});
-              }}
-            >
-              <div className="controlDot" />
-            </Draggable>
-            <svg height="100" width="100">
-            <polygon
-                points={
-                  ((parseFloat(this.state.vertexAX) + 0.5) * 100).toString() + ',' + (100 - (parseFloat(this.state.vertexAY) + 0.5) * 100).toString() + ' ' +
-                  ((parseFloat(this.state.vertexBX) + 0.5) * 100).toString() + ',' + (100 - (parseFloat(this.state.vertexBY) + 0.5) * 100).toString() + ' ' +
-                  ((parseFloat(this.state.vertexCX) + 0.5) * 100).toString() + ',' + (100 - (parseFloat(this.state.vertexCY) + 0.5) * 100).toString()
-                } 
-                style={{
-                  fill: (isTriangleValid? color: "none"),
-                  stroke: (isTriangleValid? "#EEEEEE": "red"),
-                  strokeWidth: 3
-                }}
-              />
-              <polygon
-                points="0,0 0,100 100,100 100,0"
-                style={{
-                  fill: "none",
-                  stroke: "#EEEEEE",
-                  strokeWidth: 1
-                }}
-              />
-            </svg>
+          <div>
+            vertexA:
+            <input className="textInput" value={data.geometry.vertexA.x} data-value="geometry.vertexA.x" onChange={this.changeObjectField} />
+            <input className="textInput" value={data.geometry.vertexA.y} data-value="geometry.vertexA.y" onChange={this.changeObjectField} />
+          </div>
+          <div>
+            vertexB:
+            <input className="textInput" value={data.geometry.vertexB.x} data-value="geometry.vertexB.x" onChange={this.changeObjectField} />
+            <input className="textInput" value={data.geometry.vertexB.y} data-value="geometry.vertexB.y" onChange={this.changeObjectField} />
+          </div>
+          <div>
+            vertexC:
+            <input className="textInput" value={data.geometry.vertexC.x} data-value="geometry.vertexC.x" onChange={this.changeObjectField} />
+            <input className="textInput" value={data.geometry.vertexC.y} data-value="geometry.vertexC.y" onChange={this.changeObjectField} />
+          </div>
+          <div>
+            rotation:
+            <input className="textInput" value={data.rotation.x} data-value="rotation.x" onChange={this.changeObjectField} />
+            <input className="textInput" value={data.rotation.y} data-value="rotation.y" onChange={this.changeObjectField} />
+            <input className="textInput" value={data.rotation.z} data-value="rotation.z" onChange={this.changeObjectField} />
+          </div>
+          <div>
+            scale:
+            <input className="textInput" value={data.scale.x} data-value="scale.x" onChange={this.changeObjectField} />
+            <input className="textInput" value={data.scale.y} data-value="scale.y" onChange={this.changeObjectField} />
+            <input className="textInput" value={data.scale.z} data-value="scale.z" onChange={this.changeObjectField} />
+          </div>
+          <div>
+            texture: <span><img className={data.textureClass} src={data.texture} /></span><input onChange={this.changeObjectTexture} type="file" />
+          </div>
+          <div>
+            color: <input className="colorInput" onChange={this.changeObjectField} type="color" data-value="material.color" value={data.material.color} />
           </div>
         </div>
       </div>

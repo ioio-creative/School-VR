@@ -1,23 +1,11 @@
-/*
-  Left Panel should be similar to slides in powerpoint ( ▭ )
-  ▫▫▫▫▫▫▫▫▫▫▫
-  ▭ ┌──────┐
-  ▭ │AFRAME│
-  ▭ └──────◲
-*/
 import React, {Component} from 'react';
-
-import ipcHelper from 'utils/ipcHelper';
-import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
-import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 
 import './assetsPanel.css';
 
-//const Events = require('vendor/Events.js');
+const Events = require('vendor/Events.js');
 
 function handleUpload(event, callback) {
   var self = event.target;
-  console.log(self.value);
   if (self.files && self.files[0]) {
     var reader = new FileReader();
     reader.onload = function (e) {
@@ -28,33 +16,6 @@ function handleUpload(event, callback) {
     reader.readAsDataURL(self.files[0]);
     self.value = '';
   }
-}
-function handleUploadThroughElectron(callback) {
-  ipcHelper.showOpenDialog({
-    properties: [
-      'openFile'
-    ],
-    filters: [
-      {name: 'Images', extensions: ['jpg', 'png', 'gif']},
-      {name: 'Movies', extensions: ['mp4']},
-      {name: 'All Files', extensions: ['*']}
-    ]
-  }, (err, data) => {
-    if (err) {
-      handleErrorWithUiDefault(err);
-      return;
-    }
-    const filePaths = data.filePaths;
-    if (!isNonEmptyArray(filePaths)) {
-      console.log("No file selected");
-    } else {
-      callback({
-        src: filePaths[0],
-        width: 'test',
-        height: 'test'
-      });
-    }
-  });  
 }
 // if have time, this one seems funny
 // http://www.html5rocks.com/en/tutorials/canvas/imagefilters/
@@ -126,7 +87,7 @@ class AssetsPanel extends Component {
     });
   }
   render() {
-    //const props = this.props;
+    const props = this.props;
     const self = this;
     return (
       <div id="assets-panel">
@@ -137,7 +98,7 @@ class AssetsPanel extends Component {
           </div>
           <div className="panel-body">
             <div className="assets-buttons">
-              <button id="add-assets" onClick={_=>handleUploadThroughElectron(self.addAsset)}>Add</button>
+              <button id="add-assets" onClick={_=>this.fileUpload.click()}>Add</button>
               <input type="file" 
                 ref={ref=>this.fileUpload = ref} 
                 onChange={event=>handleUpload(event, self.addAsset)} 

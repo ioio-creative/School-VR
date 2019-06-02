@@ -35,7 +35,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 0;
-  -webkit-app-region: no-drag;
 }
 #app-name .hyphen {
   padding: 0 5px;

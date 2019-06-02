@@ -59,6 +59,10 @@
   white-space: nowrap;
   display: inline-flex;
 }
+#app-buttons {
+  /* just for app-name alignment, no use */
+  min-width: 100px;
+}
 #app-buttons .menu-group {
   position: relative;
 }
@@ -76,7 +80,7 @@
   overflow: hidden;
   position: relative;
 }
-#app-buttons button:hover,
+#app-buttons button.hover,
 #app-buttons .hover button,
 #system-buttons button:hover {
   background-color: #505050;
@@ -164,7 +168,10 @@ body.maximized #system-buttons button#btn-max-app:after {
   padding: 5px 10px;
   color: #CCCCCC;
 }
-#system-panel .menu-list .menu-item:hover {
+#system-panel .disabled {
+  opacity: 0.4;
+}
+#system-panel .menu-list .menu-item:not(.disabled):hover {
   background-color: #505050;
   color: #ffffff;
 }
