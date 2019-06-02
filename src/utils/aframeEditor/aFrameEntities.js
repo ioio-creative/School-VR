@@ -2,7 +2,7 @@ import React from 'react';
 import 'aframe-gif-shader';
 import {mediaType, openFileDialogFilter} from 'globals/config';
 import fileHelper from 'utils/fileHelper/fileHelper';
-import ipcHelper from 'utils/ipcHelper';
+import ipcHelper from 'utils/ipc/ipcHelper';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 

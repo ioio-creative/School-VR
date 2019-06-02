@@ -1,5 +1,9 @@
 import React, {Component} from 'react';
 
+import ipcHelper from 'utils/ipc/ipcHelper';
+import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
+import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
+
 import './assetsPanel.css';
 
 const Events = require('vendor/Events.js');

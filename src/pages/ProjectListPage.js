@@ -4,7 +4,7 @@ import {Link} from 'react-router-dom';
 import MenuComponent from 'components/menuComponent';
 import CrossButton from 'components/crossButton';
 
-import ipcHelper from 'utils/ipcHelper';
+import ipcHelper from 'utils/ipc/ipcHelper';
 import routes from 'globals/routes';
 import {funcFactoryForCompareFileStatsByProperty} from 'utils/saveLoadProjectHelper/listProjectsAsync';
 import {formatDateTime} from 'utils/dateTime/formatDateTime';
@@ -319,7 +319,7 @@ class ProjectOrderSelect extends Component {
 function Menu(props) {
   /* event handlers */
 
-  function handleBtnNewClick(event) {
+  function handleBtnNewClick(event) {    
     props.history.push(routes.editor);
   };
 
@@ -467,7 +467,7 @@ class ProjectListPage extends Component {
     }
   }
 
-  handleSmallProjectNewButtonClick = _ => {
+  handleSmallProjectNewButtonClick = _ => {    
     this.props.history.push(routes.editor);
   }
 

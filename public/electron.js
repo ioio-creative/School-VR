@@ -205,6 +205,10 @@ app.on('activate', () => {
 
 
 /* ipc main event listeners */
+/**
+ * !!! Important !!! 
+ * Note Error object cannot be passed as argument.
+ */
 
 function getSenderWindowFromEvent(ipcEvent) {  
   return BrowserWindow.fromWebContents(ipcEvent.sender);
@@ -296,7 +300,7 @@ ipcMain.on('mimeStat', (event, arg) => {
     });
   } catch (err) {
     event.sender.send('mimeStatResponse', {
-      err: err,
+      err: err.toString(),
       data: null
     });
   }  
@@ -314,7 +318,7 @@ ipcMain.on('mimeStats', (event, arg) => {
     });
   } catch (err) {
     event.sender.send('mimeStatsResponse', {
-      err: err,
+      err: err.toString(),
       data: null
     });
   }  
@@ -332,7 +336,7 @@ ipcMain.on('base64Encode', async (event, arg) => {
     });
   } catch (err) {
     event.sender.send('base64EncodeResponse', {
-      err: err,
+      err: err.toString(),
       data: null
     });
   }  
@@ -346,7 +350,7 @@ ipcMain.on('base64Decode', async (event, arg) => {
     });
   } catch (err) {
     event.sender.send('base64DecodeResponse', {
-      err: err,      
+      err: err.toString(),      
     });
   }  
 });
@@ -359,7 +363,7 @@ ipcMain.on('createPackage', async (event, arg) => {
     });
   } catch (err) {
     event.sender.send('createPackageResponse', {
-      err: err,      
+      err: err.toString(),      
     });
   }
 });
@@ -372,7 +376,7 @@ ipcMain.on('extractAll', (event, arg) => {
     });
   } catch (err) {
     event.sender.send('extractAllResponse', {
-      err: err,      
+      err: err.toString(),      
     });
   }
 });
@@ -389,7 +393,7 @@ ipcMain.on('readdir', async (event, arg) => {
     });
   } catch (err) {
     event.sender.send('readdirResponse', {
-      err: err,
+      err: err.toString(),
       data: null
     });
   }
@@ -407,7 +411,7 @@ ipcMain.on('createDirectoriesIfNotExists', async (event, arg) => {
     });
   } catch (err) {
     event.sender.send('createDirectoriesIfNotExistsResponse', {
-      err: err,
+      err: err.toString(),
       data: null
     });
   }  
@@ -425,7 +429,7 @@ ipcMain.on('readFile', async (event, arg) => {
     });
   } catch (err) {
     event.sender.send('readFileResponse', {
-      err: err,
+      err: err.toString(),
       data: null
     });
   } 
@@ -439,7 +443,7 @@ ipcMain.on('writeFile', async (event, arg) => {
     });
   } catch (err) {
     event.sender.send('writeFileResponse', {
-      err: err      
+      err: err.toString()      
     });
   } 
 });
@@ -453,7 +457,7 @@ ipcMain.on('deleteFile', async (event, arg) => {
     });
   } catch (err) {
     event.sender.send('deleteFileResponse', {
-      err: err      
+      err: err.toString()      
     });
   } 
 });
@@ -470,9 +474,9 @@ ipcMain.on('listProjects', async (event, arg) => {
         }
       });
     })
-    .catch(err => {
+    .catch(err => {      
       event.sender.send('listProjectsResponse', {
-        err: err,
+        err: err.toString(),
         data: null
       });
     });
@@ -490,7 +494,7 @@ ipcMain.on('getExistingProjectNames', async (event, arg) => {
     })
     .catch(err => {
       event.sender.send('getExistingProjectNamesResponse', {
-        err: err,
+        err: err.toString(),
         data: null
       });
     });
@@ -508,7 +512,7 @@ ipcMain.on('saveProject', (event, arg) => {
     })
     .catch(err => {
       event.sender.send('saveProjectResponse', {
-        err: err,
+        err: err.toString(),
         data: null
       });
     });
@@ -526,7 +530,7 @@ ipcMain.on('parseDataToSaveFormat', (event, arg) => {
     })
     .catch(err => {
       event.sender.send('parseDataToSaveFormatResponse', {
-        err: err,
+        err: err.toString(),
         data: null
       });
     });
@@ -545,7 +549,7 @@ ipcMain.on('loadProjectByProjectFilePath', (event, arg) => {
     })
     .catch(err => {
       event.sender.send('loadProjectByProjectFilePathResponse', {
-        err: err,
+        err: err.toString(),
         data: null
       });
     });
@@ -558,9 +562,9 @@ ipcMain.on('deleteAllTempProjectDirectories', (event, arg) => {
         err: null,        
       });
     })
-    .catch(err => {
+    .catch(err => {    
       event.sender.send('deleteAllTempProjectDirectoriesResponse', {
-        err: err,       
+        err: err.toString(),
       });
     });
 });

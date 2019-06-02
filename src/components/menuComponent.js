@@ -5,6 +5,12 @@
 import React, {Component} from 'react';
 
 import {withSceneContext} from 'globals/contexts/sceneContext';
+import Mousetrap from 'mousetrap';
+import Events from 'vendor/Events.js';
+
+import config from 'globals/config';
+import ipcHelper from 'utils/ipc/ipcHelper';
+import {invokeIfIsFunction} from 'utils/variableType/isFunction';
 
 import './menuComponent.css';
 
