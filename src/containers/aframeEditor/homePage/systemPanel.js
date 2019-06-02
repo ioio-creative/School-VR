@@ -6,7 +6,7 @@ import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 
 import routes from 'globals/routes';
-import ipcHelper from 'utils/ipcHelper';
+import ipcHelper from 'utils/ipc/ipcHelper';
 
 import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 

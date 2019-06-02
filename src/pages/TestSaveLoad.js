@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
-import ipcHelper from 'utils/ipcHelper';
+import ipcHelper from 'utils/ipc/ipcHelper';
 import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 
 

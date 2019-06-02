@@ -2,7 +2,7 @@
 
 import React, { Component } from 'react';
 
-import ipcHelper from 'utils/ipcHelper';
+import ipcHelper from 'utils/ipc/ipcHelper';
 import fileHelper from 'utils/fileHelper/fileHelper';
 import { getAbsoluteUrlFromRelativeUrl } from 'utils/setStaticResourcesPath';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';

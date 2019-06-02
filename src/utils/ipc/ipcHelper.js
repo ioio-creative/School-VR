@@ -1,8 +1,8 @@
 import isFunction from 'utils/variableType/isFunction';
+import ipc from 'utils/ipc/ipc';
 
 
-const electron = window.require ? window.require('electron') : null;
-const ipc = electron ? electron.ipcRenderer : null;
+
 
 
 /* listeners */
@@ -179,7 +179,7 @@ const deleteFile = (filePath, callBack) => {
 /* saveLoadProject */
 
 const listProjects = (callBack) => {
-  ipc.once('listProjectsResponse', (event, arg) => {
+  ipc.once('listProjectsResponse', (event, arg) => {    
     callBack(arg.err, arg.data);
   });
   ipc.send('listProjects');

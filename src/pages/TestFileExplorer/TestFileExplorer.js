@@ -7,7 +7,7 @@ import FolderView from 'pages/TestFileExplorer/FolderView';
 
 import config, { appDirectory } from 'globals/config';
 import fileHelper from 'utils/fileHelper/fileHelper';
-import ipcHelper from 'utils/ipcHelper';
+import ipcHelper from 'utils/ipc/ipcHelper';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 
 import './bootstrap/css/bootstrap.css';

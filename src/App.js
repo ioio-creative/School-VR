@@ -6,7 +6,7 @@ import {library} from '@fortawesome/fontawesome-svg-core'
 // import {faArrowsAlt, faArrowsAlt} from '@fortawesome/free-solid-svg-icons'
 
 import {setAppData, appDirectory, setParamsReadFromExternalConfig} from 'globals/config';
-import ipcHelper from 'utils/ipcHelper';
+import ipcHelper from 'utils/ipc/ipcHelper';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 
 import asyncLoadingComponent from 'components/asyncLoadingComponent';

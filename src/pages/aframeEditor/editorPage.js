@@ -17,7 +17,7 @@ import stricterParseInt from 'utils/number/stricterParseInt';
 
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 import loadProjectInEditorPageAsync from './loadProjectInEditorPageAsync';
-import ipcHelper from 'utils/ipcHelper';
+import ipcHelper from 'utils/ipc/ipcHelper';
 
 import './editorPage.css';
 

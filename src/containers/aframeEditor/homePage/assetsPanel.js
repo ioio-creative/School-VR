@@ -7,7 +7,7 @@
 */
 import React, {Component} from 'react';
 
-import ipcHelper from 'utils/ipcHelper';
+import ipcHelper from 'utils/ipc/ipcHelper';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 

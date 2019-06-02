@@ -1,6 +1,6 @@
 import getSearchObjectFromHistory from 'utils/queryString/getSearchObjectFromHistory';
 import getProjectFilePathFromSearchObject from 'utils/queryString/getProjectFilePathFromSearchObject';
-import ipcHelper from 'utils/ipcHelper';
+import ipcHelper from 'utils/ipc/ipcHelper';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 
 
