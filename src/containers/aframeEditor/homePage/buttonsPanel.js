@@ -95,8 +95,11 @@ class ButtonsPanel extends Component {
         </div>
         <div className="buttons-list buttons-2d">
           <div className="buttons-list-wrapper">
-            <button onClick={()=>this.addNewEntity('a-plane')}>
+          <button onClick={()=>this.addNewEntity('a-plane')}>
               addNewImage
+            </button>
+            <button onClick={()=>this.addNewEntity('a-video')}>
+              addNewVideo
             </button>
             <button onClick={()=>this.addNewEntity('a-text')}>
               addNewText

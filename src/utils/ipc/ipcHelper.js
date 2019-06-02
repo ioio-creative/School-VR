@@ -1,7 +1,5 @@
 import isFunction from 'utils/variableType/isFunction';
-import ipc from 'utils/ipc/ipc';
-
-
+// import ipc from 'utils/ipc/ipc';
 
 const electron = window.require ? window.require('electron') : null;
 const dummyFunc = _=>{ console.log('not in electron app, no ipc') };

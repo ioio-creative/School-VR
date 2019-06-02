@@ -33,8 +33,9 @@ import APlane from 'utils/aframeEditor/aPlane';
 import AText from 'utils/aframeEditor/aText';
 import ASky from 'utils/aframeEditor/aSky';
 import ACamera from 'utils/aframeEditor/aCamera';
+import AVideo from 'utils/aframeEditor/aVideo';
 
-import ipcHelper from 'utils/ipcHelper';
+import ipcHelper from 'utils/ipc/ipcHelper';
 
 var Events = require('vendor/Events.js');
 
@@ -62,6 +63,7 @@ const entityModel = {
   'a-plane': APlane, //InfoTypePlane,
   'a-triangle': ABox, //InfoTypeTriangle,
   'a-image': ABox, //InfoTypeImage
+  'a-video': ABox, //InfoTypeImage
   'a-camera': ACamera,
   'a-sky': ASky,
   'a-navigation': ANavigation,
@@ -200,11 +202,16 @@ class InfoPanel extends Component {
                 }
                 case 'image': {
                   // use electron to load later
-                  ipcHelper.openImageDialog((err, data) => {
-                    selectedEntity.el.setAttribute('material', `src:url(${data.filePaths})`);
-                  })
-{/* openGifDialog
-openVideoDialog */}
+                  inputField = <div onClick={_=> {
+                    ipcHelper.openImageDialog((err, data) => {
+                      sceneContext.updateEntity({
+                          material: {
+                            src: `url(${data.filePaths})`
+                          }
+                        }, selectedEntity['id']);
+                      selectedEntity.el.setAttribute('material', `src:url(${data.filePaths})`);
+                    })
+                  }}>choose</div>
                   {/* inputField = <input type="file" accept="image" onChange={(event) => {
                     if (event.target.files && event.target.files[0]) {
                       var FR= new FileReader();
@@ -229,7 +236,17 @@ openVideoDialog */}
                 }
                 case 'video': {
                   // use electron to load later
-                  inputField = <input type="file" accept="video" onChange={(event) => {
+                  inputField = <div onClick={_=> {
+                    ipcHelper.openVideoDialog((err, data) => {
+                      sceneContext.updateEntity({
+                        material: {
+                          src: `url(${data.filePaths})`
+                        }
+                      }, selectedEntity['id']);
+                      selectedEntity.el.setAttribute('material', `src:url(${data.filePaths})`);
+                    })
+                  }}>choose</div>
+                  {/* inputField = <input type="file" accept="video" onChange={(event) => {
                     if (event.target.files && event.target.files[0]) {
                       var FR= new FileReader();
                       FR.addEventListener("load", function(e) {
@@ -248,7 +265,7 @@ openVideoDialog */}
                     } else {
                       selectedEntity.el.removeAttribute('material', 'src');
                     }
-                  }} />
+                  }} /> */}
                   break;
                 }
                 case 'slidesList': {
