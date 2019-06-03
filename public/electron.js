@@ -17,6 +17,7 @@ const jsoncParser = require('jsonc-parser');
 const mime = require('./utils/fileSystem/mime');
 const fileSystem = require('./utils/fileSystem/fileSystem');
 const ProjectFile = require('./utils/saveLoadProject/ProjectFile');
+const {loadProjectByProjectFilePathAsync} = require('./utils/saveLoadProject/loadProject');
 const {openImageDialog, openGifDialog, openVideoDialog, openSchoolVrFileDialog} = 
   require('./utils/aframeEditor/openFileDialog');
 const {parseDataToSaveFormat} = require('./utils/saveLoadProject/parseDataToSaveFormat');
@@ -154,8 +155,13 @@ function createWindow() {
   menu.append(new MenuItem({
     label: 'Refresh',
     accelerator: 'F5',
-    click: () => { 
-      mainWindow.reload();
+    click: () => {
+      try {
+        console.log("reload");
+        mainWindow.reload();
+      } catch (err) {
+        console.log(err);
+      }      
     }
   }));
 
@@ -263,8 +269,14 @@ ipcMain.on('newBrowserWindow', (event, arg) => {
 });
 
 ipcMain.on('close', (event, arg) => {  
-  const senderWindow = getSenderWindowFromEvent(event);  
-  senderWindow.close();  
+  const senderWindow = getSenderWindowFromEvent(event);
+  try {
+    console.log('close');
+    console.log(senderWindow === mainWindow);
+    senderWindow.close();
+  } catch (err) {
+    console.error(err);
+  }
 });
 
 ipcMain.on('minimize', (event, arg) => {  
@@ -298,6 +310,7 @@ ipcMain.on('mimeStat', (event, arg) => {
       }
     });
   } catch (err) {
+    console.error(err);
     event.sender.send('mimeStatResponse', {
       err: err.toString(),
       data: null
@@ -316,6 +329,7 @@ ipcMain.on('mimeStats', (event, arg) => {
       }
     });
   } catch (err) {
+    console.error(err);
     event.sender.send('mimeStatsResponse', {
       err: err.toString(),
       data: null
@@ -334,6 +348,7 @@ ipcMain.on('base64Encode', async (event, arg) => {
       }
     });
   } catch (err) {
+    console.error(err);
     event.sender.send('base64EncodeResponse', {
       err: err.toString(),
       data: null
@@ -348,6 +363,7 @@ ipcMain.on('base64Decode', async (event, arg) => {
       err: null,      
     });
   } catch (err) {
+    console.error(err);
     event.sender.send('base64DecodeResponse', {
       err: err.toString(),      
     });
@@ -361,6 +377,7 @@ ipcMain.on('createPackage', async (event, arg) => {
       err: null,      
     });
   } catch (err) {
+    console.error(err);
     event.sender.send('createPackageResponse', {
       err: err.toString(),      
     });
@@ -374,6 +391,7 @@ ipcMain.on('extractAll', (event, arg) => {
       err: null,      
     });
   } catch (err) {
+    console.error(err);
     event.sender.send('extractAllResponse', {
       err: err.toString(),      
     });
@@ -391,6 +409,7 @@ ipcMain.on('readdir', async (event, arg) => {
       }   
     });
   } catch (err) {
+    console.error(err);
     event.sender.send('readdirResponse', {
       err: err.toString(),
       data: null
@@ -409,6 +428,7 @@ ipcMain.on('createDirectoriesIfNotExists', async (event, arg) => {
       data: null
     });
   } catch (err) {
+    console.error(err);
     event.sender.send('createDirectoriesIfNotExistsResponse', {
       err: err.toString(),
       data: null
@@ -427,6 +447,7 @@ ipcMain.on('readFile', async (event, arg) => {
       }
     });
   } catch (err) {
+    console.error(err);
     event.sender.send('readFileResponse', {
       err: err.toString(),
       data: null
@@ -441,6 +462,7 @@ ipcMain.on('writeFile', async (event, arg) => {
       err: null      
     });
   } catch (err) {
+    console.error(err);
     event.sender.send('writeFileResponse', {
       err: err.toString()      
     });
@@ -455,6 +477,7 @@ ipcMain.on('deleteFile', async (event, arg) => {
       err: null
     });
   } catch (err) {
+    console.error(err);
     event.sender.send('deleteFileResponse', {
       err: err.toString()      
     });
@@ -474,7 +497,7 @@ ipcMain.on('listProjects', async (event, arg) => {
       });
     })
     .catch(err => {
-      console.log(err)   
+      console.error(err);
       event.sender.send('listProjectsResponse', {
         err: err.toString(),
         data: null
@@ -493,6 +516,7 @@ ipcMain.on('getExistingProjectNames', async (event, arg) => {
       });
     })
     .catch(err => {
+      console.error(err);
       event.sender.send('getExistingProjectNamesResponse', {
         err: err.toString(),
         data: null
@@ -511,6 +535,7 @@ ipcMain.on('saveProject', (event, arg) => {
       });
     })
     .catch(err => {
+      console.error(err);
       event.sender.send('saveProjectResponse', {
         err: err.toString(),
         data: null
@@ -529,6 +554,7 @@ ipcMain.on('parseDataToSaveFormat', (event, arg) => {
       });
     })
     .catch(err => {
+      console.error(err);
       event.sender.send('parseDataToSaveFormatResponse', {
         err: err.toString(),
         data: null
@@ -548,6 +574,7 @@ ipcMain.on('loadProjectByProjectFilePath', (event, arg) => {
       });
     })
     .catch(err => {
+      console.error(err);
       event.sender.send('loadProjectByProjectFilePathResponse', {
         err: err.toString(),
         data: null
@@ -562,7 +589,8 @@ ipcMain.on('deleteAllTempProjectDirectories', (event, arg) => {
         err: null,        
       });
     })
-    .catch(err => {    
+    .catch(err => {
+      console.error(err);
       event.sender.send('deleteAllTempProjectDirectoriesResponse', {
         err: err.toString(),
       });

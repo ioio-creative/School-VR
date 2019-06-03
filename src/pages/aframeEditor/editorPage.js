@@ -23,10 +23,15 @@ import {TweenMax, TimelineMax, Linear} from 'gsap';
 
 import isStrAnInt from 'utils/number/isStrAnInt';
 import stricterParseInt from 'utils/number/stricterParseInt';
+import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
-import loadProjectInEditorPageAsync from './loadProjectInEditorPageAsync';
 import ipcHelper from 'utils/ipc/ipcHelper';
+
+import routes from 'globals/routes';
+
+import getSearchObjectFromHistory from 'utils/queryString/getSearchObjectFromHistory';
+import getProjectFilePathFromSearchObject from 'utils/queryString/getProjectFilePathFromSearchObject';
 
 import './editorPage.css';
 const Events = require('vendor/Events.js');
@@ -42,9 +47,24 @@ class EditorPage extends Component {
     this.inited = false;
     this.state = {
       entitiesList: []
-    }
+    };
+
+    // bind methods
+    this.newProject = this.newProject.bind(this);
+    this.loadProject = this.loadProject.bind(this);
     
-}
+    // bind event handlers
+    this.handleHomeButtonClick = this.handleHomeButtonClick.bind(this);
+    this.handleNewProjectButtonClick = this.handleNewProjectButtonClick.bind(this);
+    this.handleOpenProjectButtonClick = this.handleOpenProjectButtonClick.bind(this);
+    this.handleExitButtonClick = this.handleExitButtonClick.bind(this);      
+    this.handleUndoButtonClick = this.handleUndoButtonClick.bind(this);
+    this.handleRedoButtonClick = this.handleRedoButtonClick.bind(this);      
+  }
+
+
+  /* react lifecycles */
+
   componentDidMount() {
     this.editor = new Editor();
     this.inited = true;
@@ -54,29 +74,113 @@ class EditorPage extends Component {
     };
     Events.on('editor-load', (editor) => {
       if (this.props.match.params.projectId === undefined) {
-        this.props.sceneContext.newProject();
+        this.newProject();
       } else {
         // load project
-        // this.props.sceneContext.loadProject(getProjectDataFromId(this.props.match.params.projectId));
-        this.props.sceneContext.newProject();
+        const searchObj = getSearchObjectFromHistory(this.props.history);
+        const projectFilePathToLoad = getProjectFilePathFromSearchObject(searchObj);
+  
+        //console.log("project path to load: " + projectFilePathToLoad);
+  
+        if (!projectFilePathToLoad) {
+          return;
+        }
+        
+        this.loadProject(projectFilePathToLoad);
       }
     })
   }
-  componentDidUpdate() {
-  }
+
   componentWillUnmount() {
     this.editor = null;
   }
+
+  /* end of react lifecycles */
+
+  
+  /* methods */
+
+  newProject() {
+    //console.log('new');
+                    
+    // test open file with user defined extension
+    // const fileDialog = document.createElement('input');
+    // fileDialog.type = 'file';
+    // fileDialog.multiple = true;
+    // fileDialog.accept = ['image/x-png','image/gif'];
+    // fileDialog.click();
+
+    this.props.sceneContext.newProject();
+  }
+
+  loadProject(projectFilePath) {
+    ipcHelper.loadProjectByProjectFilePath(projectFilePath, (err, data) => {
+      if (err) {
+        handleErrorWithUiDefault(err);
+        return;                         
+      }
+      
+      const projectJsonData = data.projectJson;
+      console.log(projectJsonData);
+      this.props.sceneContext.loadProject(projectJsonData);   
+    });
+  }
+
+  /* end of methods */
+
+
+  /* event handlers */
+
+  handleHomeButtonClick(event) {
+    this.props.history.push(routes.home);
+  }
+
+  handleNewProjectButtonClick(event) {
+    this.newProject();             
+  }
+
+  handleOpenProjectButtonClick(event) {
+    ipcHelper.openSchoolVrFileDialog((err, data) => {
+      if (err) {
+        handleErrorWithUiDefault(err);
+        return;
+      }
+
+      const filePaths = data.filePaths;
+
+      if (!isNonEmptyArray(filePaths)) {
+        return;
+      }
+      
+      this.loadProject(filePaths[0]);
+    });
+  }
+
+  handleExitButtonClick(event) {
+    ipcHelper.closeWindow();
+  }
+
+  handleUndoButtonClick(event) {
+    this.props.sceneContext.undo();
+  }
+
+  handleRedoButtonClick(event) {
+    this.props.sceneContext.redo();
+  }
+
+  /* end of event handlers */
+
+
   render() {
-    const state = this.state;
+    const props = this.props;
+    //const state = this.state;
     const sceneContext = this.props.sceneContext;
     if (!sceneContext) {
       console.log('no context');
       return null;
     } else {
       console.log('context');
-
-    }
+    }   
     return (
       <div id="editor">
         <Prompt
@@ -92,22 +196,19 @@ class EditorPage extends Component {
               // onClick: _=> { console.log('file') },
               children: [
                 {
+                  label: 'Home',
+                  disabled: false,
+                  onClick: this.handleHomeButtonClick                                      
+                },
+                {
                   label: 'New',
                   disabled: false,
-                  onClick: _=> { 
-                    console.log('new');
-                    // test open file with user defined extension
-                    // const fileDialog = document.createElement('input');
-                    // fileDialog.type = 'file';
-                    // fileDialog.multiple = true;
-                    // fileDialog.accept = ['image/x-png','image/gif'];
-                    // fileDialog.click();
-                  }
+                  onClick: this.handleNewButtonClick
                 },
                 {
                   label: 'Open',
                   disabled: false,
-                  onClick: _=> { console.log('open') }
+                  onClick: this.handleOpenProjectButtonClick
                 },
                 {
                   label: '-'
@@ -115,24 +216,26 @@ class EditorPage extends Component {
                 {
                   label: 'Exit',
                   disabled: false,
-                  onClick: _=> { console.log('exit') }
+                  onClick: this.handleExitButtonClick
                 }
               ]
-            }, {
+            }, 
+            {
               label: 'Edit',
               children: [
                 {
                   label: 'Undo',
                   disabled: !sceneContext.getUndoQueueLength(),
-                  onClick: _=> { sceneContext.undo() }
+                  onClick: this.handleUndoButtonClick
                 },
                 {
                   label: 'Redo',
                   disabled: !sceneContext.getRedoQueueLength(),
-                  onClick: _=> { sceneContext.redo() }
+                  onClick: this.handleRedoButtonClick
                 }
               ]
-            }, {
+            }, 
+            {
               label: 'Disabled',
               disabled: true,
               children: [

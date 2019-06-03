@@ -5,20 +5,13 @@
 import React, {Component} from 'react';
 
 import {withSceneContext} from 'globals/contexts/sceneContext';
-// import Mousetrap from 'mousetrap';
-// import Events from 'vendor/Events.js';
+import Mousetrap from 'mousetrap';
 
-import config from 'globals/config';
 import ipcHelper from 'utils/ipc/ipcHelper';
 import {invokeIfIsFunction} from 'utils/variableType/isFunction';
 
 import './menuComponent.css';
 
-const Mousetrap = require('mousetrap');
-
-const Events = require('vendor/Events.js');
-
-const appName = 'School VR';
 
 class MenuComponent extends Component {
   constructor(props) {
@@ -29,10 +22,18 @@ class MenuComponent extends Component {
     };
     this.buttons = [];
 
-    this.onClick = this.onClick.bind(this);
+    // bind event handlers
+    this.handleClick = this.handleClick.bind(this);
+    this.handleBtnMinAppClick = this.handleBtnMinAppClick.bind(this);
+    this.handleBtnMaxAppClick = this.handleBtnMaxAppClick.bind(this);
+    this.handleBtnCloseAppClick = this.handleBtnCloseAppClick.bind(this);
   }
+
+
+  /* react lifecycles */
+
   componentDidMount() {
-    document.addEventListener('click', this.onClick);
+    document.addEventListener('click', this.handleClick);
     const self = this;
     Mousetrap.bind('alt', (e) => {
       e.preventDefault();
@@ -52,15 +53,38 @@ class MenuComponent extends Component {
       self.props.sceneContext.redo()
     })
   }
-  onClick(e) {
+
+  componentWillUnmount() {
+    document.removeEventListener('click', this.handleClick);
+    Mousetrap.reset();
+  }
+
+  /* end react lifecycles */
+
+
+  /* event handlers */
+
+  handleClick(event) {
     this.setState({
       menuOpen: false
     })
   }
-  componentWillUnmount() {
-    document.removeEventListener('click', this.onClick);
-    Mousetrap.reset();
+
+  handleBtnMinAppClick(event) {
+    ipcHelper.minimizeWindow();
   }
+
+  handleBtnMaxAppClick(event) {
+    ipcHelper.toggleMaximizeWindow();
+  }
+
+  handleBtnCloseAppClick(event) {
+    ipcHelper.closeWindow();
+  }
+
+  /* end of event handlers */
+
+  
   render() {
     const props = this.props;
     const state = this.state;
@@ -85,9 +109,7 @@ class MenuComponent extends Component {
                 onClick={(e) => {
                   e.nativeEvent.stopImmediatePropagation();
                   if (!rootBtn.disabled) {
-                    if (typeof(rootBtn.onClick) === 'function') {
-                      rootBtn.onClick();
-                    }
+                    invokeIfIsFunction(rootBtn.onClick);                    
                     this.setState((currentState) => {
                       return {
                         menuOpen: !currentState.menuOpen
@@ -108,9 +130,7 @@ class MenuComponent extends Component {
                     } else {
                       return <div className={`menu-item${childBtn.disabled? ' disabled': ''}`} key={childIdx} onClick={(e) => {
                         if (!childBtn.disabled) {
-                          if (typeof(childBtn.onClick) === 'function') {
-                            childBtn.onClick();
-                          }
+                          invokeIfIsFunction(childBtn.onClick);                          
                           this.setState({
                             menuOpen: false
                           });
@@ -137,11 +157,9 @@ class MenuComponent extends Component {
           <div className="app-name">{appName}</div>
         </div>
         <div id="system-buttons">
-          <button id="btn-min-app"></button>
-          <button id="btn-max-app" onClick={()=>{
-            Events.emit('toggleMaximize');
-          }}></button>
-          <button id="btn-close-app"></button>
+          <button id="btn-min-app" onClick={this.handleBtnMinAppClick} />
+          <button id="btn-max-app" onClick={this.handleBtnMaxAppClick} />
+          <button id="btn-close-app" onClick={this.handleBtnCloseAppClick} />
         </div>
       </div>
     );

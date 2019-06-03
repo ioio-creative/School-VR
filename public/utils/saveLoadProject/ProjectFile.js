@@ -4,8 +4,15 @@ const fileSystem = require('../fileSystem/fileSystem');
 const myPath = require('../fileSystem/myPath');
 const CustomedFileStats = require('../fileSystem/CustomedFileStats');
 const isNonEmptyArray = require('../variableType/isNonEmptyArray');
-const {isCurrentLoadedProject, setCurrentLoadedProjectFilePath} = require('./loadProject');
 const parseDataToSaveFormat = require('./parseDataToSaveFormat');
+
+
+/* current loaded project (singleton) */
+/* somehow static properties seem not yet supported in Node */
+
+currentLoadedProjectFilePath = null;
+
+/* end of current loaded project (singleton) */
 
 
 class ProjectFile {
@@ -157,6 +164,8 @@ class ProjectFile {
   }
   /* end of saveFilesToTemp */
 
+
+  /* listProjects */
   static funcFactoryForCompareFileStatsByProperty(fileStatPropSelectFunc, isOrderByDesc) {
     return (fileStat1, fileStat2) => {
       let valueToReturn = 0;
@@ -226,9 +235,11 @@ class ProjectFile {
   async isProjectNameUsedAsync() {
     const projectName = this.name;
     const existingProjectNames = await ProjectFile.getExistingProjectNamesAsync();
-    const isNameUsed = !isCurrentLoadedProject(projectName) && existingProjectNames.includes(projectName);
+    const isNameUsed = !ProjectFile.isCurrentLoadedProject(projectName) && existingProjectNames.includes(projectName);
     return isNameUsed;
-  }   
+  }
+  /* end of listProjects */
+
 
   static async deleteAllTempProjectDirectoriesAsync() {    
     await fileSystem.myDeletePromise(appDirectory.appTempProjectsDirectory);
@@ -406,7 +417,7 @@ class ProjectFile {
     await fileSystem.createPackagePromise(this.tempProjectDirectoryPath, destProjectPackagePath);
     console.log(`saveProjectToLocal - saveProjectToLocalDetail: Project file saved in ${destProjectPackagePath}`);
         
-    setCurrentLoadedProjectFilePath(destProjectPackagePath);
+    ProjectFile.setCurrentLoadedProjectFilePath(destProjectPackagePath);
     
     return {
       //tempProjectDirectoryPath: this.tempProjectDirectoryPath,
@@ -433,7 +444,7 @@ class ProjectFile {
 
     // check if tempProjectDir already exists, if exists, delete it
     // actually this step may be redundant because I would check isProjectNameUsedAsync    
-    if (!isCurrentLoadedProject(projectName)) {      
+    if (!ProjectFile.isCurrentLoadedProject(projectName)) {      
       await fileSystem.myDeletePromise(this.tempProjectDirectoryPath);
       savedProjectObj = await this.saveToLocalDetailAsync(entitiesList, assetsList);    
     } else {      
@@ -444,7 +455,8 @@ class ProjectFile {
   }
   /* end of saveProject */
 
-  /* loadProject */  
+  /* loadProject */
+
   async loadProjectByFilePathAsync() {
     const savedProjectFilePath = this.savedProjectFilePath;
 
@@ -454,7 +466,7 @@ class ProjectFile {
 
     const tempProjectDirectoryPath = this.tempProjectDirectoryPath;
 
-    setCurrentLoadedProjectFilePath(savedProjectFilePath);
+    ProjectFile.setCurrentLoadedProjectFilePath(savedProjectFilePath);
 
     await ProjectFile.deleteAllTempProjectDirectoriesAsync();    
     
@@ -479,6 +491,25 @@ class ProjectFile {
     return projectJson
   }
   /* end of loadProject */
+
+
+  /* current loaded project (singleton) */
+
+  // Note: may not be good idea to expose this method
+  static setCurrentLoadedProjectFilePath(projectFilePath) {
+    currentLoadedProjectFilePath = projectFilePath;
+  };
+
+  static isCurrentLoadedProject(aFilePath) {
+    return currentLoadedProjectFilePath === aFilePath;
+  };
+
+  static async loadCurrentLoadedProjectAsync() {
+    return await loadProjectByProjectFilePathAsync(currentLoadedProjectFilePath);
+  };
+
+  /* end of current loaded project (singleton) */
+
 
   /* end of methods */
 }
