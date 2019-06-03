@@ -1,6 +1,6 @@
 // https://github.com/hokein/electron-sample-apps/tree/master/file-explorer
 
-const fileSystem = require('./fileSystem');
+const myPath = require('./myPath');
 
 
 const map = {
@@ -19,14 +19,14 @@ let cached = {};
 
 const statSync = (filepath) => {
   const result = {
-    name: fileSystem.getFileNameWithExtension(filepath),
+    name: myPath.getFileNameWithExtension(filepath),
     path: filepath
   };
 
   if (fileSystem.isDirectorySync(filepath)) {
     result.type = 'folder';
   } else {
-    const ext = fileSystem.getFileExtensionWithoutLeadingDot(filepath);
+    const ext = myPath.getFileExtensionWithoutLeadingDot(filepath);
     result.type = cached[ext];
     if (!result.type) {
       for (let key in map) {

@@ -1,16 +1,16 @@
 const electron = require('electron');
 const { app } = electron;
-const fileSystem = require('../utils/fileSystem/fileSystem');
+const myPath = require('../utils/fileSystem/myPath');
 
 
 const appName = app.getName();
 
 const appDirectory = {
   // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname  
-  appDataDirectory: fileSystem.join(app.getPath('appData'), `${appName}-Data`),  
-  appProjectsDirectory: fileSystem.join(app.getPath('documents'), `${appName}-Projects`),  
-  appTempDirectory: fileSystem.join(app.getPath('appData'), `${appName}-Temp`),
-  appTempProjectsDirectory: fileSystem.join(app.getPath('appData'), `${appName}-Temp`, `${appName}-Projects`)
+  appDataDirectory: myPath.join(app.getPath('appData'), `${appName}-Data`),  
+  appProjectsDirectory: myPath.join(app.getPath('documents'), `${appName}-Projects`),  
+  appTempDirectory: myPath.join(app.getPath('appData'), `${appName}-Temp`),
+  appTempProjectsDirectory: myPath.join(app.getPath('appData'), `${appName}-Temp`, `${appName}-Projects`)
 };
 
 const config = {
@@ -76,7 +76,7 @@ let setParamsReadFromExternalConfig = (configObj) => {
 //   something = val;
 // };
 
-module.exports.config = {
+module.exports = {
   config,
   mediaType,
   appDirectory,

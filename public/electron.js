@@ -16,10 +16,9 @@ const jsoncParser = require('jsonc-parser');
 
 const mime = require('./utils/fileSystem/mime');
 const fileSystem = require('./utils/fileSystem/fileSystem');
-const {ProjectFile} = require('./utils/saveLoadProject/ProjectFile');
+const ProjectFile = require('./utils/saveLoadProject/ProjectFile');
 const {openImageDialog, openGifDialog, openVideoDialog, openSchoolVrFileDialog} = 
   require('./utils/aframeEditor/openFileDialog');
-const {listProjectsAsync} = require('./utils/saveLoadProject/listProjectsAsync');
 const {parseDataToSaveFormat} = require('./utils/saveLoadProject/parseDataToSaveFormat');
 
 
@@ -465,7 +464,7 @@ ipcMain.on('deleteFile', async (event, arg) => {
 // saveLoadProject
 
 ipcMain.on('listProjects', async (event, arg) => {  
-  listProjectsAsync()
+  ProjectFile.listProjectsAsync()
     .then((projectFileObjs) => {      
       event.sender.send('listProjectsResponse', {
         err: null,
@@ -474,7 +473,8 @@ ipcMain.on('listProjects', async (event, arg) => {
         }
       });
     })
-    .catch(err => {      
+    .catch(err => {
+      console.log(err)   
       event.sender.send('listProjectsResponse', {
         err: err.toString(),
         data: null
