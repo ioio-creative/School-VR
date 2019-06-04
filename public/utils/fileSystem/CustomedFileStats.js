@@ -1,4 +1,4 @@
-const fileSystem = require('./fileSystem');
+const myPath = require('./myPath');
 
 
 class CustomedFileStats {
@@ -12,24 +12,24 @@ class CustomedFileStats {
       this[key] = fsStats[key];
     }
   
-    this.path = filePath;
+    this.path = filePath;    
   }
 
   get fileNameWithExtension() {
-    return fileSystem.getFileNameWithExtension(this.path);
+    return myPath.getFileNameWithExtension(this.path);
   }
 
   get fileNameWithoutExtension() {
-    return fileSystem.getFileNameWithoutExtension(this.path);
+    return myPath.getFileNameWithoutExtension(this.path);
   }
 
-  get fileExtensionWithLeadingDot() {
-    return fileSystem.getFileExtensionWithLeadingDot(this.path);
+  get fileExtensionWithLeadingDot() {    
+    return myPath.getFileExtensionWithLeadingDot(this.path);
   }
 
   get fileExtensionWithoutLeadingDot() {
-    return fileSystem.getFileExtensionWithoutLeadingDot(this.path);
+    return getFileExtensionWithLeadingDot.getFileExtensionWithoutLeadingDot(this.path);
   }
 }
 
-module.exports.CustomedFileStats = CustomedFileStats;
+module.exports = CustomedFileStats;

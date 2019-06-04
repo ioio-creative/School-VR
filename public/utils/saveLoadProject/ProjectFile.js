@@ -1,11 +1,18 @@
-const {forEach} = require('p-iteration');
+const {forEach, filter} = require('p-iteration');
 const {config, mediaType, appDirectory, projectDirectoryStructure} = require('../../globals/config');
 const fileSystem = require('../fileSystem/fileSystem');
+const myPath = require('../fileSystem/myPath');
 const CustomedFileStats = require('../fileSystem/CustomedFileStats');
 const isNonEmptyArray = require('../variableType/isNonEmptyArray');
-const listProjectsAsync = require('./listProjectsAsync');
-const {isCurrentLoadedProject, setCurrentLoadedProjectFilePath} = require('./loadProject');
 const parseDataToSaveFormat = require('./parseDataToSaveFormat');
+
+
+/* current loaded project (singleton) */
+/* somehow static properties seem not yet supported in Node */
+
+currentLoadedProjectFilePath = null;
+
+/* end of current loaded project (singleton) */
 
 
 class ProjectFile {
@@ -27,12 +34,12 @@ class ProjectFile {
     
     if (projectName) {
       this.name = projectName;
-      this.savedProjectFilePath = fileSystem.join(appDirectory.appProjectsDirectory, this.name) + config.schoolVrProjectArchiveExtensionWithLeadingDot;
+      this.savedProjectFilePath = myPath.join(appDirectory.appProjectsDirectory, this.name) + config.schoolVrProjectArchiveExtensionWithLeadingDot;
     }
 
     if (projectFilePath) {
       if (!this.name) {
-        this.name = fileSystem.getFileNameWithoutExtension(projectFilePath)
+        this.name = myPath.getFileNameWithoutExtension(projectFilePath)
       }
       if (!this.savedProjectFilePath) {
         this.savedProjectFilePath = projectFilePath;
@@ -54,17 +61,17 @@ class ProjectFile {
 
     // set derived properties        
     // temp project directories    
-    this.tempProjectDirectoryPath = fileSystem.join(appDirectory.appTempProjectsDirectory, this.name);
-    this.tempProjectImageDirectoryPath = fileSystem.join(this.tempProjectDirectoryPath, projectDirectoryStructure.image);
-    this.tempProjectGifDirectoryPath = fileSystem.join(this.tempProjectDirectoryPath, projectDirectoryStructure.gif);
-    this.tempProjectVideoDirectoryPath = fileSystem.join(this.tempProjectDirectoryPath, projectDirectoryStructure.video);
+    this.tempProjectDirectoryPath = myPath.join(appDirectory.appTempProjectsDirectory, this.name);
+    this.tempProjectImageDirectoryPath = myPath.join(this.tempProjectDirectoryPath, projectDirectoryStructure.image);
+    this.tempProjectGifDirectoryPath = myPath.join(this.tempProjectDirectoryPath, projectDirectoryStructure.gif);
+    this.tempProjectVideoDirectoryPath = myPath.join(this.tempProjectDirectoryPath, projectDirectoryStructure.video);
     this.tempProjectAllAssetsDirectoryPaths = [
       this.tempProjectImageDirectoryPath,
       this.tempProjectGifDirectoryPath,
       this.tempProjectVideoDirectoryPath
     ];
     // temp project files
-    this.tempProjectJsonFilePath = fileSystem.join(this.tempProjectDirectoryPath, this.name + config.jsonFileExtensionWithLeadingDot);
+    this.tempProjectJsonFilePath = myPath.join(this.tempProjectDirectoryPath, this.name + config.jsonFileExtensionWithLeadingDot);
 
     // fileStats properties
     if (this.projectFileStats) {
@@ -88,33 +95,33 @@ class ProjectFile {
   /* getProjectPath */
   // temp project files
   getTempImageFilePath(assetId, fileExtensionWithDot) {    
-    return fileSystem.join(this.tempProjectImageDirectoryPath, assetId) + fileExtensionWithDot;
+    return myPath.join(this.tempProjectImageDirectoryPath, assetId) + fileExtensionWithDot;
   }
 
   getTempGifFilePath(assetId, fileExtensionWithDot) {    
-    return fileSystem.join(this.tempProjectImageDirectoryPath, assetId) + fileExtensionWithDot;
+    return myPath.join(this.tempProjectImageDirectoryPath, assetId) + fileExtensionWithDot;
   }
   
   getTempVideoFilePath(assetId, fileExtensionWithDot) {    
-    return fileSystem.join(this.tempProjectImageDirectoryPath, assetId) + fileExtensionWithDot;
+    return myPath.join(this.tempProjectImageDirectoryPath, assetId) + fileExtensionWithDot;
   }
 
   getTempProjectAssetAbsolutePathFromProvidedPathIfIsRelative(assetPath) {    
     return ProjectFile.isAssetPathRelative(assetPath) ?
-      fileSystem.join(this.tempProjectImageDirectoryPath, assetPath) : assetPath;
+      myPath.join(this.tempProjectImageDirectoryPath, assetPath) : assetPath;
   }
 
   // saved project
   static getImageFilePathRelativeToProjectDirectory(assetId, fileExtensionWithDot) {    
-    return fileSystem.join(projectDirectoryStructure.image, assetId) + fileExtensionWithDot; 
+    return myPath.join(projectDirectoryStructure.image, assetId) + fileExtensionWithDot; 
   }
 
   static getGifFilePathRelativeToProjectDirectory(assetId, fileExtensionWithDot) {    
-    return fileSystem.join(projectDirectoryStructure.gif, assetId) + fileExtensionWithDot; 
+    return myPath.join(projectDirectoryStructure.gif, assetId) + fileExtensionWithDot; 
   }
 
   static getVideoFilePathRelativeToProjectDirectory(assetId, fileExtensionWithDot) {    
-    return fileSystem.join(projectDirectoryStructure.video, assetId) + fileExtensionWithDot;
+    return myPath.join(projectDirectoryStructure.video, assetId) + fileExtensionWithDot;
   }
 
   static isAssetPathRelative(assetPath) {
@@ -139,23 +146,76 @@ class ProjectFile {
   }
 
   async saveImageToTempAsync(srcFilePath, assetId, isAssumeDestDirExists) {
-    const destFilePath = this.getTempImageFilePath(assetId, fileSystem.getFileExtensionWithLeadingDot(srcFilePath));
+    const destFilePath = this.getTempImageFilePath(assetId, myPath.getFileExtensionWithLeadingDot(srcFilePath));
     await this.copyFileAsync(srcFilePath, destFilePath, isAssumeDestDirExists);
     return destFilePath;
   }
   
   async saveGifToTempAsync(srcFilePath, assetId, isAssumeDestDirExists) {
-    const destFilePath = this.getTempGifFilePath(assetId, fileSystem.getFileExtensionWithLeadingDot(srcFilePath));
+    const destFilePath = this.getTempGifFilePath(assetId, myPath.getFileExtensionWithLeadingDot(srcFilePath));
     await this.copyFileAsync(srcFilePath, destFilePath, isAssumeDestDirExists);
     return destFilePath;
   }
   
   async saveVideoToTempAsync(srcFilePath, assetId, isAssumeDestDirExists) {
-    const destFilePath = this.getTempVideoFilePath(assetId, fileSystem.getFileExtensionWithLeadingDot(srcFilePath));
+    const destFilePath = this.getTempVideoFilePath(assetId, myPath.getFileExtensionWithLeadingDot(srcFilePath));
     await this.copyFileAsync(srcFilePath, destFilePath, isAssumeDestDirExists);
     return destFilePath;
   }
-  /* end of saveFilesToTemp */  
+  /* end of saveFilesToTemp */
+
+
+  /* listProjects */
+  static funcFactoryForCompareFileStatsByProperty(fileStatPropSelectFunc, isOrderByDesc) {
+    return (fileStat1, fileStat2) => {
+      let valueToReturn = 0;
+  
+      const [fileStat1Prop, fileStat2Prop] = [fileStat1, fileStat2].map(fileStat => fileStatPropSelectFunc(fileStat));    
+      if (fileStat1Prop < fileStat2Prop) {
+        valueToReturn = -1;
+      } else if (fileStat1Prop > fileStat2Prop) {
+        valueToReturn = 1;
+      } else {
+        valueToReturn = 0;
+      }
+  
+      return isOrderByDesc ? -1 * valueToReturn : valueToReturn;
+    };
+  }
+
+  static async listProjectsAsync() {
+    const appProjectsDirectory = appDirectory.appProjectsDirectory;  
+    const fileCustomedStatsObjs = await fileSystem.readdirWithStatPromise(appProjectsDirectory);
+
+    if (!fileCustomedStatsObjs || fileCustomedStatsObjs.length === 0) {
+      return [];
+    }
+
+    const filteredFileStatObjs = await filter(fileCustomedStatsObjs, async (fileCustomedStatsObj) => {
+      // remove directory
+      if (fileCustomedStatsObj.isDirectory()) {
+        return false;
+      }
+
+      // remove file with other extension
+      if (fileCustomedStatsObj.fileExtensionWithLeadingDot !== config.schoolVrProjectArchiveExtensionWithLeadingDot) {
+        return false;
+      }
+
+      return true;
+    });
+
+    //const compareFileStatsByAccessTimeAsc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.atimeMs, false);
+    const compareFileStatsByAccessTimeDesc = ProjectFile.funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.atimeMs, true);
+    //const compareFileStatsByModifiedTimeDesc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.mtimeMs, true);
+
+    const sortedFileStatObjs = 
+      filteredFileStatObjs.sort(compareFileStatsByAccessTimeDesc);
+
+    const sortedProjectFileObjs = sortedFileStatObjs.map(fileStatObj => new ProjectFile(null, null, fileStatObj));
+    
+    return sortedProjectFileObjs;
+  }
 
   static async getExistingProjectNamesAsync() {
     const projects = await listProjectsAsync();  
@@ -163,7 +223,7 @@ class ProjectFile {
       return project.name;
     });
     return projectNames;  
-  }
+  }  
 
   async isProjectFileExistAsync() {
     const projectName = this.name;
@@ -175,11 +235,13 @@ class ProjectFile {
   async isProjectNameUsedAsync() {
     const projectName = this.name;
     const existingProjectNames = await ProjectFile.getExistingProjectNamesAsync();
-    const isNameUsed = !isCurrentLoadedProject(projectName) && existingProjectNames.includes(projectName);
+    const isNameUsed = !ProjectFile.isCurrentLoadedProject(projectName) && existingProjectNames.includes(projectName);
     return isNameUsed;
-  }   
+  }
+  /* end of listProjects */
 
-  static async deleteAllTempProjectDirectoriesAsync() {
+
+  static async deleteAllTempProjectDirectoriesAsync() {    
     await fileSystem.myDeletePromise(appDirectory.appTempProjectsDirectory);
   }
 
@@ -242,7 +304,7 @@ class ProjectFile {
 
     // check assetsList
     const normedAssetSrcAbsolutePaths = assetsList.map((asset) => {
-      return fileSystem.normalize(this.convertAssetSrcToProperAbsolutePath(asset.src));
+      return myPath.normalize(this.convertAssetSrcToProperAbsolutePath(asset.src));
     });
     const normedAssetSrcAbsolutePathsSet = 
       new Set(normedAssetSrcAbsolutePaths);
@@ -252,7 +314,7 @@ class ProjectFile {
       await this.getAllExistingAssetFileAbsolutePathsInTempAsync();
     const normedExistingProjectAssetFileAbsolutePaths = 
       existingProjectAssetFileAbsolutePaths.map((path) => {
-        return fileSystem.normalize(path);
+        return myPath.normalize(path);
       });
     const normedExistingProjectAssetFileAbsolutePathsSet = 
       new Set(normedExistingProjectAssetFileAbsolutePaths);
@@ -340,7 +402,7 @@ class ProjectFile {
       }
       
       const assetFilePathRelativeToProjectDirectory = 
-        getAssetFilePathRelativeToProjectDirectoryFunc(asset.id, fileSystem.getFileExtensionWithLeadingDot(asset.src));
+        getAssetFilePathRelativeToProjectDirectoryFunc(asset.id, myPath.getFileExtensionWithLeadingDot(asset.src));
       asset.src = assetFilePathRelativeToProjectDirectory;
     });
   
@@ -355,7 +417,7 @@ class ProjectFile {
     await fileSystem.createPackagePromise(this.tempProjectDirectoryPath, destProjectPackagePath);
     console.log(`saveProjectToLocal - saveProjectToLocalDetail: Project file saved in ${destProjectPackagePath}`);
         
-    setCurrentLoadedProjectFilePath(destProjectPackagePath);
+    ProjectFile.setCurrentLoadedProjectFilePath(destProjectPackagePath);
     
     return {
       //tempProjectDirectoryPath: this.tempProjectDirectoryPath,
@@ -382,7 +444,7 @@ class ProjectFile {
 
     // check if tempProjectDir already exists, if exists, delete it
     // actually this step may be redundant because I would check isProjectNameUsedAsync    
-    if (!isCurrentLoadedProject(projectName)) {      
+    if (!ProjectFile.isCurrentLoadedProject(projectName)) {      
       await fileSystem.myDeletePromise(this.tempProjectDirectoryPath);
       savedProjectObj = await this.saveToLocalDetailAsync(entitiesList, assetsList);    
     } else {      
@@ -393,7 +455,8 @@ class ProjectFile {
   }
   /* end of saveProject */
 
-  /* loadProject */  
+  /* loadProject */
+
   async loadProjectByFilePathAsync() {
     const savedProjectFilePath = this.savedProjectFilePath;
 
@@ -403,7 +466,7 @@ class ProjectFile {
 
     const tempProjectDirectoryPath = this.tempProjectDirectoryPath;
 
-    setCurrentLoadedProjectFilePath(savedProjectFilePath);
+    ProjectFile.setCurrentLoadedProjectFilePath(savedProjectFilePath);
 
     await ProjectFile.deleteAllTempProjectDirectoriesAsync();    
     
@@ -429,8 +492,27 @@ class ProjectFile {
   }
   /* end of loadProject */
 
+
+  /* current loaded project (singleton) */
+
+  // Note: may not be good idea to expose this method
+  static setCurrentLoadedProjectFilePath(projectFilePath) {
+    currentLoadedProjectFilePath = projectFilePath;
+  };
+
+  static isCurrentLoadedProject(aFilePath) {
+    return currentLoadedProjectFilePath === aFilePath;
+  };
+
+  static async loadCurrentLoadedProjectAsync() {
+    return await loadProjectByProjectFilePathAsync(currentLoadedProjectFilePath);
+  };
+
+  /* end of current loaded project (singleton) */
+
+
   /* end of methods */
 }
 
 
-module.exports.ProjectFile = ProjectFile;
+module.exports = ProjectFile;

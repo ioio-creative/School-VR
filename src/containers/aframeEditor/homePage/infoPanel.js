@@ -63,7 +63,7 @@ const entityModel = {
   'a-plane': APlane, //InfoTypePlane,
   'a-triangle': ABox, //InfoTypeTriangle,
   'a-image': ABox, //InfoTypeImage
-  'a-video': ABox, //InfoTypeImage
+  'a-video': AVideo, //InfoTypeImage
   'a-camera': ACamera,
   'a-sky': ASky,
   'a-navigation': ANavigation,
@@ -164,6 +164,7 @@ class InfoPanel extends Component {
             {staticAttributes.map(staticAttribute => {
               let inputField = null;
               // try to prompt an input field from electron?
+              console.log(staticAttribute.type);
               switch (staticAttribute.type) {
                 case 'text': {
                   inputField = <input type="text" onInput={(event) => {
@@ -201,7 +202,7 @@ class InfoPanel extends Component {
                   break;
                 }
                 case 'image': {
-                  // use electron to load later
+                  // use electron api to load
                   inputField = <div onClick={_=> {
                     ipcHelper.openImageDialog((err, data) => {
                       sceneContext.updateEntity({
@@ -212,6 +213,7 @@ class InfoPanel extends Component {
                       selectedEntity.el.setAttribute('material', `src:url(${data.filePaths})`);
                     })
                   }}>choose</div>
+                  // temp use browser api to debug
                   {/* inputField = <input type="file" accept="image" onChange={(event) => {
                     if (event.target.files && event.target.files[0]) {
                       var FR= new FileReader();
@@ -231,11 +233,11 @@ class InfoPanel extends Component {
                     } else { 
                       selectedEntity.el.removeAttribute('material', 'src');
                     }
-                  }} />*/}
+                  }} /> */}
                   break;
                 }
                 case 'video': {
-                  // use electron to load later
+                  // use electron api to load
                   inputField = <div onClick={_=> {
                     ipcHelper.openVideoDialog((err, data) => {
                       sceneContext.updateEntity({
@@ -246,6 +248,7 @@ class InfoPanel extends Component {
                       selectedEntity.el.setAttribute('material', `src:url(${data.filePaths})`);
                     })
                   }}>choose</div>
+                  // temp use browser api to debug
                   {/* inputField = <input type="file" accept="video" onChange={(event) => {
                     if (event.target.files && event.target.files[0]) {
                       var FR= new FileReader();

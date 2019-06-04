@@ -186,7 +186,9 @@ class TimelinePanel extends Component {
     // Events.emit('updateEntityName', entityId, event.currentTarget.value);
     // this.props.sceneContext.selectEntity(entityId); // selectEntity
     // this.props.sceneContext.updateEntity(); // selectEntity
-    this.props.sceneContext.updateEntity(event.target.value, entityId); // selectEntity
+    this.props.sceneContext.updateEntity({
+      name: event.target.value
+    }, entityId); // selectEntity
   }
   selectEntity(event, entityId) {
     this.props.sceneContext.selectEntity(entityId); // selectEntity

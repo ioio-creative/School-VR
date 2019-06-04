@@ -69,8 +69,9 @@ class AEntity {
   updateEntityAttributes(attrs) {
     if (typeof(attrs) !== 'object') return;
     // console.log(attrs);
+    const self = this;
     for (let key in attrs) {
-      if (this.animatableAttributes.hasOwnProperty(key)) {
+      if (self.animatableAttributes.hasOwnProperty(key)) {
         // if (typeof(attrs[key]) === 'object') {
         //   const subAttrs = attrs[key];
         //   const subAttrKeys = Object.keys(subAttrs);
@@ -78,12 +79,12 @@ class AEntity {
         //   subAttrKeys.forEach( subKey => {
         //     valueString += `${subKey}:${subAttrs[subKey]};`;
         //   })
-        //   this._el.setAttribute(key, valueString);
+        //   self._el.setAttribute(key, valueString);
         // } else {
-          this._el.setAttribute(key, attrs[key]);
+          self._el.setAttribute(key, attrs[key]);
         // }
       } else {
-        const staticAttribute = this.staticAttributes.find(attr => attr.attributeKey === key);
+        const staticAttribute = self.staticAttributes.find(attr => attr.attributeKey === key);
         if (staticAttribute) {
           // if (typeof(attrs[key]) === 'object') {
           //   const subAttrs = attrs[key];
@@ -92,9 +93,9 @@ class AEntity {
           //   subAttrKeys.forEach( subKey => {
           //     valueString += `${subKey}:${subAttrs[subKey]};`;
           //   })
-          //   this._el.setAttribute(key, valueString);
+          //   self._el.setAttribute(key, valueString);
           // } else {
-            this._el.setAttribute(key, attrs[key]);
+            self._el.setAttribute(key, attrs[key]);
           // }
         }
       }

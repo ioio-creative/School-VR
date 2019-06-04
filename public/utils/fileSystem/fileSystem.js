@@ -4,6 +4,8 @@ const rimraf = require('rimraf');
 const fx = require('./mkdir-recursive');
 const {map} = require('p-iteration');
 
+const myPath = require('./myPath');
+
 const CustomedFileStats = require('./CustomedFileStats');
 
 const toBase64Str = require('../base64/toBase64Str');
@@ -19,7 +21,6 @@ const {isFunction} = require('../variableType/isFunction');
 const asar = require('asar');
 
 const fs = require('fs');
-const path = require('path');
 const {promisify} = require('util');
 
 
@@ -78,7 +79,7 @@ const handleGeneralErr = (callBack, err) => {
 };
 
 const handleGeneralErrAndData = (callBack, err, data) => {
-  console.log("fileSystem - handleGeneralErrAndData");  
+  //console.log("fileSystem - handleGeneralErrAndData");  
   const callBackCall = (newErr, theData) => {
     isFunction(callBack) && callBack(newErr, theData);
   };
@@ -139,7 +140,7 @@ const writeFileAssumingDestDirExistsPromise = promisify(writeFileAssumingDestDir
  * https://stackoverflow.com/questions/16316330/how-to-write-file-if-parent-folder-doesnt-exist
  */
 const writeFile = (filePath, content, callBack) => {
-  const directoriesStr = dirname(filePath);
+  const directoriesStr = myPath.dirname(filePath);
   const writeFileCallBack = () => {
     fs.writeFile(filePath, content, (err) => {
       handleGeneralErr(callBack, err);
@@ -161,7 +162,7 @@ const writeFile = (filePath, content, callBack) => {
 };
 
 const writeFileSync = (filePath, content) => {
-  const directoriesStr = dirname(filePath);
+  const directoriesStr = myPath.dirname(filePath);
   if (!existsSync(directoriesStr)) {
     createDirectoryIfNotExistsSync(directoriesStr);
   }
@@ -175,7 +176,7 @@ const createWriteStream = (outputPath) => {
 };
 
 const appendFile = (filePath, content, callBack) => {
-  const directoriesStr = dirname(filePath);
+  const directoriesStr = myPath.dirname(filePath);
   const appendFileCallBack = () => {
     fs.appendFile(filePath, content, (err) => {
       handleGeneralErr(callBack, err);
@@ -197,7 +198,7 @@ const appendFile = (filePath, content, callBack) => {
 }
 
 const appendFileSync = (filePath, content) => {
-  const directoriesStr = dirname(filePath);
+  const directoriesStr = myPath.dirname(filePath);
   if (!existsSync(directoriesStr)) {
     createDirectoryIfNotExistsSync(directoriesStr);
   }
@@ -277,7 +278,7 @@ const copyFile = (src, dest, callBack) => {
     return;
   }
 
-  const destDirectoriesStr = dirname(dest);
+  const destDirectoriesStr = myPath.dirname(dest);
   const copyFileCallBack = () => {
     fs.copyFile(src, dest, (err) => {
       handleGeneralErr(callBack, err);
@@ -303,7 +304,7 @@ const copyFileSync = (src, dest) => {
     return;
   }
 
-  const destDirectoriesStr = dirname(dest);
+  const destDirectoriesStr = myPath.dirname(dest);
   if (!existsSync(destDirectoriesStr)) {
     createDirectoryIfNotExistsSync(destDirectoriesStr);
   }
@@ -444,13 +445,13 @@ const extractAll = (archive, dest) => {
 
 // use fx instead of fs
 const mkdir = (dirPath, callBack) => {
-  fx.mkdir(fs, path, dirPath, (err) => {
+  fx.mkdir(fs, myPath.path, dirPath, (err) => {
     handleGeneralErr(callBack, err);
   });
 };
 
 const mkdirSync = (dirPath) => {
-  fx.mkdirSync(fs, path, dirPath);
+  fx.mkdirSync(fs, myPath.path, dirPath);
 }
 
 const createDirectoryIfNotExists = (dirPath, callBack) => {  
@@ -524,7 +525,7 @@ const readdirWithStatPromise = async (dirPath) => {
     return [];
   }
 
-  const absolutePaths = fileNames.map(fileName => join(dirPath, fileName)); 
+  const absolutePaths = fileNames.map(fileName => myPath.join(dirPath, fileName)); 
   const fileStatObjs = await map(absolutePaths, async (fileAbsolutePath) => {
     return await statPromise(fileAbsolutePath);
   });
@@ -558,46 +559,6 @@ const myDeleteSync = (filePath) => {
 const myDeletePromise = promisify(myDelete);
 
 /* end of del api */
-
-
-/* path api */
-
-const sep = path.sep;
-
-const getFileExtensionWithLeadingDot = (filePath) => {
-  return path.extname(filePath);
-};
-
-const getFileExtensionWithoutLeadingDot = (filePath) => {
-  return path.extname(filePath).substr(1);
-};
-
-const getFileNameWithExtension = (filePath) => {
-  return path.basename(filePath);
-};
-
-const getFileNameWithoutExtension = (filePath) => {
-  // https://stackoverflow.com/questions/4250364/how-to-trim-a-file-extension-from-a-string-in-javascript
-  return path.basename(filePath).split('.').slice(0, -1).join('.');
-};
-
-const join = (...paths) => {  
-  return path.join(...paths);
-};
-
-const resolve = (...paths) => {
-  return path.resolve(...paths);
-}
-
-const normalize = (filePath) => {
-  return path.normalize(filePath);
-}
-
-const dirname = (filePath) => {
-  return path.dirname(filePath);
-}
-
-/* end of path api */
 
 
 module.exports = {
@@ -678,15 +639,4 @@ module.exports = {
   myDelete,
   myDeleteSync,
   myDeletePromise,
-
-  // path api
-  sep,
-  getFileExtensionWithLeadingDot,
-  getFileExtensionWithoutLeadingDot,
-  getFileNameWithExtension,
-  getFileNameWithoutExtension,
-  join,
-  resolve,
-  normalize,
-  dirname
 };

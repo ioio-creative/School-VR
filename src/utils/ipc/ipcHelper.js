@@ -1,5 +1,5 @@
 import isFunction from 'utils/variableType/isFunction';
-// import ipc from 'utils/ipc/ipc';
+
 
 const electron = window.require ? window.require('electron') : null;
 const dummyFunc = _=>{ console.log('not in electron app, no ipc') };
@@ -13,32 +13,45 @@ const ipc = electron ? electron.ipcRenderer : {
 
 /* listeners */
 
-const addListener = (channel, listener) => {
+function addListener(channel, listener) {
   ipc.on(channel, listener);
 }
 
-const removeListener = (channel, listener) => {
+function removeListener(channel, listener) {
   ipc.removeListener(channel, listener);
 }
 
 /* end of listeners */
 
 
-const getParamsFromExternalConfig = (callBack) => {
-  ipc.once('getParamsFromExternalConfigResponse', (event, arg) => {    
-    callBack(arg.err, arg.data);    
-  });
-  ipc.send('getParamsFromExternalConfig');
+function generalIpcCall(channelName, callBack = null, objToSend = null) {
+  if (isFunction(callBack)) {
+    ipc.once(`${channelName}Response`, (event, arg) => {
+      if (arg.err) {
+        callBack(`${channelName}: ${arg.err}`, arg.data);
+      } else {
+        callBack(null, arg.data);
+      }
+    });
+  }
+
+  if (objToSend) {
+    ipc.send(channelName, objToSend);
+  } else {
+    ipc.send(channelName);
+  }
+}
+
+
+function getParamsFromExternalConfig(callBack) {  
+  generalIpcCall('getParamsFromExternalConfig', callBack);
 };
 
 
 /* app */
 
-const getAppData = (callBack) => {
-  ipc.once('getAppDataResponse', (event, arg) => {
-    callBack(arg.err, arg.data);
-  });
-  ipc.send('getAppData');
+function getAppData(callBack) {
+  generalIpcCall('getAppData', callBack);  
 };
 
 /* end of app */
@@ -46,8 +59,8 @@ const getAppData = (callBack) => {
 
 /* shell */
 
-const shellOpenItem = (filePath) => {
-  ipc.send('shellOpenItem');
+function shellOpenItem(filePath) {
+  generalIpcCall('shellOpenItem', null, filePath);
 };
 
 /* end of shell */
@@ -55,32 +68,27 @@ const shellOpenItem = (filePath) => {
 
 /* electron window api */
 
-const newBrowserWindow = (windowOptions, url, callBack) => {
-  if (isFunction(callBack)) {
-    ipc.once('newBrowserWindowResponse', (err, data) => {
-      callBack(err, data);
-    });
-  }
-  ipc.send('newBrowserWindow', {
+function newBrowserWindow(windowOptions, url, callBack) {
+  generalIpcCall('newBrowserWindow', callBack, {
     windowOptions: windowOptions,
     url: url
   });
 }
 
-const closeWindow = () => {
-  ipc.send('close');
+function closeWindow() {
+  generalIpcCall('close');
 };
 
-const minimizeWindow = () => {
-  ipc.send('minimize');
+function minimizeWindow() {
+  generalIpcCall('minimize');
 };
 
-const toggleMaximizeWindow = () => {
-  ipc.send('toggleMaximize');
+function toggleMaximizeWindow() {
+  generalIpcCall('toggleMaximize');
 };
 
-const toggleDevTools = () => {
-  ipc.send('toggleDevTools', true);
+function toggleDevTools() {
+  generalIpcCall('toggleDevTools', true);
 };
 
 /* end of electron window api */
@@ -88,95 +96,62 @@ const toggleDevTools = () => {
 
 /* fileSystem */
 
-const mimeStat = (filePath, callBack) => {
-  ipc.once('mimeStatResponse', (event, arg) => {
-    callBack(arg.err, arg.data);
-  });
-  ipc.send('mimeStat', filePath);
+function mimeStat(filePath, callBack) {  
+  generalIpcCall('mimeStat', callBack, filePath);
 }
 
-const mimeStats = (filePaths, callBack) => {
-  ipc.once('mimeStatsResponse', (event, arg) => {
-    callBack(arg.err, arg.data);
-  });
-  ipc.send('mimeStats', filePaths);
+function mimeStats(filePaths, callBack) {  
+  generalIpcCall('mimeStats', callBack, filePaths);
 }
 
-const base64Encode = (filePath, callBack) => {
-  ipc.once('base64EncodeResponse', (event, arg) => {
-    callBack(arg.err, arg.data);
-  });
-  ipc.send('base64Encode', filePath);
+function base64Encode(filePath, callBack) {  
+  generalIpcCall('base64Encode', callBack, filePath);
 };
 
-const base64Decode = (locationToSaveFile, encodedStr, callBack) => {
-  ipc.once('base64DecodeResponse', (event, arg) => {
-    callBack(arg.err);
-  });
-  ipc.send('base64Decode', {
+function base64Decode(locationToSaveFile, encodedStr, callBack) {  
+  generalIpcCall('base64Decode', callBack, {
     locationToSaveFile: locationToSaveFile,
     encodedStr: encodedStr
   });
 };
 
-const createPackage = (src, dest, callBack) => {
-  ipc.once('createPackageResponse', (event, arg) => {
-    callBack(arg.err);
-  });
-  ipc.send('createPackage', {
+function createPackage(src, dest, callBack) {  
+  generalIpcCall('createPackage', callBack, {
     src: src,
     dest: dest
   });
 };
 
-const extractAll = (archive, dest, callBack) => {
-  ipc.once('extractAllResponse', (event, arg) => {
-    callBack(arg.err);
-  });
-  ipc.send('extractAll', {
+function extractAll(archive, dest, callBack) {  
+  generalIpcCall('extractAll', callBack, {
     archive: archive,
     dest: dest
   });
 };
 
-const readdir = (dirPath, callBack) => {
-  ipc.once('readdirResponse', (event, arg) => {
-    callBack(arg.err, arg.data);
-  });
-  ipc.send('readdir', {
+function readdir(dirPath, callBack) {  
+  generalIpcCall('readdir', callBack, {
     dirPath: dirPath,    
   });
 }
 
-const createDirectoriesIfNotExists = (directoryPaths, callBack) => {
-  ipc.once('createDirectoriesIfNotExistsResponse', (event, arg) => {
-    callBack(arg.err, arg.data);
-  });
-  ipc.send('createDirectoriesIfNotExists', directoryPaths);
+function createDirectoriesIfNotExists(directoryPaths, callBack) {  
+  generalIpcCall('createDirectoriesIfNotExists', callBack, directoryPaths);
 };
 
-const readFile = (filePath, callBack) => {
-  ipc.once('readFileResponse', (event, arg) => {
-    callBack(arg.err, arg.data);
-  });
-  ipc.send('readFile', filePath);
+function readFile(filePath, callBack) {  
+  generalIpcCall('readFile', callBack, filePath);
 };
 
-const writeFile = (filePath, content, callBack) => {
-  ipc.once('writeFileResponse', (event, arg) => {
-    callBack(arg.err, arg.data);
-  });
-  ipc.send('writeFile', {
+function writeFile(filePath, content, callBack) {  
+  generalIpcCall('writeFile', callBack, {
     filePath: filePath,
     content: content
   });
 };
 
-const deleteFile = (filePath, callBack) => {
-  ipc.once('deleteFileResponse', (event, arg) => {
-    callBack(arg.err, arg.data);
-  });
-  ipc.send('deleteFile', filePath);
+function deleteFile(filePath, callBack) {
+  generalIpcCall('deleteFile', callBack, filePath);
 };
 
 /* end of fileSystem */
@@ -184,55 +159,37 @@ const deleteFile = (filePath, callBack) => {
 
 /* saveLoadProject */
 
-const listProjects = (callBack) => {
-  ipc.once('listProjectsResponse', (event, arg) => {    
-    callBack(arg.err, arg.data);
-  });
-  ipc.send('listProjects');
+function listProjects(callBack) {  
+  generalIpcCall('listProjects', callBack);
 };
 
-const getExistingProjectNames = (callBack) => {
-  ipc.once('getExistingProjectNamesResponse', (event, arg) => {
-    callBack(arg.err, arg.data);
-  });
-  ipc.send('getExistingProjectNames');
+function getExistingProjectNames(callBack) {  
+  generalIpcCall('getExistingProjectNames', callBack);
 };
 
-const saveProject = (projectName, entitiesList, assetsList, callBack) => {
-  ipc.once('saveProjectResponse', (event, arg) => {
-    callBack(arg.err, arg.data);
-  });
-  ipc.send('saveProject', {
+function saveProject(projectName, entitiesList, assetsList, callBack) {  
+  generalIpcCall('saveProject', callBack, {
     projectName: projectName,
     entitiesList: entitiesList,
     assetsList: assetsList
   });
 };
 
-const parseDataToSaveFormat = (projectName, entitiesList, assetsList, callBack) => {
-  ipc.once('parseDataToSaveFormatResponse', (event, arg) => {
-    callBack(arg.err, arg.data);
-  });
-  ipc.send('parseDataToSaveFormat', {
+function parseDataToSaveFormat(projectName, entitiesList, assetsList, callBack) {  
+  generalIpcCall('parseDataToSaveFormat', callBack, {
     projectName: projectName,
     entitiesList: entitiesList,
     assetsList: assetsList
   });
 }
 
-const loadProjectByProjectFilePath = (filePath, callBack) => {
-  ipc.once('loadProjectByProjectFilePathResponse', (event, arg) => {
-    callBack(arg.err, arg.data);
-  });
-  ipc.send('loadProjectByProjectFilePath', filePath);
+function loadProjectByProjectFilePath(filePath, callBack) {  
+  generalIpcCall('loadProjectByProjectFilePath', callBack, filePath);
 };
 
 // delete any cached temp project files
-const deleteAllTempProjectDirectories = (callBack) => {
-  ipc.once('deleteAllTempProjectDirectoriesResponse', (event, arg) => {
-    callBack(arg.err);
-  });
-  ipc.send('deleteAllTempProjectDirectories');
+function deleteAllTempProjectDirectories(callBack) {
+  generalIpcCall('deleteAllTempProjectDirectories', callBack);
 };
 
 /* end of saveLoadProject */
@@ -240,32 +197,20 @@ const deleteAllTempProjectDirectories = (callBack) => {
 
 /* window diaglog */
 
-const openImageDialog = (callBack) => {
-  ipc.once('openImageDialogResponse', (event, arg) => {
-    callBack(arg.err, arg.data);
-  });
-  ipc.send('openImageDialog');
+function openImageDialog(callBack) {  
+  generalIpcCall('openImageDialog', callBack);
 };
 
-const openGifDialog = (callBack) => {
-  ipc.once('openGifDialogResponse', (event, arg) => {
-    callBack(arg.err, arg.data);
-  });
-  ipc.send('openGifDialog');
+function openGifDialog(callBack) {  
+  generalIpcCall('openGifDialog', callBack);
 };
 
-const openVideoDialog = (callBack) => {
-  ipc.once('openVideoDialogResponse', (event, arg) => {
-    callBack(arg.err, arg.data);
-  });
-  ipc.send('openVideoDialog');
+function openVideoDialog(callBack) {  
+  generalIpcCall('openVideoDialog', callBack);
 };
 
-const openSchoolVrFileDialog = (callBack) => {
-  ipc.once('openSchoolVrFileDialogResponse', (event, arg) => {
-    callBack(arg.err, arg.data);
-  });
-  ipc.send('openSchoolVrFileDialog');
+function openSchoolVrFileDialog(callBack) {  
+  generalIpcCall('openSchoolVrFileDialog', callBack);
 };
 
 /* end of window dialog */
@@ -273,18 +218,12 @@ const openSchoolVrFileDialog = (callBack) => {
 
 /* vanilla electron dialog */
 
-const showOpenDialog = (options, callBack) => {
-  ipc.once('showOpenDialogResponse', (event, arg) => {
-    callBack(arg.err, arg.data);
-  });
-  ipc.send('showOpenDialog', options);
+function showOpenDialog(options, callBack) {  
+  generalIpcCall('showOpenDialog', options, callBack);
 };
 
-const showSaveDialog = (options, callBack) => {
-  ipc.once('showSaveDialogResponse', (event, arg) => {
-    callBack(arg.err, arg.data);
-  });
-  ipc.send('showSaveDialog', options);
+function showSaveDialog(options, callBack) {  
+  generalIpcCall('showSaveDialog', options, callBack);
 }
 
 /* end of vanilla electron dialog */
