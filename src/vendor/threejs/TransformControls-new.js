@@ -196,9 +196,10 @@ export default ( function () {
 			if ( this.object !== undefined ) {
 
 				this.object.updateMatrixWorld();
-				this.object.parent.matrixWorld.decompose( parentPosition, parentQuaternion, parentScale );
 				this.object.matrixWorld.decompose( worldPosition, worldQuaternion, worldScale );
-
+        if ( this.object.parent) {
+          this.object.parent.matrixWorld.decompose( parentPosition, parentQuaternion, parentScale );
+        }
 			}
 
 			this.camera.updateMatrixWorld();

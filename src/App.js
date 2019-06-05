@@ -61,6 +61,7 @@ const faIconsNeed = [
   "faSyncAlt",
   "faExpandArrowsAlt",
   "faPlay",
+  "faPause",
   "faTrashAlt",
   "faEye",
   "faEyeSlash"

@@ -164,7 +164,7 @@ class InfoPanel extends Component {
             {staticAttributes.map(staticAttribute => {
               let inputField = null;
               // try to prompt an input field from electron?
-              console.log(staticAttribute.type);
+              {/* console.log(staticAttribute.type); */}
               switch (staticAttribute.type) {
                 case 'text': {
                   inputField = <input type="text" onInput={(event) => {
@@ -203,7 +203,7 @@ class InfoPanel extends Component {
                 }
                 case 'image': {
                   // use electron api to load
-                  inputField = <div onClick={_=> {
+                  {/* inputField = <div onClick={_=> {
                     ipcHelper.openImageDialog((err, data) => {
                       sceneContext.updateEntity({
                           material: {
@@ -212,9 +212,9 @@ class InfoPanel extends Component {
                         }, selectedEntity['id']);
                       selectedEntity.el.setAttribute('material', `src:url(${data.filePaths})`);
                     })
-                  }}>choose</div>
+                  }}>choose</div> */}
                   // temp use browser api to debug
-                  {/* inputField = <input type="file" accept="image" onChange={(event) => {
+                  inputField = <input type="file" accept="image" onChange={(event) => {
                     if (event.target.files && event.target.files[0]) {
                       var FR= new FileReader();
                       FR.addEventListener("load", function(e) {
@@ -233,7 +233,7 @@ class InfoPanel extends Component {
                     } else { 
                       selectedEntity.el.removeAttribute('material', 'src');
                     }
-                  }} /> */}
+                  }} />
                   break;
                 }
                 case 'video': {

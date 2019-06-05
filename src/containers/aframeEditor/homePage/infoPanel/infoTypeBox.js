@@ -192,7 +192,7 @@ class InfoTypeBox extends Component {
           <div className="attribute-col color-col" onClick={() => this.changeTransformMode(null)}>
             <div title={rgba2hex(data.material.color)}>
               <div className="field-label">Color:</div>
-              <ColorPicker key={props.timelineObj.id}
+              <ColorPicker key={props.timelineObj.id + data.material.color}
                 field={'material'}
                 color={rgba2hex(data.material.color)} 
                 timelineId={props.timelineObj.id} 
@@ -225,7 +225,7 @@ class InfoTypeBox extends Component {
           <div className="attribute-col color-col" onClick={() => this.changeTransformMode(null)}>
             <div title={data.text.color}>
               <div className="field-label">Text Color:</div>
-              <ColorPicker key={props.timelineObj.id}
+              <ColorPicker key={props.timelineObj.id + data.text.color}
                 field={'text'}
                 color={data.text.color} 
                 timelineId={props.timelineObj.id} 
