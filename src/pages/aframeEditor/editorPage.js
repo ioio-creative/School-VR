@@ -2,7 +2,7 @@ import React, {Component, Fragment} from 'react';
 // import SystemPanel from 'containers/aframeEditor/homePage/systemPanel';
 import {withRouter, Prompt} from 'react-router-dom';
 
-import {withSceneContext} from 'globals/contexts/sceneContext';
+import {withSceneContext, SceneContextProvider} from 'globals/contexts/sceneContext';
 
 import MenuComponent from 'components/menuComponent';
 
@@ -69,9 +69,9 @@ class EditorPage extends Component {
     this.editor = new Editor();
     this.inited = true;
     // 
-    window.onbeforeunload = function() {
-      return 'hello?';
-    };
+    // window.onbeforeunload = function() {
+    //   return 'hello?';
+    // };
     Events.on('editor-load', (editor) => {
       if (this.props.match.params.projectId === undefined) {
         this.newProject();
@@ -183,81 +183,83 @@ class EditorPage extends Component {
 
     // }
     return (
-      <div id="editor">
-        <Prompt
-          when={true}
-          message='You have unsaved changes, are you sure you want to leave?'
-        />
-        {/* <SystemPanel projectName={this.projectName} /> */}
-        <MenuComponent 
-          // projectName="Untitled_1"
-          menuButtons={[
-            {
-              label: 'File',
-              // onClick: _=> { console.log('file') },
-              children: [
-                {
-                  label: 'Home',
-                  disabled: false,
-                  onClick: this.handleHomeButtonClick                                      
-                },
-                {
-                  label: 'New',
-                  disabled: false,
-                  onClick: this.handleNewButtonClick
-                },
-                {
-                  label: 'Open',
-                  disabled: false,
-                  onClick: this.handleOpenProjectButtonClick
-                },
-                {
-                  label: '-'
-                },
-                {
-                  label: 'Exit',
-                  disabled: false,
-                  onClick: this.handleExitButtonClick
-                }
-              ]
-            }, 
-            {
-              label: 'Edit',
-              children: [
-                {
-                  label: 'Undo',
-                  disabled: !sceneContext.getUndoQueueLength(),
-                  onClick: this.handleUndoButtonClick
-                },
-                {
-                  label: 'Redo',
-                  disabled: !sceneContext.getRedoQueueLength(),
-                  onClick: this.handleRedoButtonClick
-                }
-              ]
-            }, 
-            {
-              label: 'Disabled',
-              disabled: true,
-              children: [
-                {
-                  label: 'Undo',
-                  disabled: true,
-                },
-                {
-                  label: 'Redo',
-                  disabled: true,
-                }
-              ]
-            }
-          ]}
-        />
-        <ButtonsPanel />
-        <AFramePanel />
-        <SlidesPanel />
-        <TimelinePanel />
-        <InfoPanel />
-      </div>
+      // <SceneContextProvider>
+        <div id="editor">
+          <Prompt
+            when={true}
+            message='You have unsaved changes, are you sure you want to leave?'
+          />
+          {/* <SystemPanel projectName={this.projectName} /> */}
+          <MenuComponent 
+            // projectName="Untitled_1"
+            menuButtons={[
+              {
+                label: 'File',
+                // onClick: _=> { console.log('file') },
+                children: [
+                  {
+                    label: 'Home',
+                    disabled: false,
+                    onClick: this.handleHomeButtonClick                                      
+                  },
+                  {
+                    label: 'New',
+                    disabled: false,
+                    onClick: this.handleNewButtonClick
+                  },
+                  {
+                    label: 'Open',
+                    disabled: false,
+                    onClick: this.handleOpenProjectButtonClick
+                  },
+                  {
+                    label: '-'
+                  },
+                  {
+                    label: 'Exit',
+                    disabled: false,
+                    onClick: this.handleExitButtonClick
+                  }
+                ]
+              }, 
+              {
+                label: 'Edit',
+                children: [
+                  {
+                    label: 'Undo',
+                    disabled: !sceneContext.getUndoQueueLength(),
+                    onClick: this.handleUndoButtonClick
+                  },
+                  {
+                    label: 'Redo',
+                    disabled: !sceneContext.getRedoQueueLength(),
+                    onClick: this.handleRedoButtonClick
+                  }
+                ]
+              }, 
+              {
+                label: 'Disabled',
+                disabled: true,
+                children: [
+                  {
+                    label: 'Undo',
+                    disabled: true,
+                  },
+                  {
+                    label: 'Redo',
+                    disabled: true,
+                  }
+                ]
+              }
+            ]}
+          />
+          <ButtonsPanel />
+          <AFramePanel />
+          <SlidesPanel />
+          <TimelinePanel />
+          <InfoPanel />
+        </div>
+      // </SceneContextProvider>
     );
   }
 }

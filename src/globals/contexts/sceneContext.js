@@ -73,6 +73,7 @@ class SceneContextProvider extends Component {
 
       currentTime: 0,
 
+      slideIsPlaying: false,
       // animationTimeline: null,
 
       appName: 'School VR',
@@ -134,6 +135,7 @@ class SceneContextProvider extends Component {
     this.getRedoQueueLength = this.getRedoQueueLength.bind(this);
 
     this.playSlide = this.playSlide.bind(this);
+    this.stopSlide = this.stopSlide.bind(this);
 
     this.events = {
       'editor-load': obj => {
@@ -429,11 +431,13 @@ class SceneContextProvider extends Component {
       const sceneData = prevState.sceneData;
       if (prevState.slideId) {
         const currentSlide = sceneData.slides.find(slide => slide.id === prevState.slideId);
-        currentSlide.entities.forEach(entity => {
-          if (entity.type !== 'a-camera') {
-            this.editor.removeObject(entity.el.object3D);
-          }
-        })
+        if (currentSlide) {
+          currentSlide.entities.forEach(entity => {
+            if (entity.type !== 'a-camera') {
+              this.editor.removeObject(entity.el.object3D);
+            }
+          })
+        }
       }
       const newSceneData = jsonCopy(prevState.sceneData);
       const newSlide = newSceneData.slides.find(slide => slide.id === slideId);
@@ -996,7 +1000,7 @@ class SceneContextProvider extends Component {
         })
         // this.startEventListener('objectselected');
         this.rebuildTimeline().then(tl => {
-          tl.seek(this.state.currentTime, false);
+          tl.seek(this.state.currentTime + 0.01).seek(this.state.currentTime, false);
           this.startEventListener('objectselected');          
         });
       })
@@ -1046,7 +1050,7 @@ class SceneContextProvider extends Component {
         })
         this.rebuildTimeline().then(tl => {
           // console.log(tl);
-          tl.seek(this.state.currentTime, false);
+          tl.seek(this.state.currentTime + 0.01).seek(this.state.currentTime, false);
           this.startEventListener('objectselected');          
         });
       })
@@ -1156,9 +1160,13 @@ class SceneContextProvider extends Component {
           // Events.emit('refreshsidebarobject3d');
           // console.log('onComplete');
           // the timeline need to manually pause after complete?
-          tl.pause();
+          this.setState({
+            slideIsPlaying: false
+          }, _=> {
+            tl.pause();
+          })
         })
-        // tl.play(0, false).stop().seek(0, false);
+        // tl.play(0, false).stop().seek(0.001).seek(0, false);
         // if (autoPlay) {
         //   tl.play(0, false);
         // }
@@ -1175,16 +1183,33 @@ class SceneContextProvider extends Component {
   }
   // animation function
   playSlide() {
-    if (this.state.animationTimeline) {
-      // console.log('replay: ', this.state.animationTimeline.duration());
-      this.state.animationTimeline.stop().seek(0, false).play();
-      
-    } else {
-      // const autoPlay = true;
-      // console.log('rebuild');
-      this.rebuildTimeline().then(tl => tl.stop().seek(0, false).play());
-      // this.animationTimeline.play();
-    }
+    this.setState({
+      slideIsPlaying: true
+    }, _=> {
+      if (this.state.animationTimeline) {
+        this.state.animationTimeline.stop().seek(0.001).seek(this.state.currentTime, false).play();
+      } else {
+        this.rebuildTimeline().then(tl => tl.stop().seek(0.001).seek(this.state.currentTime, false));
+      }
+    })
+    
+  }
+  stopSlide() {
+    this.setState((prevState) => {
+      return {
+        currentTime: Math.round(prevState.currentTime),
+        slideIsPlaying: false
+      }
+    }, _=> {
+      if (this.state.animationTimeline) {
+        // this.state.animationTimeline
+        // console.log(this.state.animationTimeline);
+        this.state.animationTimeline.stop().seek(this.state.currentTime, false);
+      } else {
+        // the timeline must be present ?
+        this.rebuildTimeline().then(tl => tl.stop());
+      }
+    })
   }
   seekSlide(timeInSec) {
     if (this.state.animationTimeline) {
@@ -1258,6 +1283,8 @@ class SceneContextProvider extends Component {
           getRedoQueueLength: this.getRedoQueueLength,
 
           playSlide: this.playSlide,
+          stopSlide: this.stopSlide,
+          slideIsPlaying: state.slideIsPlaying,
           // variables, should use functions to return?
           // appName: this.state.appName,
           // projectName: this.state.projectName,

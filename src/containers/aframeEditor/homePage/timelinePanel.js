@@ -281,10 +281,17 @@ class TimelinePanel extends Component {
             onClick={() => {
               /* todo */
               // Events.emit('previewTimeline');
-              sceneContext.playSlide();
+              if (sceneContext.slideIsPlaying) {
+                sceneContext.stopSlide();
+              } else {
+                sceneContext.playSlide();
+              }
             }}
           >
-            <FontAwesomeIcon icon="play" />
+            {sceneContext.slideIsPlaying ?
+              <FontAwesomeIcon icon="pause" />:
+              <FontAwesomeIcon icon="play" />
+            }
           </div>
           <div className="toggle-panel" onClick={() => {
             this.timelinePanel.classList.toggle('opened');
@@ -400,7 +407,7 @@ class TimelinePanel extends Component {
                       return (
                         <ResizableAndDraggable
                           ref={(ref)=>this.resizableAndDraggable[entityId][timelineId] = ref}
-                          key={timelineId}
+                          key={timelineId + '_' + timelineData.start + '_' + timelineData.duration}
                           className={`time-span${((selectedEntityId === entityId && selectedTimelineId === timelineId)? " selected": "")}`}
                           default={{
                             x: timelineData.start * state.timeScale,
