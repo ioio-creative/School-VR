@@ -57,6 +57,7 @@ class EditorPage extends Component {
     this.handleHomeButtonClick = this.handleHomeButtonClick.bind(this);
     this.handleNewProjectButtonClick = this.handleNewProjectButtonClick.bind(this);
     this.handleOpenProjectButtonClick = this.handleOpenProjectButtonClick.bind(this);
+    this.handleSaveProjectButtonClick = this.handleSaveProjectButtonClick.bind(this);
     this.handleExitButtonClick = this.handleExitButtonClick.bind(this);      
     this.handleUndoButtonClick = this.handleUndoButtonClick.bind(this);
     this.handleRedoButtonClick = this.handleRedoButtonClick.bind(this);      
@@ -155,6 +156,12 @@ class EditorPage extends Component {
       this.loadProject(filePaths[0]);
     });
   }
+  handleSaveProjectButtonClick(event) {
+    const sceneContext = this.props.sceneContext;
+    const {projectName, entitiesList, assetsList} = sceneContext.saveProject();
+    console.log(projectName, entitiesList, assetsList);
+    ipcHelper.saveProject(projectName, entitiesList, assetsList);
+  }
 
   handleExitButtonClick(event) {
     ipcHelper.closeWindow();
@@ -203,14 +210,25 @@ class EditorPage extends Component {
                     onClick: this.handleHomeButtonClick                                      
                   },
                   {
+                    label: '-'
+                  },
+                  {
                     label: 'New',
                     disabled: false,
                     onClick: this.handleNewButtonClick
                   },
                   {
+                    label: '-'
+                  },
+                  {
                     label: 'Open',
                     disabled: false,
                     onClick: this.handleOpenProjectButtonClick
+                  },
+                  {
+                    label: 'Save',
+                    disabled: false,
+                    onClick: this.handleSaveProjectButtonClick
                   },
                   {
                     label: '-'

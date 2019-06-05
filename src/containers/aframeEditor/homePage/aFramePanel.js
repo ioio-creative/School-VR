@@ -8,6 +8,11 @@ import {withSceneContext} from 'globals/contexts/sceneContext';
 // import dcjaiobj from '../../3Dmodels/20190215_dave_pose(3d glasses).obj';
 // import dcjaitex from '../../3Dmodels/GF_Dave_smile.jpg';
 
+// fonts
+
+import fontSchoolbellRegular from 'fonts/Schoolbell/SchoolbellRegular.png';
+// import fontNotoSerifTC from 'fonts/Noto_Serif_TC/Noto Serif TC_Regular.json';
+
 import './aFramePanel.css';
 
 const Events = require('vendor/Events.js');
@@ -137,11 +142,15 @@ class AFramePanel extends Component {
           this.sceneEl = ref;
         }} >
           <a-assets>
+            {/* try load some fonts */}
+
             <canvas ref={(ref)=>this.cameraPreviewEl=ref} id="camera-preview"/>
             
             {/* <a-asset-item id="dcjaiModelObj" src={dcjaiobj}></a-asset-item>
             <img id="dcjaiModelTex" src={dcjaitex} /> */}
-
+            {/* <a-asset-item id="fontSchoolbellRegular" src={fontSchoolbellRegular} /> */}
+            <img src={fontSchoolbellRegular} id="fontSchoolbellRegularImg" />
+            {/* <a-asset-item id="fontNotoSerifTC" src={fontNotoSerifTC} /> */}
           </a-assets>
           {/* <a-sky el-name="sky" el-isSystem={true} color="#FF0000"></a-sky> */}
           <a-camera el-isSystem={false} el-defaultCamera="true" position="0 2 5" wasd-controls look-controls ref={(ref)=>this.cameraEl=ref}>

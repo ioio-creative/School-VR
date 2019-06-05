@@ -65,6 +65,7 @@ class SceneContextProvider extends Component {
     this.state = {
       loaded: false,
       sceneData: [],
+      assetsData: [],
       slideId: undefined,
       entityId: undefined,
       timelineId: undefined,
@@ -88,6 +89,7 @@ class SceneContextProvider extends Component {
     this.getAppName = this.getAppName.bind(this);
     this.getProjectName = this.getProjectName.bind(this);
     this.newProject = this.newProject.bind(this);
+    this.saveProject = this.saveProject.bind(this);
     this.loadProject = this.loadProject.bind(this);
 
     this.getSlidesList = this.getSlidesList.bind(this);
@@ -135,7 +137,10 @@ class SceneContextProvider extends Component {
     this.getRedoQueueLength = this.getRedoQueueLength.bind(this);
 
     this.playSlide = this.playSlide.bind(this);
+    this.seekSlide = this.seekSlide.bind(this);
     this.stopSlide = this.stopSlide.bind(this);
+
+    this.addAsset = this.addAsset.bind(this);
 
     this.events = {
       'editor-load': obj => {
@@ -232,7 +237,7 @@ class SceneContextProvider extends Component {
           ]
         }
       ],
-      assets: []
+      // assets: []
     };
     this.setProjectName(projectName);
     this.loadProject(data);
@@ -241,15 +246,24 @@ class SceneContextProvider extends Component {
       timelineId: timelineId
     });
   }
-  loadProject(data) {
+  saveProject() {
+    const state = this.state;
+    return {
+      projectName: state.sceneData.projectName,
+      entitiesList: state.sceneData,
+      assetsList: state.assetsData
+    }
+  }
+  loadProject(sceneData, assetData) {
     // need to parse camera data inside data
-    
+    // items in assetData need to add element to the sceneEl
+    // TODO !!!
     this.setState({
-      sceneData: data,
+      sceneData: sceneData,
     }, _=> {
       const cameraEl = document.querySelector('a-camera[el-defaultCamera="true"]');
       this.updateCameraEl(cameraEl);
-      this.selectSlide(data.slides[0].id);
+      this.selectSlide(sceneData.slides[0].id);
     })
   }
   updateCameraEl(cameraEl) {
@@ -1219,6 +1233,104 @@ class SceneContextProvider extends Component {
       // this.animationTimeline.play();
     }
   }
+
+  addAsset(newFile) {
+    const sceneEl = this.editor.sceneEl;
+    let assetEl = sceneEl.querySelector('a-assets');
+    if (!assetEl) {
+      assetEl = document.createElement('a-assets');
+      sceneEl.append(assetEl);
+    }
+    // assetEl.append(el);
+    let newEl = null;
+    const newId = uuid();
+    const newFileUrl = (
+      Object.prototype.toString.call(newFile) === '[object File]' ? 
+      URL.createObjectURL(newFile) :
+      newFile.filePath
+    );
+    const newAssetData = {
+      id: newId,
+      src: newFileUrl,
+      type: null,
+      shader: 'flat'
+    };
+    switch (newFile.type) {
+      case 'image/svg+xml':
+      case 'image/jpeg':
+      case 'image/png': {
+        // normal still images
+        newAssetData.type = 'image';
+        newEl = document.createElement('img');
+        newEl.setAttribute('id', newId);
+        newEl.setAttribute('src', newFileUrl);
+        assetEl.append(newEl);
+        break;
+      }
+      case 'image/gif': {
+        // may be animated
+        newAssetData.type = 'gif';
+        newAssetData.shader = 'gif';
+        newEl = document.createElement('img');
+        newEl.setAttribute('id', newId);
+        newEl.setAttribute('src', newFileUrl);
+        assetEl.append(newEl);
+        break;
+      }
+      case 'video/mp4': {
+        // video
+        newAssetData.type = 'video';
+        newEl = document.createElement('video');
+        newEl.setAttribute('id', newId);
+        newEl.setAttribute('src', newFileUrl);
+        assetEl.append(newEl);
+        break;
+      }
+      default: {
+        console.log('unsupported files type (image/svg+xml, image/jpeg, image/png, image/gif, video/mp4)');
+        console.log('your file: ' + newFile.type);
+      }
+    }
+    this.setState((prevState) => {
+      return {
+        assetsData: [
+          ...prevState.assetsData,
+          newAssetData
+        ]
+      }
+    }, _=>{
+      console.log(this.state);
+    });
+    return newAssetData;
+
+    //   case 'VIDEO':
+    //     newid = 'vid_' + uuid(); // 'vid_' + document.querySelectorAll('video').length;
+    //     el.loop = true;
+    //     fileMediaType = mediaType.video;
+    //     break;
+    //   case 'IMG':
+    //     newid = 'img_' + uuid() // 'img_' + document.querySelectorAll('img').length;
+        
+    //     const fileExtensionWithoutDot = fileSystem.getFileExtensionWithoutLeadingDot(el.src);
+    //     const isGif = openFileDialogFilter.gif.extensions.includes(fileExtensionWithoutDot);
+    //     fileMediaType = isGif ? mediaType.gif : mediaType.image;      
+
+    //     break;
+    //   default:
+    //     console.log('editorFunctions_addToAsset: ???');
+    //     break;
+    // }
+    // if (existingUuidStr !== undefined) {
+    //   newid = existingUuidStr;
+    // }
+    // el.setAttribute('id', newid);
+    // Events.emit('addAsset', 
+    //   fileMediaType,
+    //   newid,
+    //   el.src
+    // );
+    // return newid;
+  }
   render() {
     // console.log('context render');
     const props = this.props;
@@ -1236,6 +1348,7 @@ class SceneContextProvider extends Component {
           setProjectName: this.setProjectName,
           getProjectName: this.getProjectName,
           newProject: this.newProject,
+          saveProject: this.saveProject,
           loadProject: this.loadProject,
 
           getSlidesList: this.getSlidesList,
@@ -1285,6 +1398,9 @@ class SceneContextProvider extends Component {
           playSlide: this.playSlide,
           stopSlide: this.stopSlide,
           slideIsPlaying: state.slideIsPlaying,
+
+          // assets
+          addAsset: this.addAsset,
           // variables, should use functions to return?
           // appName: this.state.appName,
           // projectName: this.state.projectName,

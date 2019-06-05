@@ -637,7 +637,8 @@ ipcMain.on('openVideoDialog', (event, args) => {
   openVideoDialog((filePaths) => {
     event.sender.send('openVideoDialogResponse', {
       data: {
-        filePaths: filePaths
+        filePaths: filePaths,
+        type: myPath.getMimeType(filePaths[0])
       }
     });
   });

@@ -216,7 +216,7 @@ class InfoPanel extends Component {
                   // temp use browser api to debug
                   inputField = <input type="file" accept="image" onChange={(event) => {
                     if (event.target.files && event.target.files[0]) {
-                      var FR= new FileReader();
+                      {/* const FR= new FileReader();
                       FR.addEventListener("load", function(e) {
                         // console.log(e.target.result);
                         selectedEntity.el.setAttribute('material', `src:url(${e.target.result})`);
@@ -229,7 +229,23 @@ class InfoPanel extends Component {
                           // }
                         }, selectedEntity['id']);
                       }); 
-                      FR.readAsDataURL( event.target.files[0] );
+                      FR.readAsDataURL( event.target.files[0] ); */}
+                      {/* console.log(event.target.files[0].type); */}
+                      /**
+                      image/svg+xml
+                      image/jpeg
+                      image/gif
+                      image/png
+                      video/mp4
+                       */
+                      const newAssetData = sceneContext.addAsset(event.target.files[0]);
+                      selectedEntity.el.setAttribute('material', `src:#${newAssetData.id};shader: ${newAssetData.shader}`);
+                      sceneContext.updateEntity({
+                        material: {
+                          src: `#${newAssetData.id}`
+                        }
+                      }, selectedEntity['id']);
+                    
                     } else { 
                       selectedEntity.el.removeAttribute('material', 'src');
                     }
@@ -240,12 +256,22 @@ class InfoPanel extends Component {
                   // use electron api to load
                   inputField = <div onClick={_=> {
                     ipcHelper.openVideoDialog((err, data) => {
+                      const newAssetData = sceneContext.addAsset({
+                        filePath: data.filePaths[0],
+                        type: data.type
+                      });
+                      selectedEntity.el.setAttribute('material', `src:#${newAssetData.id};shader: ${newAssetData.shader}`);
                       sceneContext.updateEntity({
+                        material: {
+                          src: `#${newAssetData.id}`
+                        }
+                      }, selectedEntity['id']);
+                      {/* sceneContext.updateEntity({
                         material: {
                           src: `url(${data.filePaths})`
                         }
-                      }, selectedEntity['id']);
-                      selectedEntity.el.setAttribute('material', `src:url(${data.filePaths})`);
+                      }, selectedEntity['id']); */}
+                      {/* selectedEntity.el.setAttribute('material', `src:url(${data.filePaths})`); */}
                     })
                   }}>choose</div>
                   // temp use browser api to debug
