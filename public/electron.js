@@ -612,6 +612,7 @@ ipcMain.on('deleteAllTempProjectDirectories', (event, arg) => {
 // window dialog
 
 ipcMain.on('openImageDialog', (event, args) => {
+  console.log('openImageDialog');
   openImageDialog((filePaths) => {
     event.sender.send('openImageDialogResponse', {
       data: {
@@ -632,6 +633,7 @@ ipcMain.on('openGifDialog', (event, args) => {
 });
 
 ipcMain.on('openVideoDialog', (event, args) => {
+  console.log('openVideoDialog');
   openVideoDialog((filePaths) => {
     event.sender.send('openVideoDialogResponse', {
       data: {

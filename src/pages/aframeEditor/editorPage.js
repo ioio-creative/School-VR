@@ -175,12 +175,13 @@ class EditorPage extends Component {
     const props = this.props;
     //const state = this.state;
     const sceneContext = this.props.sceneContext;
-    if (!sceneContext) {
-      console.log('no context');
-      return null;
-    } else {
-      console.log('context');
-    }   
+    // if (!sceneContext) {
+    //   console.log('no context');
+    //   return null;
+    // } else {
+    //   console.log('context');
+
+    // }
     return (
       <div id="editor">
         <Prompt

@@ -558,7 +558,7 @@ class SceneContextProvider extends Component {
       const currentEntity = currentSlide.entities.find(el => el.id === entityId);
       // currentEntity.name = newAttrs;
       Object.keys(newAttrs).forEach(key => {
-        if (currentEntity['components'].hasOwnProperty(key)) {
+        if (currentEntity['components'] && currentEntity['components'].hasOwnProperty(key)) {
           if (typeof(newAttrs[key]) === "object") {
             currentEntity['components'][key] = {
               ...currentEntity['components'][key],
@@ -928,7 +928,9 @@ class SceneContextProvider extends Component {
         redoQueue: [],
       }
     }, _=> {
-      this.rebuildTimeline()
+      this.rebuildTimeline().then(tl => tl.seek(this.state.currentTime, false));
+      console.log(this.state.sceneData);
+      console.log(this.state.undoQueue);
     })
 // currentSlide.entites
 // slides
@@ -963,6 +965,7 @@ class SceneContextProvider extends Component {
         const undoQueue = jsonCopy(prevState.undoQueue);
         const redoQueue = jsonCopy(prevState.redoQueue);
         const lastState = undoQueue.pop();
+        console.log(lastState);
         redoQueue.push({
           sceneData: jsonCopy(prevState.sceneData),
           slideId: prevState.slideId,
@@ -980,10 +983,22 @@ class SceneContextProvider extends Component {
         const newSceneData = this.state.sceneData;
         const newSlide = newSceneData.slides.find(slide => slide.id === this.state.slideId);
         newSlide.entities.forEach(entity => {
-          entity.el = this.editor.createNewEntity(entity);
+          if (entity.type !== 'a-camera') {
+            entity.el = this.editor.createNewEntity(entity);
+          } else {
+            entity.el = this.editor.currentCameraEl;
+          }
+          if (entity.material && entity.material.src) {
+            entity.el.setAttribute('material', {
+              src: entity.material.src
+            })
+          }
         })
-        this.startEventListener('objectselected');
-        this.rebuildTimeline()
+        // this.startEventListener('objectselected');
+        this.rebuildTimeline().then(tl => {
+          tl.seek(this.state.currentTime, false);
+          this.startEventListener('objectselected');          
+        });
       })
     }
   }
@@ -1017,15 +1032,23 @@ class SceneContextProvider extends Component {
         const newSceneData = this.state.sceneData;
         const newSlide = newSceneData.slides.find(slide => slide.id === this.state.slideId);
         newSlide.entities.forEach(entity => {
-          entity.el = this.editor.createNewEntity(entity);
+          if (entity.type !== 'a-camera') {
+            entity.el = this.editor.createNewEntity(entity);
+          } else {
+            entity.el = this.editor.currentCameraEl;
+          }
+          // entity.el = this.editor.createNewEntity(entity);
           if (entity.material && entity.material.src) {
             entity.el.setAttribute('material', {
               src: entity.material.src
             })
           }          
         })
-        this.startEventListener('objectselected');
-        this.rebuildTimeline()
+        this.rebuildTimeline().then(tl => {
+          // console.log(tl);
+          tl.seek(this.state.currentTime, false);
+          this.startEventListener('objectselected');          
+        });
       })
     }
   }
@@ -1086,19 +1109,24 @@ class SceneContextProvider extends Component {
         const tl = new TimelineMax({
           paused: true
         });
+        const deltaOffset = 0.001;
         currentSlide.entities.forEach(entity => {
           // animation here
           const element = entity.el;
           const aEntity = new entityModel[entity['type']](element);
+          let firstTimeline = null;
           entity.timelines.forEach(timeline => {
             const {
               start, duration,
               startAttribute, endAttribute
             } = timeline;
             const tmpAttrs = this.flattenJSON(jsonCopy(startAttribute));
+            if (firstTimeline === null || start < firstTimeline.start) {
+              firstTimeline = timeline;
+            }
             tl.add(TweenMax.to(
               tmpAttrs,
-              duration,
+              duration - deltaOffset * 2,
               {
                 ...this.flattenJSON(endAttribute),
                 ease: Power0.easeNone,
@@ -1108,8 +1136,13 @@ class SceneContextProvider extends Component {
                   aEntity.updateEntityAttributes(this.deFlattenJSON(tmpAttrs));
                 }
               }
-            ), start);
+            ), start + deltaOffset);
           })
+          if (firstTimeline) {
+            tl.add(() => {
+              aEntity.updateEntityAttributes(firstTimeline.startAttribute);
+            }, 0);
+          }
         })
         // tl.eventCallback('onStart', () => {
         // })
@@ -1119,11 +1152,12 @@ class SceneContextProvider extends Component {
             currentTime: tl.progress() * tl.duration()
           });
         })
-        // tl.eventCallback('onComplete', () => {
-        //   // Events.emit('refreshsidebarobject3d');
-        //   console.log('onComplete');
-        //   tl.pause();
-        // })
+        tl.eventCallback('onComplete', () => {
+          // Events.emit('refreshsidebarobject3d');
+          // console.log('onComplete');
+          // the timeline need to manually pause after complete?
+          tl.pause();
+        })
         // tl.play(0, false).stop().seek(0, false);
         // if (autoPlay) {
         //   tl.play(0, false);

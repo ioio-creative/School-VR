@@ -21,7 +21,7 @@ function openDialogCommon(fileFilters, dialogMessage, callBack, defaultPath) {
 }
 
 function openImageDialog(callBack) {
-  // console.log(openFileDialogFilter);
+  console.log(['openImageDialog', openFileDialogFilter.image]);
   debugger;
   openDialogCommon([openFileDialogFilter.image],
     "Please select an image file.", callBack);  
@@ -33,6 +33,8 @@ function openGifDialog(callBack) {
 }
 
 function openVideoDialog(callBack) {
+  console.log(['openVideoDialog', openFileDialogFilter.video]);
+  debugger;
   openDialogCommon([openFileDialogFilter.video],
     "Please select a video file.", callBack);
 }

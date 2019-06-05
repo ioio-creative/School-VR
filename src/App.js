@@ -76,10 +76,10 @@ faIconsNeed.forEach(iconName => {
 // Code Splitting and React Router v4
 // https://serverless-stack.com/chapters/code-splitting-in-create-react-app.html
 const EditorPage = require('pages/aframeEditor/editorPage').default;
-const PresenterPage = require('pages/aframeEditor/presenterPage').default;
+// const PresenterPage = require('pages/aframeEditor/presenterPage').default;
 // const ViewerPage = require('pages/aframeEditor/viewerPage').default;
-// const AsyncEditorPage = asyncLoadingComponent(() => import('pages/aframeEditor/editorPage'));
-// const AsyncPresenterPage = asyncLoadingComponent(() => import('pages/aframeEditor/presenterPage'));
+const AsyncEditorPage = asyncLoadingComponent(() => import('pages/aframeEditor/editorPage'));
+const AsyncPresenterPage = asyncLoadingComponent(() => import('pages/aframeEditor/presenterPage'));
 //const AsyncTestSaveLoad = asyncLoadingComponent(() => import('pages/TestSaveLoad'));
 const AsyncTestFileExplorer = asyncLoadingComponent(() => import('pages/TestFileExplorer/TestFileExplorer'));
 const AsyncProjectListPage = asyncLoadingComponent(() => import('pages/ProjectListPage'));
@@ -88,20 +88,15 @@ class App extends Component {
   render() {    
     return (
       <SceneContextProvider>
-        {/* <div className="window-resizer border-left"></div>
-        <div className="window-resizer border-right"></div>
-        <div className="window-resizer border-top"></div>
-        <div className="window-resizer border-bottom"></div>
-        <div className="window-resizer corner-top-left"></div>
-        <div className="window-resizer corner-top-right"></div>
-        <div className="window-resizer corner-bottom-left"></div>
-        <div className="window-resizer corner-bottom-right"></div> */}
         <div id="App">
           <Switch>
+
+            {/* maybe add some checking here, if !electron, return viewer page only */}
             <Route exact path="/file-explorer" render={() => <AsyncTestFileExplorer />} />
             <Route exact path={routes.editor} component={EditorPage} />
-            {/* <Route exact path={routes.presenter} render={() => <AsyncPresenterPage />} /> */}
-            <Route exact path={routes.presenter} component={PresenterPage} />
+            {/* <Route exact path={routes.editor} render={() => <AsyncEditorPage />} /> */}
+            <Route exact path={routes.presenter} render={() => <AsyncPresenterPage />} />
+            {/* <Route exact path={routes.presenter} component={PresenterPage} /> */}
             {/* <Route exact path={routes.viewer} component={ViewerPage} /> */}
             <Route exact path={routes.projectList} component={AsyncProjectListPage} />
             <Route exact path={routes.home} component={AsyncProjectListPage} />
