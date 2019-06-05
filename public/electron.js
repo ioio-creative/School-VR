@@ -6,7 +6,9 @@ const BrowserWindow = electron.BrowserWindow;
 const dialog = electron.dialog;
 const shell = electron.shell;
 
-const path = require('path');
+const {appDirectory} = require('./globals/config');
+
+const myPath = require('./utils/fileSystem/myPath');
 //const url = require('url');
 const isDev = require('electron-is-dev');
 const {fork} = require('child_process');
@@ -42,7 +44,7 @@ let developmentServerPort = process.env.PORT || 1234;
 
 let mainWindow;
 // https://fabiofranchino.com/blog/use-electron-as-local-webserver/
-let webServerProcess = fork(`${path.join(__dirname, 'server.js')}`);
+let webServerProcess = fork(`${myPath.join(__dirname, 'server', 'easyrtc-server.js')}`);
 let paramsFromExternalConfigForReact;
 
 /* end of global variables */
@@ -91,10 +93,10 @@ function createWindow() {
     webPreferences: { webSecurity: false },  // for saving and loading assets via local path
   });
 
-  splashScreen.loadURL(`file://${path.join(__dirname, 'splash.html')}`);
-  //mainWindow.loadURL(isDev ? `http://localhost:${developmentServerPort}/file-explorer` : `file://${path.join(__dirname, '../build/index.html')}`);
-  //mainWindow.loadURL(isDev ? `http://localhost:${developmentServerPort}` : `file://${path.join(__dirname, '../build/index.html')}`);
-  mainWindow.loadURL(isDev ? `http://localhost:${developmentServerPort}/projectlist` : `file://${path.join(__dirname, '../build/index.html')}`);
+  splashScreen.loadURL(`file://${myPath.join(__dirname, 'splash.html')}`);
+  //mainWindow.loadURL(isDev ? `http://localhost:${developmentServerPort}/file-explorer` : `file://${myPath.join(__dirname, '../build/index.html')}`);
+  //mainWindow.loadURL(isDev ? `http://localhost:${developmentServerPort}` : `file://${myPath.join(__dirname, '../build/index.html')}`);
+  mainWindow.loadURL(isDev ? `http://localhost:${developmentServerPort}/projectlist` : `file://${myPath.join(__dirname, '../build/index.html')}`);
   
   function showMainWindow() {
     if (mainWindowReady && splashScreenCountdowned) {
@@ -172,9 +174,19 @@ function createWindow() {
 }
 
 function startWebServer() {
+  //const appAsarPath = myPath.join(app.getAppPath(), 'resources', 'app.asar');
+  const appAsarPath = myPath.join(app.getPath('appData'), 'Local', 'Programs', 'School VR', 'resources', 'app.asar');
+  console.log(appAsarPath);
+  const appAsarDestPathInWorkingDirectory = myPath.join(appDirectory.appTempAppWorkingDirectory, 'resources');
+  console.log(appAsarDestPathInWorkingDirectory);
+
+  if (!isDev) {
+    fileSystem.extractAll(appAsarPath, appAsarDestPathInWorkingDirectory);
+  }
+
   // https://nodejs.org/api/child_process.html#child_process_subprocess_send_message_sendhandle_options_callback
   webServerProcess.send({
-    address: 'create-server',
+    address: 'start-server',
     port: webServerPort,
     rootDirPath: webServerRootDirPath
   });
@@ -191,7 +203,7 @@ app.on('ready', async _ => {
   }
 
   startWebServer();
-  createWindow();  
+  createWindow(); 
 });
 
 app.on('window-all-closed', () => {

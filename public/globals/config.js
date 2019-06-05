@@ -10,7 +10,8 @@ const appDirectory = {
   appDataDirectory: myPath.join(app.getPath('appData'), `${appName}-Data`),  
   appProjectsDirectory: myPath.join(app.getPath('documents'), `${appName}-Projects`),  
   appTempDirectory: myPath.join(app.getPath('appData'), `${appName}-Temp`),
-  appTempProjectsDirectory: myPath.join(app.getPath('appData'), `${appName}-Temp`, `${appName}-Projects`)
+  appTempProjectsDirectory: myPath.join(app.getPath('appData'), `${appName}-Temp`, `${appName}-Projects`),
+  appTempAppWorkingDirectory: myPath.join(app.getPath('appData'), `${appName}-Temp`, `${appName}-App-Working`),
 };
 
 const config = {
