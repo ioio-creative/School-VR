@@ -12,13 +12,14 @@
     "aframe-gif-shader": "^0.2.0",
     "asar": "^0.14.6",
     "deepmerge": "^2.2.1",
+    "easyrtc": "^1.1.0",
     "electron-is-dev": "^1.0.1",
+    "express": "^4.17.1",
     "gsap": "^2.0.2",
     "jsonc-parser": "^2.1.0",
     "jsonschema": "^1.2.4",
     "moment": "^2.24.0",
     "mousetrap": "^1.6.3",
-    "node-static": "^0.7.11",
     "p-iteration": "^1.1.7",
     "path": "^0.12.7",
     "query-string": "^6.4.2",
@@ -32,7 +33,10 @@
     "react-scripts": "^2.1.8",
     "rimraf": "^2.6.3",
     "save-dev": "^2.0.0",
-    "smalltalk": "^3.2.2"
+    "serve-static": "^1.14.1",
+    "smalltalk": "^3.2.2",
+    "socket.io": "^2.2.0",
+    "typescript": "^3.5.1"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -55,6 +59,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "electron-dev": "concurrently \"BROWSER=none npm start\" \"wait-on http://localhost:1234 && electron .\"",
+    "electron-build": "electron-builder -c.extraMetadata.main=build/electron.js",
     "electron-pack": "electron-builder -c.extraMetadata.main=build/electron.js",
     "preelectron-pack": "react-scripts build",
     "dist-all": "electron-builder -mw"
