@@ -128,7 +128,6 @@ class InfoTypeText extends Component {
               title={data.text.opacity * 100 + '%'}
               ref={ref=> this.textOpacityControl = ref}
               onClick={(event) => {
-
                 const clickPercent = (event.clientX - event.currentTarget.getBoundingClientRect().left) / event.currentTarget.getBoundingClientRect().width;
                 this.changeObjectField('text.opacity', roundTo(clickPercent, 2));
               }}
