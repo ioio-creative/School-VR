@@ -169,36 +169,25 @@ function createWindow() {
 }
 
 async function openWebServer() {
-  try  {
-    //const appAsarInstallationPath = myPath.join(app.getAppPath(), 'resources', 'app.asar');
-    const appAsarInstallationPath = myPath.join(app.getPath('appData'), '..', 'Local', 'Programs', 'School VR', 'resources', 'app.asar');
-    console.log(appAsarInstallationPath);
-    const appAsarDestPathInWorkingDirectory = myPath.join(appDirectory.appTempAppWorkingDirectory, 'resources');
-    console.log(appAsarDestPathInWorkingDirectory);
-    const webServerRootDirectory = myPath.join(appAsarDestPathInWorkingDirectory, 'build');
-    console.log(webServerRootDirectory);
-    
-    console.log("reach here 1");
-    //await fileSystem.myDeletePromise(appAsarDestPathInWorkingDirectory);
-    console.log("reach here 2");
-    fileSystem.extractAll(appAsarInstallationPath, appAsarDestPathInWorkingDirectory)
-      .then(() => {
-        console.log("reach here 3");
+  //const appAsarInstallationPath = myPath.join(app.getAppPath(), 'resources', 'app.asar');
+  const appAsarInstallationPath = myPath.join(app.getPath('appData'), '..', 'Local', 'Programs', 'School VR', 'resources', 'app.asar');
+  console.log(appAsarInstallationPath);
+  const appAsarDestPathInWorkingDirectory = myPath.join(appDirectory.appTempAppWorkingDirectory, 'resources');
+  console.log(appAsarDestPathInWorkingDirectory);
+  const webServerRootDirectory = myPath.join(appAsarDestPathInWorkingDirectory, 'build');
+  console.log(webServerRootDirectory);
+  
+  await fileSystem.myDeletePromise(appAsarDestPathInWorkingDirectory);
+  console.log("reach here 1");
+  fileSystem.extractAll(appAsarInstallationPath, appAsarDestPathInWorkingDirectory);
+  console.log("reach here 2");
 
-        // https://nodejs.org/api/child_process.html#child_process_subprocess_send_message_sendhandle_options_callback
-        webServerProcess.send({
-          address: 'open-server',
-          port: webServerPort,
-          rootDirPath: webServerRootDirectory
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-    
-  } catch (err) {
-    console.log(err);
-  }
+  // https://nodejs.org/api/child_process.html#child_process_subprocess_send_message_sendhandle_options_callback
+  webServerProcess.send({
+    address: 'open-server',
+    port: webServerPort,
+    rootDirPath: webServerRootDirectory
+  });      
 }
 
 function closeWebServer() {
@@ -215,7 +204,7 @@ app.on('ready', async _ => {
     console.error(err);
   }
 
-  await openWebServer();
+  //await openWebServer();
   createWindow(); 
 });
 
