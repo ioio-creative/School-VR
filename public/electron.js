@@ -19,6 +19,7 @@ const jsoncParser = require('jsonc-parser');
 const mime = require('./utils/fileSystem/mime');
 const fileSystem = require('./utils/fileSystem/fileSystem');
 const ProjectFile = require('./utils/saveLoadProject/ProjectFile');
+const {saveProjectToLocalAsync} = require('./utils/saveLoadProject/saveProject');
 const {loadProjectByProjectFilePathAsync} = require('./utils/saveLoadProject/loadProject');
 const {openImageDialog, openGifDialog, openVideoDialog, openSchoolVrFileDialog} = 
   require('./utils/aframeEditor/openFileDialog');
@@ -535,9 +536,6 @@ ipcMain.on('getExistingProjectNames', async (event, arg) => {
 });
 
 ipcMain.on('saveProject', (event, arg) => {
-  console.log(arg.projectName);
-  console.log(arg.entitiesList);
-  console.log(arg.assetsList);
   saveProjectToLocalAsync(arg.projectName, arg.entitiesList, arg.assetsList)
     .then((data) => {      
       event.sender.send('saveProjectResponse', {

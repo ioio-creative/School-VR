@@ -82,6 +82,35 @@ class ProjectFile {
       this.mtimeMs = this.projectFileStats.mtimeMs;
       this.path = this.projectFileStats.path;
     }
+
+
+    // bind methods
+    [
+      'getTempImageFilePath',
+      'getTempGifFilePath',
+      'getTempVideoFilePath',
+      'getTempProjectAssetAbsolutePathFromProvidedPathIfIsRelative',
+
+      'saveImageToTempAsync',
+      'saveGifToTempAsync',
+      'saveVideoToTempAsync',
+
+      'isProjectFileExistAsync',
+      'isProjectNameUsedAsync',
+
+      'convertAssetSrcToProperAbsolutePath',
+      'getAllExistingAssetFileAbsolutePathsInTempAsync',
+      'createAssetTempDirectoriesAsync',
+      'deleteAssetTempDirectoriesAsync',
+
+      'deleteNonUsedAssetsFromTempAsync',
+      'saveAssetsToTempAsync',
+      'saveToLocalDetailAsync',
+      'saveToLocalAsync',
+      'loadProjectByFilePathAsync',
+    ].forEach(methodName => {
+      this[methodName] = this[methodName].bind(this);
+    });
   }
 
 
@@ -159,7 +188,7 @@ class ProjectFile {
   
   async saveVideoToTempAsync(srcFilePath, assetId, isAssumeDestDirExists) {
     const destFilePath = this.getTempVideoFilePath(assetId, myPath.getFileExtensionWithLeadingDot(srcFilePath));
-    await this.copyFileAsync(srcFilePath, destFilePath, isAssumeDestDirExists);
+    await ProjectFile.copyFileAsync(srcFilePath, destFilePath, isAssumeDestDirExists);
     return destFilePath;
   }
   /* end of saveFilesToTemp */
@@ -218,7 +247,7 @@ class ProjectFile {
   }
 
   static async getExistingProjectNamesAsync() {
-    const projects = await listProjectsAsync();  
+    const projects = await ProjectFile.listProjectsAsync();  
     const projectNames = projects.map((project) => {
       return project.name;
     });
@@ -249,7 +278,7 @@ class ProjectFile {
     // strip file:/// from asset.src
     const strToStrip = "file:///";  
     if (assetSrc.includes(strToStrip)) {
-      assetSrc = assetSrc.substr("file:///".length);
+      assetSrc = assetSrc.substr(strToStrip.length);
     }
     
     // TODO: this check of relative path is not well thought through!!!
@@ -382,49 +411,49 @@ class ProjectFile {
     console.log("saveProjectToLocal - deleteNonUsedAssetsFromTempAsync: Done");
   
     await this.saveAssetsToTempAsync(assetsList);
-    console.log(`saveProjectToLocal - saveProjectToLocalDetail: Assets saved in ${this.tempProjectDirPath}`);
+    console.log(`saveProjectToLocal - saveProjectToLocalDetail: Assets saved in ${this.tempProjectDirectoryPath}`);
   
-    // TODO: The following modify the objects in the input assetsList directly. Is this alright?
-    // modify assets_list node in jsonForSave to reflect the relative paths of the project folder structure to be zipped
-    jsonForSave.assets_list.forEach((asset) => {
-      let getAssetFilePathRelativeToProjectDirectoryFunc = null;
-      switch (asset.media_type) {
-        case mediaType.image:
-          getAssetFilePathRelativeToProjectDirectoryFunc = ProjectFile.getImageFilePathRelativeToProjectDirectory;
-          break;
-        case mediaType.gif:
-          getAssetFilePathRelativeToProjectDirectoryFunc = ProjectFile.getGifFilePathRelativeToProjectDirectory;  
-          break;
-        case mediaType.video:
-        default:
-          getAssetFilePathRelativeToProjectDirectoryFunc = ProjectFile.getVideoFilePathRelativeToProjectDirectory;
-          break;
-      }
+    // // TODO: The following modify the objects in the input assetsList directly. Is this alright?
+    // // modify assets_list node in jsonForSave to reflect the relative paths of the project folder structure to be zipped
+    // jsonForSave.assets_list.forEach((asset) => {
+    //   let getAssetFilePathRelativeToProjectDirectoryFunc = null;
+    //   switch (asset.media_type) {
+    //     case mediaType.image:
+    //       getAssetFilePathRelativeToProjectDirectoryFunc = ProjectFile.getImageFilePathRelativeToProjectDirectory;
+    //       break;
+    //     case mediaType.gif:
+    //       getAssetFilePathRelativeToProjectDirectoryFunc = ProjectFile.getGifFilePathRelativeToProjectDirectory;  
+    //       break;
+    //     case mediaType.video:
+    //     default:
+    //       getAssetFilePathRelativeToProjectDirectoryFunc = ProjectFile.getVideoFilePathRelativeToProjectDirectory;
+    //       break;
+    //   }
       
-      const assetFilePathRelativeToProjectDirectory = 
-        getAssetFilePathRelativeToProjectDirectoryFunc(asset.id, myPath.getFileExtensionWithLeadingDot(asset.src));
-      asset.src = assetFilePathRelativeToProjectDirectory;
-    });
+    //   const assetFilePathRelativeToProjectDirectory = 
+    //     getAssetFilePathRelativeToProjectDirectoryFunc(asset.id, myPath.getFileExtensionWithLeadingDot(asset.src));
+    //   asset.src = assetFilePathRelativeToProjectDirectory;
+    // });
   
-    // write project json file
-    const jsonForSaveStr = JSON.stringify(jsonForSave);
-    const tempJsonPath = this.tempProjectJsonFilePath;
-    await fileSystem.writeFilePromise(tempJsonPath, jsonForSaveStr);      
-    console.log(`saveProjectToLocal - saveProjectToLocalDetail: JSON file saved in ${tempJsonPath}`);
+    // // write project json file
+    // const jsonForSaveStr = JSON.stringify(jsonForSave);
+    // const tempJsonPath = this.tempProjectJsonFilePath;
+    // await fileSystem.writeFilePromise(tempJsonPath, jsonForSaveStr);      
+    // console.log(`saveProjectToLocal - saveProjectToLocalDetail: JSON file saved in ${tempJsonPath}`);
   
-    // zip and move temp folder to appProjectsDirectory
-    const destProjectPackagePath = this.savedProjectFilePath;
-    await fileSystem.createPackagePromise(this.tempProjectDirectoryPath, destProjectPackagePath);
-    console.log(`saveProjectToLocal - saveProjectToLocalDetail: Project file saved in ${destProjectPackagePath}`);
+    // // zip and move temp folder to appProjectsDirectory
+    // const destProjectPackagePath = this.savedProjectFilePath;
+    // await fileSystem.createPackagePromise(this.tempProjectDirectoryPath, destProjectPackagePath);
+    // console.log(`saveProjectToLocal - saveProjectToLocalDetail: Project file saved in ${destProjectPackagePath}`);
         
-    ProjectFile.setCurrentLoadedProjectFilePath(destProjectPackagePath);
+    // ProjectFile.setCurrentLoadedProjectFilePath(destProjectPackagePath);
     
-    return {
-      //tempProjectDirectoryPath: this.tempProjectDirectoryPath,
-      //tempJsonPath: tempJsonPath,
-      jsonForSave: jsonForSave,
-      destProjectPackagePath: destProjectPackagePath
-    };
+    // return {
+    //   //tempProjectDirectoryPath: this.tempProjectDirectoryPath,
+    //   //tempJsonPath: tempJsonPath,
+    //   jsonForSave: jsonForSave,
+    //   destProjectPackagePath: destProjectPackagePath
+    // };
   }
 
   async saveToLocalAsync(entitiesList, assetsList) {

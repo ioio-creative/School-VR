@@ -3,4 +3,4 @@ function isNonEmptyArray(obj) {
 };
 
 
-module.exports.isNonEmptyArray = isNonEmptyArray;
+module.exports = isNonEmptyArray;
