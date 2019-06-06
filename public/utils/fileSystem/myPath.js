@@ -39,13 +39,15 @@ const dirname = (filePath) => {
   return path.dirname(filePath);
 }
 
+/* end of path api */
+
+
 const getMimeType = (filePath) => {
   const ext = getFileExtensionWithoutLeadingDot(filePath);
   const mime = mimeTypes.lookup(ext);
   console.log(mime);
   return mime;
-}
-/* end of path api */
+};
 
 
 module.exports = {
@@ -61,5 +63,6 @@ module.exports = {
   resolve,
   normalize,
   dirname,
-  getMimeType
+  
+  getMimeType,
 }

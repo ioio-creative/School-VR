@@ -41,7 +41,16 @@ const dirname = (filePath) => {
 /* end of path api */
 
 
+const getMimeType = (filePath) => {
+  const ext = getFileExtensionWithoutLeadingDot(filePath);
+  const mime = mimeTypes.lookup(ext);
+  console.log(mime);
+  return mime;
+};
+
+
 export default {
+  // path api
   sep,
   getFileExtensionWithLeadingDot,
   getFileExtensionWithoutLeadingDot,
@@ -50,5 +59,7 @@ export default {
   join,
   resolve,
   normalize,
-  dirname
+  dirname,
+
+  getMimeType,
 }

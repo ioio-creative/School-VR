@@ -128,11 +128,11 @@ class ProjectFile {
   }
 
   getTempGifFilePath(assetId, fileExtensionWithDot) {    
-    return myPath.join(this.tempProjectImageDirectoryPath, assetId) + fileExtensionWithDot;
+    return myPath.join(this.tempProjectGifDirectoryPath, assetId) + fileExtensionWithDot;
   }
   
   getTempVideoFilePath(assetId, fileExtensionWithDot) {    
-    return myPath.join(this.tempProjectImageDirectoryPath, assetId) + fileExtensionWithDot;
+    return myPath.join(this.tempProjectVideoDirectoryPath, assetId) + fileExtensionWithDot;
   }
 
   getTempProjectAssetAbsolutePathFromProvidedPathIfIsRelative(assetPath) {    
@@ -188,6 +188,9 @@ class ProjectFile {
   
   async saveVideoToTempAsync(srcFilePath, assetId, isAssumeDestDirExists) {
     const destFilePath = this.getTempVideoFilePath(assetId, myPath.getFileExtensionWithLeadingDot(srcFilePath));
+    console.log(assetId);
+    console.log(srcFilePath);
+    console.log(destFilePath);
     await ProjectFile.copyFileAsync(srcFilePath, destFilePath, isAssumeDestDirExists);
     return destFilePath;
   }
@@ -371,6 +374,7 @@ class ProjectFile {
   // saveAssetsToTempAsync() will do nothing and pass control to callBack
   // if assetsList.length === 0
   async saveAssetsToTempAsync(assetsList) {
+    console.log(assetsList);
     if (!isNonEmptyArray(assetsList)) {    
       return;
     }
