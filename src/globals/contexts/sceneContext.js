@@ -248,9 +248,14 @@ class SceneContextProvider extends Component {
   }
   saveProject() {
     const state = this.state;
+    const sceneData = jsonCopy(state.sceneData);
+    sceneData.slides.forEach(slide => {
+      slide.entities.forEach(entity => delete entity['el'])
+    })
+    debugger;
     return {
-      projectName: state.sceneData.projectName,
-      entitiesList: state.sceneData,
+      projectName: sceneData.projectName,
+      entitiesList: sceneData,
       assetsList: state.assetsData
     }
   }

@@ -154,6 +154,7 @@ class InfoPanel extends Component {
     // console.log(model);
     const staticAttributes = model.staticAttributes;
     let staticPanel = null;
+
     if (staticAttributes.length) {
       staticPanel = <div id="content-panel">
         <div className="panel">
@@ -163,11 +164,20 @@ class InfoPanel extends Component {
           <div className="panel-body">
             {staticAttributes.map(staticAttribute => {
               let inputField = null;
+              let currentValue = '';
+              if (staticAttribute.attributeField) {
+                const attrsObj = selectedEntity.el.getAttribute(staticAttribute.attributeKey);
+                if (attrsObj) {
+                  currentValue = attrsObj[staticAttribute.attributeField];
+                }
+              } else {
+                currentValue = selectedEntity.el.getAttribute(staticAttribute.attributeField)
+              }
               // try to prompt an input field from electron?
               {/* console.log(staticAttribute.type); */}
               switch (staticAttribute.type) {
                 case 'text': {
-                  inputField = <input type="text" onInput={(event) => {
+                  inputField = <input type="text" key={selectedEntity.el.id} onInput={(event) => {
                     {/* selectedEntity.el.setAttribute(staticAttribute.attributeKey,
                     {
                       [staticAttribute.attributeField]: event.target.value
@@ -178,13 +188,24 @@ class InfoPanel extends Component {
                           [staticAttribute.attributeField]: event.target.value
                         }
                       });
+                      sceneContext.updateEntity({                      
+                        [staticAttribute.attributeKey]: {
+                          [staticAttribute.attributeField]: event.target.value
+                        }
+                      }, selectedEntity['id']);
                     } else {
                       model.updateEntityAttributes({
                         [staticAttribute.attributeKey]: event.target.value
                       });
+                      sceneContext.updateEntity({
+                        [staticAttribute.attributeKey]: event.target.value
+                        // [staticAttribute.attributeKey]: {
+                          // [staticAttribute.attributeField]: event.target.value
+                        // }
+                      }, selectedEntity['id']);
                     }
                   }} onBlur={(event) => {
-                    if (staticAttribute.attributeField) {
+                    {/* if (staticAttribute.attributeField) {
                       sceneContext.updateEntity({                      
                         [staticAttribute.attributeKey]: {
                           [staticAttribute.attributeField]: event.target.value
@@ -197,8 +218,8 @@ class InfoPanel extends Component {
                           // [staticAttribute.attributeField]: event.target.value
                         // }
                       }, selectedEntity['id']);
-                    }
-                  }} />
+                    } */}
+                  }} value={currentValue} />
                   break;
                 }
                 case 'image': {
@@ -330,7 +351,9 @@ class InfoPanel extends Component {
                 <div className="field-label" onClick={(e) => {
                   const nextSiblingPosition = e.currentTarget.nextSibling.style.position;
                   e.currentTarget.nextSibling.style.position = (nextSiblingPosition === 'fixed'? '': 'fixed');
-                }}>{staticAttribute.name} :</div>
+                }}
+                title={currentValue}
+              >{staticAttribute.name} :</div>
                 {inputField}
               </div>
             })}

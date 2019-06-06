@@ -43,6 +43,13 @@
 #timeline-panel.panel .panel-header .preview-timeline {
   margin-right: 10px;
 }
+#timeline-panel.panel .panel-header .timer .current-time {
+  color: #28a8ff;
+  min-width: 45px;
+  text-align: right;
+  display: inline-block;
+  vertical-align: top;
+}
 #timeline-panel.panel .panel-header .preview-timeline {
   cursor: pointer;
   padding: 2px;
