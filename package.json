@@ -20,6 +20,7 @@
     "jsonschema": "^1.2.4",
     "moment": "^2.24.0",
     "mousetrap": "^1.6.3",
+    "networked-aframe": "^0.6.1",
     "opentype.js": "^1.1.0",
     "p-iteration": "^1.1.7",
     "path": "^0.12.7",

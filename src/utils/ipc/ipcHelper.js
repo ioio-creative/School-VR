@@ -2,7 +2,30 @@ import isFunction from 'utils/variableType/isFunction';
 
 
 const electron = window.require ? window.require('electron') : null;
-const dummyFunc = _=>{ console.log('not in electron app, no ipc') };
+const dummyFunc = (param1, param2, param3) => { 
+  // console.log(param1, param2, param3);
+  // console.log('not in electron app, no ipc')
+  if (param1 === "saveProject") {
+    localStorage.setItem('schoolVRSave', JSON.stringify(param2));
+  }
+  if (param1 === "openSchoolVrFileDialogResponse") {
+    // const loadFile = JSON.parse(localStorage.getItem('schoolVRSave'));
+    param2(null, {
+      data: {
+        filePaths: ['hello']
+      }
+    });
+  }
+  if (param1 === "loadProjectByProjectFilePathResponse") {
+    const loadFile = JSON.parse(localStorage.getItem('schoolVRSave'));
+    param2(null, {
+      data: {
+        projectJson: loadFile
+      }
+    });
+  }
+  // debugger;
+};
 const ipc = electron ? electron.ipcRenderer : {
   on: dummyFunc,
   removeListener: dummyFunc,
