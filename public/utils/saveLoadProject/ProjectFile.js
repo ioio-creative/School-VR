@@ -264,6 +264,7 @@ class ProjectFile {
   async isProjectNameUsedAsync() {
     const projectName = this.name;
     const existingProjectNames = await ProjectFile.getExistingProjectNamesAsync();
+    // TODO: isCurrentLoadedProject now is checking project file path instead of project name
     const isNameUsed = !ProjectFile.isCurrentLoadedProject(projectName) && existingProjectNames.includes(projectName);
     return isNameUsed;
   }
@@ -401,19 +402,15 @@ class ProjectFile {
     });  
   };
 
-  async saveToLocalDetailAsync(entitiesList, assetsList) {
-    console.log("reach here 1")
+  async saveToLocalDetailAsync(entitiesList, assetsList) {    
     const projectName = this.name;
 
-    const jsonForSave = parseDataToSaveFormat(projectName, entitiesList, assetsList);
-    console.log("reach here 2")
+    const jsonForSave = parseDataToSaveFormat(projectName, entitiesList, assetsList);    
     // deal with assetsList
     await this.deleteNonUsedAssetsFromTempAsync(assetsList);
-    console.log("saveProjectToLocal - deleteNonUsedAssetsFromTempAsync: Done");
-    console.log("reach here 3")
+    console.log("saveProjectToLocal - deleteNonUsedAssetsFromTempAsync: Done");    
     await this.saveAssetsToTempAsync(assetsList);
-    console.log(`saveProjectToLocal - saveProjectToLocalDetail: Assets saved in ${this.tempProjectDirectoryPath}`);
-    console.log("reach here 4")
+    console.log(`saveProjectToLocal - saveProjectToLocalDetail: Assets saved in ${this.tempProjectDirectoryPath}`);    
     // TODO: The following modify the objects in the input assetsList directly. Is this alright?
     // modify assets_list node in jsonForSave to reflect the relative paths of the project folder structure to be zipped
     jsonForSave.assetsList.forEach((asset) => {
@@ -442,24 +439,22 @@ class ProjectFile {
     await fileSystem.writeFilePromise(tempJsonPath, jsonForSaveStr);      
     console.log(`saveProjectToLocal - saveProjectToLocalDetail: JSON file saved in ${tempJsonPath}`);
   
-    // // zip and move temp folder to appProjectsDirectory
-    // const destProjectPackagePath = this.savedProjectFilePath;
-    // await fileSystem.createPackagePromise(this.tempProjectDirectoryPath, destProjectPackagePath);
-    // console.log(`saveProjectToLocal - saveProjectToLocalDetail: Project file saved in ${destProjectPackagePath}`);
+    // zip and move temp folder to appProjectsDirectory
+    const destProjectPackagePath = this.savedProjectFilePath;
+    await fileSystem.createPackagePromise(this.tempProjectDirectoryPath, destProjectPackagePath);
+    console.log(`saveProjectToLocal - saveProjectToLocalDetail: Project file saved in ${destProjectPackagePath}`);
         
-    // ProjectFile.setCurrentLoadedProjectFilePath(destProjectPackagePath);
+    ProjectFile.setCurrentLoadedProjectFilePath(destProjectPackagePath);
     
-    // return {
-    //   //tempProjectDirectoryPath: this.tempProjectDirectoryPath,
-    //   //tempJsonPath: tempJsonPath,
-    //   jsonForSave: jsonForSave,
-    //   destProjectPackagePath: destProjectPackagePath
-    // };
+    return {
+      //tempProjectDirectoryPath: this.tempProjectDirectoryPath,
+      //tempJsonPath: tempJsonPath,
+      jsonForSave: jsonForSave,
+      destProjectPackagePath: destProjectPackagePath
+    };
   }
 
   async saveToLocalAsync(entitiesList, assetsList) {
-    const projectName = this.name;
-
     let savedProjectObj;
 
     // save in temp folder before zip (in appTempProjectsDirectory)
@@ -475,14 +470,8 @@ class ProjectFile {
 
     // check if tempProjectDir already exists, if exists, delete it
     // actually this step may be redundant because I would check isProjectNameUsedAsync        
-    if (!ProjectFile.isCurrentLoadedProject(projectName)) {
-      console.log("reach here 0.3")
-      try {
-        await fileSystem.myDeletePromise(this.tempProjectDirectoryPath);
-      } catch (err) {
-        console.log(err)
-      }
-      console.log("reach here 0.4")
+    if (!ProjectFile.isCurrentLoadedProject(this.savedProjectFilePath)) {
+      await fileSystem.myDeletePromise(this.tempProjectDirectoryPath);            
       savedProjectObj = await this.saveToLocalDetailAsync(entitiesList, assetsList);      
     } else {      
       savedProjectObj = await this.saveToLocalDetailAsync(entitiesList, assetsList);      
@@ -493,7 +482,6 @@ class ProjectFile {
   /* end of saveProject */
 
   /* loadProject */
-
   async loadProjectByFilePathAsync() {
     const savedProjectFilePath = this.savedProjectFilePath;
 

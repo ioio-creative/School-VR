@@ -554,7 +554,7 @@ const defaultMyDeleteOptions = Object.assign({
 } , fs);
 
 const myDelete = (filePath, callBack) => {  
-  rimraf(filePath, defaultMyDeleteOptions, (err) => {    
+  rimraf(filePath, defaultMyDeleteOptions, (err) => {   
     handleGeneralErr(callBack, err);    
   });  
 };

@@ -653,10 +653,10 @@ ipcMain.on('openSchoolVrFileDialog', (event, args) => {
 });
 
 ipcMain.on('saveSchoolVrFileDialog', (event, args) => {
-  saveSchoolVrFileDialog((filePaths) => {
+  saveSchoolVrFileDialog((filePath) => {
     event.sender.send('saveSchoolVrFileDialogResponse', {
       data: {
-        filePaths: filePaths
+        filePath: filePath
       }
     });
   });
@@ -666,10 +666,10 @@ ipcMain.on('saveSchoolVrFileDialog', (event, args) => {
 
 ipcMain.on('showOpenDialog', (event, args) => {
   const options = args;
-  dialog.showOpenDialog(options, (filePath) => {
+  dialog.showOpenDialog(options, (filePaths) => {
     event.sender.send('showOpenDialogResponse', {
       data: {
-        filePath: filePath
+        filePaths: filePaths
       }
     });
   });

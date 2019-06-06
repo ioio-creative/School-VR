@@ -60,6 +60,7 @@ class EditorPage extends Component {
       'handleNewProjectButtonClick',
       'handleOpenProjectButtonClick',
       'handleSaveProjectButtonClick',
+      'handleSaveAsProjectButtonClick',
       'handleExitButtonClick',
       'handleUndoButtonClick',
       'handleRedoButtonClick'
@@ -174,8 +175,20 @@ class EditorPage extends Component {
       this.loadProject(filePaths[0]);
     });
   }
-  
+
   handleSaveProjectButtonClick(event) {
+    ipcHelper.saveSchoolVrFileDialog((err, data) => {
+      if (err) {
+        handleErrorWithUiDefault(err);
+        return;
+      }
+
+      const filePath = data.filePath;
+      this.saveProject(filePath);
+    });    
+  }
+  
+  handleSaveAsProjectButtonClick(event) {
     ipcHelper.saveSchoolVrFileDialog((err, data) => {
       if (err) {
         handleErrorWithUiDefault(err);
@@ -253,6 +266,11 @@ class EditorPage extends Component {
                     label: 'Save',
                     disabled: false,
                     onClick: this.handleSaveProjectButtonClick
+                  },
+                  {
+                    label: 'Save As...',
+                    disabled: false,
+                    onClick: this.handleSaveAsProjectButtonClick
                   },
                   {
                     label: '-'
