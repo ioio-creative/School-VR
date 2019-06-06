@@ -8,7 +8,7 @@ const dummyFunc = (param1, param2, param3) => {
   if (param1 === "saveProject") {
     localStorage.setItem('schoolVRSave', JSON.stringify(param2));
   }
-  if (param1 === "openSchoolVrFileDialogResponse") {
+  else if (param1 === "openSchoolVrFileDialogResponse") {
     // const loadFile = JSON.parse(localStorage.getItem('schoolVRSave'));
     param2(null, {
       data: {
@@ -16,7 +16,7 @@ const dummyFunc = (param1, param2, param3) => {
       }
     });
   }
-  if (param1 === "loadProjectByProjectFilePathResponse") {
+  else if (param1 === "loadProjectByProjectFilePathResponse") {
     const loadFile = JSON.parse(localStorage.getItem('schoolVRSave'));
     param2(null, {
       data: {

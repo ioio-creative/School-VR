@@ -467,13 +467,14 @@ class ProjectFile {
 
     // save in temp folder before zip (in appTempProjectsDirectory)
       
-    // check if projectName is already used  
-    const isNameUsed = await this.isProjectNameUsedAsync(projectName);
+    // check if projectName is already used
+    // TODO: do we need to check isProjectNameUsedAsync() ?
+    // const isNameUsed = await this.isProjectNameUsedAsync(projectName);
 
-    if (isNameUsed) {      
-      const projectNameTakenError = new Error(`Project name "${projectName}" is used`);
-      throw projectNameTakenError;
-    }
+    // if (isNameUsed) {      
+    //   const projectNameTakenError = new Error(`Project name "${projectName}" is used`);
+    //   throw projectNameTakenError;
+    // }
 
     // check if tempProjectDir already exists, if exists, delete it
     // actually this step may be redundant because I would check isProjectNameUsedAsync    

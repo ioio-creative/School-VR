@@ -1,6 +1,6 @@
 const path = require('path');
-
 const mimeTypes = require('mime-types');
+
 
 /* path api */
 
@@ -42,12 +42,16 @@ const dirname = (filePath) => {
 /* end of path api */
 
 
+/* mime-types api */
+
 const getMimeType = (filePath) => {
   const ext = getFileExtensionWithoutLeadingDot(filePath);
   const mime = mimeTypes.lookup(ext);
   console.log(mime);
   return mime;
 };
+
+/* end of mime-types api */
 
 
 module.exports = {
@@ -64,5 +68,6 @@ module.exports = {
   normalize,
   dirname,
   
+  // mime-types api
   getMimeType,
 }

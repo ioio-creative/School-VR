@@ -1,4 +1,5 @@
 import path from 'path';
+import mimeTypes from 'mime-types';
 
 
 /* path api */
@@ -41,12 +42,15 @@ const dirname = (filePath) => {
 /* end of path api */
 
 
+/* mime-types api */
+
 const getMimeType = (filePath) => {
   const ext = getFileExtensionWithoutLeadingDot(filePath);
-  const mime = mimeTypes.lookup(ext);
-  console.log(mime);
+  const mime = mimeTypes.lookup(ext);  
   return mime;
 };
+
+/* end of mime-types api */
 
 
 export default {
@@ -61,5 +65,6 @@ export default {
   normalize,
   dirname,
 
+  // mime-types api
   getMimeType,
 }
