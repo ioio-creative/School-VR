@@ -37,6 +37,14 @@ let splashScreenDurationInMillis = 2000;
 
 let developmentServerPort = process.env.PORT || 1234;
 
+//const appAsarInstallationPath = myPath.join(app.getAppPath(), 'resources', 'app.asar');
+const appAsarInstallationPath = myPath.join(app.getPath('appData'), '..', 'Local', 'Programs', 'School VR', 'resources', 'app.asar');
+console.log(appAsarInstallationPath);
+const appAsarDestPathInWorkingDirectory = myPath.join(appDirectory.appTempAppWorkingDirectory, 'resources');
+console.log(appAsarDestPathInWorkingDirectory);
+const webServerRootDirectory = myPath.join(appAsarDestPathInWorkingDirectory, 'build');
+console.log(webServerRootDirectory);
+
 /* end of constants */
 
 
@@ -169,13 +177,7 @@ function createWindow() {
 }
 
 async function openWebServer() {
-  //const appAsarInstallationPath = myPath.join(app.getAppPath(), 'resources', 'app.asar');
-  const appAsarInstallationPath = myPath.join(app.getPath('appData'), '..', 'Local', 'Programs', 'School VR', 'resources', 'app.asar');
-  console.log(appAsarInstallationPath);
-  const appAsarDestPathInWorkingDirectory = myPath.join(appDirectory.appTempAppWorkingDirectory, 'resources');
-  console.log(appAsarDestPathInWorkingDirectory);
-  const webServerRootDirectory = myPath.join(appAsarDestPathInWorkingDirectory, 'build');
-  console.log(webServerRootDirectory);
+  
   
   await fileSystem.myDeletePromise(appAsarDestPathInWorkingDirectory);
   console.log("reach here 1");
@@ -533,6 +535,9 @@ ipcMain.on('getExistingProjectNames', async (event, arg) => {
 });
 
 ipcMain.on('saveProject', (event, arg) => {
+  console.log(arg.projectName);
+  console.log(arg.entitiesList);
+  console.log(arg.assetsList);
   saveProjectToLocalAsync(arg.projectName, arg.entitiesList, arg.assetsList)
     .then((data) => {      
       event.sender.send('saveProjectResponse', {
