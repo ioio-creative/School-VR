@@ -364,7 +364,7 @@ class InfoPanel extends Component {
                   <div className="timelines-col">
                     {/* timelines exist, display timeline selecting box */}
                     {allTimelines.map(timeline => {
-                      return <div className="timeline-btns-col">
+                      return <div key={timeline.id} className="timeline-btns-col">
                       <button className="new-timeline-btn" onClick={_=>{
                       this.selectTimelinePosition("startAttribute", timeline.id)
                     }} >

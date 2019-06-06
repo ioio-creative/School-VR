@@ -2,20 +2,37 @@ import React, {Component} from 'react';
 
 import AFRAME from 'aframe';
 import 'aframe-gif-shader';
-
 import {withSceneContext} from 'globals/contexts/sceneContext';
 
 // import dcjaiobj from '../../3Dmodels/20190215_dave_pose(3d glasses).obj';
 // import dcjaitex from '../../3Dmodels/GF_Dave_smile.jpg';
 
 // fonts
-
+import TTFLoader from 'vendor/threejs/TTFLoader';
 import fontSchoolbellRegular from 'fonts/Schoolbell/SchoolbellRegular.png';
-// import fontNotoSerifTC from 'fonts/Noto_Serif_TC/Noto Serif TC_Regular.json';
+// import fontNotoSansRegular from 'fonts/Noto_Sans_TC/NotoSansTC-Regular.otf';
+import fontYenHeavy from 'fonts/Yen_Heavy/wt009.ttf';
 
 import './aFramePanel.css';
 
+// console.log(AFRAME.THREE.Font);
 const Events = require('vendor/Events.js');
+
+const ttfFonts = {
+
+};
+
+const three = AFRAME.THREE;
+const loader = new TTFLoader();
+// const targetFont = this.el.getAttribute('text')['fontPath'];
+loader.load(fontYenHeavy, (json) => {
+  ttfFonts['fontYenHeavy'] = new three.Font(json);
+  // oldMesh.geometry = newGeometry;
+})
+// loader.load(fontNotoSansRegular, (json) => {
+//   ttfFonts['fontNotoSansRegular'] = new three.Font(json);
+//   // oldMesh.geometry = newGeometry;
+// })
 
 AFRAME.registerComponent('cursor-listener', {
   init: function () {
@@ -67,6 +84,83 @@ AFRAME.registerComponent('cursor-listener', {
         childEl.setAttribute('material', 'color', defaultColor);
       })
     });
+  }
+});
+
+AFRAME.registerComponent('ttfFont', {
+  schema: {
+    fontSize: {type: 'number', default: 1},
+    opacity: {type: 'number', default: 1},
+    value: {type: 'string', default: ''},
+    fontFamily: {type: 'string', default: 'fontYenHeavy'},
+    color: {type: 'color', default: '#FFF'}
+  },
+  init: function () {
+    const el = this.el;
+    const data = this.data;
+    // Create geometry.
+    const textGeometry = new three.TextGeometry( data.value, {
+      font: ttfFonts[data.fontFamily],
+      size: data.fontSize,
+      height: 0.001,
+      curveSegments: 5,
+      // below values are testing, maybe just disable is ok
+      bevelEnabled: false,
+      bevelThickness: 0.1,
+      bevelSize: 0.05,
+      bevelOffset: 0,
+      bevelSegments: 5
+    });
+    textGeometry.center();
+    // Create material.
+    const textMaterial = new three.MeshStandardMaterial({
+      color: data.color,
+      opacity: data.opacity,
+      transparent: true
+    });
+
+    // Create mesh.
+    this.mesh = new three.Mesh(textGeometry, textMaterial);
+
+    // Set mesh on entity.
+    el.setObject3D('mesh', this.mesh);
+  },
+  // tick: function(){
+  //   console.log('tick', this.font);
+  // },
+  update: function (oldData) {
+    const data = this.data;
+    const el = this.el;
+    // console.log(data, oldData);
+
+    // If `oldData` is empty, then this means we're in the initialization process.
+    // No need to update.
+    if (Object.keys(oldData).length === 0) { return; }
+
+    // do update logic here
+    if (oldData.fontSize !== data.fontSize ||
+      oldData.value !== data.value ||
+      oldData.fontFamily !== data.fontFamily) {
+      this.mesh.geometry = new three.TextGeometry( data.value, {
+        font: ttfFonts[data.fontFamily],
+        size: data.fontSize,
+        height: 0.001,
+        curveSegments: 5,
+        // below values are testing, maybe just disable is ok
+        bevelEnabled: false,
+        bevelThickness: 0.01,
+        bevelSize: 0.1,
+        bevelOffset: 0,
+        bevelSegments: 5
+      });
+      this.mesh.geometry.center();
+    }
+    if (oldData.color !== data.color) {
+      this.mesh.material.color = new three.Color(data.color);
+    }
+    if (oldData.opacity !== data.opacity) {
+      this.mesh.material.opacity = data.opacity;
+    }
   }
 });
 class AFramePanel extends Component {

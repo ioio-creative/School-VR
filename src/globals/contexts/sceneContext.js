@@ -1201,9 +1201,9 @@ class SceneContextProvider extends Component {
       slideIsPlaying: true
     }, _=> {
       if (this.state.animationTimeline) {
-        this.state.animationTimeline.stop().seek(0.001).seek(this.state.currentTime, false).play();
+        this.state.animationTimeline.stop().seek(0.001).seek(0, false).play();
       } else {
-        this.rebuildTimeline().then(tl => tl.stop().seek(0.001).seek(this.state.currentTime, false));
+        this.rebuildTimeline().then(tl => tl.stop().seek(0.001).seek(0, false));
       }
     })
     
