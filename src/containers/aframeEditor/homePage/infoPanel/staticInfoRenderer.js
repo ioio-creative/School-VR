@@ -16,7 +16,7 @@ import './infoTypeBox.css';
 
 var Events = require('vendor/Events.js');
 
-class InfoTypeBox extends Component {
+class StaticInfoRenderer extends Component {
   constructor(props) {
     super(props);
     const self = this;
@@ -24,7 +24,7 @@ class InfoTypeBox extends Component {
     this.state = {
       editorMode: null,
       displayColorPicker: false,
-      // color: props.timelineObj[props.timelinePosition]['material']['color'],
+      // color: currentEntity[props.timelinePosition]['material']['color'],
       additionalAttributes: {}
       // const color = rgba2hex(data.material.color)
     };
@@ -68,12 +68,13 @@ class InfoTypeBox extends Component {
   componentDidUpdate(prevProps, prevState) {
     const props = this.props;
     const state = this.state;
+    const currentEntity = props.sceneContext.getCurrentEntity();
     // console.log(props, prevProps);
-    // console.log(props.timelineObj.id, prevProps.timelineObj.id);
+    // console.log(currentEntity.id, prevProps.timelineObj.id);
     // console.log(props.timelinePosition, prevProps.timelinePosition);
     if (
-      props.timelineObj.id !== prevProps.timelineObj.id ||
-      props.timelinePosition !== prevProps.timelinePosition
+      currentEntity.id !== prevProps.entityId
+      // props.timelinePosition !== prevProps.timelinePosition
     ) {
       // console.log('reset');
       // this.changeTransformMode(null);
@@ -86,7 +87,7 @@ class InfoTypeBox extends Component {
       }
     }
 
-    if (state.additionalAttributes.radiusTop !== props.timelineObj[props.timelinePosition])
+    // if (state.additionalAttributes.radiusTop !== currentEntity[props.timelinePosition])
     return true;
   }
   componentWillUnmount() {
@@ -120,7 +121,7 @@ class InfoTypeBox extends Component {
     })
     // tmp[field] = value;
     // console.log(tmp);
-    props.sceneContext.updateTimelinePositionAttributes(
+    props.sceneContext.updateDefaultAttributes(
       tmp
     );
     // Events.emit('updateSelectedEntityAttribute', tmp);
@@ -145,7 +146,7 @@ class InfoTypeBox extends Component {
       // console.log(pointer);
     })
     // tmp[field] = value;
-    props.sceneContext.updateTimelinePositionAttributes(
+    props.sceneContext.updateDefaultAttributes(
       tmp
     );
     // Events.emit('updateSelectedEntityAttribute', tmp);
@@ -156,7 +157,7 @@ class InfoTypeBox extends Component {
     const props = this.props;
     const state = this.state;
     const currentEntity = props.sceneContext.getCurrentEntity();
-    const data = props.timelineObj[props.timelinePosition];
+    const data = currentEntity['components'];
     // console.log(data.ttfFont, animatableAttributes.ttfFont && animatableAttributes.ttfFont.indexOf('fontSize') !== -1);
     // const color = rgba2hex(data.material.color);
 
@@ -192,11 +193,11 @@ class InfoTypeBox extends Component {
           <div className="attribute-col color-col" onClick={() => this.changeTransformMode(null)}>
             <div title={rgba2hex(data.material.color)}>
               <div className="field-label">Color:</div>
-              <ColorPicker key={props.timelineObj.id + data.material.color}
+              <ColorPicker key={currentEntity.id + data.material.color}
                 field={'material'}
                 color={rgba2hex(data.material.color)} 
-                timelineId={props.timelineObj.id} 
-                timelinePosition={props.timelinePosition} 
+                timelineId={currentEntity.id} 
+                timelinePosition={''} 
                 onUpdate={(newColor) => {
                   this.changeObjectField('material.color', newColor)
                 }}
@@ -209,11 +210,11 @@ class InfoTypeBox extends Component {
         {animatableAttributes.material && animatableAttributes.material.indexOf('opacity') !== -1 &&
           <div className="attribute-col opacity-col" onClick={() => this.changeTransformMode(null)}>
             <div className="field-label">Opacity:</div>
-            <OpacityPicker key={props.timelineObj.id}
+            <OpacityPicker key={currentEntity.id}
               field={'material'}
               opacity={data.material.opacity} 
-              timelineId={props.timelineObj.id} 
-              timelinePosition={props.timelinePosition} 
+              timelineId={currentEntity.id} 
+              timelinePosition={''} 
               onUpdate={(newOpacity) => {
                 this.changeObjectField('material.opacity', newOpacity)
               }}
@@ -225,11 +226,11 @@ class InfoTypeBox extends Component {
           <div className="attribute-col color-col" onClick={() => this.changeTransformMode(null)}>
             <div title={data.ttfFont.color}>
               <div className="field-label">Text Color:</div>
-              <ColorPicker key={props.timelineObj.id + data.ttfFont.color}
+              <ColorPicker key={currentEntity.id + data.ttfFont.color}
                 field={'ttfFont'}
                 color={data.ttfFont.color} 
-                timelineId={props.timelineObj.id} 
-                timelinePosition={props.timelinePosition} 
+                timelineId={currentEntity.id} 
+                timelinePosition={''} 
                 onUpdate={(newColor) => {
                   this.changeObjectField('ttfFont.color', newColor)
                 }}
@@ -242,11 +243,11 @@ class InfoTypeBox extends Component {
         {animatableAttributes.ttfFont && animatableAttributes.ttfFont.indexOf('opacity') !== -1 &&
           <div className="attribute-col opacity-col" onClick={() => this.changeTransformMode(null)}>
             <div className="field-label">Text Opacity:</div>
-            <OpacityPicker key={props.timelineObj.id}
+            <OpacityPicker key={currentEntity.id}
               field={'ttfFont'}
               opacity={data.ttfFont.opacity} 
-              timelineId={props.timelineObj.id} 
-              timelinePosition={props.timelinePosition} 
+              timelineId={currentEntity.id} 
+              timelinePosition={''} 
               onUpdate={(newOpacity) => {
                 this.changeObjectField('ttfFont.opacity', newOpacity)
               }}
@@ -320,10 +321,13 @@ class InfoTypeBox extends Component {
           <canvas ref={ref=>{
             {/* props.model.setEditorInstance(this.editor) */}
             props.model.setCameraPreviewEl(ref)
+            props.model.setEditorInstance(props.sceneContext.editor)
+          }} onClick={_=> {
+            props.model.renderCameraPreview(props.sceneContext);
           }} />
         </div>}
       </div>
     );
   }
 }
-export default InfoTypeBox;
+export default StaticInfoRenderer;

@@ -16,6 +16,10 @@
 #buttons-panel button:hover {
   border: 1px solid #444444;
 }
+#buttons-panel button img {
+  width: 40px;
+  height: 40px;
+}
 #buttons-panel .buttons-list {
   border-left: 1px solid #b4b1b1;
   /* flex: 1 0; */
