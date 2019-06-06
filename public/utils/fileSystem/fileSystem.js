@@ -416,11 +416,18 @@ const createPackageWithOptions = (src, dest, options, callBack) => {
 const createPackageWithOptionsPromise = promisify(createPackageWithOptions);
 
 const extractAll = (archive, dest) => {
-  // asar would cache previous result!
-  asar.uncache(archive);
-  //asar.uncacheAll();
-  // overwrite existing dest!
-  asar.extractAll(archive, dest);
+  try {
+    console.log("reach here 3.0a");
+    // asar would cache previous result!
+    asar.uncache(archive);
+    //asar.uncacheAll();
+    // overwrite existing dest!
+    console.log("reach here 3.0b");
+    asar.extractAll(archive, dest);
+    console.log("reach here 3.0c");
+  } catch (err) {
+    console.log(err);
+  }  
 };
 
 /* end of asar - Electron Archive */

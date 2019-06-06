@@ -31,7 +31,7 @@ const configFilePath = './config.jsonc';
 
 // default values
 let webServerPort = 1413;
-let webServerRootDirPath = __dirname;  // public folder
+//let webServerRootDirPath = __dirname;  // public folder
 
 let splashScreenDurationInMillis = 2000;
 
@@ -60,7 +60,7 @@ async function readConfigFile(configFile) {
   developmentServerPort = configObjForElectron.developmentServerPort || developmentServerPort;
 
   webServerPort = configObjForElectron.webServerPort || webServerPort;
-  webServerRootDirPath = configObjForElectron.webServerRootDirPath || webServerRootDirPath;      
+  //webServerRootDirPath = configObjForElectron.webServerRootDirPath || webServerRootDirPath;      
 
   splashScreenDurationInMillis = configObjForElectron.splashScreenDurationInMillis || splashScreenDurationInMillis;          
 }
@@ -157,13 +157,8 @@ function createWindow() {
   menu.append(new MenuItem({
     label: 'Refresh',
     accelerator: 'F5',
-    click: () => {
-      try {
-        console.log("reload");
-        mainWindow.reload();
-      } catch (err) {
-        console.log(err);
-      }      
+    click: () => {              
+      mainWindow.reload();            
     }
   }));
 
@@ -173,23 +168,41 @@ function createWindow() {
   /* end of setting up menu for hot keys purpose only */
 }
 
-function startWebServer() {
-  //const appAsarPath = myPath.join(app.getAppPath(), 'resources', 'app.asar');
-  const appAsarPath = myPath.join(app.getPath('appData'), 'Local', 'Programs', 'School VR', 'resources', 'app.asar');
-  console.log(appAsarPath);
-  const appAsarDestPathInWorkingDirectory = myPath.join(appDirectory.appTempAppWorkingDirectory, 'resources');
-  console.log(appAsarDestPathInWorkingDirectory);
+async function openWebServer() {
+  try  {
+    //const appAsarInstallationPath = myPath.join(app.getAppPath(), 'resources', 'app.asar');
+    const appAsarInstallationPath = myPath.join(app.getPath('appData'), '..', 'Local', 'Programs', 'School VR', 'resources', 'app.asar');
+    console.log(appAsarInstallationPath);
+    const appAsarDestPathInWorkingDirectory = myPath.join(appDirectory.appTempAppWorkingDirectory, 'resources');
+    console.log(appAsarDestPathInWorkingDirectory);
+    const webServerRootDirectory = myPath.join(appAsarDestPathInWorkingDirectory, 'build');
+    console.log(webServerRootDirectory);
+    
+    console.log("reach here 1");
+    //await fileSystem.myDeletePromise(appAsarDestPathInWorkingDirectory);
+    console.log("reach here 2");
+    fileSystem.extractAll(appAsarInstallationPath, appAsarDestPathInWorkingDirectory)
+      .then(() => {
+        console.log("reach here 3");
 
-  if (!isDev) {
-    fileSystem.extractAll(appAsarPath, appAsarDestPathInWorkingDirectory);
+        // https://nodejs.org/api/child_process.html#child_process_subprocess_send_message_sendhandle_options_callback
+        webServerProcess.send({
+          address: 'open-server',
+          port: webServerPort,
+          rootDirPath: webServerRootDirectory
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    
+  } catch (err) {
+    console.log(err);
   }
+}
 
-  // https://nodejs.org/api/child_process.html#child_process_subprocess_send_message_sendhandle_options_callback
-  webServerProcess.send({
-    address: 'start-server',
-    port: webServerPort,
-    rootDirPath: webServerRootDirPath
-  });
+function closeWebServer() {
+
 }
 
 
@@ -202,7 +215,7 @@ app.on('ready', async _ => {
     console.error(err);
   }
 
-  startWebServer();
+  await openWebServer();
   createWindow(); 
 });
 
@@ -282,13 +295,7 @@ ipcMain.on('newBrowserWindow', (event, arg) => {
 
 ipcMain.on('close', (event, arg) => {  
   const senderWindow = getSenderWindowFromEvent(event);
-  try {
-    console.log('close');
-    console.log(senderWindow === mainWindow);
-    senderWindow.close();
-  } catch (err) {
-    console.error(err);
-  }
+  senderWindow.close();  
 });
 
 ipcMain.on('minimize', (event, arg) => {  

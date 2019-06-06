@@ -18,10 +18,10 @@ process.title = "node-easyrtc";
 //var port = process.env.PORT || 8080;
 
 
-function startServer(port, rootDirPath) {
+function openServer(port, rootDirPath = 'public/server/static') {
   // Setup and configure Express http server. Expect a subfolder called "static" to be the web root.
-  var app = express();
-  app.use(serveStatic('public/server/static', {'index': ['index.html']}));
+  var app = express();  
+  app.use(serveStatic(rootDirPath, {'index': ['index.html']}));
 
   // Start Express http server
   var webServer = http.createServer(app);
@@ -89,13 +89,23 @@ function startServer(port, rootDirPath) {
 }
 
 
+function closeServer() {
+
+}
+
+
 /* ipc */
 // https://nodejs.org/api/child_process.html#child_process_subprocess_send_message_sendhandle_options_callback
 
 process.on('message', (message) => {
-  if (message.address === 'start-server') {
-    startServer(message.port, message.rootDirPath);
-  }
+  switch (message.address) {
+    case 'open-server':      
+      openServer(message.port, message.rootDirPath);
+      break;
+    case 'close-server':
+      closeServer();
+      break;
+  }  
 });
 
 /* end of ipc */
