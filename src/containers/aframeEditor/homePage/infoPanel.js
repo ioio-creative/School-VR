@@ -8,7 +8,8 @@
 import React, {Component, Fragment} from 'react';
 // import EntitiesList from 'containers/aframeEditor/panelItem/entitiesList';
 
-import infoRenderer from 'containers/aframeEditor/homePage/infoPanel/infoTypeBox';
+import timelineInfoRenderer from 'containers/aframeEditor/homePage/infoPanel/timelineInfoRenderer';
+import staticInfoRenderer from 'containers/aframeEditor/homePage/infoPanel/staticInfoRenderer';
 // import InfoTypeCone from 'containers/aframeEditor/homePage/infoPanel/infoTypeCone';
 // import InfoTypeCylinder from 'containers/aframeEditor/homePage/infoPanel/infoTypeCylinder';
 // import InfoTypePlane from 'containers/aframeEditor/homePage/infoPanel/infoTypePlane';
@@ -28,6 +29,7 @@ import { withSceneContext } from 'globals/contexts/sceneContext';
 import ABox from 'utils/aframeEditor/aBox';
 import ASphere from 'utils/aframeEditor/aSphere';
 import ACone from 'utils/aframeEditor/aCone';
+import APyramid from 'utils/aframeEditor/aPyramid';
 import ANavigation from 'utils/aframeEditor/aNavigation';
 import APlane from 'utils/aframeEditor/aPlane';
 import AText from 'utils/aframeEditor/aText';
@@ -62,6 +64,7 @@ const entityModel = {
   'a-cone': ACone, //InfoTypeCone,
   'a-cylinder': ABox, //InfoTypeCylinder,
   'a-tetrahedron': ABox,
+  'a-pyramid': APyramid,
   'a-sphere': ASphere,
   'a-plane': APlane, //InfoTypePlane,
   'a-triangle': ABox, //InfoTypeTriangle,
@@ -75,15 +78,19 @@ const entityModel = {
 function EntityDetails(props) {
   const entity = props.sceneContext.getCurrentEntity();// entitiesList[props.selectedEntity]['el'];
   const timeline = props.sceneContext.getCurrentTimeline();// entitiesList[props.selectedEntity]['el'];
-  const Renderer = infoRenderer;
   const Model = new entityModel[entity['type']];
-
-  if (Renderer) {
+  
+  if (timeline) {
+    const Renderer = timelineInfoRenderer;
     return (
-      <Renderer key={timeline.id} {...props} animatableAttributes={Model.animatableAttributes}/>
+      <Renderer key={entity.id + '_' + timeline.id} {...props} animatableAttributes={Model.animatableAttributes}/>
     );
   } else {
-    return null;
+    // render a panel same as above but not setting any timeline
+    const Renderer = staticInfoRenderer;
+    return (
+      <Renderer key={entity.id} {...props} animatableAttributes={Model.animatableAttributes}/>
+    );
   }
 }
 class InfoPanel extends Component {
@@ -395,12 +402,15 @@ class InfoPanel extends Component {
               <div className="panel-body">
                 {/* check if any timelines exist */}
                 {/* no timeline exist, display hints box */}
-                {selectedEntity['timelines'].length === 0 ?
-                  <div className="attribute-col">
-                    <button className="new-timeline-btn" onClick={this.addTimeline}>
-                      Click to add animation
-                    </button>
-                  </div>
+                {selectedEntity['timelines'].length === 0 ? 
+                  <Fragment>
+                    <EntityDetails key={selectedEntity.id} entityId={selectedEntity['id']} {...props} model={model} />
+                    <div className="attribute-col">
+                      <button className="new-timeline-btn" onClick={this.addTimeline}>
+                        Click to add animation
+                      </button>
+                    </div>
+                  </Fragment>
                 :
                   <div className="timelines-col">
                     {/* timelines exist, display timeline selecting box */}

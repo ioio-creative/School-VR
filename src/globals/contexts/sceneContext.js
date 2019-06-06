@@ -5,6 +5,7 @@ import ABox from 'utils/aframeEditor/aBox';
 import ASphere from 'utils/aframeEditor/aSphere';
 import ATetrahedron from 'utils/aframeEditor/aTetrahedron';
 import ACone from 'utils/aframeEditor/aCone';
+import APyramid from 'utils/aframeEditor/aPyramid';
 import ACylinder from 'utils/aframeEditor/aCylinder';
 import ANavigation from 'utils/aframeEditor/aNavigation';
 import APlane from 'utils/aframeEditor/aPlane';
@@ -25,6 +26,7 @@ const entityModel = {
   'a-cone': ACone, //InfoTypeCone,
   'a-cylinder': ACylinder, //InfoTypeCylinder,
   'a-tetrahedron': ATetrahedron,
+  'a-pyramid': APyramid,
   'a-sphere': ASphere,
   'a-plane': APlane, //InfoTypePlane,
   'a-triangle': ABox, //InfoTypeTriangle,
@@ -124,6 +126,8 @@ class SceneContextProvider extends Component {
     this.getCurrentTimelinePosition = this.getCurrentTimelinePosition.bind(this);
 
     this.updateTimelinePositionAttributes = this.updateTimelinePositionAttributes.bind(this);
+
+    this.updateDefaultAttributes = this.updateDefaultAttributes.bind(this);
 
     this.getCurrentTime = this.getCurrentTime.bind(this);
     this.updateCurrentTime = this.updateCurrentTime.bind(this);
@@ -546,7 +550,7 @@ class SceneContextProvider extends Component {
     return [];
   }
   addEntity() {
-
+    // what ??
   }
   deleteEntity(entityId) {
     this.setState((prevState) => {
@@ -920,6 +924,46 @@ class SceneContextProvider extends Component {
       this.rebuildTimeline()
     })
   }
+
+  updateDefaultAttributes(newAttrs) {
+    this.setState((prevState) => {
+      const newSceneData = jsonCopy(prevState.sceneData);
+      const slides = newSceneData.slides;
+      const currentSlide = slides.find(el => el.id === prevState.slideId);
+      const selectedEntity = currentSlide.entities.find(el => el.id === prevState.entityId);
+      const entityComponent = selectedEntity['components'];
+      const newUndoQueue = jsonCopy(prevState.undoQueue);      
+      if (entityComponent) {
+        for (let k in newAttrs) {
+          if (entityComponent.hasOwnProperty(k)) {
+            if (typeof(newAttrs[k]) === "object") {
+              // console.log(selectedTimelinePosition[k], newAttrs[k]);
+              Object.assign(entityComponent[k], newAttrs[k]);
+            } else {
+              entityComponent[k] = newAttrs[k];
+            }
+          }
+        }
+        newUndoQueue.push({
+          sceneData: jsonCopy(prevState.sceneData),
+          slideId: prevState.slideId,
+          entityId: prevState.entityId,
+          timelineId: prevState.timelineId,
+          timelinePosition: prevState.timelinePosition,
+          currentTime: prevState.currentTime,
+        });
+      }
+
+      // console.log(selectedTimelinePosition);
+      return {
+        sceneData: newSceneData,
+        undoQueue: newUndoQueue,
+        redoQueue: [],
+      }
+    }, _=> {
+      this.rebuildTimeline()
+    })
+  }
   getCurrentTime() {
     return this.state.currentTime
   }
@@ -961,6 +1005,13 @@ class SceneContextProvider extends Component {
       ...objectModel.fixedAttributes
     }
     const newEl = this.editor.createNewEntity(newElement);
+    // need a setAttribute to trigger the ttfFont init
+    if (newElement['components']['ttfFont'] && newElement['components']['ttfFont']['opacity']) {
+      console.log('sdfsaf');
+      newEl.setAttribute('ttfFont', 'opacity', !newElement['components']['ttfFont']['opacity']);
+      newEl.setAttribute('ttfFont', 'opacity', newElement['components']['ttfFont']['opacity']);
+    }
+    // newEl.removeAttribute('something');
     newElement['el'] = newEl;
     objectModel.setEl(newEl);
     this.setState((prevState) => {
@@ -985,8 +1036,8 @@ class SceneContextProvider extends Component {
       }
     }, _=> {
       this.rebuildTimeline().then(tl => tl.seek(this.state.currentTime, false));
-      console.log(this.state.sceneData);
-      console.log(this.state.undoQueue);
+      // console.log(this.state.sceneData);
+      // console.log(this.state.undoQueue);
     })
 // currentSlide.entites
 // slides
@@ -1457,6 +1508,8 @@ class SceneContextProvider extends Component {
           getCurrentTimelinePosition: this.getCurrentTimelinePosition,
 
           updateTimelinePositionAttributes: this.updateTimelinePositionAttributes,
+          // for non timeline
+          updateDefaultAttributes: this.updateDefaultAttributes,
 
           getCurrentTime: this.getCurrentTime,
           updateCurrentTime: this.updateCurrentTime,
@@ -1475,6 +1528,9 @@ class SceneContextProvider extends Component {
 
           // assets
           addAsset: this.addAsset,
+
+          // editor
+          editor: this.editor,
           // variables, should use functions to return?
           // appName: this.state.appName,
           // projectName: this.state.projectName,

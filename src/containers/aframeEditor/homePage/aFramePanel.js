@@ -87,6 +87,7 @@ AFRAME.registerComponent('cursor-listener', {
   }
 });
 
+// for chinese font
 AFRAME.registerComponent('ttfFont', {
   schema: {
     fontSize: {type: 'number', default: 1},
@@ -98,6 +99,7 @@ AFRAME.registerComponent('ttfFont', {
   init: function () {
     const el = this.el;
     const data = this.data;
+    // console.log(data);
     // Create geometry.
     const textGeometry = new three.TextGeometry( data.value, {
       font: ttfFonts[data.fontFamily],
@@ -116,20 +118,28 @@ AFRAME.registerComponent('ttfFont', {
     const textMaterial = new three.MeshStandardMaterial({
       color: data.color,
       opacity: data.opacity,
-      transparent: true
+      visible: (data.opacity !== 0),
+      transparent: true,
+      needsUpdate: true
     });
+    textMaterial.opacity = data.opacity; // ???
     textMaterial.transparent = true; // ???
+    textMaterial.visible = (data.opacity !== 0); // ???
     // Create mesh.
     this.mesh = new three.Mesh(textGeometry, textMaterial);
     
     this.mesh.material.transparent = true;
     // Set mesh on entity.
     el.setObject3D('mesh', this.mesh);
+    // console.log('init');
+    // call update to get the correct rendering
+    this.update(data);
   },
   // tick: function(){
   //   console.log('tick', this.font);
   // },
   update: function (oldData) {
+    // console.log('update', oldData);
     const data = this.data;
     const el = this.el;
     // console.log(data, oldData);
@@ -156,16 +166,44 @@ AFRAME.registerComponent('ttfFont', {
       });
       this.mesh.geometry.center();
     }
-    if (oldData.color !== data.color) {
+    // skip check since the call from init always the same value
+    // and need an assigment to make it render correctly
+    // if (oldData.color !== data.color) {
       this.mesh.material.color = new three.Color(data.color);
-    }
-    if (oldData.opacity !== data.opacity) {
+    // }
+    // if (oldData.opacity !== data.opacity) {
       this.mesh.material.opacity = data.opacity;
       this.mesh.material.visible = (data.opacity !== 0);
       this.mesh.material.transparent = true;
-    }
+    // }
+      // this.mesh.material.needsUpdate = true;
+
   }
 });
+// pyramid
+// AFRAME.registerGeometry('pyramid', {
+//   schema: {
+//     vertices: {
+//       default: ['-10 10 0', '-10 -10 0', '10 -10 0', '10 -10 0'],
+//     }
+//   },
+
+//   init: function (data) {
+//     var geometry = new THREE.Geometry();
+//     geometry.vertices = data.vertices.map(function (vertex) {
+//         var points = vertex.split(' ').map(function(x){return parseInt(x);});
+//         return new THREE.Vector3(points[0], points[1], points[2]);
+//     });
+//     geometry.computeBoundingBox();
+//     geometry.faces.push(new THREE.Face3(0, 1, 2));
+//     geometry.faces.push(new THREE.Face3(0, 2, 3));
+//     geometry.mergeVertices();
+//     geometry.computeFaceNormals();
+//     geometry.computeVertexNormals();
+//     this.geometry = geometry;
+//   }
+// });
+
 class AFramePanel extends Component {
   constructor(props) {
     super(props);

@@ -40,12 +40,14 @@ class ACamera extends AEntity {
     // Events.emit('getEditorInstance', obj => {
     //   this.editor = obj;
     // });
+    this.renderCameraPreview = this.renderCameraPreview.bind(this);
+
     // Events.on('refreshsidebarobject3d', _=> {
-    //   // this.renderCameraPreview();
+    //   requestAnimationFrame(this.renderCameraPreview);
     // })
   }
   setEditorInstance(editorInstance) {
-    // this.editor = editorInstance;
+    this.editor = editorInstance;
   }
   setCameraPreviewEl(canvasEl) {
     this.cameraPreviewEl = this.cameraPreviewEl || canvasEl;
