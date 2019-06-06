@@ -1,4 +1,4 @@
-import React, {Component, Fragment} from 'react';
+import React, {Component} from 'react';
 // import SystemPanel from 'containers/aframeEditor/homePage/systemPanel';
 import {withRouter, Prompt} from 'react-router-dom';
 
@@ -156,6 +156,7 @@ class EditorPage extends Component {
       this.loadProject(filePaths[0]);
     });
   }
+  
   handleSaveProjectButtonClick(event) {
     const sceneContext = this.props.sceneContext;
     const {projectName, entitiesList, assetsList} = sceneContext.saveProject();
