@@ -17,7 +17,7 @@ import { TimelineMax, TweenMax, Power0 } from 'gsap';
 const mergeJSON = require('deepmerge').default;
 const Events = require('vendor/Events.js');
 const uuid_v1 = require('uuid/v1');
-const uuid = _=> 'uuid_' + uuid_v1().split('-')[0];
+const uuid = _=> 'uuid_' + uuid_v1();//.split('-')[0];
 
 const entityModel = {
   'a-box': ABox,
@@ -249,13 +249,27 @@ class SceneContextProvider extends Component {
   saveProject() {
     const state = this.state;
     const sceneData = jsonCopy(state.sceneData);
+    let assetsData = jsonCopy(state.assetsData);
+    const assetsList = {};
     sceneData.slides.forEach(slide => {
-      slide.entities.forEach(entity => delete entity['el'])
+      slide.entities.forEach(entity => {
+        // remove circular ref
+        delete entity['el'];
+        // try to remove unwant assets
+        if (entity['components']) { // if (entity['type'] !== 'a-camera')
+          const assetId = entity['components']['material']['src'];
+          if (assetId) {
+            assetsList[assetId.substr(1)] = true;
+          }
+        }
+      });
     });
+    assetsData = assetsData.filter(assetData => assetsList[assetData['id']]);
+    // debugger;
     return {
       projectName: sceneData.projectName,
       entitiesList: sceneData,
-      assetsList: state.assetsData
+      assetsList: assetsData
     }
   }
   loadProject(sceneData, assetData) {
