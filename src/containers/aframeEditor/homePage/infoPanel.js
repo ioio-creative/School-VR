@@ -263,7 +263,8 @@ class InfoPanel extends Component {
                       selectedEntity.el.setAttribute('material', `src:#${newAssetData.id};shader: ${newAssetData.shader}`);
                       sceneContext.updateEntity({
                         material: {
-                          src: `#${newAssetData.id}`
+                          src: `#${newAssetData.id}`,
+                          shader: newAssetData.shader
                         }
                       }, selectedEntity['id']);
                     
@@ -284,7 +285,8 @@ class InfoPanel extends Component {
                       selectedEntity.el.setAttribute('material', `src:#${newAssetData.id};shader: ${newAssetData.shader}`);
                       sceneContext.updateEntity({
                         material: {
-                          src: `#${newAssetData.id}`
+                          src: `#${newAssetData.id}`,
+                          shader: newAssetData.shader
                         }
                       }, selectedEntity['id']);
                       {/* sceneContext.updateEntity({

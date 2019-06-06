@@ -160,7 +160,7 @@ class EditorPage extends Component {
   handleSaveProjectButtonClick(event) {
     const sceneContext = this.props.sceneContext;
     const {projectName, entitiesList, assetsList} = sceneContext.saveProject();
-    console.log(projectName, entitiesList, assetsList);
+    // console.log(projectName, entitiesList, assetsList);
     ipcHelper.saveProject(projectName, entitiesList, assetsList);
   }
 

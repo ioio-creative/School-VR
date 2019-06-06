@@ -3,7 +3,7 @@ import ACylinder from "./aCylinder";
 import ACone from "./aCone";
 
 const uuid_v1 = require('uuid/v1');
-const uuid = _=> 'uuid_' + uuid_v1().split('-')[0];
+const uuid = _=> 'uuid_' + uuid_v1(); // .split('-')[0];
 
 class ANavigation extends AEntity {
   constructor(el) {
