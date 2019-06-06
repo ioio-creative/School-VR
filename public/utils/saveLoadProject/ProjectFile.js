@@ -188,9 +188,6 @@ class ProjectFile {
   
   async saveVideoToTempAsync(srcFilePath, assetId, isAssumeDestDirExists) {
     const destFilePath = this.getTempVideoFilePath(assetId, myPath.getFileExtensionWithLeadingDot(srcFilePath));
-    console.log(assetId);
-    console.log(srcFilePath);
-    console.log(destFilePath);
     await ProjectFile.copyFileAsync(srcFilePath, destFilePath, isAssumeDestDirExists);
     return destFilePath;
   }
@@ -373,8 +370,7 @@ class ProjectFile {
 
   // saveAssetsToTempAsync() will do nothing and pass control to callBack
   // if assetsList.length === 0
-  async saveAssetsToTempAsync(assetsList) {
-    console.log(assetsList);
+  async saveAssetsToTempAsync(assetsList) {    
     if (!isNonEmptyArray(assetsList)) {    
       return;
     }
@@ -406,44 +402,45 @@ class ProjectFile {
   };
 
   async saveToLocalDetailAsync(entitiesList, assetsList) {
+    console.log("reach here 1")
     const projectName = this.name;
 
     const jsonForSave = parseDataToSaveFormat(projectName, entitiesList, assetsList);
-    
+    console.log("reach here 2")
     // deal with assetsList
     await this.deleteNonUsedAssetsFromTempAsync(assetsList);
     console.log("saveProjectToLocal - deleteNonUsedAssetsFromTempAsync: Done");
-  
+    console.log("reach here 3")
     await this.saveAssetsToTempAsync(assetsList);
     console.log(`saveProjectToLocal - saveProjectToLocalDetail: Assets saved in ${this.tempProjectDirectoryPath}`);
-  
-    // // TODO: The following modify the objects in the input assetsList directly. Is this alright?
-    // // modify assets_list node in jsonForSave to reflect the relative paths of the project folder structure to be zipped
-    // jsonForSave.assets_list.forEach((asset) => {
-    //   let getAssetFilePathRelativeToProjectDirectoryFunc = null;
-    //   switch (asset.media_type) {
-    //     case mediaType.image:
-    //       getAssetFilePathRelativeToProjectDirectoryFunc = ProjectFile.getImageFilePathRelativeToProjectDirectory;
-    //       break;
-    //     case mediaType.gif:
-    //       getAssetFilePathRelativeToProjectDirectoryFunc = ProjectFile.getGifFilePathRelativeToProjectDirectory;  
-    //       break;
-    //     case mediaType.video:
-    //     default:
-    //       getAssetFilePathRelativeToProjectDirectoryFunc = ProjectFile.getVideoFilePathRelativeToProjectDirectory;
-    //       break;
-    //   }
+    console.log("reach here 4")
+    // TODO: The following modify the objects in the input assetsList directly. Is this alright?
+    // modify assets_list node in jsonForSave to reflect the relative paths of the project folder structure to be zipped
+    jsonForSave.assetsList.forEach((asset) => {
+      let getAssetFilePathRelativeToProjectDirectoryFunc = null;
+      switch (asset.media_type) {
+        case mediaType.image:
+          getAssetFilePathRelativeToProjectDirectoryFunc = ProjectFile.getImageFilePathRelativeToProjectDirectory;
+          break;
+        case mediaType.gif:
+          getAssetFilePathRelativeToProjectDirectoryFunc = ProjectFile.getGifFilePathRelativeToProjectDirectory;  
+          break;
+        case mediaType.video:
+        default:
+          getAssetFilePathRelativeToProjectDirectoryFunc = ProjectFile.getVideoFilePathRelativeToProjectDirectory;
+          break;
+      }
       
-    //   const assetFilePathRelativeToProjectDirectory = 
-    //     getAssetFilePathRelativeToProjectDirectoryFunc(asset.id, myPath.getFileExtensionWithLeadingDot(asset.src));
-    //   asset.src = assetFilePathRelativeToProjectDirectory;
-    // });
+      const assetFilePathRelativeToProjectDirectory = 
+        getAssetFilePathRelativeToProjectDirectoryFunc(asset.id, myPath.getFileExtensionWithLeadingDot(asset.src));
+      asset.src = assetFilePathRelativeToProjectDirectory;
+    });
   
-    // // write project json file
-    // const jsonForSaveStr = JSON.stringify(jsonForSave);
-    // const tempJsonPath = this.tempProjectJsonFilePath;
-    // await fileSystem.writeFilePromise(tempJsonPath, jsonForSaveStr);      
-    // console.log(`saveProjectToLocal - saveProjectToLocalDetail: JSON file saved in ${tempJsonPath}`);
+    // write project json file
+    const jsonForSaveStr = JSON.stringify(jsonForSave);
+    const tempJsonPath = this.tempProjectJsonFilePath;
+    await fileSystem.writeFilePromise(tempJsonPath, jsonForSaveStr);      
+    console.log(`saveProjectToLocal - saveProjectToLocalDetail: JSON file saved in ${tempJsonPath}`);
   
     // // zip and move temp folder to appProjectsDirectory
     // const destProjectPackagePath = this.savedProjectFilePath;
@@ -477,12 +474,18 @@ class ProjectFile {
     // }
 
     // check if tempProjectDir already exists, if exists, delete it
-    // actually this step may be redundant because I would check isProjectNameUsedAsync    
-    if (!ProjectFile.isCurrentLoadedProject(projectName)) {      
-      await fileSystem.myDeletePromise(this.tempProjectDirectoryPath);
-      savedProjectObj = await this.saveToLocalDetailAsync(entitiesList, assetsList);    
+    // actually this step may be redundant because I would check isProjectNameUsedAsync        
+    if (!ProjectFile.isCurrentLoadedProject(projectName)) {
+      console.log("reach here 0.3")
+      try {
+        await fileSystem.myDeletePromise(this.tempProjectDirectoryPath);
+      } catch (err) {
+        console.log(err)
+      }
+      console.log("reach here 0.4")
+      savedProjectObj = await this.saveToLocalDetailAsync(entitiesList, assetsList);      
     } else {      
-      savedProjectObj = await this.saveToLocalDetailAsync(entitiesList, assetsList);
+      savedProjectObj = await this.saveToLocalDetailAsync(entitiesList, assetsList);      
     }
 
     return savedProjectObj;

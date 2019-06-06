@@ -46,8 +46,7 @@ const dirname = (filePath) => {
 
 const getMimeType = (filePath) => {
   const ext = getFileExtensionWithoutLeadingDot(filePath);
-  const mime = mimeTypes.lookup(ext);
-  console.log(mime);
+  const mime = mimeTypes.lookup(ext);  
   return mime;
 };
 

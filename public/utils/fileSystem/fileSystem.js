@@ -553,9 +553,9 @@ const defaultMyDeleteOptions = Object.assign({
   maxBusyTries: 15
 } , fs);
 
-const myDelete = (filePath, callBack) => {
+const myDelete = (filePath, callBack) => {  
   rimraf(filePath, defaultMyDeleteOptions, (err) => {    
-    handleGeneralErr(callBack, err);        
+    handleGeneralErr(callBack, err);    
   });  
 };
 
