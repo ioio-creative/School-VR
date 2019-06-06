@@ -412,7 +412,7 @@ class ProjectFile {
     await this.saveAssetsToTempAsync(assetsList);
     console.log(`saveProjectToLocal - saveProjectToLocalDetail: Assets saved in ${this.tempProjectDirectoryPath}`);    
     // TODO: The following modify the objects in the input assetsList directly. Is this alright?
-    // modify assets_list node in jsonForSave to reflect the relative paths of the project folder structure to be zipped
+    // modify assetsList node in jsonForSave to reflect the relative paths of the project folder structure to be zipped
     jsonForSave.assetsList.forEach((asset) => {
       let getAssetFilePathRelativeToProjectDirectoryFunc = null;
       switch (asset.media_type) {
@@ -505,7 +505,7 @@ class ProjectFile {
     const projectJson = JSON.parse(projectJsonStr);
     
     // change any relative file path in assets to absolute path
-    const assetsList = projectJson.assets_list;
+    const assetsList = projectJson.assetsList;
     assetsList.forEach((asset) => {
       asset.src = 
         this.getTempProjectAssetAbsolutePathFromProvidedPathIfIsRelative(asset.src);

@@ -416,15 +416,12 @@ const createPackageWithOptions = (src, dest, options, callBack) => {
 const createPackageWithOptionsPromise = promisify(createPackageWithOptions);
 
 const extractAll = (archive, dest) => {
-  try {
-    console.log("reach here 3.0a");
+  try {    
     // asar would cache previous result!
     asar.uncache(archive);
     //asar.uncacheAll();
-    // overwrite existing dest!
-    console.log("reach here 3.0b");
-    asar.extractAll(archive, dest);
-    console.log("reach here 3.0c");
+    // overwrite existing dest!    
+    asar.extractAll(archive, dest);    
   } catch (err) {
     console.log(err);
   }  
