@@ -21,9 +21,10 @@ const fileSystem = require('./utils/fileSystem/fileSystem');
 const ProjectFile = require('./utils/saveLoadProject/ProjectFile');
 const {saveProjectToLocalAsync} = require('./utils/saveLoadProject/saveProject');
 const {loadProjectByProjectFilePathAsync} = require('./utils/saveLoadProject/loadProject');
-const {openImageDialog, openGifDialog, openVideoDialog, openSchoolVrFileDialog} = 
+const {openImageDialog, openGifDialog, openVideoDialog, openSchoolVrFileDialog, saveSchoolVrFileDialog} = 
   require('./utils/aframeEditor/openFileDialog');
 const {parseDataToSaveFormat} = require('./utils/saveLoadProject/parseDataToSaveFormat');
+const isNonEmptyArray = require('./utils/variableType/isNonEmptyArray');
 
 
 /* constants */
@@ -536,7 +537,7 @@ ipcMain.on('getExistingProjectNames', async (event, arg) => {
 });
 
 ipcMain.on('saveProject', (event, arg) => {
-  saveProjectToLocalAsync(arg.projectName, arg.entitiesList, arg.assetsList)
+  saveProjectToLocalAsync(arg.projectFilePath, arg.entitiesList, arg.assetsList)
     .then((data) => {      
       event.sender.send('saveProjectResponse', {
         err: null,
@@ -631,13 +632,11 @@ ipcMain.on('openGifDialog', (event, args) => {
   });
 });
 
-ipcMain.on('openVideoDialog', (event, args) => {
-  console.log('openVideoDialog');
-  openVideoDialog((filePaths) => {
-    event.sender.send('openVideoDialogResponse', {
+ipcMain.on('openVideoDialog', (event, args) => {  
+  openVideoDialog((filePaths) => {    
+    event.sender.send('openVideoDialogResponse', {      
       data: {
-        filePaths: filePaths,
-        type: myPath.getMimeType(filePaths[0])
+        filePaths: filePaths        
       }
     });
   });
@@ -648,6 +647,16 @@ ipcMain.on('openSchoolVrFileDialog', (event, args) => {
     event.sender.send('openSchoolVrFileDialogResponse', {
       data: {
         filePaths: filePaths
+      }
+    });
+  });
+});
+
+ipcMain.on('saveSchoolVrFileDialog', (event, args) => {
+  saveSchoolVrFileDialog((filePath) => {
+    event.sender.send('saveSchoolVrFileDialogResponse', {
+      data: {
+        filePath: filePath
       }
     });
   });

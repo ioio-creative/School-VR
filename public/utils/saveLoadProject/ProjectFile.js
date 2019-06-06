@@ -128,11 +128,11 @@ class ProjectFile {
   }
 
   getTempGifFilePath(assetId, fileExtensionWithDot) {    
-    return myPath.join(this.tempProjectImageDirectoryPath, assetId) + fileExtensionWithDot;
+    return myPath.join(this.tempProjectGifDirectoryPath, assetId) + fileExtensionWithDot;
   }
   
   getTempVideoFilePath(assetId, fileExtensionWithDot) {    
-    return myPath.join(this.tempProjectImageDirectoryPath, assetId) + fileExtensionWithDot;
+    return myPath.join(this.tempProjectVideoDirectoryPath, assetId) + fileExtensionWithDot;
   }
 
   getTempProjectAssetAbsolutePathFromProvidedPathIfIsRelative(assetPath) {    
@@ -264,6 +264,7 @@ class ProjectFile {
   async isProjectNameUsedAsync() {
     const projectName = this.name;
     const existingProjectNames = await ProjectFile.getExistingProjectNamesAsync();
+    // TODO: isCurrentLoadedProject now is checking project file path instead of project name
     const isNameUsed = !ProjectFile.isCurrentLoadedProject(projectName) && existingProjectNames.includes(projectName);
     return isNameUsed;
   }
@@ -370,7 +371,7 @@ class ProjectFile {
 
   // saveAssetsToTempAsync() will do nothing and pass control to callBack
   // if assetsList.length === 0
-  async saveAssetsToTempAsync(assetsList) {
+  async saveAssetsToTempAsync(assetsList) {    
     if (!isNonEmptyArray(assetsList)) {    
       return;
     }
@@ -401,83 +402,79 @@ class ProjectFile {
     });  
   };
 
-  async saveToLocalDetailAsync(entitiesList, assetsList) {
+  async saveToLocalDetailAsync(entitiesList, assetsList) {    
     const projectName = this.name;
 
-    const jsonForSave = parseDataToSaveFormat(projectName, entitiesList, assetsList);
-    
+    const jsonForSave = parseDataToSaveFormat(projectName, entitiesList, assetsList);    
     // deal with assetsList
     await this.deleteNonUsedAssetsFromTempAsync(assetsList);
-    console.log("saveProjectToLocal - deleteNonUsedAssetsFromTempAsync: Done");
-  
+    console.log("saveProjectToLocal - deleteNonUsedAssetsFromTempAsync: Done");    
     await this.saveAssetsToTempAsync(assetsList);
-    console.log(`saveProjectToLocal - saveProjectToLocalDetail: Assets saved in ${this.tempProjectDirectoryPath}`);
-  
-    // // TODO: The following modify the objects in the input assetsList directly. Is this alright?
-    // // modify assets_list node in jsonForSave to reflect the relative paths of the project folder structure to be zipped
-    // jsonForSave.assets_list.forEach((asset) => {
-    //   let getAssetFilePathRelativeToProjectDirectoryFunc = null;
-    //   switch (asset.media_type) {
-    //     case mediaType.image:
-    //       getAssetFilePathRelativeToProjectDirectoryFunc = ProjectFile.getImageFilePathRelativeToProjectDirectory;
-    //       break;
-    //     case mediaType.gif:
-    //       getAssetFilePathRelativeToProjectDirectoryFunc = ProjectFile.getGifFilePathRelativeToProjectDirectory;  
-    //       break;
-    //     case mediaType.video:
-    //     default:
-    //       getAssetFilePathRelativeToProjectDirectoryFunc = ProjectFile.getVideoFilePathRelativeToProjectDirectory;
-    //       break;
-    //   }
+    console.log(`saveProjectToLocal - saveProjectToLocalDetail: Assets saved in ${this.tempProjectDirectoryPath}`);    
+    // TODO: The following modify the objects in the input assetsList directly. Is this alright?
+    // modify assets_list node in jsonForSave to reflect the relative paths of the project folder structure to be zipped
+    jsonForSave.assetsList.forEach((asset) => {
+      let getAssetFilePathRelativeToProjectDirectoryFunc = null;
+      switch (asset.media_type) {
+        case mediaType.image:
+          getAssetFilePathRelativeToProjectDirectoryFunc = ProjectFile.getImageFilePathRelativeToProjectDirectory;
+          break;
+        case mediaType.gif:
+          getAssetFilePathRelativeToProjectDirectoryFunc = ProjectFile.getGifFilePathRelativeToProjectDirectory;  
+          break;
+        case mediaType.video:
+        default:
+          getAssetFilePathRelativeToProjectDirectoryFunc = ProjectFile.getVideoFilePathRelativeToProjectDirectory;
+          break;
+      }
       
-    //   const assetFilePathRelativeToProjectDirectory = 
-    //     getAssetFilePathRelativeToProjectDirectoryFunc(asset.id, myPath.getFileExtensionWithLeadingDot(asset.src));
-    //   asset.src = assetFilePathRelativeToProjectDirectory;
-    // });
+      const assetFilePathRelativeToProjectDirectory = 
+        getAssetFilePathRelativeToProjectDirectoryFunc(asset.id, myPath.getFileExtensionWithLeadingDot(asset.src));
+      asset.src = assetFilePathRelativeToProjectDirectory;
+    });
   
-    // // write project json file
-    // const jsonForSaveStr = JSON.stringify(jsonForSave);
-    // const tempJsonPath = this.tempProjectJsonFilePath;
-    // await fileSystem.writeFilePromise(tempJsonPath, jsonForSaveStr);      
-    // console.log(`saveProjectToLocal - saveProjectToLocalDetail: JSON file saved in ${tempJsonPath}`);
+    // write project json file
+    const jsonForSaveStr = JSON.stringify(jsonForSave);
+    const tempJsonPath = this.tempProjectJsonFilePath;
+    await fileSystem.writeFilePromise(tempJsonPath, jsonForSaveStr);      
+    console.log(`saveProjectToLocal - saveProjectToLocalDetail: JSON file saved in ${tempJsonPath}`);
   
-    // // zip and move temp folder to appProjectsDirectory
-    // const destProjectPackagePath = this.savedProjectFilePath;
-    // await fileSystem.createPackagePromise(this.tempProjectDirectoryPath, destProjectPackagePath);
-    // console.log(`saveProjectToLocal - saveProjectToLocalDetail: Project file saved in ${destProjectPackagePath}`);
+    // zip and move temp folder to appProjectsDirectory
+    const destProjectPackagePath = this.savedProjectFilePath;
+    await fileSystem.createPackagePromise(this.tempProjectDirectoryPath, destProjectPackagePath);
+    console.log(`saveProjectToLocal - saveProjectToLocalDetail: Project file saved in ${destProjectPackagePath}`);
         
-    // ProjectFile.setCurrentLoadedProjectFilePath(destProjectPackagePath);
+    ProjectFile.setCurrentLoadedProjectFilePath(destProjectPackagePath);
     
-    // return {
-    //   //tempProjectDirectoryPath: this.tempProjectDirectoryPath,
-    //   //tempJsonPath: tempJsonPath,
-    //   jsonForSave: jsonForSave,
-    //   destProjectPackagePath: destProjectPackagePath
-    // };
+    return {
+      //tempProjectDirectoryPath: this.tempProjectDirectoryPath,
+      //tempJsonPath: tempJsonPath,
+      jsonForSave: jsonForSave,
+      destProjectPackagePath: destProjectPackagePath
+    };
   }
 
   async saveToLocalAsync(entitiesList, assetsList) {
-    const projectName = this.name;
-
     let savedProjectObj;
 
     // save in temp folder before zip (in appTempProjectsDirectory)
       
-    // check if projectName is already used  
-    const isNameUsed = await this.isProjectNameUsedAsync(projectName);
+    // check if projectName is already used
+    // TODO: do we need to check isProjectNameUsedAsync() ?
+    // const isNameUsed = await this.isProjectNameUsedAsync(projectName);
 
-    if (isNameUsed) {      
-      const projectNameTakenError = new Error(`Project name "${projectName}" is used`);
-      throw projectNameTakenError;
-    }
+    // if (isNameUsed) {      
+    //   const projectNameTakenError = new Error(`Project name "${projectName}" is used`);
+    //   throw projectNameTakenError;
+    // }
 
     // check if tempProjectDir already exists, if exists, delete it
-    // actually this step may be redundant because I would check isProjectNameUsedAsync    
-    if (!ProjectFile.isCurrentLoadedProject(projectName)) {      
-      await fileSystem.myDeletePromise(this.tempProjectDirectoryPath);
-      savedProjectObj = await this.saveToLocalDetailAsync(entitiesList, assetsList);    
+    // actually this step may be redundant because I would check isProjectNameUsedAsync        
+    if (!ProjectFile.isCurrentLoadedProject(this.savedProjectFilePath)) {
+      await fileSystem.myDeletePromise(this.tempProjectDirectoryPath);            
+      savedProjectObj = await this.saveToLocalDetailAsync(entitiesList, assetsList);      
     } else {      
-      savedProjectObj = await this.saveToLocalDetailAsync(entitiesList, assetsList);
+      savedProjectObj = await this.saveToLocalDetailAsync(entitiesList, assetsList);      
     }
 
     return savedProjectObj;
@@ -485,7 +482,6 @@ class ProjectFile {
   /* end of saveProject */
 
   /* loadProject */
-
   async loadProjectByFilePathAsync() {
     const savedProjectFilePath = this.savedProjectFilePath;
 

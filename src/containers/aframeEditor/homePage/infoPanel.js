@@ -38,6 +38,9 @@ import ACamera from 'utils/aframeEditor/aCamera';
 import AVideo from 'utils/aframeEditor/aVideo';
 
 import ipcHelper from 'utils/ipc/ipcHelper';
+import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
+import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
+import fileHelper from 'utils/fileHelper/fileHelper';
 
 var Events = require('vendor/Events.js');
 
@@ -285,8 +288,21 @@ class InfoPanel extends Component {
                   // use electron api to load
                   inputField = <div onClick={_=> {
                     ipcHelper.openVideoDialog((err, data) => {
+                      if (err) {
+                        handleErrorWithUiDefault(err);
+                        return;
+                      }
+
+                      const filePaths = data.filePaths;
+
+                      if (!isNonEmptyArray(filePaths)) {
+                        return;
+                      }
+
+                      const mimeType = fileHelper.getMimeType(filePaths[0]);
+
                       const newAssetData = sceneContext.addAsset({
-                        filePath: data.filePaths[0],
+                        filePath: filePaths[0],
                         type: data.type
                       });
                       selectedEntity.el.setAttribute('material', `src:#${newAssetData.id};shader: ${newAssetData.shader}`);

@@ -8,7 +8,7 @@ const dummyFunc = (param1, param2, param3) => {
   if (param1 === "saveProject") {
     localStorage.setItem('schoolVRSave', JSON.stringify(param2));
   }
-  if (param1 === "openSchoolVrFileDialogResponse") {
+  else if (param1 === "openSchoolVrFileDialogResponse") {
     // const loadFile = JSON.parse(localStorage.getItem('schoolVRSave'));
     param2(null, {
       data: {
@@ -16,7 +16,7 @@ const dummyFunc = (param1, param2, param3) => {
       }
     });
   }
-  if (param1 === "loadProjectByProjectFilePathResponse") {
+  else if (param1 === "loadProjectByProjectFilePathResponse") {
     const loadFile = JSON.parse(localStorage.getItem('schoolVRSave'));
     param2(null, {
       data: {
@@ -190,13 +190,12 @@ function getExistingProjectNames(callBack) {
   generalIpcCall('getExistingProjectNames', callBack);
 };
 
-function saveProject(projectName, entitiesList, assetsList, callBack) {
-  const objToSend = {
-    projectName: projectName,
+function saveProject(projectFilePath, entitiesList, assetsList, callBack) {  
+  generalIpcCall('saveProject', callBack, {
+    projectFilePath: projectFilePath,    
     entitiesList: entitiesList,
     assetsList: assetsList
-  };
-  generalIpcCall('saveProject', callBack, objToSend);
+  });
 };
 
 function parseDataToSaveFormat(projectName, entitiesList, assetsList, callBack) {  
@@ -214,7 +213,7 @@ function loadProjectByProjectFilePath(filePath, callBack) {
 // delete any cached temp project files
 function deleteAllTempProjectDirectories(callBack) {
   generalIpcCall('deleteAllTempProjectDirectories', callBack);
-};
+}
 
 /* end of saveLoadProject */
 
@@ -223,19 +222,23 @@ function deleteAllTempProjectDirectories(callBack) {
 
 function openImageDialog(callBack) {  
   generalIpcCall('openImageDialog', callBack);
-};
+}
 
 function openGifDialog(callBack) {  
   generalIpcCall('openGifDialog', callBack);
-};
+}
 
 function openVideoDialog(callBack) {  
   generalIpcCall('openVideoDialog', callBack);
-};
+}
 
 function openSchoolVrFileDialog(callBack) {  
   generalIpcCall('openSchoolVrFileDialog', callBack);
-};
+}
+
+function saveSchoolVrFileDialog(callBack) {
+  generalIpcCall('saveSchoolVrFileDialog', callBack);
+}
 
 /* end of window dialog */
 
@@ -244,7 +247,7 @@ function openSchoolVrFileDialog(callBack) {
 
 function showOpenDialog(options, callBack) {  
   generalIpcCall('showOpenDialog', options, callBack);
-};
+}
 
 function showSaveDialog(options, callBack) {  
   generalIpcCall('showSaveDialog', options, callBack);
@@ -299,6 +302,7 @@ export default {
   openGifDialog,
   openVideoDialog,
   openSchoolVrFileDialog,
+  saveSchoolVrFileDialog,
 
   // vanilla electron dialog
   showOpenDialog,

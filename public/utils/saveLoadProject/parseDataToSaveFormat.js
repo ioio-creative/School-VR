@@ -4,7 +4,7 @@ const parseDataToSaveFormat = (projectName, entitiesList, assetsList) => {
     entitiesList: entitiesList,
     assetsList: assetsList
   };
-  console.log(JSON.stringify(resultJson));
+  //console.log(JSON.stringify(resultJson));
   return resultJson;
 };
 

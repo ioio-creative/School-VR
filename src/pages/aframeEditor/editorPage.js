@@ -34,6 +34,7 @@ import getSearchObjectFromHistory from 'utils/queryString/getSearchObjectFromHis
 import getProjectFilePathFromSearchObject from 'utils/queryString/getProjectFilePathFromSearchObject';
 
 import './editorPage.css';
+import fileHelper from 'utils/fileHelper/fileHelper';
 const Events = require('vendor/Events.js');
 const uuid = require('uuid/v1');
 
@@ -49,18 +50,23 @@ class EditorPage extends Component {
       entitiesList: []
     };
 
-    // bind methods
-    this.newProject = this.newProject.bind(this);
-    this.loadProject = this.loadProject.bind(this);
-    
-    // bind event handlers
-    this.handleHomeButtonClick = this.handleHomeButtonClick.bind(this);
-    this.handleNewProjectButtonClick = this.handleNewProjectButtonClick.bind(this);
-    this.handleOpenProjectButtonClick = this.handleOpenProjectButtonClick.bind(this);
-    this.handleSaveProjectButtonClick = this.handleSaveProjectButtonClick.bind(this);
-    this.handleExitButtonClick = this.handleExitButtonClick.bind(this);      
-    this.handleUndoButtonClick = this.handleUndoButtonClick.bind(this);
-    this.handleRedoButtonClick = this.handleRedoButtonClick.bind(this);      
+    // bind methods    
+    [
+      'newProject',
+      'loadProject',
+      'saveProject',
+
+      'handleHomeButtonClick',
+      'handleNewProjectButtonClick',
+      'handleOpenProjectButtonClick',
+      'handleSaveProjectButtonClick',
+      'handleSaveAsProjectButtonClick',
+      'handleExitButtonClick',
+      'handleUndoButtonClick',
+      'handleRedoButtonClick'
+    ].forEach(methodName => {
+      this[methodName] = this[methodName].bind(this);
+    });
   }
 
 
@@ -127,6 +133,19 @@ class EditorPage extends Component {
     });
   }
 
+  saveProject(projectFilePath) {
+    const sceneContext = this.props.sceneContext;
+    const {entitiesList, assetsList} = sceneContext.saveProject();    
+    const projectName = fileHelper.getFileNameWithoutExtension(projectFilePath);
+    //console.log(projectName, entitiesList, assetsList);
+    entitiesList.projectName = projectName;
+    ipcHelper.saveProject(projectFilePath, entitiesList, assetsList, (err) => {
+      if (err) {
+        handleErrorWithUiDefault(err);
+      }
+    });
+  }
+
   /* end of methods */
 
 
@@ -156,16 +175,29 @@ class EditorPage extends Component {
       this.loadProject(filePaths[0]);
     });
   }
-  
+
   handleSaveProjectButtonClick(event) {
-    const sceneContext = this.props.sceneContext;
-    const {projectName, entitiesList, assetsList} = sceneContext.saveProject();
-    //console.log(projectName, entitiesList, assetsList);
-    ipcHelper.saveProject(projectName, entitiesList, assetsList, (err) => {
+    ipcHelper.saveSchoolVrFileDialog((err, data) => {
       if (err) {
         handleErrorWithUiDefault(err);
+        return;
       }
-    });
+
+      const filePath = data.filePath;
+      this.saveProject(filePath);
+    });    
+  }
+  
+  handleSaveAsProjectButtonClick(event) {
+    ipcHelper.saveSchoolVrFileDialog((err, data) => {
+      if (err) {
+        handleErrorWithUiDefault(err);
+        return;
+      }
+
+      const filePath = data.filePath;
+      this.saveProject(filePath);
+    });    
   }
 
   handleExitButtonClick(event) {
@@ -234,6 +266,11 @@ class EditorPage extends Component {
                     label: 'Save',
                     disabled: false,
                     onClick: this.handleSaveProjectButtonClick
+                  },
+                  {
+                    label: 'Save As...',
+                    disabled: false,
+                    onClick: this.handleSaveAsProjectButtonClick
                   },
                   {
                     label: '-'
