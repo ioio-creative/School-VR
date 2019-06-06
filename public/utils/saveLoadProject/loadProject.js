@@ -1,9 +1,8 @@
 const ProjectFile = require('./ProjectFile');
 
 
-const loadProjectByProjectFilePathAsync = async (projectFilePath) => {
-  const projectFile = new ProjectFile(null, projectFilePath, null);
-  const projectJson = await projectFile.loadProjectByFilePathAsync();
+const loadProjectByProjectFilePathAsync = async (projectFilePath) => {  
+  const projectJson = await ProjectFile.loadProjectByFilePathAsync(projectFilePath);
   return projectJson;
 };
 

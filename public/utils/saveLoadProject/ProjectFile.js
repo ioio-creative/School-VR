@@ -107,7 +107,7 @@ class ProjectFile {
       'saveAssetsToTempAsync',
       'saveToLocalDetailAsync',
       'saveToLocalAsync',
-      'loadProjectByFilePathAsync',
+      'loadProjectAsync',
     ].forEach(methodName => {
       this[methodName] = this[methodName].bind(this);
     });
@@ -137,7 +137,7 @@ class ProjectFile {
 
   getTempProjectAssetAbsolutePathFromProvidedPathIfIsRelative(assetPath) {    
     return ProjectFile.isAssetPathRelative(assetPath) ?
-      myPath.join(this.tempProjectImageDirectoryPath, assetPath) : assetPath;
+      myPath.join(this.tempProjectDirectoryPath, assetPath) : assetPath;
   }
 
   // saved project
@@ -471,9 +471,11 @@ class ProjectFile {
     // check if tempProjectDir already exists, if exists, delete it
     // actually this step may be redundant because I would check isProjectNameUsedAsync        
     if (!ProjectFile.isCurrentLoadedProject(this.savedProjectFilePath)) {
+      console.log("is not current loaded project");
       await fileSystem.myDeletePromise(this.tempProjectDirectoryPath);            
       savedProjectObj = await this.saveToLocalDetailAsync(entitiesList, assetsList);      
-    } else {      
+    } else {
+      console.log("is current loaded project");
       savedProjectObj = await this.saveToLocalDetailAsync(entitiesList, assetsList);      
     }
 
@@ -482,10 +484,10 @@ class ProjectFile {
   /* end of saveProject */
 
   /* loadProject */
-  async loadProjectByFilePathAsync() {
+  async loadProjectAsync() {
     const savedProjectFilePath = this.savedProjectFilePath;
 
-    if (!this.savedProjectFilePath) {
+    if (!savedProjectFilePath) {
       return null;
     }
 
@@ -515,6 +517,11 @@ class ProjectFile {
 
     return projectJson
   }
+
+  static async loadProjectByFilePathAsync(filePath) {
+    const projectFile = new ProjectFile(null, filePath, null);
+    return await projectFile.loadProjectAsync();
+  }
   /* end of loadProject */
 
 
@@ -529,8 +536,8 @@ class ProjectFile {
     return currentLoadedProjectFilePath === aFilePath;
   };
 
-  static async loadCurrentLoadedProjectAsync() {
-    return await loadProjectByProjectFilePathAsync(currentLoadedProjectFilePath);
+  static async loadCurrentLoadedProjectAsync() {    
+    return await ProjectFile.loadProjectByFilePathAsync(currentLoadedProjectFilePath);
   };
 
   /* end of current loaded project (singleton) */

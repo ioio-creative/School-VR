@@ -24,7 +24,6 @@ const {loadProjectByProjectFilePathAsync} = require('./utils/saveLoadProject/loa
 const {openImageDialog, openGifDialog, openVideoDialog, openSchoolVrFileDialog, saveSchoolVrFileDialog} = 
   require('./utils/aframeEditor/openFileDialog');
 const {parseDataToSaveFormat} = require('./utils/saveLoadProject/parseDataToSaveFormat');
-const isNonEmptyArray = require('./utils/variableType/isNonEmptyArray');
 
 
 /* constants */
@@ -577,7 +576,7 @@ ipcMain.on('parseDataToSaveFormat', (event, arg) => {
 ipcMain.on('loadProjectByProjectFilePath', (event, arg) => {
   const filePath = arg;
   loadProjectByProjectFilePathAsync(filePath)
-    .then((data) =>{
+    .then((data) =>{      
       event.sender.send('loadProjectByProjectFilePathResponse', {
         err: null,
         data: {
@@ -607,6 +606,17 @@ ipcMain.on('deleteAllTempProjectDirectories', (event, arg) => {
         err: err.toString(),
       });
     });
+});
+
+ipcMain.on('isCurrentLoadedProject', (event, arg) => {
+  const projectFilePath = arg;  
+  const isCurrentLoadedProject = ProjectFile.isCurrentLoadedProject(projectFilePath);
+  event.sender.send('isCurrentLoadedProjectResponse', {
+    err: null, 
+    data: {
+      isCurrentLoadedProject: isCurrentLoadedProject
+    }
+  });  
 });
 
 // window dialog
@@ -653,7 +663,7 @@ ipcMain.on('openSchoolVrFileDialog', (event, args) => {
 });
 
 ipcMain.on('saveSchoolVrFileDialog', (event, args) => {
-  saveSchoolVrFileDialog((filePath) => {
+  saveSchoolVrFileDialog((filePath) => {    
     event.sender.send('saveSchoolVrFileDialogResponse', {
       data: {
         filePath: filePath

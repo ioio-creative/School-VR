@@ -215,6 +215,10 @@ function deleteAllTempProjectDirectories(callBack) {
   generalIpcCall('deleteAllTempProjectDirectories', callBack);
 }
 
+function isCurrentLoadedProject(projectFilePath, callBack) {
+  generalIpcCall('isCurrentLoadedProject', callBack, projectFilePath);
+}
+
 /* end of saveLoadProject */
 
 
@@ -296,6 +300,7 @@ export default {
   parseDataToSaveFormat,
   loadProjectByProjectFilePath,
   deleteAllTempProjectDirectories,
+  isCurrentLoadedProject,
 
   // window dialog
   openImageDialog,

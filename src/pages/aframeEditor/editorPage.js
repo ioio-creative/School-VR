@@ -42,6 +42,11 @@ const uuid = require('uuid/v1');
 // const validator = new jsonSchemaValidator();
 // const schema = require('schema/aframe_schema_20181108.json');
 
+
+// TODO: ask hung to put into sceneContext
+let loadedProjectFilePath = '';
+
+
 class EditorPage extends Component {
   constructor(props) {
     super(props);
@@ -55,6 +60,7 @@ class EditorPage extends Component {
       'newProject',
       'loadProject',
       'saveProject',
+      'saveProjectAs',
 
       'handleHomeButtonClick',
       'handleNewProjectButtonClick',
@@ -80,21 +86,17 @@ class EditorPage extends Component {
     //   return 'hello?';
     // };
     Events.on('editor-load', (editor) => {
-      if (this.props.match.params.projectId === undefined) {
-        this.newProject();
-      } else {
-        // load project
-        const searchObj = getSearchObjectFromHistory(this.props.history);
-        const projectFilePathToLoad = getProjectFilePathFromSearchObject(searchObj);
-  
-        //console.log("project path to load: " + projectFilePathToLoad);
-  
-        if (!projectFilePathToLoad) {
-          return;
-        }
-        
-        this.loadProject(projectFilePathToLoad);
+      // load project
+      const searchObj = getSearchObjectFromHistory(this.props.history);
+      const projectFilePathToLoad = getProjectFilePathFromSearchObject(searchObj);
+
+      console.log("project path to load: " + projectFilePathToLoad);
+
+      if (!projectFilePathToLoad) {
+        return;
       }
+      
+      this.loadProject(projectFilePathToLoad);      
     })
   }
 
@@ -117,6 +119,9 @@ class EditorPage extends Component {
     // fileDialog.accept = ['image/x-png','image/gif'];
     // fileDialog.click();
 
+    // TODO: ask hung to put into sceneContext
+    loadedProjectFilePath = '';
+
     this.props.sceneContext.newProject();
   }
 
@@ -126,14 +131,21 @@ class EditorPage extends Component {
         handleErrorWithUiDefault(err);
         return;                         
       }
+
+      // TODO: ask hung to put into sceneContext
+      loadedProjectFilePath = projectFilePath;
       
       const projectJsonData = data.projectJson;
-      console.log(projectJsonData);
+      //console.log(projectJsonData);
       this.props.sceneContext.loadProject(projectJsonData);   
     });
   }
 
   saveProject(projectFilePath) {
+    if (!projectFilePath) {
+      return;
+    }
+
     const sceneContext = this.props.sceneContext;
     const {entitiesList, assetsList} = sceneContext.saveProject();    
     const projectName = fileHelper.getFileNameWithoutExtension(projectFilePath);
@@ -142,7 +154,22 @@ class EditorPage extends Component {
     ipcHelper.saveProject(projectFilePath, entitiesList, assetsList, (err) => {
       if (err) {
         handleErrorWithUiDefault(err);
+        return;
       }
+      // TODO: ask hung to put into sceneContext
+      loadedProjectFilePath = projectFilePath;
+    });
+  }
+
+  saveProjectAs() {
+    ipcHelper.saveSchoolVrFileDialog((err, data) => {
+      if (err) {
+        handleErrorWithUiDefault(err);
+        return;
+      }
+
+      const filePath = data.filePath;
+      this.saveProject(filePath);
     });
   }
 
@@ -177,27 +204,24 @@ class EditorPage extends Component {
   }
 
   handleSaveProjectButtonClick(event) {
-    ipcHelper.saveSchoolVrFileDialog((err, data) => {
+    // TODO: ask hung to put into sceneContext
+    ipcHelper.isCurrentLoadedProject(loadedProjectFilePath, (err, data) => {
       if (err) {
         handleErrorWithUiDefault(err);
         return;
       }
 
-      const filePath = data.filePath;
-      this.saveProject(filePath);
+      const isCurrentLoadedProject = data.isCurrentLoadedProject;
+      if (isCurrentLoadedProject) {
+        this.saveProject(loadedProjectFilePath);
+      } else {
+        this.saveProjectAs();
+      }
     });    
   }
   
   handleSaveAsProjectButtonClick(event) {
-    ipcHelper.saveSchoolVrFileDialog((err, data) => {
-      if (err) {
-        handleErrorWithUiDefault(err);
-        return;
-      }
-
-      const filePath = data.filePath;
-      this.saveProject(filePath);
-    });    
+    this.saveProjectAs();
   }
 
   handleExitButtonClick(event) {
@@ -216,7 +240,7 @@ class EditorPage extends Component {
 
 
   render() {
-    const props = this.props;
+    //const props = this.props;
     //const state = this.state;
     const sceneContext = this.props.sceneContext;
     // if (!sceneContext) {
