@@ -8,7 +8,7 @@ class ACamera extends AEntity {
     this._type = 'a-camera';
     this._animatableAttributes = {
       position: ['x', 'y', 'z'],
-      rotation: ['x', 'y', 'z'],
+      // rotation: ['x', 'y', 'z'],
       cameraPreview: true
     }
     this._staticAttributes = [

@@ -1,7 +1,6 @@
 const { appDirectory, openFileDialogFilter } = require('../../globals/config');
 const { BrowserWindow, dialog } = require('electron');
 
-
 // https://electronjs.org/docs/api/dialog
 // The browserWindow argument allows the dialog to attach itself to a parent window, making it modal.
 function openDialogCommon(fileFilters, dialogMessage, callBack, defaultPath) {
