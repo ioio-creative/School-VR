@@ -1,4 +1,5 @@
-import APlane from "./aPlane";
+import AEntity from "./aEntity";
+// import APlane from "./aPlane";
 // import fontSchoolbellRegular from 'fonts/Schoolbell/SchoolbellRegular.fnt';
 // import fontSchoolbellRegularImg from 'fonts/Schoolbell/SchoolbellRegular.png';
 // import TypeFace from 'fonts/typeface-0.10.js';
@@ -9,35 +10,44 @@ import APlane from "./aPlane";
 // }
 // const opentype = require('opentype.js');
 // const typefaceNotoSansTc = require('typeface-noto-sans-tc');
-class AText extends APlane {
+class AText extends AEntity {
   constructor(el) {
     super(el);
     this._animatableAttributes = {
-      ...this.animatableAttributes,
-      text: [
+      position: ['x', 'y', 'z'],
+      scale: ['x', 'y', 'z'],
+      rotation: ['x', 'y', 'z'],
+      ttfFont: [
         'color',
-        'opacity'
+        'opacity',
+        // 'fontSize'
       ]
     };
     this._staticAttributes = [
       {
+        type: 'image',
+        name: 'Texture',
+        attributeKey: 'material',
+        attributeField: 'src'
+      },
+      {
         type: 'text',
         name: 'Text',
-        attributeKey: 'text',
+        attributeKey: 'ttfFont',
         attributeField: 'value'
       },
       {
         type: 'text',
-        name: 'Wrap Count',
-        attributeKey: 'text',
-        attributeField: 'wrapCount'
+        name: 'Font Size',
+        attributeKey: 'ttfFont',
+        attributeField: 'fontSize'
       },
-      {
-        type: 'text',
-        name: 'Width',
-        attributeKey: 'text',
-        attributeField: 'width'
-      },
+      // {
+      //   type: 'text',
+      //   name: 'Width',
+      //   attributeKey: 'text',
+      //   attributeField: 'width'
+      // },
       // text: [
       //   // 'align',
       //   // 'anchor',
@@ -63,24 +73,36 @@ class AText extends APlane {
     ]
     // console.log(fontSchoolbellRegular);
     this._fixedAttributes = {
-      ...this.fixedAttributes,
-      text: {
-        align: 'center',
-        side: 'double',
-        // font: 'Noto Sans TC'
-        // font: fontSchoolbellRegular,
-        // fontImage: fontSchoolbellRegularImg
-      }
+      // ...this.fixedAttributes,
+      // text: {
+      //   align: 'center',
+      //   side: 'double',
+      //   // font: 'Noto Sans TC'
+      //   // font: fontSchoolbellRegular,
+      //   // fontImage: fontSchoolbellRegularImg
+      // },
+      // 'ttf-font': ''
     }
     this._animatableAttributesValues = {
-      ...this.animatableAttributesValues,
-      material: {
-        color: '#FFFFFF',
-        opacity: 0
+      position: {
+        x: 0,
+        y: 0,
+        z: 0
       },
-      text: {
+      scale: {
+        x: 1, 
+        y: 1, 
+        z: 1
+      },
+      rotation: {
+        x: 0,
+        y: 0,
+        z: 0
+      },
+      ttfFont: {
         color: '#000000',
-        opacity: 1
+        opacity: 1,
+        // fontSize: 1
       }
     }
   }

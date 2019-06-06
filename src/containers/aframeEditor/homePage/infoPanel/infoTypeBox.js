@@ -157,7 +157,7 @@ class InfoTypeBox extends Component {
     const state = this.state;
     const currentEntity = props.sceneContext.getCurrentEntity();
     const data = props.timelineObj[props.timelinePosition];
-
+    // console.log(data.ttfFont, animatableAttributes.ttfFont && animatableAttributes.ttfFont.indexOf('fontSize') !== -1);
     // const color = rgba2hex(data.material.color);
 
     const animatableAttributes = props.animatableAttributes;
@@ -221,17 +221,17 @@ class InfoTypeBox extends Component {
             />
           </div>
         }
-        {animatableAttributes.text && animatableAttributes.text.indexOf('color') !== -1 &&
+        {animatableAttributes.ttfFont && animatableAttributes.ttfFont.indexOf('color') !== -1 &&
           <div className="attribute-col color-col" onClick={() => this.changeTransformMode(null)}>
-            <div title={data.text.color}>
+            <div title={data.ttfFont.color}>
               <div className="field-label">Text Color:</div>
-              <ColorPicker key={props.timelineObj.id + data.text.color}
-                field={'text'}
-                color={data.text.color} 
+              <ColorPicker key={props.timelineObj.id + data.ttfFont.color}
+                field={'ttfFont'}
+                color={data.ttfFont.color} 
                 timelineId={props.timelineObj.id} 
                 timelinePosition={props.timelinePosition} 
                 onUpdate={(newColor) => {
-                  this.changeObjectField('text.color', newColor)
+                  this.changeObjectField('ttfFont.color', newColor)
                 }}
                 currentEntity={currentEntity}
               />
@@ -239,19 +239,40 @@ class InfoTypeBox extends Component {
             {/* <input type="color" value={color} onInput={(event) => this.changeObjectField('material.color', event.target.value)} hidden/> */}
           </div>
         }
-        {animatableAttributes.text && animatableAttributes.text.indexOf('opacity') !== -1 &&
+        {animatableAttributes.ttfFont && animatableAttributes.ttfFont.indexOf('opacity') !== -1 &&
           <div className="attribute-col opacity-col" onClick={() => this.changeTransformMode(null)}>
             <div className="field-label">Text Opacity:</div>
             <OpacityPicker key={props.timelineObj.id}
-              field={'text'}
-              opacity={data.text.opacity} 
+              field={'ttfFont'}
+              opacity={data.ttfFont.opacity} 
               timelineId={props.timelineObj.id} 
               timelinePosition={props.timelinePosition} 
               onUpdate={(newOpacity) => {
-                this.changeObjectField('text.opacity', newOpacity)
+                this.changeObjectField('ttfFont.opacity', newOpacity)
               }}
               currentEntity={currentEntity}
             />
+          </div>
+        }
+        {animatableAttributes.ttfFont && animatableAttributes.ttfFont.indexOf('fontSize') !== -1 &&
+          <div className="attribute-col opacity-col" onClick={() => this.changeTransformMode(null)}>
+            <div className="field-label">Font Size:</div>
+            <input type="ttfFont" value={data.ttfFont.fontSize} onInput={(e) => {
+              currentEntity.el.setAttribute('ttfFont', {
+                fontSize: e.currentTarget.value
+              })
+              {/* this.setState((prevState) => {
+                return {
+                  additionalAttributes: {
+                    ...prevState.additionalAttributes,
+                    radiusTop: e.currentTarget.value
+                  }
+                }
+              }) */}
+              this.changeObjectField('ttfFont.fontSize', e.currentTarget.value)
+            }} onBlur={(e) => {
+              this.changeObjectField('ttfFont.fontSize', e.currentTarget.value)
+            }} />
           </div>
         }
         {animatableAttributes.geometry && animatableAttributes.geometry.indexOf('radiusTop') !== -1 &&

@@ -155,7 +155,7 @@ function Viewport (editor) {
   function getIntersects (point, objects) {
     mouse.set((point.x * 2) - 1, -(point.y * 2) + 1);
     raycaster.setFromCamera(mouse, camera);
-    return raycaster.intersectObjects(objects);
+    return raycaster.intersectObjects(objects, true);
   }
 
   var onDownPosition = new THREE.Vector2();
