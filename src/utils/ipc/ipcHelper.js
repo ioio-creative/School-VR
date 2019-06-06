@@ -167,12 +167,13 @@ function getExistingProjectNames(callBack) {
   generalIpcCall('getExistingProjectNames', callBack);
 };
 
-function saveProject(projectName, entitiesList, assetsList, callBack) {  
-  generalIpcCall('saveProject', callBack, {
+function saveProject(projectName, entitiesList, assetsList, callBack) {
+  const objToSend = {
     projectName: projectName,
     entitiesList: entitiesList,
     assetsList: assetsList
-  });
+  };
+  generalIpcCall('saveProject', callBack, objToSend);
 };
 
 function parseDataToSaveFormat(projectName, entitiesList, assetsList, callBack) {  
