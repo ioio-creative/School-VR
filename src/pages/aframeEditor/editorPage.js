@@ -220,7 +220,7 @@ class EditorPage extends Component {
                   {
                     label: 'New',
                     disabled: false,
-                    onClick: this.handleNewButtonClick
+                    onClick: this.handleNewProjectButtonClick
                   },
                   {
                     label: '-'

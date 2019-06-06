@@ -85,7 +85,7 @@ class SceneContextProvider extends Component {
     this.editor = null;
 
     this.setAppName = this.setAppName.bind(this);
-    this.setProjectName = this.setProjectName.bind(this);
+    // // this.setProjectName = this.setProjectName.bind(this);
     this.getAppName = this.getAppName.bind(this);
     this.getProjectName = this.getProjectName.bind(this);
     this.newProject = this.newProject.bind(this);
@@ -239,12 +239,16 @@ class SceneContextProvider extends Component {
       ],
       // assets: []
     };
-    this.setProjectName(projectName);
-    this.loadProject(data);
-    this.setState({
-      entityId: entityId,
-      timelineId: timelineId
+    // this.setProjectName(projectName);
+    this.loadProject({
+      projectName: projectName,
+      entitiesList: data,
+      assetsList: []
     });
+    // this.setState({
+    //   entityId: entityId,
+    //   timelineId: timelineId
+    // });
   }
   saveProject() {
     const state = this.state;
@@ -256,7 +260,7 @@ class SceneContextProvider extends Component {
         // remove circular ref
         delete entity['el'];
         // try to remove unwant assets
-        if (entity['components']) { // if (entity['type'] !== 'a-camera')
+        if (entity['components'] && entity['components']['material']) { // if (entity['type'] !== 'a-camera')
           const assetId = entity['components']['material']['src'];
           if (assetId) {
             assetsList[assetId.substr(1)] = true;
@@ -272,12 +276,28 @@ class SceneContextProvider extends Component {
       assetsList: assetsData
     }
   }
-  loadProject(sceneData, assetData) {
+  loadProject(projectData) {
+    // empty current scene
+    const currentSlide = this.getCurrentSlide();
+    if (currentSlide) {
+      currentSlide.entities.forEach(entity => {
+        if (entity.type !== 'a-camera') {
+          this.editor.removeObject(entity.el.object3D);
+        }
+      })
+    }
     // need to parse camera data inside data
+    const projectName = projectData['projectName'];
+    const sceneData = projectData['entitiesList'];
+    const assetsData = projectData['assetsList'];
+    sceneData['projectName'] = projectName;
     // items in assetData need to add element to the sceneEl
-    // TODO !!!
+    assetsData.forEach(assetData => {
+      this.addAsset(assetData);
+    })
     this.setState({
       sceneData: sceneData,
+      slideId: undefined,
     }, _=> {
       const cameraEl = document.querySelector('a-camera[el-defaultCamera="true"]');
       this.updateCameraEl(cameraEl);
@@ -447,7 +467,7 @@ class SceneContextProvider extends Component {
     }
   }
   getCurrentSlide() {
-    const state = jsonCopy(this.state);
+    const state = this.state;
     const sceneData = state.sceneData;
     const slides = sceneData.slides;
     if (!slides) return null;
@@ -1151,6 +1171,19 @@ class SceneContextProvider extends Component {
           const element = entity.el;
           const aEntity = new entityModel[entity['type']](element);
           let firstTimeline = null;
+          let lastTimeline = null;
+          const entityMedia = {
+            mediaEl : null,
+          }
+          if (entity.components && entity.components.material && entity.components.material.src) {
+            // check if this is a video
+            const mediaEl = document.querySelector(entity.components.material.src);
+            const mediaElType = Object.prototype.toString.call(mediaEl);
+            if (mediaElType === '[object HTMLVideoElement]') {
+              entityMedia['mediaEl'] = mediaEl;
+            }
+            // debugger;
+          }
           entity.timelines.forEach(timeline => {
             const {
               start, duration,
@@ -1159,6 +1192,9 @@ class SceneContextProvider extends Component {
             const tmpAttrs = this.flattenJSON(jsonCopy(startAttribute));
             if (firstTimeline === null || start < firstTimeline.start) {
               firstTimeline = timeline;
+            }
+            if (lastTimeline === null || start > lastTimeline.start) {
+              lastTimeline = timeline;
             }
             tl.add(TweenMax.to(
               tmpAttrs,
@@ -1178,6 +1214,18 @@ class SceneContextProvider extends Component {
             tl.add(() => {
               aEntity.updateEntityAttributes(firstTimeline.startAttribute);
             }, 0);
+            // must need timeline to enable play
+            // media playing
+            if (entityMedia['mediaEl']) {
+              tl.add(() => {
+                entityMedia['mediaEl'].loop = true;
+                if (!tl.paused())
+                  entityMedia['mediaEl'].play();
+              }, firstTimeline.start + deltaOffset);
+              tl.add(() => {
+                entityMedia['mediaEl'].pause();
+              }, lastTimeline.start + lastTimeline.duration);
+            }
           }
         })
         // tl.eventCallback('onStart', () => {
@@ -1255,17 +1303,21 @@ class SceneContextProvider extends Component {
   addAsset(newFile) {
     const sceneEl = this.editor.sceneEl;
     let assetEl = sceneEl.querySelector('a-assets');
+    // create a-assets element in case not exist
     if (!assetEl) {
       assetEl = document.createElement('a-assets');
       sceneEl.append(assetEl);
     }
     // assetEl.append(el);
     let newEl = null;
-    const newId = uuid();
+    const newId = newFile.id || uuid();
     const newFileUrl = (
       Object.prototype.toString.call(newFile) === '[object File]' ? 
       URL.createObjectURL(newFile) :
-      newFile.filePath
+      (newFile.src?
+        newFile.src :
+        newFile.filePath
+      )
     );
     const newAssetData = {
       id: newId,
@@ -1276,7 +1328,9 @@ class SceneContextProvider extends Component {
     switch (newFile.type) {
       case 'image/svg+xml':
       case 'image/jpeg':
-      case 'image/png': {
+      case 'image/png':
+      // for loadProject
+      case 'image': {
         // normal still images
         newAssetData.type = 'image';
         newEl = document.createElement('img');
@@ -1285,7 +1339,9 @@ class SceneContextProvider extends Component {
         assetEl.append(newEl);
         break;
       }
-      case 'image/gif': {
+      // for loadProject
+      case 'image/gif':
+      case 'gif': {
         // may be animated
         newAssetData.type = 'gif';
         newAssetData.shader = 'gif';
@@ -1295,7 +1351,9 @@ class SceneContextProvider extends Component {
         assetEl.append(newEl);
         break;
       }
-      case 'video/mp4': {
+      case 'video/mp4':
+      // for loadProject
+      case 'video': {
         // video
         newAssetData.type = 'video';
         newEl = document.createElement('video');
@@ -1316,8 +1374,6 @@ class SceneContextProvider extends Component {
           newAssetData
         ]
       }
-    }, _=>{
-      console.log(this.state);
     });
     return newAssetData;
 

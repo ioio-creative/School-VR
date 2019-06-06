@@ -118,10 +118,11 @@ AFRAME.registerComponent('ttfFont', {
       opacity: data.opacity,
       transparent: true
     });
-
+    textMaterial.transparent = true; // ???
     // Create mesh.
     this.mesh = new three.Mesh(textGeometry, textMaterial);
-
+    
+    this.mesh.material.transparent = true;
     // Set mesh on entity.
     el.setObject3D('mesh', this.mesh);
   },
@@ -160,6 +161,8 @@ AFRAME.registerComponent('ttfFont', {
     }
     if (oldData.opacity !== data.opacity) {
       this.mesh.material.opacity = data.opacity;
+      this.mesh.material.visible = (data.opacity !== 0);
+      this.mesh.material.transparent = true;
     }
   }
 });
