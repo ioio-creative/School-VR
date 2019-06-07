@@ -303,7 +303,7 @@ class InfoPanel extends Component {
 
                       const newAssetData = sceneContext.addAsset({
                         filePath: filePaths[0],
-                        type: data.type
+                        type: 'video/mp4', // data.type not pass from the ipc
                       });
                       selectedEntity.el.setAttribute('material', `src:#${newAssetData.id};shader: ${newAssetData.shader}`);
                       sceneContext.updateEntity({

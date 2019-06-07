@@ -22,6 +22,7 @@ import iconSphere from 'media/icons/sphere.svg';
 import iconText from 'media/icons/text.svg';
 import iconImage from 'media/icons/image.svg';
 import iconVideo from 'media/icons/video.svg';
+import iconSky from 'media/icons/360.svg';
 import './buttonsPanel.css';
 
 const Events = require('vendor/Events.js');
@@ -97,7 +98,7 @@ class ButtonsPanel extends Component {
             {/* {btns.addNewVideo()} */}
             {/* {btns.addNewImageSphere()} */}
             <button onClick={()=>this.addNewEntity('a-sky')}>
-              addNewSky
+              <img src={iconSky} alt=""/>
             </button>
             {/* <button onClick={()=>this.addNewEntity('a-videoShpere')}>
               addNew360Video

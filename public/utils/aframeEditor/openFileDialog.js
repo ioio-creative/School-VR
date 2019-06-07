@@ -44,7 +44,6 @@ function showDialogCommon(fileFilters, dialogMessage, callBack, defaultPath, dia
 
 function openImageDialog(callBack) {
   console.log(['openImageDialog', openFileDialogFilter.image]);
-  debugger;
   showDialogCommon([openFileDialogFilter.image],
     "Please select an image file.", callBack, DialogType.Open);  
 }
@@ -56,7 +55,6 @@ function openGifDialog(callBack) {
 
 function openVideoDialog(callBack) {
   console.log(['openVideoDialog', openFileDialogFilter.video]);
-  debugger;
   showDialogCommon([openFileDialogFilter.video],
     "Please select a video file.", callBack, DialogType.Open);
 }

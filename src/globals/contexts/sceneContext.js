@@ -18,7 +18,7 @@ import { TimelineMax, TweenMax, Power0 } from 'gsap';
 const mergeJSON = require('deepmerge').default;
 const Events = require('vendor/Events.js');
 const uuid_v1 = require('uuid/v1');
-const uuid = _=> 'uuid_' + uuid_v1();//.split('-')[0];
+const uuid = _=> 'uuid_' + uuid_v1().replace(/-/g, '_');
 
 const entityModel = {
   'a-box': ABox,
@@ -225,6 +225,7 @@ class SceneContextProvider extends Component {
     if (cameraEl) {
       cameraEl.setAttribute('id', cameraId);
     }
+    const cameraModel = new entityModel['a-camera'];
     const data = {
       projectName: projectName,
       slides: [
@@ -236,7 +237,12 @@ class SceneContextProvider extends Component {
               id: cameraId,
               el: cameraEl,
               name: "Camera",
-              timelines: []
+              timelines: [],
+              components: {
+                id: cameraId,
+                ...cameraModel.animatableAttributesValues,
+                ...cameraModel.fixedAttributes
+              }
             }
           ]
         }
@@ -716,7 +722,6 @@ class SceneContextProvider extends Component {
           if (!nextTimeline) {
             animatableEndAttributes = jsonCopy(prevTimeline.endAttribute);
           }
-
         }
         if (nextTimeline) {
           animatableEndAttributes = jsonCopy(nextTimeline.startAttribute);
@@ -724,6 +729,12 @@ class SceneContextProvider extends Component {
           if (!prevTimeline) {
             animatableStartAttributes = jsonCopy(nextTimeline.startAttribute);
           }
+        }
+      } else {
+        // get current components data as initial value
+        if (currentEntity['components']) {
+          animatableStartAttributes = jsonCopy(currentEntity['components']);
+          animatableEndAttributes = jsonCopy(currentEntity['components']);
         }
       }
       const newUndoQueue = jsonCopy(prevState.undoQueue);

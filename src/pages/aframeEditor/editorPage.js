@@ -93,10 +93,11 @@ class EditorPage extends Component {
       console.log("project path to load: " + projectFilePathToLoad);
 
       if (!projectFilePathToLoad) {
-        return;
+        this.newProject();
+      } else {
+        this.loadProject(projectFilePathToLoad);      
       }
       
-      this.loadProject(projectFilePathToLoad);      
     })
   }
 
@@ -183,7 +184,7 @@ class EditorPage extends Component {
   }
 
   handleNewProjectButtonClick(event) {
-    this.newProject();             
+    this.newProject();
   }
 
   handleOpenProjectButtonClick(event) {
@@ -321,7 +322,7 @@ class EditorPage extends Component {
                   }
                 ]
               }, 
-              {
+              {/* {
                 label: 'Disabled',
                 disabled: true,
                 children: [
@@ -334,7 +335,7 @@ class EditorPage extends Component {
                     disabled: true,
                   }
                 ]
-              }
+              } */}
             ]}
           />
           <ButtonsPanel />
