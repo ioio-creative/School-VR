@@ -245,7 +245,7 @@ class InfoPanel extends Component {
                     })
                   }}>choose</div> */}
                   // temp use browser api to debug
-                  inputField = <input type="file" accept="image" onChange={(event) => {
+                  inputField = <input type="file" accept="image/svg+xml,image/jpeg,image/png" onChange={(event) => {
                     if (event.target.files && event.target.files[0]) {
                       {/* const FR= new FileReader();
                       FR.addEventListener("load", function(e) {
@@ -286,42 +286,42 @@ class InfoPanel extends Component {
                 }
                 case 'video': {
                   // use electron api to load
-                  inputField = <div onClick={_=> {
-                    ipcHelper.openVideoDialog((err, data) => {
-                      if (err) {
-                        handleErrorWithUiDefault(err);
-                        return;
-                      }
+//                  inputField = <div onClick={_=> {
+//                    ipcHelper.openVideoDialog((err, data) => {
+//                      if (err) {
+//                        handleErrorWithUiDefault(err);
+//                        return;
+//                      }
 
-                      const filePaths = data.filePaths;
+//                      const filePaths = data.filePaths;
 
-                      if (!isNonEmptyArray(filePaths)) {
-                        return;
-                      }
+//                      if (!isNonEmptyArray(filePaths)) {
+//                        return;
+//                      }
 
-                      const mimeType = fileHelper.getMimeType(filePaths[0]);
+//                      const mimeType = fileHelper.getMimeType(filePaths[0]);
 
-                      const newAssetData = sceneContext.addAsset({
-                        filePath: filePaths[0],
-                        type: 'video/mp4', // data.type not pass from the ipc
-                      });
-                      selectedEntity.el.setAttribute('material', `src:#${newAssetData.id};shader: ${newAssetData.shader}`);
-                      sceneContext.updateEntity({
-                        material: {
-                          src: `#${newAssetData.id}`,
-                          shader: newAssetData.shader
-                        }
-                      }, selectedEntity['id']);
-                      {/* sceneContext.updateEntity({
-                        material: {
-                          src: `url(${data.filePaths})`
-                        }
-                      }, selectedEntity['id']); */}
-                      {/* selectedEntity.el.setAttribute('material', `src:url(${data.filePaths})`); */}
-                    })
-                  }}>choose</div>
+//                      const newAssetData = sceneContext.addAsset({
+//                        filePath: filePaths[0],
+//                        type: 'video/mp4', // data.type not pass from the ipc
+//                      });
+//                      selectedEntity.el.setAttribute('material', `src:#${newAssetData.id};shader: ${newAssetData.shader}`);
+//                      sceneContext.updateEntity({
+//                        material: {
+//                          src: `#${newAssetData.id}`,
+//                          shader: newAssetData.shader
+//                        }
+//                      }, selectedEntity['id']);
+//                      {/* sceneContext.updateEntity({
+//                        material: {
+//                          src: `url(${data.filePaths})`
+//                        }
+//                      }, selectedEntity['id']); */}
+//                      {/* selectedEntity.el.setAttribute('material', `src:url(${data.filePaths})`); */}
+//                    })
+//                  }}>choose</div>
                   // temp use browser api to debug
-                  {/* inputField = <input type="file" accept="video" onChange={(event) => {
+                  inputField = <input type="file" accept="video/mp4" onChange={(event) => {
                     if (event.target.files && event.target.files[0]) {
                       var FR= new FileReader();
                       FR.addEventListener("load", function(e) {
@@ -340,7 +340,7 @@ class InfoPanel extends Component {
                     } else {
                       selectedEntity.el.removeAttribute('material', 'src');
                     }
-                  }} /> */}
+                  }} />
                   break;
                 }
                 case 'slidesList': {

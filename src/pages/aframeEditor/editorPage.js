@@ -69,7 +69,8 @@ class EditorPage extends Component {
       'handleSaveAsProjectButtonClick',
       'handleExitButtonClick',
       'handleUndoButtonClick',
-      'handleRedoButtonClick'
+      'handleRedoButtonClick',
+      'onEditorLoad'
     ].forEach(methodName => {
       this[methodName] = this[methodName].bind(this);
     });
@@ -85,23 +86,11 @@ class EditorPage extends Component {
     // window.onbeforeunload = function() {
     //   return 'hello?';
     // };
-    Events.on('editor-load', (editor) => {
-      // load project
-      const searchObj = getSearchObjectFromHistory(this.props.history);
-      const projectFilePathToLoad = getProjectFilePathFromSearchObject(searchObj);
-
-      console.log("project path to load: " + projectFilePathToLoad);
-
-      if (!projectFilePathToLoad) {
-        this.newProject();
-      } else {
-        this.loadProject(projectFilePathToLoad);      
-      }
-      
-    })
+    Events.on('editor-load', this.onEditorLoad);
   }
 
   componentWillUnmount() {
+    Events.removeListener('editor-load', this.onEditorLoad);
     this.editor = null;
   }
 
@@ -109,7 +98,20 @@ class EditorPage extends Component {
 
   
   /* methods */
+  onEditorLoad(editor) {
+    // load project
+    const searchObj = getSearchObjectFromHistory(this.props.history);
+    const projectFilePathToLoad = getProjectFilePathFromSearchObject(searchObj);
 
+    console.log("project path to load: " + projectFilePathToLoad);
+
+    if (!projectFilePathToLoad) {
+      this.newProject();
+    } else {
+      this.loadProject(projectFilePathToLoad);      
+    }
+    
+  }
   newProject() {
     //console.log('new');
                     

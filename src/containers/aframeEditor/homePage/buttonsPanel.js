@@ -24,6 +24,7 @@ import iconImage from 'media/icons/image.svg';
 import iconVideo from 'media/icons/video.svg';
 import iconSky from 'media/icons/360.svg';
 import './buttonsPanel.css';
+import config from 'globals/config';
 
 const Events = require('vendor/Events.js');
 
@@ -35,6 +36,7 @@ class ButtonsPanel extends Component {
     };
     this.toggleEditor = this.toggleEditor.bind(this);
     this.addNewEntity = this.addNewEntity.bind(this);
+    this.resetView = this.resetView.bind(this);
   }
   componentDidMount() {
   }
@@ -47,6 +49,11 @@ class ButtonsPanel extends Component {
   }
   toggleEditor() {
     this.props.editor.toggle();
+  }
+  resetView() {
+    const props = this.props;
+    const sceneContext = props.sceneContext;
+    sceneContext.resetView();
   }
   render() {
     const props = this.props;
@@ -109,6 +116,12 @@ class ButtonsPanel extends Component {
             <button onClick={()=>this.addNewEntity('a-sky')}>
               scale
             </button> */}
+          </div>
+        </div>
+        <div className="button-list buttons-presentation">
+          <div className="buttons-list-wrapper">
+            <button className="button-present" onClick={this.resetView}>Reset View</button>
+            <Link className="button-present" to={'/presenter/1'}>presenter mode<br />(under construction)</Link>
           </div>
         </div>
       </div>

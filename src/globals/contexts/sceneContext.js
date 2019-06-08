@@ -146,6 +146,8 @@ class SceneContextProvider extends Component {
 
     this.addAsset = this.addAsset.bind(this);
 
+    this.resetView = this.resetView.bind(this);
+
     this.events = {
       'editor-load': obj => {
         this.editor = obj;
@@ -780,7 +782,15 @@ class SceneContextProvider extends Component {
       const currentSlide = slides.find(el => el.id === prevState.slideId);
       const currentEntity = currentSlide.entities.find(el => el.id === prevState.entityId);
       const deleteTimelineIdx = currentEntity.timelines.findIndex(el => el.id === timelineId);
-      currentEntity.timelines.splice(deleteTimelineIdx, 1);
+      const deletedTimeline = currentEntity.timelines.splice(deleteTimelineIdx, 1);
+      if (currentEntity.timelines.length === 0) {
+        // just now deleted is the last timeline
+        const startAttribute = deletedTimeline[0]['startAttribute'];
+        currentEntity.components = mergeJSON(currentEntity.components, startAttribute);
+        Object.keys(startAttribute).forEach(k => {
+          currentEntity.el.setAttribute(k, startAttribute[k]);
+        })
+      }
       this.editor.enableControls(false);
       const newUndoQueue = jsonCopy(prevState.undoQueue);
       newUndoQueue.push({
@@ -1010,15 +1020,17 @@ class SceneContextProvider extends Component {
       // },
       timelines: []
     };
-    newElement['components'] = {
-      id: elementId,
-      ...objectModel.animatableAttributesValues,
-      ...objectModel.fixedAttributes
-    }
+    newElement['components'] = mergeJSON(
+      {
+        id: elementId,
+        ...objectModel.animatableAttributesValues
+      },
+      objectModel.fixedAttributes
+    );
     const newEl = this.editor.createNewEntity(newElement);
     // need a setAttribute to trigger the ttfFont init
     if (newElement['components']['ttfFont'] && newElement['components']['ttfFont']['opacity']) {
-      console.log('sdfsaf');
+      // console.log('sdfsaf');
       newEl.setAttribute('ttfFont', 'opacity', !newElement['components']['ttfFont']['opacity']);
       newEl.setAttribute('ttfFont', 'opacity', newElement['components']['ttfFont']['opacity']);
     }
@@ -1467,6 +1479,11 @@ class SceneContextProvider extends Component {
     // );
     // return newid;
   }
+
+  resetView() {
+    this.editor.EDITOR_CAMERA.position.set(20, 10, 20);
+    this.editor.EDITOR_CAMERA.lookAt(0,0,0);
+  }
   render() {
     // console.log('context render');
     const props = this.props;
@@ -1540,6 +1557,7 @@ class SceneContextProvider extends Component {
           // assets
           addAsset: this.addAsset,
 
+          resetView: this.resetView,
           // editor
           editor: this.editor,
           // variables, should use functions to return?

@@ -33,6 +33,7 @@
 #buttons-panel .buttons-list-wrapper {
   width: 100%;
   padding: 0 15px;
+  display: flex;
 }
 #buttons-panel button {
   color: #FFFFFF;
@@ -102,4 +103,13 @@
 }
 #button-box:hover polygon:nth-child(3) {
   fill: #9de0de;
+}
+
+.buttons-presentation {
+  margin-left: auto;
+}
+.buttons-presentation .button-present {
+  color: #FFF;
+  display: block;
+  text-align: center;
 }

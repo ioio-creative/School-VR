@@ -160,7 +160,7 @@ class ProjectList extends Component {
     return (
       <div className="project-list" onScroll={this.handleProjectListScroll}>
         <div className="project-item create-new-project" ref={props.setCreateNewProjectBlockRefFunc}>
-          <Link to={routes.editor}>
+          <Link to='/editor'>
             <div className="create-new-project-content">+</div>
           </Link>
         </div>
