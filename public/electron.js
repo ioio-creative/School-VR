@@ -53,7 +53,8 @@ console.log(webServerRootDirectory);
 
 let mainWindow;
 // https://fabiofranchino.com/blog/use-electron-as-local-webserver/
-let webServerProcess = fork(`${myPath.join(__dirname, 'server', 'easyrtc-server.js')}`);
+// let webServerProcess = fork(`${myPath.join(__dirname, 'server', 'easyrtc-server.js')}`);
+let webServerProcess = fork(`${myPath.join(__dirname, 'server', 'socketio-server.js')}`);
 let paramsFromExternalConfigForReact;
 
 /* end of global variables */
@@ -184,12 +185,13 @@ async function openWebServer() {
   console.log("reach here 1");
   fileSystem.extractAll(appAsarInstallationPath, appAsarDestPathInWorkingDirectory);
   console.log("reach here 2");
+  const indexHtmlPath = (isDev ? `${myPath.join(__dirname, '../build')}` : webServerRootDirectory);
 
   // https://nodejs.org/api/child_process.html#child_process_subprocess_send_message_sendhandle_options_callback
   webServerProcess.send({
     address: 'open-server',
     port: webServerPort,
-    rootDirPath: webServerRootDirectory
+    rootDirPath: indexHtmlPath
   });      
 }
 
@@ -207,7 +209,7 @@ app.on('ready', async _ => {
     console.error(err);
   }
 
-  //await openWebServer();
+  await openWebServer();
   createWindow(); 
 });
 

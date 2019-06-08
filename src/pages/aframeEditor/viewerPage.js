@@ -1,6 +1,4 @@
-import React, {Component, Fragment} from 'react';
-// import SystemPanel from 'containers/aframeEditor/homePage/systemPanel';
-import {withRouter, Prompt} from 'react-router-dom';
+import React, {Component} from 'react';
 
 import {withSceneContext} from 'globals/contexts/sceneContext';
 
@@ -12,40 +10,41 @@ import InfoPanel from 'containers/aframeEditor/homePage/infoPanel';
 import SlidesPanel from 'containers/aframeEditor/homePage/slidesPanel';
 import TimelinePanel from 'containers/aframeEditor/homePage/timelinePanel';
 // import AssetsPanel from 'containers/aframeEditor/homePage/assetsPanel';
+import io from 'socket.io-client';
 
-import Editor from 'vendor/editor.js';
+// import Editor from 'vendor/editor.js';
 // import {addEntityAutoType} from 'utils/aFrameEntities';
 // import {roundTo, jsonCopy} from 'globals/helperfunctions';
 // import {TweenMax, TimelineMax, Linear} from 'gsap';
-import io from 'socket.io-client';
 
-import './presenterPage.css';
+import './viewerPage.css';
 const Events = require('vendor/Events.js');
-const uuid = require('uuid/v1');
 
+// const io = require('socket.io-client');
+// or with import syntax
 // const jsonSchemaValidator = require('jsonschema').Validator;
 // const validator = new jsonSchemaValidator();
 // const schema = require('schema/aframe_schema_20181108.json');
 
-class PresenterPage extends Component {
+class ViewerPage extends Component {
   constructor(props) {
     super(props);
     this.inited = false;
     this.state = {
       socket: null
     }
-    this.onEditorLoad = this.onEditorLoad.bind(this);
-    Events.on('editor-load', this.onEditorLoad);
+    // this.onEditorLoad = this.onEditorLoad.bind(this);
+    // Events.on('editor-load', this.onEditorLoad);
 
   }
   componentDidMount() {
-    const props = this.props;
-    this.editor = new Editor();
-    this.inited = true;
+    // const props = this.props;
+    // this.editor = new Editor();
+    // this.inited = true;
     const socket = io('http://localhost:1413');
     socket.on('connect', () => {
       console.log('connected!!!'); // socket.connected); // true
-      socket.emit('registerPresenter');
+      socket.emit('registerViewer');
     });
     socket.on('serverMsg', (msg) => {
       console.log('message from server: ', msg);
@@ -54,22 +53,13 @@ class PresenterPage extends Component {
       socket: socket
     })
   }
-  onEditorLoad(editor) {
-    const props = this.props;
-    const savedProjectStr = localStorage.getItem('schoolVRSave');
-    if (props.match.params.projectId === undefined || !savedProjectStr) {
-      props.sceneContext.newProject();
-    } else {
-      props.sceneContext.loadProject(JSON.parse(savedProjectStr));
-    }
-    editor.close();
-  }
-  componentDidUpdate() {
-  }
   componentWillUnmount() {
-    Events.removeListener('editor-load', this.onEditorLoad);
-    this.editor = null;
+    this.state.socket.close();
   }
+  
+  // onClick() {
+  //   // socket.emit('roomCreate', 'room A')
+  // }
   render() {
     const state = this.state;
     const sceneContext = this.props.sceneContext;
@@ -80,7 +70,7 @@ class PresenterPage extends Component {
           message='You have unsaved changes, are you sure you want to leave?'
         /> */}
         {/* <SystemPanel projectName={this.projectName} /> */}
-        <MenuComponent 
+        {/* <MenuComponent 
           // projectName="Untitled_1"
           menuButtons={[
             {
@@ -116,10 +106,10 @@ class PresenterPage extends Component {
               ]
             }
           ]}
-        />
+        /> */}
         {/* <ButtonsPanel /> */}
         <AFramePanel />
-        <SlidesPanel isEditing={false} />
+        {/* <SlidesPanel isEditing={false} /> */}
         {/* <TimelinePanel /> */}
         {/* <InfoPanel /> */}
       </div>
@@ -127,4 +117,4 @@ class PresenterPage extends Component {
   }
 }
 
-export default withSceneContext(withRouter(PresenterPage));
+export default withSceneContext(ViewerPage);

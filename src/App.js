@@ -80,21 +80,29 @@ const EditorPage = require('pages/aframeEditor/editorPage').default;
 // const PresenterPage = require('pages/aframeEditor/presenterPage').default;
 // const ViewerPage = require('pages/aframeEditor/viewerPage').default;
 const AsyncEditorPage = asyncLoadingComponent(() => import('pages/aframeEditor/editorPage'));
+const AsyncViewerPage = asyncLoadingComponent(() => import('pages/aframeEditor/viewerPage'));
 const AsyncPresenterPage = asyncLoadingComponent(() => import('pages/aframeEditor/presenterPage'));
 //const AsyncTestSaveLoad = asyncLoadingComponent(() => import('pages/TestSaveLoad'));
 const AsyncTestFileExplorer = asyncLoadingComponent(() => import('pages/TestFileExplorer/TestFileExplorer'));
 const AsyncProjectListPage = asyncLoadingComponent(() => import('pages/ProjectListPage'));
 
 class App extends Component {  
+  constructor(props) {
+    super(props);
+    // check if in electron
+    this.isElectronApp = window.require ? true: false;
+  }
   render() {    
     return (
       <SceneContextProvider>
         <div id="App">
+          {this.isElectronApp?
+          
           <Switch>
 
             {/* maybe add some checking here, if !electron, return viewer page only */}
             <Route exact path="/file-explorer" render={() => <AsyncTestFileExplorer />} />
-            <Route exact path={routes.editor} component={EditorPage} />
+            <Route exact path={routes.editor} component={AsyncEditorPage} />
             {/* <Route exact path={routes.editor} render={() => <AsyncEditorPage />} /> */}
             <Route exact path={routes.presenter} render={() => <AsyncPresenterPage />} />
             {/* <Route exact path={routes.presenter} component={PresenterPage} /> */}
@@ -102,7 +110,13 @@ class App extends Component {
             <Route exact path={routes.projectList} component={AsyncProjectListPage} />
             <Route exact path={routes.home} component={AsyncProjectListPage} />
             <Redirect to={routes.home} />
+          </Switch>:
+          <Switch>
+            <Route exact path={routes.home} component={AsyncViewerPage} />
+            <Redirect to={routes.home} />
           </Switch>
+          
+          }
         </div>
       </SceneContextProvider>
     );

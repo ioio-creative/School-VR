@@ -19,7 +19,13 @@ class ASky extends AEntity {
     this._staticAttributes = [
       {
         type: 'image',
-        name: 'Texture',
+        name: 'Image360',
+        attributeKey: 'material',
+        attributeField: 'src'
+      },
+      {
+        type: 'video',
+        name: 'Video360',
         attributeKey: 'material',
         attributeField: 'src'
       }
