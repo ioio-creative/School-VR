@@ -34,18 +34,46 @@ function openServer(port, rootDirPath = 'public/server/static') {
     console.log('listening on http://localhost:' + port);
   });
 
+  let presenter = null;
+  let sceneData = null;
+  let viewer = [];
   socketServer.on('connection', (socket) => {
     // console.log('a user connected');
     socket.on('registerPresenter', (projectData) => {
       console.log('presenter connected');
+      presenter = socket;
       socket.emit('serverMsg', 'You are now presenter');
     });
     socket.on('registerViewer', () => {
       console.log('viewer connected');
       socket.emit('serverMsg', 'You are now viewer');
+      viewer.push(socket);
+      console.log(sceneData);
+      if (sceneData) {
+        socket.emit('updateSceneData', sceneData);
+      }
     });
-    socket.on('disconnect', function(){
+    socket.on('disconnect', () => {
       console.log('user disconnected');
+    });
+    socket.on('test', (data) => {
+      if (presenter === socket) {
+        // only let presenter send msg
+        // if (data.action === "hello") {
+          socket.broadcast.emit(data);
+        // }
+      }
+    });
+    socket.on('useSceneData', (data) => {
+      console.log('useSceneData', presenter.id, socket.id);
+      if (presenter.id === socket.id) {
+        console.log('useSceneData');
+      // only let presenter send msg
+      // if (data.action === "hello") {
+        sceneData = data;
+        socket.broadcast.emit('updateSceneData', data);
+        // }
+      }
     });
     // basic flow
     /* 

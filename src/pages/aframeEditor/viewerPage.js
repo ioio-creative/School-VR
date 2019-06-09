@@ -11,6 +11,7 @@ import SlidesPanel from 'containers/aframeEditor/homePage/slidesPanel';
 import TimelinePanel from 'containers/aframeEditor/homePage/timelinePanel';
 // import AssetsPanel from 'containers/aframeEditor/homePage/assetsPanel';
 import io from 'socket.io-client';
+import Editor from 'vendor/editor.js';
 
 // import Editor from 'vendor/editor.js';
 // import {addEntityAutoType} from 'utils/aFrameEntities';
@@ -38,16 +39,30 @@ class ViewerPage extends Component {
 
   }
   componentDidMount() {
-    // const props = this.props;
-    // this.editor = new Editor();
+    const props = this.props;
+    const sceneContext = props.sceneContext;
+    this.editor = new Editor();
+    Events.on('editor-load', (editor) => {
+      editor.close();
+    })
+    sceneContext.updateEditor(this.editor);
     // this.inited = true;
-    const socket = io('http://localhost:1413');
+    const socket = io('http://10.0.1.40:1413');
     socket.on('connect', () => {
       console.log('connected!!!'); // socket.connected); // true
       socket.emit('registerViewer');
     });
     socket.on('serverMsg', (msg) => {
       console.log('message from server: ', msg);
+    })
+    socket.on('updateSceneData', (sceneData) => {
+      console.log('sceneData recieved');
+      const autoInit = setInterval(() => {
+        if (sceneContext.editor) {
+          sceneContext.loadProject(sceneData);
+          clearInterval(autoInit);
+        }
+      }, 100)
     })
     this.setState({
       socket: socket

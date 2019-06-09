@@ -150,6 +150,7 @@ class SceneContextProvider extends Component {
 
     this.events = {
       'editor-load': obj => {
+        console.log('editor-load')
         this.editor = obj;
         // try add an id to the scene
         const sceneId = uuid();
@@ -185,6 +186,15 @@ class SceneContextProvider extends Component {
     // init the data
     this.startEventListener('editor-load');
     this.startEventListener('objectselected');
+    // in case the editor loaded before context load
+    const autoInit = setInterval(() => {
+      Events.emit('getEditorInstance', (o) => {
+        console.log('hihi getEditorInstance');
+        debugger;
+        this.events['editor-load'](o);
+        clearInterval(autoInit);
+      });
+    }, 200);
     // the event emits when click on canvas
     
   }
@@ -1484,6 +1494,10 @@ class SceneContextProvider extends Component {
     this.editor.EDITOR_CAMERA.position.set(20, 10, 20);
     this.editor.EDITOR_CAMERA.lookAt(0,0,0);
   }
+
+  updateEditor(editor) {
+    this.editor = editor;
+  }
   render() {
     // console.log('context render');
     const props = this.props;
@@ -1560,6 +1574,7 @@ class SceneContextProvider extends Component {
           resetView: this.resetView,
           // editor
           editor: this.editor,
+          updateEditor: this.updateEditor,
           // variables, should use functions to return?
           // appName: this.state.appName,
           // projectName: this.state.projectName,

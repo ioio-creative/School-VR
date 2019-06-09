@@ -19,6 +19,11 @@ import Editor from 'vendor/editor.js';
 // import {TweenMax, TimelineMax, Linear} from 'gsap';
 import io from 'socket.io-client';
 
+import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
+import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
+import ipcHelper from 'utils/ipc/ipcHelper';
+import routes from 'globals/routes';
+
 import './presenterPage.css';
 const Events = require('vendor/Events.js');
 const uuid = require('uuid/v1');
@@ -27,6 +32,8 @@ const uuid = require('uuid/v1');
 // const validator = new jsonSchemaValidator();
 // const schema = require('schema/aframe_schema_20181108.json');
 
+let loadedProjectFilePath = '';
+
 class PresenterPage extends Component {
   constructor(props) {
     super(props);
@@ -34,13 +41,22 @@ class PresenterPage extends Component {
     this.state = {
       socket: null
     }
-    this.onEditorLoad = this.onEditorLoad.bind(this);
-    Events.on('editor-load', this.onEditorLoad);
-
+    // this.onEditorLoad = this.onEditorLoad.bind(this);
+    // Events.on('editor-load', this.onEditorLoad);
+    this.handleHomeButtonClick = this.handleHomeButtonClick.bind(this);
+    this.handleOpenProjectButtonClick = this.handleOpenProjectButtonClick.bind(this);
+    this.handleExitButtonClick = this.handleExitButtonClick.bind(this);
+    this.loadProject = this.loadProject.bind(this);
   }
   componentDidMount() {
     const props = this.props;
+    const sceneContext = props.sceneContext;
     this.editor = new Editor();
+    Events.on('editor-load', (editor) => {
+      editor.close();
+    })
+    sceneContext.updateEditor(this.editor);
+    // this.props.sceneContext
     this.inited = true;
     const socket = io('http://localhost:1413');
     socket.on('connect', () => {
@@ -50,25 +66,75 @@ class PresenterPage extends Component {
     socket.on('serverMsg', (msg) => {
       console.log('message from server: ', msg);
     })
+    // document.addEventListener('dblclick', this.sendMessage);
     this.setState({
       socket: socket
     })
   }
-  onEditorLoad(editor) {
-    const props = this.props;
-    const savedProjectStr = localStorage.getItem('schoolVRSave');
-    if (props.match.params.projectId === undefined || !savedProjectStr) {
-      props.sceneContext.newProject();
-    } else {
-      props.sceneContext.loadProject(JSON.parse(savedProjectStr));
-    }
-    editor.close();
-  }
+  // onEditorLoad(editor) {
+  //   const props = this.props;
+  //   const savedProjectStr = localStorage.getItem('schoolVRSave');
+  //   if (props.match.params.projectId === undefined || !savedProjectStr) {
+  //     props.sceneContext.newProject();
+  //   } else {
+  //     props.sceneContext.loadProject(JSON.parse(savedProjectStr));
+  //   }
+  //   editor.close();
+  // }
   componentDidUpdate() {
   }
   componentWillUnmount() {
-    Events.removeListener('editor-load', this.onEditorLoad);
+    // Events.removeListener('editor-load', this.onEditorLoad);
     this.editor = null;
+    // document.removeEventListener('dblclick', this.sendMessage);
+  }
+  // sendMessage(msg) {
+  //   this.state.socket.emit('test', 'hello');
+  // }
+
+  handleHomeButtonClick(event) {
+    this.props.history.push(routes.home);
+  }
+
+  handleOpenProjectButtonClick(event) {
+    ipcHelper.openSchoolVrFileDialog((err, data) => {
+      if (err) {
+        handleErrorWithUiDefault(err);
+        return;
+      }
+
+      const filePaths = data.filePaths;
+
+      if (!isNonEmptyArray(filePaths)) {
+        return;
+      }
+      
+      this.loadProject(filePaths[0]);
+    });
+  }
+  
+  handleExitButtonClick(event) {
+    ipcHelper.closeWindow();
+  }
+
+  loadProject(projectFilePath) {
+    const state = this.state;
+    const sceneContext = this.props.sceneContext;
+    ipcHelper.loadProjectByProjectFilePath(projectFilePath, (err, data) => {
+      if (err) {
+        handleErrorWithUiDefault(err);
+        return;                         
+      }
+
+      // TODO: ask hung to put into sceneContext
+      loadedProjectFilePath = projectFilePath;
+      
+      const projectJsonData = data.projectJson;
+      //console.log(projectJsonData);
+      // send a copy to server
+      state.socket.emit('useSceneData', projectJsonData);
+      sceneContext.loadProject(projectJsonData);   
+    });
   }
   render() {
     const state = this.state;
@@ -88,31 +154,26 @@ class PresenterPage extends Component {
               // onClick: _=> { console.log('file') },
               children: [
                 {
-                  label: 'New',
-                  disabled: false,
-                  onClick: _=> { 
-                    console.log('new');
-                    // test open file with user defined extension
-                    // const fileDialog = document.createElement('input');
-                    // fileDialog.type = 'file';
-                    // fileDialog.multiple = true;
-                    // fileDialog.accept = ['image/x-png','image/gif'];
-                    // fileDialog.click();
+                    label: 'Home',
+                    disabled: false,
+                    onClick: this.handleHomeButtonClick                                      
+                  },
+                  {
+                    label: '-'
+                  },
+                  {
+                    label: 'Open',
+                    disabled: false,
+                    onClick: this.handleOpenProjectButtonClick
+                  },
+                  {
+                    label: '-'
+                  },
+                  {
+                    label: 'Exit',
+                    disabled: false,
+                    onClick: this.handleExitButtonClick
                   }
-                },
-                {
-                  label: 'Open',
-                  disabled: false,
-                  onClick: _=> { console.log('open') }
-                },
-                {
-                  label: '-'
-                },
-                {
-                  label: 'Exit',
-                  disabled: false,
-                  onClick: _=> { console.log('exit') }
-                }
               ]
             }
           ]}

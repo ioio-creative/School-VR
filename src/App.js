@@ -77,8 +77,8 @@ faIconsNeed.forEach(iconName => {
 // Code Splitting and React Router v4
 // https://serverless-stack.com/chapters/code-splitting-in-create-react-app.html
 const EditorPage = require('pages/aframeEditor/editorPage').default;
-// const PresenterPage = require('pages/aframeEditor/presenterPage').default;
-// const ViewerPage = require('pages/aframeEditor/viewerPage').default;
+const PresenterPage = require('pages/aframeEditor/presenterPage').default;
+const ViewerPage = require('pages/aframeEditor/viewerPage').default;
 const AsyncEditorPage = asyncLoadingComponent(() => import('pages/aframeEditor/editorPage'));
 const AsyncViewerPage = asyncLoadingComponent(() => import('pages/aframeEditor/viewerPage'));
 const AsyncPresenterPage = asyncLoadingComponent(() => import('pages/aframeEditor/presenterPage'));
@@ -104,7 +104,7 @@ class App extends Component {
             <Route exact path="/file-explorer" render={() => <AsyncTestFileExplorer />} />
             <Route exact path={routes.editor} component={AsyncEditorPage} />
             {/* <Route exact path={routes.editor} render={() => <AsyncEditorPage />} /> */}
-            <Route exact path={routes.presenter} render={() => <AsyncPresenterPage />} />
+            <Route exact path={routes.presenter} component={AsyncPresenterPage} />
             {/* <Route exact path={routes.presenter} component={PresenterPage} /> */}
             {/* <Route exact path={routes.viewer} component={ViewerPage} /> */}
             <Route exact path={routes.projectList} component={AsyncProjectListPage} />
