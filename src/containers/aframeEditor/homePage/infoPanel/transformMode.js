@@ -1,5 +1,10 @@
 import React, {Component, Fragment} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+
+import iconTranslate from 'media/icons/translate.svg';
+import iconRotate from 'media/icons/rotate.svg';
+import iconScale from 'media/icons/scale.svg';
+
 var Events = require('vendor/Events.js');
 
 class TransformMode extends Component {
@@ -52,7 +57,8 @@ class TransformMode extends Component {
                 onClick={()=>{this.changeTransformMode('translate')}}
                 title="Translate"
               >
-                <FontAwesomeIcon icon="arrows-alt" />
+                <img src={iconTranslate} />
+                <div>Position</div>
               </button>;
             }
             case 'rotate': {
@@ -62,7 +68,8 @@ class TransformMode extends Component {
                 onClick={()=>{this.changeTransformMode('rotate')}}
                 title="Rotate"
               >
-                <FontAwesomeIcon icon="sync-alt" />
+                <img src={iconRotate} />
+                <div>Rotate</div>
               </button>;
             }
             case 'scale': {
@@ -72,7 +79,8 @@ class TransformMode extends Component {
                 onClick={()=>{this.changeTransformMode('scale')}}
                 title="Scale"
               >
-                <FontAwesomeIcon icon="expand-arrows-alt" />
+                <img src={iconScale} />
+                <div>Scale</div>
               </button>;
             }
           }

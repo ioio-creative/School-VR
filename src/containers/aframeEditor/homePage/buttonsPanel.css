@@ -12,29 +12,49 @@
   border: 1px solid transparent;
   cursor: pointer;
   vertical-align: middle;
+  margin-right: 6px;
 }
 #buttons-panel button:hover {
   border: 1px solid #444444;
 }
 #buttons-panel button img {
-  width: 40px;
-  height: 40px;
+  width: 26px;
+  height: 26px;
 }
 #buttons-panel .buttons-list {
-  border-left: 1px solid #b4b1b1;
+  /* border-left: 1px solid #b4b1b1; */
+  position: relative;
   /* flex: 1 0; */
 }
 #buttons-panel .buttons-list.buttons-3d {
   flex: 0 0 auto;
 }
-#buttons-panel .buttons-list:nth-child(1) {
-  border-left: 0;
+/* #buttons-panel .buttons-list:before {
+  content: '';
+  width: 1px;
+  background-color: #8697AD;
+  display: block;
+  height: 30px;
+  position: absolute;
+  top: 10px;
+  left: 0;
 }
+#buttons-panel .buttons-list:nth-child(1):before {
+  display: none;
+} */
 #buttons-panel .buttons-list-wrapper {
   width: 100%;
+  height: 100%;
   padding: 0 15px;
   display: flex;
 }
+#buttons-panel .buttons-list.buttons-3d .buttons-list-wrapper {
+  padding-right: 0;
+}
+#buttons-panel .buttons-list.buttons-2d .buttons-list-wrapper {
+  padding-left: 0;
+}
+
 #buttons-panel button {
   color: #FFFFFF;
 }
@@ -105,11 +125,54 @@
   fill: #9de0de;
 }
 
-.buttons-presentation {
+#buttons-panel .buttons-presentation {
   margin-left: auto;
+  padding: 0 5px;
 }
-.buttons-presentation .button-present {
+#buttons-panel .buttons-presentation button {
+  margin-right: 0;
+}
+#buttons-panel .buttons-presentation .button-present {
+  display: flex;
+  align-items: center;
   color: #FFF;
-  display: block;
   text-align: center;
+  margin-left: 20px;
+}
+
+#buttons-panel .seperator {
+  position: relative;
+  width: 1px;
+  margin: 0 20px;
+}
+
+#buttons-panel .seperator:after {
+  content: '';
+  width: 1px;
+  height: 19px;
+  background: #4d5054;
+  display: block;
+  top: 15.5px;
+  position: absolute;
+}
+
+#buttons-panel .buttons-list.buttons-2d .addText img {
+  width: 23px;
+  height: 23px;
+}
+
+#buttons-panel .button-resetView img {
+  height: 32px;
+  width: 32px;
+}
+#buttons-panel .buttons-presentation .button-present img {
+  height: 26px;
+}
+#buttons-panel button.button-preview img {
+  width: 19px;
+  height: 19px;
+}
+#buttons-panel .button-undo img,#buttons-panel .button-redo img {
+  width: 24px;
+  height: 24px;
 }

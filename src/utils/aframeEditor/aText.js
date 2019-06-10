@@ -24,12 +24,12 @@ class AText extends AEntity {
       ]
     };
     this._staticAttributes = [
-      {
-        type: 'image',
-        name: 'Texture',
-        attributeKey: 'material',
-        attributeField: 'src'
-      },
+      // {
+      //   type: 'image',
+      //   name: 'Texture',
+      //   attributeKey: 'material',
+      //   attributeField: 'src'
+      // },
       {
         type: 'text',
         name: 'Text',
@@ -37,7 +37,7 @@ class AText extends AEntity {
         attributeField: 'value'
       },
       {
-        type: 'text',
+        type: 'number',
         name: 'Font Size',
         attributeKey: 'ttfFont',
         attributeField: 'fontSize'

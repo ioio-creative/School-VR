@@ -189,10 +189,9 @@ class StaticInfoRenderer extends Component {
             />
           </div>
         }
-        {animatableAttributes.material && animatableAttributes.material.indexOf('color') !== -1 &&
-          <div className="attribute-col color-col" onClick={() => this.changeTransformMode(null)}>
-            <div title={rgba2hex(data.material.color)}>
-              <div className="field-label">Color:</div>
+        <div className="attribute-buttons-wrapper">
+          {animatableAttributes.material && animatableAttributes.material.indexOf('color') !== -1 &&
+            <div className="attribute-button color-col" title={rgba2hex(data.material.color)} onClick={() => this.changeTransformMode(null)}>
               <ColorPicker key={currentEntity.id + data.material.color}
                 field={'material'}
                 color={rgba2hex(data.material.color)} 
@@ -203,29 +202,26 @@ class StaticInfoRenderer extends Component {
                 }}
                 currentEntity={currentEntity}
               />
+              <div className="field-label">Color</div>
             </div>
-            {/* <input type="color" value={color} onInput={(event) => this.changeObjectField('material.color', event.target.value)} hidden/> */}
-          </div>
-        }
-        {animatableAttributes.material && animatableAttributes.material.indexOf('opacity') !== -1 &&
-          <div className="attribute-col opacity-col" onClick={() => this.changeTransformMode(null)}>
-            <div className="field-label">Opacity:</div>
-            <OpacityPicker key={currentEntity.id}
-              field={'material'}
-              opacity={data.material.opacity} 
-              timelineId={currentEntity.id} 
-              timelinePosition={''} 
-              onUpdate={(newOpacity) => {
-                this.changeObjectField('material.opacity', newOpacity)
-              }}
-              currentEntity={currentEntity}
-            />
-          </div>
-        }
-        {animatableAttributes.ttfFont && animatableAttributes.ttfFont.indexOf('color') !== -1 &&
-          <div className="attribute-col color-col" onClick={() => this.changeTransformMode(null)}>
-            <div title={data.ttfFont.color}>
-              <div className="field-label">Text Color:</div>
+          }
+          {animatableAttributes.material && animatableAttributes.material.indexOf('opacity') !== -1 &&
+            <div className="attribute-button opacity-col" onClick={() => this.changeTransformMode(null)}>
+              <OpacityPicker key={currentEntity.id}
+                field={'material'}
+                opacity={data.material.opacity} 
+                timelineId={currentEntity.id} 
+                timelinePosition={''} 
+                onUpdate={(newOpacity) => {
+                  this.changeObjectField('material.opacity', newOpacity)
+                }}
+                currentEntity={currentEntity}
+              />
+              <div className="field-label">Opacity</div>
+            </div>
+          }
+          {animatableAttributes.ttfFont && animatableAttributes.ttfFont.indexOf('color') !== -1 &&
+            <div className="attribute-button color-col" title={data.ttfFont.color} onClick={() => this.changeTransformMode(null)}>
               <ColorPicker key={currentEntity.id + data.ttfFont.color}
                 field={'ttfFont'}
                 color={data.ttfFont.color} 
@@ -236,96 +232,97 @@ class StaticInfoRenderer extends Component {
                 }}
                 currentEntity={currentEntity}
               />
+              <div className="field-label">Text Color</div>
+              {/* <input type="color" value={color} onInput={(event) => this.changeObjectField('material.color', event.target.value)} hidden/> */}
             </div>
-            {/* <input type="color" value={color} onInput={(event) => this.changeObjectField('material.color', event.target.value)} hidden/> */}
-          </div>
-        }
-        {animatableAttributes.ttfFont && animatableAttributes.ttfFont.indexOf('opacity') !== -1 &&
-          <div className="attribute-col opacity-col" onClick={() => this.changeTransformMode(null)}>
-            <div className="field-label">Text Opacity:</div>
-            <OpacityPicker key={currentEntity.id}
-              field={'ttfFont'}
-              opacity={data.ttfFont.opacity} 
-              timelineId={currentEntity.id} 
-              timelinePosition={''} 
-              onUpdate={(newOpacity) => {
-                this.changeObjectField('ttfFont.opacity', newOpacity)
-              }}
-              currentEntity={currentEntity}
-            />
-          </div>
-        }
-        {animatableAttributes.ttfFont && animatableAttributes.ttfFont.indexOf('fontSize') !== -1 &&
-          <div className="attribute-col opacity-col" onClick={() => this.changeTransformMode(null)}>
-            <div className="field-label">Font Size:</div>
-            <input type="ttfFont" value={data.ttfFont.fontSize} onInput={(e) => {
-              currentEntity.el.setAttribute('ttfFont', {
-                fontSize: e.currentTarget.value
-              })
-              {/* this.setState((prevState) => {
-                return {
-                  additionalAttributes: {
-                    ...prevState.additionalAttributes,
-                    radiusTop: e.currentTarget.value
+          }
+          {animatableAttributes.ttfFont && animatableAttributes.ttfFont.indexOf('opacity') !== -1 &&
+            <div className="attribute-button opacity-col" onClick={() => this.changeTransformMode(null)}>
+              <OpacityPicker key={currentEntity.id}
+                field={'ttfFont'}
+                opacity={data.ttfFont.opacity} 
+                timelineId={currentEntity.id} 
+                timelinePosition={''} 
+                onUpdate={(newOpacity) => {
+                  this.changeObjectField('ttfFont.opacity', newOpacity)
+                }}
+                currentEntity={currentEntity}
+              />
+              <div className="field-label">Text Opacity</div>
+            </div>
+          }
+          {animatableAttributes.ttfFont && animatableAttributes.ttfFont.indexOf('fontSize') !== -1 &&
+            <div className="attribute-button opacity-col" onClick={() => this.changeTransformMode(null)}>
+              <div className="field-label">Font Size:</div>
+              <input type="ttfFont" value={data.ttfFont.fontSize} onInput={(e) => {
+                currentEntity.el.setAttribute('ttfFont', {
+                  fontSize: e.currentTarget.value
+                })
+                {/* this.setState((prevState) => {
+                  return {
+                    additionalAttributes: {
+                      ...prevState.additionalAttributes,
+                      radiusTop: e.currentTarget.value
+                    }
                   }
-                }
-              }) */}
-              this.changeObjectField('ttfFont.fontSize', e.currentTarget.value)
-            }} onBlur={(e) => {
-              this.changeObjectField('ttfFont.fontSize', e.currentTarget.value)
-            }} />
-          </div>
-        }
-        {animatableAttributes.geometry && animatableAttributes.geometry.indexOf('radiusTop') !== -1 &&
-          <div className="attribute-col opacity-col" onClick={() => this.changeTransformMode(null)}>
-            <div className="field-label">Radius Top:</div>
-            <input type="text" value={state.additionalAttributes.radiusTop} onInput={(e) => {
-              currentEntity.el.setAttribute('geometry', {
-                radiusTop: e.currentTarget.value
-              })
-              this.setState((prevState) => {
-                return {
-                  additionalAttributes: {
-                    ...prevState.additionalAttributes,
-                    radiusTop: e.currentTarget.value
+                }) */}
+                this.changeObjectField('ttfFont.fontSize', e.currentTarget.value)
+              }} onBlur={(e) => {
+                this.changeObjectField('ttfFont.fontSize', e.currentTarget.value)
+              }} />
+            </div>
+          }
+          {animatableAttributes.geometry && animatableAttributes.geometry.indexOf('radiusTop') !== -1 &&
+            <div className="attribute-button opacity-col" onClick={() => this.changeTransformMode(null)}>
+              <div className="field-label">Radius Top:</div>
+              <input type="text" value={state.additionalAttributes.radiusTop} onInput={(e) => {
+                currentEntity.el.setAttribute('geometry', {
+                  radiusTop: e.currentTarget.value
+                })
+                this.setState((prevState) => {
+                  return {
+                    additionalAttributes: {
+                      ...prevState.additionalAttributes,
+                      radiusTop: e.currentTarget.value
+                    }
                   }
-                }
-              })
-            }} onBlur={(e) => {
-              this.changeObjectField('geometry.radiusTop', state.additionalAttributes.radiusTop)
-            }} />
-          </div>
-        }
-        {animatableAttributes.geometry && animatableAttributes.geometry.indexOf('radiusBottom') !== -1 &&
-          <div className="attribute-col opacity-col" onClick={() => this.changeTransformMode(null)}>
-            <div className="field-label">Radius Bottom:</div>
-            <input type="text" value={state.additionalAttributes.radiusBottom} onInput={(e) => {
-              currentEntity.el.setAttribute('geometry', {
-                radiusBottom: e.currentTarget.value
-              })
-              this.setState((prevState) => {
-                return {
-                  additionalAttributes: {
-                    ...prevState.additionalAttributes,
-                    radiusBottom: e.currentTarget.value
+                })
+              }} onBlur={(e) => {
+                this.changeObjectField('geometry.radiusTop', state.additionalAttributes.radiusTop)
+              }} />
+            </div>
+          }
+          {animatableAttributes.geometry && animatableAttributes.geometry.indexOf('radiusBottom') !== -1 &&
+            <div className="attribute-button opacity-col" onClick={() => this.changeTransformMode(null)}>
+              <div className="field-label">Radius Bottom:</div>
+              <input type="text" value={state.additionalAttributes.radiusBottom} onInput={(e) => {
+                currentEntity.el.setAttribute('geometry', {
+                  radiusBottom: e.currentTarget.value
+                })
+                this.setState((prevState) => {
+                  return {
+                    additionalAttributes: {
+                      ...prevState.additionalAttributes,
+                      radiusBottom: e.currentTarget.value
+                    }
                   }
-                }
-              })
-            }} onBlur={(e) => {
-              this.changeObjectField('geometry.radiusBottom', state.additionalAttributes.radiusBottom)
+                })
+              }} onBlur={(e) => {
+                this.changeObjectField('geometry.radiusBottom', state.additionalAttributes.radiusBottom)
+              }} />
+            </div>
+          }
+          {animatableAttributes.cameraPreview &&
+          <div className="attribute-button preview-col">
+            <canvas ref={ref=>{
+              {/* props.model.setEditorInstance(this.editor) */}
+              props.model.setCameraPreviewEl(ref)
+              props.model.setEditorInstance(props.sceneContext.editor)
+            }} onClick={_=> {
+              props.model.renderCameraPreview(props.sceneContext);
             }} />
-          </div>
-        }
-        {animatableAttributes.cameraPreview &&
-        <div className="attribute-col preview-col">
-          <canvas ref={ref=>{
-            {/* props.model.setEditorInstance(this.editor) */}
-            props.model.setCameraPreviewEl(ref)
-            props.model.setEditorInstance(props.sceneContext.editor)
-          }} onClick={_=> {
-            props.model.renderCameraPreview(props.sceneContext);
-          }} />
-        </div>}
+          </div>}
+        </div>
       </div>
     );
   }

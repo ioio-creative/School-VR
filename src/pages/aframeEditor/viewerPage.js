@@ -49,7 +49,7 @@ class ViewerPage extends Component {
     sceneContext.updateEditor(this.editor);
     // TODO
     // need to get the current machine ip and port from ipc
-    const socket = io('http://10.0.1.40:1413');
+    const socket = io(window.location.origin);
     socket.on('connect', () => {
       console.log('connected!!!'); // socket.connected); // true
       socket.emit('registerViewer');

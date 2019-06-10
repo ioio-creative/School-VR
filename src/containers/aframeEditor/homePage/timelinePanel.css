@@ -43,9 +43,21 @@
 #timeline-panel.panel .panel-header .preview-timeline {
   margin-right: 10px;
 }
+#timeline-panel.panel .panel-header .header-text {
+  width: 150px;
+  text-align: right;
+  padding: 5px 15px 5px 0;
+  font-size: 16px;
+}
+#timeline-panel.panel .panel-header .timer {
+  display: flex;
+  align-items: center;
+}
 #timeline-panel.panel .panel-header .timer .current-time {
   color: #28a8ff;
-  min-width: 45px;
+  min-width: 70px;
+  font-size: 16px;
+  font-weight: bold;
   text-align: right;
   display: inline-block;
   vertical-align: top;
@@ -53,6 +65,10 @@
 #timeline-panel.panel .panel-header .preview-timeline {
   cursor: pointer;
   padding: 2px;
+  display: flex;
+  align-items: center;
+  margin-left: 15px;
+  font-size: 16px;
 }
 #timeline-panel.panel .panel-header .toggle-panel:after {
   border-top: 0;
@@ -73,7 +89,7 @@
 }
 #timeline-panel.panel.opened .panel-body {
   height: 162px;
-  padding-top: 21px;
+  padding-top: 31px;
 }
 #timeline-panel .time-scaler {
   white-space: nowrap;
@@ -107,6 +123,12 @@
   margin-top: 9px;
   cursor: ew-resize;
   /* display: none; */
+}
+#timeline-panel.panel.opened .time-scaler .time-pointer:before {
+  width: 13px;
+  height: 13px;
+  margin-left: -6px;
+  margin-top: 18px;
 }
 #timeline-panel .time-scaler .time-pointer:after {
   content: '';

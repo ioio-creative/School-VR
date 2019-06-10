@@ -106,7 +106,7 @@ class App extends Component {
             {/* <Route exact path={routes.editor} render={() => <AsyncEditorPage />} /> */}
             <Route exact path={routes.presenter} component={AsyncPresenterPage} />
             {/* <Route exact path={routes.presenter} component={PresenterPage} /> */}
-            {/* <Route exact path={routes.viewer} component={ViewerPage} /> */}
+            <Route exact path={routes.viewer} component={ViewerPage} />
             <Route exact path={routes.projectList} component={AsyncProjectListPage} />
             <Route exact path={routes.home} component={AsyncProjectListPage} />
             <Redirect to={routes.home} />

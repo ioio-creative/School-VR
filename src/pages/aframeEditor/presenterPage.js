@@ -57,7 +57,8 @@ class PresenterPage extends Component {
     sceneContext.updateEditor(this.editor);
     // this.props.sceneContext
     this.inited = true;
-    const socket = io('http://localhost:1413');
+    // get the ip and port from ipc
+    const socket = io(window.location.origin);
     socket.on('connect', () => {
       console.log('connected!!!'); // socket.connected); // true
       socket.emit('registerPresenter');

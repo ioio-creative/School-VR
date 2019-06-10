@@ -1,0 +1,20 @@
+.attribute-buttons-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+}
+.attribute-buttons-wrapper .attribute-button {
+  flex: 0 0 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.attribute-button .back-button {
+  padding: 5px 10px 0;
+  display: inline-block;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+}

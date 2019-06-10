@@ -59,12 +59,30 @@ const getIpByInterfaceName = (interfaceName) => {
   return ifnameAddressMap.get(interfaceName);
 };
 
+const getAllIps = () => {
+  if (!ifnameAddressMap) {
+    initializeIfnameAddressMap();
+  }
+  return ifnameAddressMap;
+};
+
+const getIp = () => {
+  if (!ifnameAddressMap) {
+    initializeIfnameAddressMap();
+  }
+  const ethernetIp = getIpByInterfaceName('Ethernet');
+  const wifiIp = getIpByInterfaceName('Wi-Fi');
+  return ethernetIp? ethernetIp: wifiIp;
+};
+
 /* end of public functions */
 
 
 /* exports */
 
 module.exports = {
+  getIp: getIp,
+  getAllIps: getAllIps,
   getIpByInterfaceName: getIpByInterfaceName
 };
 

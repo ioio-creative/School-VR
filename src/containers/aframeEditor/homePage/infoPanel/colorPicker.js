@@ -67,6 +67,12 @@ class ColorPicker extends Component {
       { this.state.displayColorPicker ? <div style={{
         position: 'absolute',
         zIndex: 2,
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+        borderRadius: 15
+
       }}>
         <div style={{
           position: 'fixed',
@@ -75,6 +81,10 @@ class ColorPicker extends Component {
           bottom: '0px',
           left: '0px',
         }} onClick={this.handleClose} />
+        <div className="back-button" 
+          onClick={this.handleClose}>
+          back
+        </div>
         <SketchPicker
           color={state.color}
           onChange={this.handleChange}
@@ -91,10 +101,20 @@ class ColorPicker extends Component {
           ]}
           styles={{
             default: {
+              picker: {
+                background: '#03141c',
+                width: '100%',
+                //height: '100%',
+                boxSizing: 'border-box',
+                borderRadius: 15
+              },
               hue: {
                 position: 'relative',
                 height: '24px',
                 overflow: 'hidden'
+              },
+              saturation: {
+                paddingBottom: '30%'
               }
             },
             disableAlpha: {

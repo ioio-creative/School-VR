@@ -11,10 +11,10 @@ class ACone extends AEntity {
         'color',
         'opacity'
       ],
-      geometry: [
-        'radiusTop',
-        'radiusBottom'
-      ]
+      // geometry: [
+      //   'radiusTop',
+      //   'radiusBottom'
+      // ]
     }
     this._staticAttributes = [
       {
@@ -49,10 +49,10 @@ class ACone extends AEntity {
         color: '#FFFFFF',
         opacity: 1
       },
-      geometry: {
-        'radiusTop': 0,
-        'radiusBottom': 1
-      }
+      // geometry: {
+      //   'radiusTop': 0,
+      //   'radiusBottom': 1
+      // }
     }
   }
 }

@@ -6,6 +6,7 @@ var http = require("http");              // http server core module
 var express = require("express");           // web framework external module
 var serveStatic = require('serve-static');  // serve static files
 var socketIo = require("socket.io");        // web socket external module
+var getIp = require("../utils/getIp").getIp;
 // var easyrtc = require("easyrtc");               // EasyRTC external module
 
 // const myPath = require('../utils/fileSystem/myPath');
@@ -43,6 +44,7 @@ function openServer(port, rootDirPath = 'public/server/static') {
       console.log('presenter connected');
       presenter = socket;
       socket.emit('serverMsg', 'You are now presenter');
+      console.log(getIp());
     });
     socket.on('registerViewer', () => {
       console.log('viewer connected');

@@ -23,6 +23,12 @@ import iconText from 'media/icons/text.svg';
 import iconImage from 'media/icons/image.svg';
 import iconVideo from 'media/icons/video.svg';
 import iconSky from 'media/icons/360.svg';
+
+import iconUndo from 'media/icons/undo.svg';
+import iconRedo from 'media/icons/redo.svg';
+import iconResetView from 'media/icons/resetview.svg';
+import iconPreview from 'media/icons/preview.svg';
+import iconShare from 'media/icons/share.svg';
 import './buttonsPanel.css';
 import config from 'globals/config';
 
@@ -85,6 +91,7 @@ class ButtonsPanel extends Component {
             </button>
           </div>
         </div>
+        <div className="seperator"></div>
         <div className="buttons-list buttons-2d">
           <div className="buttons-list-wrapper">
             <button onClick={()=>this.addNewEntity('a-plane')} title={'Add a image'}>
@@ -93,7 +100,7 @@ class ButtonsPanel extends Component {
             <button onClick={()=>this.addNewEntity('a-video')} title={'Add a video'}>
               <img src={iconVideo} alt=""/>
             </button>
-            <button onClick={()=>this.addNewEntity('a-text')} title={'Add a text'}>
+            <button onClick={()=>this.addNewEntity('a-text')} className="addText" title={'Add a text'}>
               <img src={iconText} alt=""/>
             </button>
             {/* <button onClick={()=>this.addNewEntity('a-triangle')}>
@@ -118,10 +125,27 @@ class ButtonsPanel extends Component {
             </button> */}
           </div>
         </div>
-        <div className="button-list buttons-presentation">
+        <div className="buttons-list buttons-presentation">
           <div className="buttons-list-wrapper">
-            <button className="button-present" onClick={this.resetView}>Reset View</button>
-            <Link className="button-present" to={'/presenter/1'}>presenter mode<br />(under construction)</Link>
+            <button className="button-undo" onClick={sceneContext.undo}>
+              <img src={iconUndo} alt="" />
+            </button>
+            <button className="button-redo" onClick={sceneContext.redo}>
+              <img src={iconRedo} alt="" />
+            </button>
+            <div className="seperator"></div>
+            <button className="button-resetView" onClick={this.resetView}>
+              <img src={iconResetView} alt="" />
+            </button>
+            <div className="seperator"></div>
+            <button className="button-preview"
+              // onClick={this.resetView}
+            >
+              <img src={iconPreview} alt="" />
+            </button>
+            <Link className="button-present" to={'/presenter/1'}>
+              <img src={iconShare} alt="" />
+            </Link>
           </div>
         </div>
       </div>

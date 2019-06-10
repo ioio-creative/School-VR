@@ -42,6 +42,9 @@ import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefau
 import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 import fileHelper from 'utils/fileHelper/fileHelper';
 
+import iconCirclePlus from 'media/icons/circleplus.svg';
+import iconCircleMinus from 'media/icons/circleminus.svg';
+
 var Events = require('vendor/Events.js');
 
 // const infoRenderer = {
@@ -168,9 +171,9 @@ class InfoPanel extends Component {
     if (staticAttributes.length) {
       staticPanel = <div id="content-panel">
         <div className="panel">
-          <div className="panel-header">
+          {/* <div className="panel-header">
             Content - {selectedEntity['name']}
-          </div>
+          </div> */}
           <div className="panel-body">
             {staticAttributes.map(staticAttribute => {
               let inputField = null;
@@ -187,7 +190,7 @@ class InfoPanel extends Component {
               {/* console.log(staticAttribute.type); */}
               switch (staticAttribute.type) {
                 case 'text': {
-                  inputField = <input type="text" key={selectedEntity.el.id} onInput={(event) => {
+                  inputField = <input type="text" className="contentTextInput" key={selectedEntity.el.id} onInput={(event) => {
                     {/* selectedEntity.el.setAttribute(staticAttribute.attributeKey,
                     {
                       [staticAttribute.attributeField]: event.target.value
@@ -234,7 +237,7 @@ class InfoPanel extends Component {
                 }
                 case 'image': {
                   // use electron api to load
-                  {/* inputField = <div onClick={_=> {
+                  inputField = <div onClick={_=> {
                     ipcHelper.openImageDialog((err, data) => {
                       sceneContext.updateEntity({
                           material: {
@@ -243,32 +246,86 @@ class InfoPanel extends Component {
                         }, selectedEntity['id']);
                       selectedEntity.el.setAttribute('material', `src:url(${data.filePaths})`);
                     })
-                  }}>choose</div> */}
+                  }}>choose</div>
                   // temp use browser api to debug
-                  inputField = <input type="file" accept="image/svg+xml,image/jpeg,image/png" onChange={(event) => {
+                  // inputField = <input type="file" accept="image/svg+xml,image/jpeg,image/png" onChange={(event) => {
+                  //   if (event.target.files && event.target.files[0]) {
+                  //     {/* const FR= new FileReader();
+                  //     FR.addEventListener("load", function(e) {
+                  //       // console.log(e.target.result);
+                  //       selectedEntity.el.setAttribute('material', `src:url(${e.target.result})`);
+                  //       sceneContext.updateEntity({
+                  //         material: {
+                  //           src: `url(${e.target.result})`
+                  //         }
+                  //         // [staticAttribute.attributeKey]: {
+                  //           // [staticAttribute.attributeField]: event.target.value
+                  //         // }
+                  //       }, selectedEntity['id']);
+                  //     }); 
+                  //     FR.readAsDataURL( event.target.files[0] ); */}
+                  //     {/* console.log(event.target.files[0].type); */}
+                  //     /**
+                  //     image/svg+xml
+                  //     image/jpeg
+                  //     image/gif
+                  //     image/png
+                  //     video/mp4
+                  //      */
+                  //     const newAssetData = sceneContext.addAsset(event.target.files[0]);
+                  //     selectedEntity.el.setAttribute('material', `src:#${newAssetData.id};shader: ${newAssetData.shader}`);
+                  //     sceneContext.updateEntity({
+                  //       material: {
+                  //         src: `#${newAssetData.id}`,
+                  //         shader: newAssetData.shader
+                  //       }
+                  //     }, selectedEntity['id']);
+                  //    
+                  //   } else { 
+                  //     selectedEntity.el.removeAttribute('material', 'src');
+                  //   }
+                  // }} />
+                  break;
+                }
+                case 'video': {
+                  // use electron api to load
+                  inputField = <div onClick={_=> {
+                    ipcHelper.openVideoDialog((err, data) => {
+                      if (err) {
+                        handleErrorWithUiDefault(err);
+                        return;
+                      }
+
+                      const filePaths = data.filePaths;
+
+                      if (!isNonEmptyArray(filePaths)) {
+                        return;
+                      }
+
+                      {/* const mimeType = fileHelper.getMimeType(filePaths[0]); */}
+
+                      const newAssetData = sceneContext.addAsset({
+                        filePath: filePaths[0],
+                        type: 'video/mp4', // data.type not pass from the ipc
+                      });
+                      selectedEntity.el.setAttribute('material', `src:#${newAssetData.id};shader: ${newAssetData.shader}`);
+                      sceneContext.updateEntity({
+                        material: {
+                          src: `#${newAssetData.id}`,
+                          shader: newAssetData.shader
+                        }
+                      }, selectedEntity['id']);
+                      {/* sceneContext.updateEntity({
+                        material: {
+                          src: `url(${data.filePaths})`
+                        }
+                      }, selectedEntity['id']); */}
+                      {/* selectedEntity.el.setAttribute('material', `src:url(${data.filePaths})`); */}
+                    })
+                  }}>choose</div>
+                  // temp use browser api to debug
+                  {/* inputField = <input type="file" accept="video/mp4" onChange={(event) => {
                     if (event.target.files && event.target.files[0]) {
-                      {/* const FR= new FileReader();
-                      FR.addEventListener("load", function(e) {
-                        // console.log(e.target.result);
-                        selectedEntity.el.setAttribute('material', `src:url(${e.target.result})`);
-                        sceneContext.updateEntity({
-                          material: {
-                            src: `url(${e.target.result})`
-                          }
-                          // [staticAttribute.attributeKey]: {
-                            // [staticAttribute.attributeField]: event.target.value
-                          // }
-                        }, selectedEntity['id']);
-                      }); 
-                      FR.readAsDataURL( event.target.files[0] ); */}
-                      {/* console.log(event.target.files[0].type); */}
-                      /**
-                      image/svg+xml
-                      image/jpeg
-                      image/gif
-                      image/png
-                      video/mp4
-                       */
                       const newAssetData = sceneContext.addAsset(event.target.files[0]);
                       selectedEntity.el.setAttribute('material', `src:#${newAssetData.id};shader: ${newAssetData.shader}`);
                       sceneContext.updateEntity({
@@ -277,70 +334,65 @@ class InfoPanel extends Component {
                           shader: newAssetData.shader
                         }
                       }, selectedEntity['id']);
-                    
-                    } else { 
-                      selectedEntity.el.removeAttribute('material', 'src');
-                    }
-                  }} />
-                  break;
-                }
-                case 'video': {
-                  // use electron api to load
-//                  inputField = <div onClick={_=> {
-//                    ipcHelper.openVideoDialog((err, data) => {
-//                      if (err) {
-//                        handleErrorWithUiDefault(err);
-//                        return;
-//                      }
-
-//                      const filePaths = data.filePaths;
-
-//                      if (!isNonEmptyArray(filePaths)) {
-//                        return;
-//                      }
-
-//                      const mimeType = fileHelper.getMimeType(filePaths[0]);
-
-//                      const newAssetData = sceneContext.addAsset({
-//                        filePath: filePaths[0],
-//                        type: 'video/mp4', // data.type not pass from the ipc
-//                      });
-//                      selectedEntity.el.setAttribute('material', `src:#${newAssetData.id};shader: ${newAssetData.shader}`);
-//                      sceneContext.updateEntity({
-//                        material: {
-//                          src: `#${newAssetData.id}`,
-//                          shader: newAssetData.shader
-//                        }
-//                      }, selectedEntity['id']);
-//                      {/* sceneContext.updateEntity({
-//                        material: {
-//                          src: `url(${data.filePaths})`
-//                        }
-//                      }, selectedEntity['id']); */}
-//                      {/* selectedEntity.el.setAttribute('material', `src:url(${data.filePaths})`); */}
-//                    })
-//                  }}>choose</div>
-                  // temp use browser api to debug
-                  inputField = <input type="file" accept="video/mp4" onChange={(event) => {
-                    if (event.target.files && event.target.files[0]) {
-                      var FR= new FileReader();
-                      FR.addEventListener("load", function(e) {
-                        // console.log(e.target.result);
-                        selectedEntity.el.setAttribute('material', `src:url(${e.target.result})`);
-                        sceneContext.updateEntity({
-                          material: {
-                            src: `url(${e.target.result})`
-                          }
-                          // [staticAttribute.attributeKey]: {
-                            // [staticAttribute.attributeField]: event.target.value
-                          // }
-                        }, selectedEntity['id']);
-                      }); 
-                      FR.readAsDataURL( event.target.files[0] );
                     } else {
                       selectedEntity.el.removeAttribute('material', 'src');
                     }
-                  }} />
+                  }} /> */}
+                  break;
+                }
+                case 'number': {
+                  inputField = <div className="numberSelector">
+                    <div className={`decreaseFontSize${(!currentValue || currentValue === 1)?' disabled': ''}`} onClick={() => {
+                      const newValue = Math.max(currentValue - 1, 1);
+                      if (staticAttribute.attributeField) {
+                        model.updateEntityAttributes({
+                          [staticAttribute.attributeKey]: {
+                            [staticAttribute.attributeField]: newValue
+                          }
+                        });
+                        sceneContext.updateEntity({                      
+                          [staticAttribute.attributeKey]: {
+                            [staticAttribute.attributeField]: newValue
+                          }
+                        }, selectedEntity['id']);
+                      } else {
+                        model.updateEntityAttributes({
+                          [staticAttribute.attributeKey]: newValue
+                        });
+                        sceneContext.updateEntity({
+                          [staticAttribute.attributeKey]: newValue
+                        }, selectedEntity['id']);
+                      }
+                    }}>
+                      <img className="buttonImg" src={iconCircleMinus} />
+                    </div>
+                    <div className="currentFontSize">{currentValue || 1}</div>
+                    <div className={`increaseFontSize${currentValue === 20? ' disabled': ''}`} onClick={() => {
+                      const newValue = Math.min(currentValue + 1, 20);
+                      if (staticAttribute.attributeField) {
+                        model.updateEntityAttributes({
+                          [staticAttribute.attributeKey]: {
+                            [staticAttribute.attributeField]: newValue
+                          }
+                        });
+                        sceneContext.updateEntity({                      
+                          [staticAttribute.attributeKey]: {
+                            [staticAttribute.attributeField]: newValue
+                          }
+                        }, selectedEntity['id']);
+                      } else {
+                        model.updateEntityAttributes({
+                          [staticAttribute.attributeKey]: newValue
+                        });
+                        sceneContext.updateEntity({
+                          [staticAttribute.attributeKey]: newValue
+                        }, selectedEntity['id']);
+                      }
+                    }}>
+                      <img className="buttonImg" src={iconCirclePlus} />
+                    </div>
+                  </div>;
+                    
                   break;
                 }
                 case 'slidesList': {
@@ -372,13 +424,13 @@ class InfoPanel extends Component {
                   </select>
                 }
               }
-              return <div key={staticAttribute.name} className="attribute-button">
-                <div className="field-label" onClick={(e) => {
+              return <div key={staticAttribute.name} className="attribute-row">
+                {/* <div className="field-label" onClick={(e) => {
                   const nextSiblingPosition = e.currentTarget.nextSibling.style.position;
                   e.currentTarget.nextSibling.style.position = (nextSiblingPosition === 'fixed'? '': 'fixed');
                 }}
                 title={currentValue}
-              >{staticAttribute.name} :</div>
+              >{staticAttribute.name} :</div> */}
                 {inputField}
               </div>
             })}
@@ -396,20 +448,20 @@ class InfoPanel extends Component {
           {staticPanel}
           <div id="info-panel">
             <div className="panel">
-              <div className="panel-header">
+              {/* <div className="panel-header">
                 Animation - {selectedEntity['name']}
-              </div>
+              </div> */}
               <div className="panel-body">
                 {/* check if any timelines exist */}
                 {/* no timeline exist, display hints box */}
                 {selectedEntity['timelines'].length === 0 ? 
                   <Fragment>
-                    <EntityDetails key={selectedEntity.id} entityId={selectedEntity['id']} {...props} model={model} />
                     <div className="attribute-col">
                       <button className="new-timeline-btn" onClick={this.addTimeline}>
                         Click to add animation
                       </button>
                     </div>
+                    <EntityDetails key={selectedEntity.id} entityId={selectedEntity['id']} {...props} model={model} />
                   </Fragment>
                 :
                   <div className="timelines-col">
@@ -445,21 +497,22 @@ class InfoPanel extends Component {
         {staticPanel}        
         <div id="info-panel">
           <div className="panel">
-            <div className="panel-header">
+            <div className="menu-item delete-timeline" onClick={() => {
+              this.deleteTimeline();
+            }}>
+              Delete
+            </div>
+            {/* <div className="panel-header">
               Animation - {selectedEntity['name']}
               <div className="menu-wrapper">
                 <div className="menu-btn">
                   <div className="dot"></div>
                 </div>
                 <div className="menu-list">
-                  <div className="menu-item delete-timeline" onClick={() => {
-                    this.deleteTimeline();
-                  }}>
-                    Delete Animation
-                  </div>
+                  
                 </div>
               </div>
-            </div>
+            </div> */}
             <div className={"panel-body " + selectedTimelinePosition}>
               <div className="timeline-position-wrap">
                 <div className={"timeline-position" + (selectedTimelinePosition === "startAttribute"? " selected": "")} onClick={()=>{ 
