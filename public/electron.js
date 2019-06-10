@@ -39,7 +39,8 @@ let splashScreenDurationInMillis = 2000;
 let developmentServerPort = process.env.PORT || 1234;
 
 //const appAsarInstallationPath = myPath.join(app.getAppPath(), 'resources', 'app.asar');
-const appAsarInstallationPath = myPath.join(app.getPath('appData'), '..', 'Local', 'Programs', 'School VR', 'resources', 'app.asar');
+// const appAsarInstallationPath = myPath.join(app.getPath('appData'), '..', 'Local', 'Programs', 'School VR', 'resources', 'app.asar');
+const appAsarInstallationPath = myPath.join(app.getPath('appData'), '..', 'Local', 'Programs', 'school-vr', 'resources', 'app.asar');
 console.log(appAsarInstallationPath);
 const appAsarDestPathInWorkingDirectory = myPath.join(appDirectory.appTempAppWorkingDirectory, 'resources');
 console.log(appAsarDestPathInWorkingDirectory);
