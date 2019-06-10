@@ -99,7 +99,7 @@ AFRAME.registerComponent('ttfFont', {
   init: function () {
     const el = this.el;
     const data = this.data;
-    // console.log(data);
+    // console.log('init');
     // Create geometry.
     const textGeometry = new three.TextGeometry( data.value, {
       font: ttfFonts[data.fontFamily],
@@ -288,7 +288,7 @@ class AFramePanel extends Component {
             {/* <a-asset-item id="fontNotoSerifTC" src={fontNotoSerifTC} /> */}
           </a-assets>
           {/* <a-sky el-name="sky" el-isSystem={true} color="#FF0000"></a-sky> */}
-          <a-camera el-isSystem={false} el-defaultCamera="true" position="0 2 5" wasd-controls look-controls ref={(ref)=>this.cameraEl=ref}>
+          <a-camera el-isSystem={false} el-defaultCamera="true" position="0 2 5" look-controls ref={(ref)=>this.cameraEl=ref}>
             {/* camera model */}
             <a-cone position="0 0 0.5" rotation="90 0 0" geometry="radius-top: 0.15;radius-bottom: 0.5" material="color:#333"></a-cone>
             <a-box position="0 0 1" scale="0.8 0.8 1.2" material="color:#222"></a-box>

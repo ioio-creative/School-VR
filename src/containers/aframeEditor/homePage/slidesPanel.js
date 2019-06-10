@@ -290,6 +290,14 @@ class SlidePanel extends Component {
     const autoPlay = this.props.isEditing === false;
     this.props.sceneContext.selectSlide(selectedSlideId, autoPlay);
     // Events.emit('setTimelinePositionSelected', null, slideId);
+    if (this.props.socket) {
+      this.props.socket.emit('updateSceneStatus', {
+        action: 'selectSlide',
+        details: {
+          slideId: selectedSlideId
+        }
+      })
+    }
   }
   showContextMenu(e) {
     e.preventDefault();

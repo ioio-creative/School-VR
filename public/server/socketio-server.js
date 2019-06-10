@@ -75,6 +75,18 @@ function openServer(port, rootDirPath = 'public/server/static') {
         // }
       }
     });
+    socket.on('updateSceneStatus', (data) => {
+      // console.log('updateSceneStatus', presenter.id, socket.id);
+      if (presenter.id === socket.id) {
+        console.log('updateSceneStatus');
+      // only let presenter send msg
+      // if (data.action === "hello") {
+        // sceneData = data;
+        socket.broadcast.emit('updateSceneStatus', data);
+        // }
+      }
+    });
+    
     // basic flow
     /* 
       registerViewer 

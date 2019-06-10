@@ -44,9 +44,11 @@ class ViewerPage extends Component {
     this.editor = new Editor();
     Events.on('editor-load', (editor) => {
       editor.close();
+      editor.currentCameraEl.removeAttribute('wasd-controls');
     })
     sceneContext.updateEditor(this.editor);
-    // this.inited = true;
+    // TODO
+    // need to get the current machine ip and port from ipc
     const socket = io('http://10.0.1.40:1413');
     socket.on('connect', () => {
       console.log('connected!!!'); // socket.connected); // true
@@ -63,6 +65,29 @@ class ViewerPage extends Component {
           clearInterval(autoInit);
         }
       }, 100)
+    })
+    socket.on('updateSceneStatus', (statusMsg) => {
+      console.log('sceneStatus recieved: ', statusMsg);
+      /** 
+       * statusMsg
+       *   action
+       *   details
+       *     slideId ?
+      */
+      const autoPlay = true;
+      switch (statusMsg.action) {
+        case 'selectSlide': {
+          sceneContext.selectSlide(
+            statusMsg.details.slideId,
+            autoPlay
+          );
+          break;
+        }
+        case 'playSlide': {
+          sceneContext.playSlide()
+          break;
+        }
+      }
     })
     this.setState({
       socket: socket

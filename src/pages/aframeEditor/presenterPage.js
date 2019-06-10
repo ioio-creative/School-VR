@@ -47,14 +47,13 @@ class PresenterPage extends Component {
     this.handleOpenProjectButtonClick = this.handleOpenProjectButtonClick.bind(this);
     this.handleExitButtonClick = this.handleExitButtonClick.bind(this);
     this.loadProject = this.loadProject.bind(this);
+    this.disableEditor = this.disableEditor.bind(this);
   }
   componentDidMount() {
     const props = this.props;
     const sceneContext = props.sceneContext;
     this.editor = new Editor();
-    Events.on('editor-load', (editor) => {
-      editor.close();
-    })
+    Events.on('editor-load', this.disableEditor)
     sceneContext.updateEditor(this.editor);
     // this.props.sceneContext
     this.inited = true;
@@ -70,6 +69,9 @@ class PresenterPage extends Component {
     this.setState({
       socket: socket
     })
+  }
+  disableEditor(editor) {
+    editor.close();
   }
   // onEditorLoad(editor) {
   //   const props = this.props;
@@ -87,6 +89,7 @@ class PresenterPage extends Component {
     // Events.removeListener('editor-load', this.onEditorLoad);
     this.editor = null;
     // document.removeEventListener('dblclick', this.sendMessage);
+    Events.removeListener('editor-load', this.disableEditor)
   }
   // sendMessage(msg) {
   //   this.state.socket.emit('test', 'hello');
@@ -180,7 +183,7 @@ class PresenterPage extends Component {
         />
         {/* <ButtonsPanel /> */}
         <AFramePanel />
-        <SlidesPanel isEditing={false} />
+        <SlidesPanel isEditing={false} socket={state.socket} />
         {/* <TimelinePanel /> */}
         {/* <InfoPanel /> */}
       </div>

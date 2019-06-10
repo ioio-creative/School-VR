@@ -112,7 +112,7 @@ class App extends Component {
             <Redirect to={routes.home} />
           </Switch>:
           <Switch>
-            <Route exact path={routes.home} component={AsyncViewerPage} />
+            <Route exact path={routes.home} component={ViewerPage} />
             <Redirect to={routes.home} />
           </Switch>
           

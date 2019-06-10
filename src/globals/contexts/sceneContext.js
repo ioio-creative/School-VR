@@ -82,7 +82,8 @@ class SceneContextProvider extends Component {
       appName: 'School VR',
       projectName: '',
       undoQueue: [],
-      redoQueue: []
+      redoQueue: [],
+      editor: null
     }
     this.editor = null;
 
@@ -156,7 +157,8 @@ class SceneContextProvider extends Component {
         const sceneId = uuid();
         obj.sceneEl.id = sceneId;
         this.setState({
-          loaded: true
+          loaded: true,
+          editor: obj
         })
         // const cameraId = uuid();
         // obj.currentCameraEl.id = cameraId;
@@ -187,14 +189,14 @@ class SceneContextProvider extends Component {
     this.startEventListener('editor-load');
     this.startEventListener('objectselected');
     // in case the editor loaded before context load
-    const autoInit = setInterval(() => {
-      Events.emit('getEditorInstance', (o) => {
-        console.log('hihi getEditorInstance');
-        debugger;
-        this.events['editor-load'](o);
-        clearInterval(autoInit);
-      });
-    }, 200);
+    // const autoInit = setInterval(() => {
+    //   Events.emit('getEditorInstance', (o) => {
+    //     console.log('hihi getEditorInstance');
+    //     clearInterval(autoInit);
+    //     debugger;
+    //     this.events['editor-load'](o);
+    //   });
+    // }, 200);
     // the event emits when click on canvas
     
   }
@@ -501,6 +503,7 @@ class SceneContextProvider extends Component {
   }
   
   selectSlide(slideId, autoPlay) {
+    const editor = this.editor;
     this.setState((prevState) => {
       const sceneData = prevState.sceneData;
       if (prevState.slideId) {
@@ -508,7 +511,7 @@ class SceneContextProvider extends Component {
         if (currentSlide) {
           currentSlide.entities.forEach(entity => {
             if (entity.type !== 'a-camera') {
-              this.editor.removeObject(entity.el.object3D);
+              editor.removeObject(entity.el.object3D);
             }
           })
         }
@@ -517,9 +520,29 @@ class SceneContextProvider extends Component {
       const newSlide = newSceneData.slides.find(slide => slide.id === slideId);
       newSlide.entities.forEach(entity => {
         if (entity.type !== 'a-camera') {
-          entity.el = this.editor.createNewEntity(entity);
+          entity.el = editor.createNewEntity(entity);
           const objectModel = new entityModel[entity.type];
           objectModel.setEl(entity.el);
+          if (entity.type === 'a-text') {
+            // seems the custom component need setAttribute to trigger init
+            const currentFontSize = entity.components.ttfFont.fontSize;
+            // console.log(entity.el, entity.el.hasLoaded);
+            if (!currentFontSize) {
+              entity.el.addEventListener('loaded', function elOnLoad() {
+                // console.log('elOnLoad');
+                // entity.el.setAttribute('ttfFont','fontSize:2');
+                entity.el.setAttribute('ttfFont','fontSize:1');
+                entity.el.removeEventListener('loaded', elOnLoad);
+              })
+            } else {
+              entity.el.addEventListener('loaded', function elOnLoad() {
+                // console.log('elOnLoad');
+                // entity.el.setAttribute('ttfFont','fontSize:' + (currentFontSize + 1));
+                entity.el.setAttribute('ttfFont','fontSize:' + currentFontSize);
+                entity.el.removeEventListener('loaded', elOnLoad);
+              })
+            }
+          }
         }
       })
       return {
