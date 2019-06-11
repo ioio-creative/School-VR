@@ -23,8 +23,8 @@ class ACamera extends AEntity {
     this._animatableAttributesValues = {
       position: {
         x: 0,
-        y: 2,
-        z: 5
+        y: 0,
+        z: 0
       },
       scale: {
         x: 1, 

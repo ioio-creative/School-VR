@@ -41,7 +41,7 @@ AFRAME.registerComponent('cursor-listener', {
     var lastIndex = -1;
     const hoverColor = '#AAAAAA';
     const clickColor = '#880000';
-    const defaultColor = this.el.getAttribute('material')['color'];
+    const defaultColor = '#FFFFFF';// this.el.getAttribute('material')['color'];
     // console.log(defaultColor);
     let childrenEls = [];
     if (this.el.children) {
@@ -303,7 +303,7 @@ class AFramePanel extends Component {
             {/* <a-asset-item id="fontNotoSerifTC" src={fontNotoSerifTC} /> */}
           </a-assets>
           {/* <a-sky el-name="sky" el-isSystem={true} color="#FF0000"></a-sky> */}
-          <a-entity position="0 0 0">
+          <a-entity position="0 2 5">
             {/* test */}
             <a-camera el-isSystem={false} position="0 2 5" el-defaultCamera="true" look-controls ref={(ref)=>this.cameraEl=ref}>
               {/* camera model */}
