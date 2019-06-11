@@ -43,7 +43,6 @@ const Events = require('vendor/Events.js');
 // const schema = require('schema/aframe_schema_20181108.json');
 
 
-
 class EditorPage extends Component {
   constructor(props) {
     super(props);
@@ -136,7 +135,7 @@ class EditorPage extends Component {
     this.props.sceneContext.newProject();
   }
 
-  loadProject(projectFilePath) {
+  loadProject(projectFilePath) {    
     ipcHelper.loadProjectByProjectFilePath(projectFilePath, (err, data) => {
       if (err) {
         handleErrorWithUiDefault(err);

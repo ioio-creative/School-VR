@@ -20,7 +20,7 @@ const mime = require('./utils/fileSystem/mime');
 const fileSystem = require('./utils/fileSystem/fileSystem');
 const ProjectFile = require('./utils/saveLoadProject/ProjectFile');
 const {saveProjectToLocalAsync} = require('./utils/saveLoadProject/saveProject');
-const {loadProjectByProjectFilePathAsync} = require('./utils/saveLoadProject/loadProject');
+const {loadProjectByProjectFilePathAsync, copyTempProjectDirectoryToExternalDirectoryAsync} = require('./utils/saveLoadProject/loadProject');
 const {openImageDialog, openGifDialog, openVideoDialog, openSchoolVrFileDialog, saveSchoolVrFileDialog} = 
   require('./utils/aframeEditor/openFileDialog');
 const {parseDataToSaveFormat} = require('./utils/saveLoadProject/parseDataToSaveFormat');
@@ -41,11 +41,13 @@ let developmentServerPort = process.env.PORT || 1234;
 
 //const appAsarInstallationPath = myPath.join(app.getAppPath(), 'resources', 'app.asar');
 const appAsarInstallationPath = myPath.join(app.getPath('appData'), '..', 'Local', 'Programs', app.getName(), 'resources', 'app.asar');
-console.log(appAsarInstallationPath);
+console.log('appAsarInstallationPath: ' + appAsarInstallationPath);
 const appAsarDestPathInWorkingDirectory = myPath.join(appDirectory.appTempAppWorkingDirectory, 'resources');
-console.log(appAsarDestPathInWorkingDirectory);
+console.log('appAsarDestPathInWorkingDirectory: ' + appAsarDestPathInWorkingDirectory);
 const webServerRootDirectory = myPath.join(appAsarDestPathInWorkingDirectory, 'build');
-console.log(webServerRootDirectory);
+console.log('webServerRootDirectory: ' + webServerRootDirectory);
+const webServerFilesDirectory = myPath.join(appDirectory.appTempAppWorkingDirectory, 'files');
+console.log('webServerFilesDirectory: ' + webServerFilesDirectory);
 
 /* end of constants */
 
@@ -61,7 +63,7 @@ let paramsFromExternalConfigForReact;
 /* end of global variables */
 
 
-async function readConfigFile(configFile) {
+async function readConfigFileAsync(configFile) {
   const data = await fileSystem.readFilePromise(configFile);
   const configObj = jsoncParser.parse(data);
   const configObjForElectron = configObj.electron;
@@ -179,7 +181,7 @@ function createWindow() {
   /* end of setting up menu for hot keys purpose only */
 }
 
-async function openWebServer() {
+async function extractAppAsarForWebServerAsync() {
   // TODO: have to do the following extracting build directory process in installer
   const isAppAsarDestPathInWorkingDirectoryExists = await fileSystem.existsPromise(appAsarDestPathInWorkingDirectory);
   if (!isAppAsarDestPathInWorkingDirectoryExists && !isDev) {
@@ -188,14 +190,21 @@ async function openWebServer() {
     fileSystem.extractAll(appAsarInstallationPath, appAsarDestPathInWorkingDirectory);
     console.log(`After extracting ${appAsarInstallationPath} to ${appAsarDestPathInWorkingDirectory}`);
   }
-  
+}
+
+async function openWebServerAsync() {
+  await extractAppAsarForWebServerAsync();
+
+  await fileSystem.createDirectoryIfNotExistsPromise(webServerFilesDirectory);
+
   const indexHtmlPath = (isDev ? `${myPath.join(__dirname, '../build')}` : webServerRootDirectory);
 
   // https://nodejs.org/api/child_process.html#child_process_subprocess_send_message_sendhandle_options_callback
   webServerProcess.send({
     address: 'open-server',
     port: webServerPort,
-    rootDirPath: indexHtmlPath
+    rootDirPath: indexHtmlPath,
+    filesDirPath: webServerFilesDirectory,
   });      
 }
 
@@ -209,12 +218,12 @@ function closeWebServer() {
 
 app.on('ready', async _ => {
   try {
-    await readConfigFile(configFilePath);
+    await readConfigFileAsync(configFilePath);
   } catch (err) {
     console.error(err);
   }
 
-  await openWebServer();
+  await extractAppAsarForWebServerAsync();
   createWindow(); 
 });
 
@@ -628,7 +637,7 @@ ipcMain.on('isCurrentLoadedProject', (event, arg) => {
 
 // window dialog
 
-ipcMain.on('openImageDialog', (event, args) => {
+ipcMain.on('openImageDialog', (event, arg) => {
   console.log('openImageDialog');
   openImageDialog((filePaths) => {
     event.sender.send('openImageDialogResponse', {
@@ -639,7 +648,7 @@ ipcMain.on('openImageDialog', (event, args) => {
   });
 });
 
-ipcMain.on('openGifDialog', (event, args) => {
+ipcMain.on('openGifDialog', (event, arg) => {
   openGifDialog((filePaths) => {
     event.sender.send('openGifDialogResponse', {
       data: {
@@ -649,7 +658,7 @@ ipcMain.on('openGifDialog', (event, args) => {
   });
 });
 
-ipcMain.on('openVideoDialog', (event, args) => {  
+ipcMain.on('openVideoDialog', (event, arg) => {  
   openVideoDialog((filePaths) => {    
     event.sender.send('openVideoDialogResponse', {      
       data: {
@@ -659,7 +668,7 @@ ipcMain.on('openVideoDialog', (event, args) => {
   });
 });
 
-ipcMain.on('openSchoolVrFileDialog', (event, args) => {
+ipcMain.on('openSchoolVrFileDialog', (event, arg) => {
   openSchoolVrFileDialog((filePaths) => {
     event.sender.send('openSchoolVrFileDialogResponse', {
       data: {
@@ -669,7 +678,7 @@ ipcMain.on('openSchoolVrFileDialog', (event, args) => {
   });
 });
 
-ipcMain.on('saveSchoolVrFileDialog', (event, args) => {
+ipcMain.on('saveSchoolVrFileDialog', (event, arg) => {
   saveSchoolVrFileDialog((filePath) => {    
     event.sender.send('saveSchoolVrFileDialogResponse', {
       data: {
@@ -681,8 +690,8 @@ ipcMain.on('saveSchoolVrFileDialog', (event, args) => {
 
 // vanilla electron dialog
 
-ipcMain.on('showOpenDialog', (event, args) => {
-  const options = args;
+ipcMain.on('showOpenDialog', (event, arg) => {
+  const options = arg;
   dialog.showOpenDialog(options, (filePaths) => {
     event.sender.send('showOpenDialogResponse', {
       data: {
@@ -692,8 +701,8 @@ ipcMain.on('showOpenDialog', (event, args) => {
   });
 });
 
-ipcMain.on('showSaveDialog', (event, args) => {
-  const options = args;
+ipcMain.on('showSaveDialog', (event, arg) => {
+  const options = arg;
   dialog.showOpenDialog(options, (filePath) => {
     event.sender.send('showSaveDialogResponse', {
       data: {
@@ -705,13 +714,41 @@ ipcMain.on('showSaveDialog', (event, args) => {
 
 // for presentation
 
-ipcMain.on('getPresentationServerInfo', (event, args) => {
+ipcMain.on('getPresentationServerInfo', (event, arg) => {
   event.sender.send('getPresentationServerInfoResponse', {
     data: {
       interfaceIpMap: getIp.getAllIps(),
       port: webServerPort
     }
   });
+});
+
+ipcMain.on('openWebServerAndLoadProject', async (event, arg) => {
+  try {
+    /* load project file */
+    const filePath = arg;
+    const isKeepAssetPathsRelative = true;
+    const projectJson = await loadProjectByProjectFilePathAsync(filePath, isKeepAssetPathsRelative);
+    /* end of load project file */
+
+    /* open web server */    
+    await openWebServerAsync();    
+    await copyTempProjectDirectoryToExternalDirectoryAsync(filePath, webServerFilesDirectory);    
+    /* end of open web server */
+    
+    event.sender.send('openWebServerAndLoadProjectResponse', {
+      err: null,
+      data: {
+        projectJson: projectJson
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    event.sender.send('openWebServerAndLoadProjectResponse', {
+      err: err.toString(),
+      data: null
+    });
+  }  
 });
 
 /* end of ipc main event listeners */

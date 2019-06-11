@@ -24,8 +24,8 @@ function openServer(port, rootDirPath = 'public/server/static', filesDirPath = n
   app.use(express.static(rootDirPath, {'index': ['index.html']}));
 
   if (filesDirPath) {
-    console.log('filesDirPath: ' + rootDirPath);
-    app.use(express.static(rootDirPath, {'index': ['index.html']}));
+    console.log('filesDirPath: ' + filesDirPath);
+    app.use('/files', express.static(filesDirPath));
   }
 
   // Start Express http server
@@ -131,7 +131,7 @@ function openServer(port, rootDirPath = 'public/server/static', filesDirPath = n
 process.on('message', (message) => {
   switch (message.address) {
     case 'open-server':      
-      openServer(message.port, message.rootDirPath);
+      openServer(message.port, message.rootDirPath, message.filesDirPath);
       break;
     case 'close-server':
       closeServer();

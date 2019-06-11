@@ -38,7 +38,6 @@ const uuid = require('uuid/v1');
 // const validator = new jsonSchemaValidator();
 // const schema = require('schema/aframe_schema_20181108.json');
 
-let loadedProjectFilePath = '';
 
 class PresenterPage extends Component {
   constructor(props) {
@@ -92,7 +91,7 @@ class PresenterPage extends Component {
       })
       // document.addEventListener('dblclick', this.sendMessage);
       const interfaceIpArr = [];
-      for (let interfaceName in data.interfaceIpMap) {
+      for (let interfaceName of Object.keys(data.interfaceIpMap)) {
         interfaceIpArr.push({
           interface: interfaceName,
           ip: data.interfaceIpMap[interfaceName]
@@ -152,12 +151,14 @@ class PresenterPage extends Component {
       this.loadProject(projectFilePathToLoad);
     }
   }
+
   componentWillUnmount() {
     // Events.removeListener('editor-load', this.onEditorLoad);
     this.editor = null;
     // document.removeEventListener('dblclick', this.sendMessage);
     Events.removeListener('editor-load', this.onEditorLoad)
   }
+
   // sendMessage(msg) {
   //   this.state.socket.emit('test', 'hello');
   // }
@@ -191,15 +192,12 @@ class PresenterPage extends Component {
 
   loadProject(projectFilePath) {
     const state = this.state;
-    const sceneContext = this.props.sceneContext;
-    ipcHelper.loadProjectByProjectFilePath(projectFilePath, (err, data) => {
+    const sceneContext = this.props.sceneContext;    
+    ipcHelper.openWebServerAndLoadProject(projectFilePath, (err, data) => {
       if (err) {
         handleErrorWithUiDefault(err);
         return;                         
       }
-
-      // TODO: ask hung to put into sceneContext
-      loadedProjectFilePath = projectFilePath;
       
       const projectJsonData = data.projectJson;
       //console.log(projectJsonData);
@@ -208,9 +206,10 @@ class PresenterPage extends Component {
       sceneContext.loadProject(projectJsonData);   
     });
   }
+
   render() {
     const state = this.state;
-    const sceneContext = this.props.sceneContext;
+    //const sceneContext = this.props.sceneContext;
     const localIps = state.localIps;
     const port = state.port;
     const viewerCount = state.viewerCount;
