@@ -405,6 +405,8 @@ class ProjectListPage extends Component {
   /* react lifecycles */
 
   componentDidMount() {
+    // mechanism to retry enumerateProjects()
+    // because appDirectory.appProjectsDirectory may not have been created at componentDidMount
     this.enumerateProjectsTimerHandler = setInterval(_ => {
       if (!this.isEnumerateProjectsSuccessful) {
         this.enumerateProjects();
