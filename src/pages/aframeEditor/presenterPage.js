@@ -58,7 +58,8 @@ class PresenterPage extends Component {
     // this.props.sceneContext
     this.inited = true;
     // get the ip and port from ipc
-    const socket = io(window.location.origin);
+    // const socket = io(window.location.origin);
+    const socket = io('http://localhost:1413');
     socket.on('connect', () => {
       console.log('connected!!!'); // socket.connected); // true
       socket.emit('registerPresenter');

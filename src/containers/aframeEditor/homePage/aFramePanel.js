@@ -27,8 +27,10 @@ const loader = new TTFLoader();
 // const targetFont = this.el.getAttribute('text')['fontPath'];
 loader.load(fontYenHeavy, (json) => {
   ttfFonts['fontYenHeavy'] = new three.Font(json);
-  // oldMesh.geometry = newGeometry;
 })
+
+
+// loadFonts();
 // loader.load(fontNotoSansRegular, (json) => {
 //   ttfFonts['fontNotoSansRegular'] = new three.Font(json);
 //   // oldMesh.geometry = newGeometry;
@@ -96,11 +98,22 @@ AFRAME.registerComponent('ttfFont', {
     fontFamily: {type: 'string', default: 'fontYenHeavy'},
     color: {type: 'color', default: '#FFF'}
   },
-  init: function () {
+  isFontLoaded: async () => {
+    const loaded = await new Promise((resolve, reject) => {
+      const checkFontLoaded = setInterval(() => {
+        if (ttfFonts['fontYenHeavy']) {
+          resolve(true);
+          clearInterval(checkFontLoaded);
+        }
+      }, 100);
+    });
+    return loaded;
+  },
+  init: async function () {
     const el = this.el;
     const data = this.data;
-    // console.log('init');
     // Create geometry.
+    const checkFontLoaded = await this.isFontLoaded();
     const textGeometry = new three.TextGeometry( data.value, {
       font: ttfFonts[data.fontFamily],
       size: data.fontSize,
@@ -113,6 +126,7 @@ AFRAME.registerComponent('ttfFont', {
       bevelOffset: 0,
       bevelSegments: 5
     });
+    // console.log(textGeometry); // .index
     textGeometry.center();
     // Create material.
     const textMaterial = new three.MeshStandardMaterial({
@@ -138,12 +152,13 @@ AFRAME.registerComponent('ttfFont', {
   // tick: function(){
   //   console.log('tick', this.font);
   // },
-  update: function (oldData) {
+  update: async function (oldData) {
     // console.log('update', oldData);
     const data = this.data;
     const el = this.el;
     // console.log(data, oldData);
-
+    // add this line to prevent update before init
+    const checkFontLoaded = await this.isFontLoaded();
     // If `oldData` is empty, then this means we're in the initialization process.
     // No need to update.
     if (Object.keys(oldData).length === 0) { return; }
@@ -288,23 +303,26 @@ class AFramePanel extends Component {
             {/* <a-asset-item id="fontNotoSerifTC" src={fontNotoSerifTC} /> */}
           </a-assets>
           {/* <a-sky el-name="sky" el-isSystem={true} color="#FF0000"></a-sky> */}
-          <a-camera el-isSystem={false} el-defaultCamera="true" position="0 2 5" look-controls ref={(ref)=>this.cameraEl=ref}>
-            {/* camera model */}
-            <a-cone position="0 0 0.5" rotation="90 0 0" geometry="radius-top: 0.15;radius-bottom: 0.5" material="color:#333"></a-cone>
-            <a-box position="0 0 1" scale="0.8 0.8 1.2" material="color:#222"></a-box>
-            <a-cylinder position="0 0.6 0.7" scale="0.3 0.3 0.3" rotation="0 0 90" material="color:#272727"></a-cylinder>
-            <a-cylinder position="0 0.6 1.3" scale="0.3 0.3 0.3" rotation="0 0 90" material="color:#272727"></a-cylinder>
-            {/* camera "monitor" */}
-            {/* <a-plane position="0 0 1.61" material="src: #camera-preview" ref={ref=>this.cameraPreviewScreenEl=ref }scale="0.8 0.8 0.8" rotation="0 0 0"></a-plane> */}
-            {/* camera model end */}
-            {/* click pointer */}
-            <a-entity cursor="fuse: true; fuseTimeout: 500"
-              position="0 0 -1"
-              geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
-              material="color: black; shader: flat">
-            </a-entity>
-            {/* click pointer end */}
-          </a-camera>
+          <a-entity position="0 0 0">
+            {/* test */}
+            <a-camera el-isSystem={false} position="0 2 5" el-defaultCamera="true" look-controls ref={(ref)=>this.cameraEl=ref}>
+              {/* camera model */}
+              <a-cone position="0 0 0.5" rotation="90 0 0" geometry="radius-top: 0.15;radius-bottom: 0.5" material="color:#333"></a-cone>
+              <a-box position="0 0 1" scale="0.8 0.8 1.2" material="color:#222"></a-box>
+              <a-cylinder position="0 0.6 0.7" scale="0.3 0.3 0.3" rotation="0 0 90" material="color:#272727"></a-cylinder>
+              <a-cylinder position="0 0.6 1.3" scale="0.3 0.3 0.3" rotation="0 0 90" material="color:#272727"></a-cylinder>
+              {/* camera "monitor" */}
+              {/* <a-plane position="0 0 1.61" material="src: #camera-preview" ref={ref=>this.cameraPreviewScreenEl=ref }scale="0.8 0.8 0.8" rotation="0 0 0"></a-plane> */}
+              {/* camera model end */}
+              {/* click pointer */}
+              <a-entity cursor="fuse: true; fuseTimeout: 500"
+                position="0 0 -1"
+                geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+                material="color: black; shader: flat">
+              </a-entity>
+              {/* click pointer end */}
+            </a-camera>
+          </a-entity>
           <a-light type="ambient" intensity="0.8" el-name="environment light" el-isSystem={true} color="#EEEEEE"></a-light>
           <a-light position="600 300 900" color="#FFFFFF" intensity="0.9" type="directional" el-name="directional light" el-isSystem={true}></a-light>
           {/**

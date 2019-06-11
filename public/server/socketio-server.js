@@ -22,6 +22,7 @@ var getIp = require("../utils/getIp").getIp;
 function openServer(port, rootDirPath = 'public/server/static') {
   // Setup and configure Express http server. Expect a subfolder called "static" to be the web root.
   var app = express();  
+  console.log('rootDirPath: ' + rootDirPath);
   app.use(serveStatic(rootDirPath, {'index': ['index.html']}));
 
   // Start Express http server
@@ -117,7 +118,7 @@ function openServer(port, rootDirPath = 'public/server/static') {
 process.on('message', (message) => {
   switch (message.address) {
     case 'open-server':      
-      openServer(message.port);
+      openServer(message.port, message.rootDirPath);
       break;
     case 'close-server':
       closeServer();
