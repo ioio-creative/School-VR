@@ -41,11 +41,13 @@ let developmentServerPort = process.env.PORT || 1234;
 
 //const appAsarInstallationPath = myPath.join(app.getAppPath(), 'resources', 'app.asar');
 const appAsarInstallationPath = myPath.join(app.getPath('appData'), '..', 'Local', 'Programs', app.getName(), 'resources', 'app.asar');
-console.log(appAsarInstallationPath);
+console.log('appAsarInstallationPath: ' + appAsarInstallationPath);
 const appAsarDestPathInWorkingDirectory = myPath.join(appDirectory.appTempAppWorkingDirectory, 'resources');
-console.log(appAsarDestPathInWorkingDirectory);
+console.log('appAsarDestPathInWorkingDirectory: ' + appAsarDestPathInWorkingDirectory);
 const webServerRootDirectory = myPath.join(appAsarDestPathInWorkingDirectory, 'build');
-console.log(webServerRootDirectory);
+console.log('webServerRootDirectory: ' + webServerRootDirectory);
+const webServerFilesDirectory = myPath.join(appDirectory.appTempAppWorkingDirectory, 'files');
+console.log('webServerFilesDirectory: ' + webServerFilesDirectory);
 
 /* end of constants */
 
@@ -189,13 +191,16 @@ async function openWebServer() {
     console.log(`After extracting ${appAsarInstallationPath} to ${appAsarDestPathInWorkingDirectory}`);
   }
   
+  await fileSystem.createDirectoryIfNotExistsPromise(webServerFilesDirectory);
+
   const indexHtmlPath = (isDev ? `${myPath.join(__dirname, '../build')}` : webServerRootDirectory);
 
   // https://nodejs.org/api/child_process.html#child_process_subprocess_send_message_sendhandle_options_callback
   webServerProcess.send({
     address: 'open-server',
     port: webServerPort,
-    rootDirPath: indexHtmlPath
+    rootDirPath: indexHtmlPath,
+    filesDirPath: webServerFilesDirectory,
   });      
 }
 

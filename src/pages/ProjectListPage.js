@@ -383,6 +383,13 @@ class ProjectListPage extends Component {
     this.createNewProjectBlock = null;
     this.setCreateNewProjectBlockRef = element => this.createNewProjectBlock = element;
 
+    // constants
+    this.enumerateProjectsRetryIntervalInMillis = 100;
+
+    // variables
+    this.enumerateProjectsTimerHandler = null;
+    this.isEnumerateProjectsSuccessful = false;
+
     // state
     this.state = {
       projects: [],  // array of ProjectFile objects
@@ -396,7 +403,15 @@ class ProjectListPage extends Component {
   /* react lifecycles */
 
   componentDidMount() {
-    this.enumerateProjects();
+    this.enumerateProjectsTimerHandler = setInterval(_ => {
+      if (!this.isEnumerateProjectsSuccessful) {
+        this.enumerateProjects();
+      } else {
+        clearInterval(this.enumerateProjectsTimerHandler);
+        this.enumerateProjectsTimerHandler = null;
+      }      
+    }, this.enumerateProjectsRetryIntervalInMillis);
+    
   }
 
   /* end of react lifecycles */
@@ -409,13 +424,16 @@ class ProjectListPage extends Component {
     ipcHelper.listProjects((err, data) => {
       if (err) {
         handleErrorWithUiDefault(err);
+        this.isEnumerateProjectsSuccessful = false;
         return;
       }
+
+      this.isEnumerateProjectsSuccessful = true;
 
       const projectFileStats = data.projectFileObjs;
       this.setState({
         projects: projectFileStats
-      });
+      });      
     });    
   }
 
