@@ -182,11 +182,12 @@ function createWindow() {
 
 async function openWebServer() {
   
-  
-  await fileSystem.myDeletePromise(appAsarDestPathInWorkingDirectory);
-  console.log("reach here 1");
-  fileSystem.extractAll(appAsarInstallationPath, appAsarDestPathInWorkingDirectory);
-  console.log("reach here 2");
+  if (!isDev) {
+    await fileSystem.myDeletePromise(appAsarDestPathInWorkingDirectory);
+    // console.log("reach here 1");
+    fileSystem.extractAll(appAsarInstallationPath, appAsarDestPathInWorkingDirectory);
+    // console.log("reach here 2");
+  }
   const indexHtmlPath = (isDev ? `${myPath.join(__dirname, '../build')}` : webServerRootDirectory);
 
   // https://nodejs.org/api/child_process.html#child_process_subprocess_send_message_sendhandle_options_callback
