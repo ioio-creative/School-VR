@@ -24,6 +24,7 @@ const {loadProjectByProjectFilePathAsync} = require('./utils/saveLoadProject/loa
 const {openImageDialog, openGifDialog, openVideoDialog, openSchoolVrFileDialog, saveSchoolVrFileDialog} = 
   require('./utils/aframeEditor/openFileDialog');
 const {parseDataToSaveFormat} = require('./utils/saveLoadProject/parseDataToSaveFormat');
+const getIp = require("./utils/getIp");
 
 
 /* constants */
@@ -701,9 +702,10 @@ ipcMain.on('showSaveDialog', (event, args) => {
 
 // for presentation
 
-ipcMain.on('getPresentationServerPort', (event, args) => {
-  event.sender.send('getPresentationServerPortResponse', {
+ipcMain.on('getPresentationServerInfo', (event, args) => {
+  event.sender.send('getPresentationServerInfoResponse', {
     data: {
+      interfaceIpMap: getIp.getAllIps(),
       port: webServerPort
     }
   });
