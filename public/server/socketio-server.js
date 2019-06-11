@@ -48,7 +48,8 @@ function openServer(port, rootDirPath = 'public/server/static', filesDirPath = n
       console.log('presenter connected');
       presenter = socket;
       socket.emit('serverMsg', 'You are now presenter');
-      console.log(getIp());
+      // console.log(getIp());
+      presenter.emit('updateViewerCount', viewer.length);
     });
     socket.on('registerViewer', () => {
       console.log('viewer connected');
@@ -58,9 +59,18 @@ function openServer(port, rootDirPath = 'public/server/static', filesDirPath = n
       if (sceneData) {
         socket.emit('updateSceneData', sceneData);
       }
+      if (presenter) {
+        presenter.emit('updateViewerCount', viewer.length);
+      }
     });
     socket.on('disconnect', () => {
       console.log('user disconnected');
+      if (socket !== presenter) {
+        viewer = viewer.filter((val, idx, arr) => {
+          return val !== socket;
+        })
+        presenter.emit('updateViewerCount', viewer.length);
+      }
     });
     socket.on('test', (data) => {
       if (presenter === socket) {

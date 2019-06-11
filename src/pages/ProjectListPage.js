@@ -75,7 +75,7 @@ class ProjectItem extends Component {
         <div className="project-info-container">
           <div className="project-info">
             <div className="project-image">
-              <img src={getAbsoluteUrlFromRelativeUrl("images/ProjectListPage/test1.jpg")} alt={"test"}/>
+              <img src={getAbsoluteUrlFromRelativeUrl("images/ProjectListPage/thumbnail1.svg")} alt={"test"}/>
             </div>
             <div className="project-info-text-container">
               <div className="project-info-text">
@@ -88,7 +88,9 @@ class ProjectItem extends Component {
         <div className={`project-handles-container ${state.isShowProjectHandles ? 'show' : 'hide'}`}>
           <div className="project-handles">
             <div className="project-preview-container">
-              <div className="project-preview">Preview</div>
+              <div className="project-preview">
+                <Link to={routes.presenterWithProjectFilePathQuery(project.path)}>Preview</Link>
+              </div>
             </div>
             <div className="project-options-container">
               <div className="project-options">Options</div>

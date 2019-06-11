@@ -4,6 +4,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Rnd as ResizableAndDraggable} from 'react-rnd';
 import {roundTo} from 'globals/helperfunctions';
 
+import iconOpacity from 'media/icons/opacity.svg';
+
 class OpacityPicker extends Component {
   constructor(props) {
     super(props);
@@ -103,7 +105,9 @@ class OpacityPicker extends Component {
     return <div className="opacity-control">
       <div className="opacity-preview" 
         onClick={ this.handlePreviewClick }
-      />
+      >
+        <img src={iconOpacity} alt=""/>
+      </div>
       { this.state.displayOpacityPicker ? 
         <div className="opacity-panel">
           <div style={{

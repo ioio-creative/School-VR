@@ -145,7 +145,7 @@ class ButtonsPanel extends Component {
             >
               <img src={iconPreview} alt="" />
             </button>
-            <Link className="button-present" to={'/presenter/1'}>
+            <Link className="button-present" to={routes.presenterWithProjectFilePathQuery(props.currentLoadedProjectPath)}>
               <img src={iconShare} alt="" />
             </Link>
           </div>

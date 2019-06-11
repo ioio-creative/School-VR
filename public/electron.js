@@ -184,7 +184,7 @@ function createWindow() {
 async function openWebServer() {
   // TODO: have to do the following extracting build directory process in installer
   const isAppAsarDestPathInWorkingDirectoryExists = await fileSystem.existsPromise(appAsarDestPathInWorkingDirectory);
-  if (!isAppAsarDestPathInWorkingDirectoryExists) {
+  if (!isAppAsarDestPathInWorkingDirectoryExists && !isDev) {
     await fileSystem.myDeletePromise(appAsarDestPathInWorkingDirectory);
     console.log(`Before extracting ${appAsarInstallationPath} to ${appAsarDestPathInWorkingDirectory}`);
     fileSystem.extractAll(appAsarInstallationPath, appAsarDestPathInWorkingDirectory);

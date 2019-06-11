@@ -55,7 +55,8 @@ class EditorPage extends Component {
 
     // state
     this.state = {
-      entitiesList: []
+      entitiesList: [],
+      loadedProjectFilePath: ''
     };
 
     // bind methods    
@@ -128,6 +129,9 @@ class EditorPage extends Component {
 
     // TODO: ask hung to put into sceneContext
     this.loadedProjectFilePath = '';
+    this.setState({
+      loadedProjectFilePath: ''
+    });
 
     this.props.sceneContext.newProject();
   }
@@ -141,7 +145,9 @@ class EditorPage extends Component {
 
       // TODO: ask hung to put into sceneContext
       this.loadedProjectFilePath = projectFilePath;
-      
+      this.setState({
+        loadedProjectFilePath: projectFilePath
+      })
       const projectJsonData = data.projectJson;
       //console.log(projectJsonData);
       this.props.sceneContext.loadProject(projectJsonData);   
@@ -165,6 +171,9 @@ class EditorPage extends Component {
       }
       // TODO: ask hung to put into sceneContext
       this.loadedProjectFilePath = projectFilePath;
+      this.setState({
+        loadedProjectFilePath: projectFilePath
+      });
     });
   }
 
@@ -212,7 +221,7 @@ class EditorPage extends Component {
 
   handleSaveProjectButtonClick(event) {
     // TODO: ask hung to put into sceneContext
-    ipcHelper.isCurrentLoadedProject(this.loadedProjectFilePath, (err, data) => {
+    ipcHelper.isCurrentLoadedProject(this.state.loadedProjectFilePath, (err, data) => {
       if (err) {
         handleErrorWithUiDefault(err);
         return;
@@ -220,7 +229,7 @@ class EditorPage extends Component {
 
       const isCurrentLoadedProject = data.isCurrentLoadedProject;
       if (isCurrentLoadedProject) {
-        this.saveProject(this.loadedProjectFilePath);
+        this.saveProject(this.state.loadedProjectFilePath);
       } else {
         this.saveProjectAs();
       }
@@ -344,7 +353,7 @@ class EditorPage extends Component {
               } */}
             ]}
           />
-          <ButtonsPanel />
+          <ButtonsPanel currentLoadedProjectPath={this.state.loadedProjectFilePath} />
           <AFramePanel />
           <SlidesPanel />
           <TimelinePanel />
