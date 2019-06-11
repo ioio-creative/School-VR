@@ -280,6 +280,10 @@ function getPresentationServerInfo(callBack) {
   generalIpcCall('getPresentationServerInfo', callBack);
 }
 
+function openWebServerAndLoadProject(filePath, callBack) {
+  generalIpcCall('openWebServerAndLoadProject', filePath, callBack);
+}
+
 /* end of for presentation */
 
 
@@ -338,4 +342,5 @@ export default {
 
   // for presentation
   getPresentationServerInfo,
+  openWebServerAndLoadProject
 };

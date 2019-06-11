@@ -72,6 +72,8 @@ class ProjectFile {
     ];
     // temp project files
     this.tempProjectJsonFilePath = myPath.join(this.tempProjectDirectoryPath, this.name + config.jsonFileExtensionWithLeadingDot);
+    // web server project directories
+    this.webServerProjectDirectoryPath = '';    
 
     // fileStats properties
     if (this.projectFileStats) {
@@ -484,7 +486,7 @@ class ProjectFile {
   /* end of saveProject */
 
   /* loadProject */
-  async loadProjectAsync() {
+  async loadProjectAsync(isKeepAssetPathsRelative = false) {
     const savedProjectFilePath = this.savedProjectFilePath;
 
     if (!savedProjectFilePath) {
@@ -509,8 +511,10 @@ class ProjectFile {
     // change any relative file path in assets to absolute path
     const assetsList = projectJson.assetsList;
     assetsList.forEach((asset) => {
-      asset.src = 
-        this.getTempProjectAssetAbsolutePathFromProvidedPathIfIsRelative(asset.src);
+      if (!webServerFilesDirectory) {
+        asset.src = 
+          this.getTempProjectAssetAbsolutePathFromProvidedPathIfIsRelative(asset.src);
+      }   
     });
   
     this.projectJson = projectJson;
@@ -518,9 +522,9 @@ class ProjectFile {
     return projectJson
   }
 
-  static async loadProjectByFilePathAsync(filePath) {
+  static async loadProjectByFilePathAsync(filePath, isKeepAssetPathsRelative = false) {
     const projectFile = new ProjectFile(null, filePath, null);
-    return await projectFile.loadProjectAsync();
+    return await projectFile.loadProjectAsync(isKeepAssetPathsRelative);
   }
   /* end of loadProject */
 
@@ -536,8 +540,8 @@ class ProjectFile {
     return currentLoadedProjectFilePath === aFilePath;
   };
 
-  static async loadCurrentLoadedProjectAsync() {    
-    return await ProjectFile.loadProjectByFilePathAsync(currentLoadedProjectFilePath);
+  static async loadCurrentLoadedProjectAsync(isKeepAssetPathsRelative = false) {    
+    return await ProjectFile.loadProjectByFilePathAsync(currentLoadedProjectFilePath, isKeepAssetPathsRelative);
   };
 
   /* end of current loaded project (singleton) */
