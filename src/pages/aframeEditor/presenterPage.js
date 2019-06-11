@@ -1,6 +1,6 @@
-import React, {Component, Fragment} from 'react';
+import React, {Component} from 'react';
 // import SystemPanel from 'containers/aframeEditor/homePage/systemPanel';
-import {withRouter, Prompt} from 'react-router-dom';
+import {withRouter} from 'react-router-dom';
 
 import {withSceneContext} from 'globals/contexts/sceneContext';
 
@@ -23,6 +23,9 @@ import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 import ipcHelper from 'utils/ipc/ipcHelper';
 import routes from 'globals/routes';
+
+import getSearchObjectFromHistory from 'utils/queryString/getSearchObjectFromHistory';
+import getProjectFilePathFromSearchObject from 'utils/queryString/getProjectFilePathFromSearchObject';
 
 import './presenterPage.css';
 const Events = require('vendor/Events.js');
@@ -57,35 +60,53 @@ class PresenterPage extends Component {
     sceneContext.updateEditor(this.editor);
     // this.props.sceneContext
     this.inited = true;
-    // get the ip and port from ipc
-    // const socket = io(window.location.origin);
-    const socket = io('http://localhost:1413');
-    socket.on('connect', () => {
-      console.log('connected!!!'); // socket.connected); // true
-      socket.emit('registerPresenter');
-    });
-    socket.on('serverMsg', (msg) => {
-      console.log('message from server: ', msg);
-    })
-    // document.addEventListener('dblclick', this.sendMessage);
-    this.setState({
-      socket: socket
-    })
+
+    // TODO: ask Hung to check after getting port from electron
+    ipcHelper.getPresentationServerPort((err, data) => {
+      if (err) {
+        handleErrorWithUiDefault(err);
+        return;
+      }
+
+      const presentationServerPort = data.port;
+      // get the ip and port from ipc
+      // const socket = io(window.location.origin);    
+      const socket = io(`http://localhost:${presentationServerPort}`);
+      socket.on('connect', () => {
+        console.log('connected!!!'); // socket.connected); // true
+        socket.emit('registerPresenter');
+      });
+      socket.on('serverMsg', (msg) => {
+        console.log('message from server: ', msg);
+      })
+      // document.addEventListener('dblclick', this.sendMessage);
+      this.setState({
+        socket: socket
+      });
+    });    
   }
   disableEditor(editor) {
     editor.close();
   }
-  // onEditorLoad(editor) {
-  //   const props = this.props;
-  //   const savedProjectStr = localStorage.getItem('schoolVRSave');
-  //   if (props.match.params.projectId === undefined || !savedProjectStr) {
-  //     props.sceneContext.newProject();
-  //   } else {
-  //     props.sceneContext.loadProject(JSON.parse(savedProjectStr));
-  //   }
-  //   editor.close();
-  // }
-  componentDidUpdate() {
+  onEditorLoad(editor) {
+    // const props = this.props;
+    // const savedProjectStr = localStorage.getItem('schoolVRSave');
+    // if (props.match.params.projectId === undefined || !savedProjectStr) {
+    //   props.sceneContext.newProject();
+    // } else {
+    //   props.sceneContext.loadProject(JSON.parse(savedProjectStr));
+    // }
+    // editor.close();
+
+    // load project
+    const searchObj = getSearchObjectFromHistory(this.props.history);
+    const projectFilePathToLoad = getProjectFilePathFromSearchObject(searchObj);
+
+    console.log("project path to load: " + projectFilePathToLoad);
+
+    if (projectFilePathToLoad) {
+      this.loadProject(projectFilePathToLoad);
+    }
   }
   componentWillUnmount() {
     // Events.removeListener('editor-load', this.onEditorLoad);

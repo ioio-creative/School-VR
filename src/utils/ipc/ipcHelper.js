@@ -274,6 +274,15 @@ function showSaveDialog(options, callBack) {
 /* end of vanilla electron dialog */
 
 
+/* for presentation */
+
+function getPresentationServerPort(callBack) {
+  generalIpcCall('getPresentationServerPort', callBack);
+}
+
+/* end of for presentation */
+
+
 export default {
   // listeners
   addListener,
@@ -325,5 +334,8 @@ export default {
 
   // vanilla electron dialog
   showOpenDialog,
-  showSaveDialog
+  showSaveDialog,
+
+  // for presentation
+  getPresentationServerPort,
 };

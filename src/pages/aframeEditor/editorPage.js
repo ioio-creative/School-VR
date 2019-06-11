@@ -43,14 +43,17 @@ const Events = require('vendor/Events.js');
 // const schema = require('schema/aframe_schema_20181108.json');
 
 
-// TODO: ask hung to put into sceneContext
-let loadedProjectFilePath = '';
-
 
 class EditorPage extends Component {
   constructor(props) {
     super(props);
+
+    // variables
     this.inited = false;
+    // TODO: ask hung to put into sceneContext
+    this.loadedProjectFilePath = '';
+
+    // state
     this.state = {
       entitiesList: []
     };
@@ -98,6 +101,7 @@ class EditorPage extends Component {
 
   
   /* methods */
+  
   onEditorLoad(editor) {
     // load project
     const searchObj = getSearchObjectFromHistory(this.props.history);
@@ -109,9 +113,9 @@ class EditorPage extends Component {
       this.newProject();
     } else {
       this.loadProject(projectFilePathToLoad);      
-    }
-    
+    }    
   }
+
   newProject() {
     //console.log('new');
                     
@@ -123,7 +127,7 @@ class EditorPage extends Component {
     // fileDialog.click();
 
     // TODO: ask hung to put into sceneContext
-    loadedProjectFilePath = '';
+    this.loadedProjectFilePath = '';
 
     this.props.sceneContext.newProject();
   }
@@ -136,7 +140,7 @@ class EditorPage extends Component {
       }
 
       // TODO: ask hung to put into sceneContext
-      loadedProjectFilePath = projectFilePath;
+      this.loadedProjectFilePath = projectFilePath;
       
       const projectJsonData = data.projectJson;
       //console.log(projectJsonData);
@@ -160,7 +164,7 @@ class EditorPage extends Component {
         return;
       }
       // TODO: ask hung to put into sceneContext
-      loadedProjectFilePath = projectFilePath;
+      this.loadedProjectFilePath = projectFilePath;
     });
   }
 
@@ -208,7 +212,7 @@ class EditorPage extends Component {
 
   handleSaveProjectButtonClick(event) {
     // TODO: ask hung to put into sceneContext
-    ipcHelper.isCurrentLoadedProject(loadedProjectFilePath, (err, data) => {
+    ipcHelper.isCurrentLoadedProject(this.loadedProjectFilePath, (err, data) => {
       if (err) {
         handleErrorWithUiDefault(err);
         return;
@@ -216,7 +220,7 @@ class EditorPage extends Component {
 
       const isCurrentLoadedProject = data.isCurrentLoadedProject;
       if (isCurrentLoadedProject) {
-        this.saveProject(loadedProjectFilePath);
+        this.saveProject(this.loadedProjectFilePath);
       } else {
         this.saveProjectAs();
       }

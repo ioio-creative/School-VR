@@ -5,11 +5,14 @@ function projectFilePathQuery(filePath) {
 
 const routes = {
     home: "/",
-    editor: "/editor/:projectId?",
+    editor: "/editor",
     editorWithProjectFilePathQuery: function (filePath) {
-      return `/editor?${projectFilePathQuery(filePath)}`;
+      return `${this.editor}?${projectFilePathQuery(filePath)}`;
     },
-    presenter: "/presenter/:projectId?",
+    presenter: "/presenter",
+    presenterWithProjectFilePathQuery: function (filePath) {
+      return `${this.presenter}?${projectFilePathQuery(filePath)}`;
+    },
     viewer: "/viewer",
     projectList: "/projectlist",
     notFound: "/notfound"

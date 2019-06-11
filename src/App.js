@@ -90,32 +90,35 @@ class App extends Component {
   constructor(props) {
     super(props);
     // check if in electron
-    this.isElectronApp = window.require ? true: false;
+    this.isElectronApp = Boolean(window.require);
   }
   render() {    
     return (
       <SceneContextProvider>
         <div id="App">
-          {this.isElectronApp?
+          {
+            this.isElectronApp ?
           
-          <Switch>
+            <Switch>
 
-            {/* maybe add some checking here, if !electron, return viewer page only */}
-            <Route exact path="/file-explorer" render={() => <AsyncTestFileExplorer />} />
-            <Route exact path={routes.editor} component={AsyncEditorPage} />
-            {/* <Route exact path={routes.editor} render={() => <AsyncEditorPage />} /> */}
-            <Route exact path={routes.presenter} component={AsyncPresenterPage} />
-            {/* <Route exact path={routes.presenter} component={PresenterPage} /> */}
-            <Route exact path={routes.viewer} component={ViewerPage} />
-            <Route exact path={routes.projectList} component={AsyncProjectListPage} />
-            <Route exact path={routes.home} component={AsyncProjectListPage} />
-            <Redirect to={routes.home} />
-          </Switch>:
-          <Switch>
-            <Route exact path={routes.home} component={ViewerPage} />
-            <Redirect to={routes.home} />
-          </Switch>
-          
+              {/* maybe add some checking here, if !electron, return viewer page only */}
+              <Route exact path="/file-explorer" render={() => <AsyncTestFileExplorer />} />
+              <Route exact path={routes.editor} component={AsyncEditorPage} />
+              {/* <Route exact path={routes.editor} render={() => <AsyncEditorPage />} /> */}
+              <Route exact path={routes.presenter} component={AsyncPresenterPage} />
+              {/* <Route exact path={routes.presenter} component={PresenterPage} /> */}
+              <Route exact path={routes.viewer} component={ViewerPage} />
+              <Route exact path={routes.projectList} component={AsyncProjectListPage} />
+              <Route exact path={routes.home} component={AsyncProjectListPage} />
+              <Redirect to={routes.home} />
+            </Switch>
+            
+            :
+            
+            <Switch>
+              <Route exact path={routes.home} component={ViewerPage} />
+              <Redirect to={routes.home} />
+            </Switch>          
           }
         </div>
       </SceneContextProvider>

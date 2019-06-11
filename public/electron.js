@@ -39,9 +39,7 @@ let splashScreenDurationInMillis = 2000;
 let developmentServerPort = process.env.PORT || 1234;
 
 //const appAsarInstallationPath = myPath.join(app.getAppPath(), 'resources', 'app.asar');
-console.log(app.getName());
-// const appAsarInstallationPath = myPath.join(app.getPath('appData'), '..', 'Local', 'Programs', 'School VR', 'resources', 'app.asar');
-const appAsarInstallationPath = myPath.join(app.getPath('appData'), '..', 'Local', 'Programs', 'school-vr', 'resources', 'app.asar');
+const appAsarInstallationPath = myPath.join(app.getPath('appData'), '..', 'Local', 'Programs', app.getName(), 'resources', 'app.asar');
 console.log(appAsarInstallationPath);
 const appAsarDestPathInWorkingDirectory = myPath.join(appDirectory.appTempAppWorkingDirectory, 'resources');
 console.log(appAsarDestPathInWorkingDirectory);
@@ -181,12 +179,13 @@ function createWindow() {
 }
 
 async function openWebServer() {
+  if (false) {
+    await fileSystem.myDeletePromise(appAsarDestPathInWorkingDirectory);
+    console.log("reach here 1");
+    fileSystem.extractAll(appAsarInstallationPath, appAsarDestPathInWorkingDirectory);
+    console.log("reach here 2");
+  }
   
-  
-  await fileSystem.myDeletePromise(appAsarDestPathInWorkingDirectory);
-  console.log("reach here 1");
-  fileSystem.extractAll(appAsarInstallationPath, appAsarDestPathInWorkingDirectory);
-  console.log("reach here 2");
   const indexHtmlPath = (isDev ? `${myPath.join(__dirname, '../build')}` : webServerRootDirectory);
 
   // https://nodejs.org/api/child_process.html#child_process_subprocess_send_message_sendhandle_options_callback
@@ -697,6 +696,16 @@ ipcMain.on('showSaveDialog', (event, args) => {
         filePath: filePath
       }
     });
+  });
+});
+
+// for presentation
+
+ipcMain.on('getPresentationServerPort', (event, args) => {
+  event.sender.send('getPresentationServerPortResponse', {
+    data: {
+      port: webServerPort
+    }
   });
 });
 
