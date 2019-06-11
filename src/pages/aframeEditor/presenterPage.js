@@ -40,9 +40,11 @@ let loadedProjectFilePath = '';
 class PresenterPage extends Component {
   constructor(props) {
     super(props);
-    this.inited = false;
+    // this.inited = false;
     this.state = {
-      socket: null
+      socket: null,
+      localIps: [],
+      viewerCount: 0
     }
     // this.onEditorLoad = this.onEditorLoad.bind(this);
     // Events.on('editor-load', this.onEditorLoad);
@@ -50,19 +52,19 @@ class PresenterPage extends Component {
     this.handleOpenProjectButtonClick = this.handleOpenProjectButtonClick.bind(this);
     this.handleExitButtonClick = this.handleExitButtonClick.bind(this);
     this.loadProject = this.loadProject.bind(this);
-    this.disableEditor = this.disableEditor.bind(this);
+    this.onEditorLoad = this.onEditorLoad.bind(this);
   }
   componentDidMount() {
     const props = this.props;
     const sceneContext = props.sceneContext;
     this.editor = new Editor();
-    Events.on('editor-load', this.disableEditor)
+    Events.on('editor-load', this.onEditorLoad)
     sceneContext.updateEditor(this.editor);
     // this.props.sceneContext
-    this.inited = true;
+    // this.inited = true;
 
     // TODO: ask Hung to check after getting port from electron
-    ipcHelper.getPresentationServerPort((err, data) => {
+    ipcHelper.getPresentationServerInfo((err, data) => {
       if (err) {
         handleErrorWithUiDefault(err);
         return;
@@ -79,15 +81,29 @@ class PresenterPage extends Component {
       socket.on('serverMsg', (msg) => {
         console.log('message from server: ', msg);
       })
+      socket.on('updateViewerCount', (count) => {
+        this.setState({
+          viewerCount: count
+        })
+      })
       // document.addEventListener('dblclick', this.sendMessage);
+      const interfaceIpArr = [];
+      for (let interfaceName in data.interfaceIpMap) {
+        interfaceIpArr.push({
+          interface: interfaceName,
+          ip: data.interfaceIpMap[interfaceName]
+        })
+      }
       this.setState({
+        localIps: interfaceIpArr,
+        port: presentationServerPort,
         socket: socket
       });
     });    
   }
-  disableEditor(editor) {
-    editor.close();
-  }
+  // disableEditor(editor) {
+  //   editor.close();
+  // }
   onEditorLoad(editor) {
     // const props = this.props;
     // const savedProjectStr = localStorage.getItem('schoolVRSave');
@@ -96,7 +112,7 @@ class PresenterPage extends Component {
     // } else {
     //   props.sceneContext.loadProject(JSON.parse(savedProjectStr));
     // }
-    // editor.close();
+    editor.close();
 
     // load project
     const searchObj = getSearchObjectFromHistory(this.props.history);
@@ -112,7 +128,7 @@ class PresenterPage extends Component {
     // Events.removeListener('editor-load', this.onEditorLoad);
     this.editor = null;
     // document.removeEventListener('dblclick', this.sendMessage);
-    Events.removeListener('editor-load', this.disableEditor)
+    Events.removeListener('editor-load', this.onEditorLoad)
   }
   // sendMessage(msg) {
   //   this.state.socket.emit('test', 'hello');
@@ -165,6 +181,9 @@ class PresenterPage extends Component {
   render() {
     const state = this.state;
     const sceneContext = this.props.sceneContext;
+    const localIps = state.localIps;
+    const port = state.port;
+    const viewerCount = state.viewerCount;
     return (
       <div id="presenter">
         {/* <Prompt
@@ -209,6 +228,15 @@ class PresenterPage extends Component {
         <SlidesPanel isEditing={false} socket={state.socket} />
         {/* <TimelinePanel /> */}
         {/* <InfoPanel /> */}
+        <div className="interfaceIp-panel">
+          {localIps.map(localIp => {
+            return <div className="interfaceIp-data" key={localIp.ip}>
+              <div className="interface">{localIp.interface}</div>
+              <div className="ip">{localIp.ip}:{port}</div>
+            </div>;
+          })}
+        </div>
+        <div className="viewerCount-panel">{viewerCount}</div>
       </div>
     );
   }

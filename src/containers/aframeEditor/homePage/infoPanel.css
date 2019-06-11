@@ -153,7 +153,7 @@
 #info-panel .opacity-col .opacity-preview {
   width: 50px;
   height: 50px;
-  background: red;
+  background: #FFFFFF;
   border-radius: 5px;
   border: 1px solid #FFFFFF;
 }
@@ -333,7 +333,7 @@
   top: 370px;
   width: 250px;
   right: 25px;
-  background-color: rgba(3, 20, 28, 0.3);
+  background-color: rgba(3, 20, 28, 0.6);
   color: var(--text-color);
   z-index: 1;
   border-radius: 15px;

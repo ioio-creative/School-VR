@@ -276,7 +276,7 @@ function showSaveDialog(options, callBack) {
 
 /* for presentation */
 
-function getPresentationServerPort(callBack) {
+function getPresentationServerInfo(callBack) {
   generalIpcCall('getPresentationServerInfo', callBack);
 }
 
@@ -337,5 +337,5 @@ export default {
   showSaveDialog,
 
   // for presentation
-  getPresentationServerPort,
+  getPresentationServerInfo,
 };
