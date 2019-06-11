@@ -108,7 +108,8 @@ class SceneContextProvider extends Component {
     this.getEntitiesList = this.getEntitiesList.bind(this);
     this.getCurrentEntity = this.getCurrentEntity.bind(this);
     this.getCurrentEntityId = this.getCurrentEntityId.bind(this);
-    
+    this.copyEntity = this.copyEntity.bind(this);
+
     this.addEntity = this.addEntity.bind(this);
     this.deleteEntity = this.deleteEntity.bind(this);
     this.selectEntity = this.selectEntity.bind(this);
@@ -649,6 +650,63 @@ class SceneContextProvider extends Component {
   }
   getCurrentEntityId() {
     return this.state.entityId;
+  }
+  copyEntity(entityId = this.state.entityId) {
+    const state = this.state;
+    const copyFromEntity = this.getCurrentEntity(entityId);
+    const type = copyFromEntity.type;
+    const objectModel = new entityModel[type];
+    const elementId = uuid();
+    const newElement = {
+      type: type,
+      id: elementId,
+      name: ('copy of ' + copyFromEntity.name).substr(0, 10),
+      element: 'a-entity',
+      timelines: []
+    };
+    newElement['components'] = mergeJSON(
+      objectModel.animatableAttributesValues,
+      objectModel.fixedAttributes
+    );
+    newElement['components'] = mergeJSON(
+      newElement['components'],
+      copyFromEntity['components']
+    );
+    newElement['components']['id'] = elementId;
+
+    const newEl = this.editor.createNewEntity(newElement);
+    // need a setAttribute to trigger the ttfFont init
+    if (newElement['components']['ttfFont'] && newElement['components']['ttfFont']['opacity']) {
+      // console.log('sdfsaf');
+      newEl.setAttribute('ttfFont', 'opacity', !newElement['components']['ttfFont']['opacity']);
+      newEl.setAttribute('ttfFont', 'opacity', newElement['components']['ttfFont']['opacity']);
+    }
+    // newEl.removeAttribute('something');
+    newElement['el'] = newEl;
+    objectModel.setEl(newEl);
+    this.setState((prevState) => {
+      const newSceneData = jsonCopy(prevState.sceneData);
+      const newUndoQueue = jsonCopy(prevState.undoQueue);
+      const currentSlide = newSceneData.slides.find(slide => slide.id === prevState.slideId);
+      currentSlide.entities.push(newElement);
+      newUndoQueue.push({
+        sceneData: jsonCopy(prevState.sceneData),
+        slideId: prevState.slideId,
+        entityId: prevState.entityId,
+        timelineId: prevState.timelineId,
+        timelinePosition: prevState.timelinePosition,
+        currentTime: prevState.currentTime,
+      });
+      // prevState.undoQueue.push(jsonCopy(prevState.sceneData));
+      return {
+        sceneData: newSceneData,
+        entityId: elementId,
+        undoQueue: newUndoQueue,
+        redoQueue: [],
+      }
+    }, _=> {
+      this.rebuildTimeline().then(tl => tl.seek(this.state.currentTime, false));
+    })
   }
   updateEntity(newAttrs, entityId) {
     this.setState((prevState) => {
@@ -1516,6 +1574,7 @@ class SceneContextProvider extends Component {
   resetView() {
     this.editor.EDITOR_CAMERA.position.set(20, 10, 20);
     this.editor.EDITOR_CAMERA.lookAt(0,0,0);
+    this.editor.editorControls.center.set(0, 0, 0);
   }
 
   updateEditor(editor) {
@@ -1554,6 +1613,7 @@ class SceneContextProvider extends Component {
           getEntitiesList: this.getEntitiesList,
           getCurrentEntity: this.getCurrentEntity,
           getCurrentEntityId: this.getCurrentEntityId,
+          copyEntity: this.copyEntity,
     
           addEntity: this.addEntity,
           deleteEntity: this.deleteEntity,

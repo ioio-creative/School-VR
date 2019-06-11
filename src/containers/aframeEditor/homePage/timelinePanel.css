@@ -237,12 +237,12 @@
 }
 #timeline-panel .entities-list,
 #timeline-panel .timeline-list {
-  height: 37px;
+  height: 31px;
 }
 #timeline-panel.opened .entities-list,
 #timeline-panel.opened .timeline-list {
   /* 4 row x 32px + 5px scrollbar height */
-  height: 141px;
+  height: 131px;
 }
 #timeline-panel .entities-list {
   overflow: hidden;
@@ -384,3 +384,46 @@
   border-bottom: 5px solid var(--default-color);
 }
 
+
+#timeline-panel .context-menu-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+}
+
+#timeline-panel .context-menu-container .content-menu-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#timeline-panel .context-menu-container .context-menu {
+  position: absolute;
+  z-index: 1;
+}
+#timeline-panel .context-menu-container .context-menu .menu-item-wrapper {
+  position: absolute;
+  bottom: 0;
+  background-color: #252526;
+  color: #CCCCCC;
+  padding: 5px 0;
+}
+#timeline-panel .context-menu-container .context-menu .menu-item {
+  padding: 3px 15px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+#timeline-panel .context-menu-container .context-menu .seperator {
+  background-color: #7F7F7F;
+  height: 1px;
+  margin: 5px 8px;
+}
+#timeline-panel .context-menu-container .context-menu .menu-item:hover {
+  background-color: #505050;
+  color: #ffffff;
+}

@@ -1,10 +1,11 @@
 import React, {Component} from 'react';
 // import SystemPanel from 'containers/aframeEditor/homePage/systemPanel';
-import {withRouter} from 'react-router-dom';
+import {withRouter, Link} from 'react-router-dom';
 
 import {withSceneContext} from 'globals/contexts/sceneContext';
 
 import MenuComponent from 'components/menuComponent';
+import Mousetrap from 'mousetrap';
 
 import ButtonsPanel from 'containers/aframeEditor/homePage/buttonsPanel';
 import AFramePanel from 'containers/aframeEditor/homePage/aFramePanel';
@@ -27,6 +28,8 @@ import routes from 'globals/routes';
 import getSearchObjectFromHistory from 'utils/queryString/getSearchObjectFromHistory';
 import getProjectFilePathFromSearchObject from 'utils/queryString/getProjectFilePathFromSearchObject';
 
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+
 import './presenterPage.css';
 const Events = require('vendor/Events.js');
 const uuid = require('uuid/v1');
@@ -44,7 +47,8 @@ class PresenterPage extends Component {
     this.state = {
       socket: null,
       localIps: [],
-      viewerCount: 0
+      viewerCount: 0,
+      loadedProjectFilePath: ''
     }
     // this.onEditorLoad = this.onEditorLoad.bind(this);
     // Events.on('editor-load', this.onEditorLoad);
@@ -99,7 +103,31 @@ class PresenterPage extends Component {
         port: presentationServerPort,
         socket: socket
       });
-    });    
+    });
+    
+    Mousetrap.bind('left', (e) => {
+      e.preventDefault();
+      // get current slide
+      const slidesList = sceneContext.getSlidesList();
+      const currentSlide = sceneContext.getCurrentSlideId();
+      const currentSlideIdx = slidesList.findIndex(slide => slide.id === currentSlide);
+      const prevSlide = (currentSlideIdx < 1? null: slidesList[currentSlideIdx - 1]['id']);
+      if (prevSlide) {
+        sceneContext.selectSlide(prevSlide);
+      }
+      return false;
+    })
+    Mousetrap.bind('right', (e) => {
+      e.preventDefault();
+      const slidesList = sceneContext.getSlidesList();
+      const currentSlide = sceneContext.getCurrentSlideId();
+      const currentSlideIdx = slidesList.findIndex(slide => slide.id === currentSlide);
+      const nextSlide = (currentSlideIdx > slidesList.length - 2? null: slidesList[currentSlideIdx + 1]['id']);
+      if (nextSlide) {
+        sceneContext.selectSlide(nextSlide);
+      }
+      return false;
+    })
   }
   // disableEditor(editor) {
   //   editor.close();
@@ -150,7 +178,9 @@ class PresenterPage extends Component {
       if (!isNonEmptyArray(filePaths)) {
         return;
       }
-      
+      this.setState({
+        loadedProjectFilePath: filePaths[0]
+      })
       this.loadProject(filePaths[0]);
     });
   }
@@ -184,6 +214,15 @@ class PresenterPage extends Component {
     const localIps = state.localIps;
     const port = state.port;
     const viewerCount = state.viewerCount;
+    const slidesList = sceneContext.getSlidesList();
+    const currentSlide = sceneContext.getCurrentSlideId();
+    const currentSlideIdx = slidesList.findIndex(slide => slide.id === currentSlide);
+    const prevSlide = (currentSlideIdx < 1? null: slidesList[currentSlideIdx - 1]['id']);
+    const nextSlide = (currentSlideIdx > slidesList.length - 2? null: slidesList[currentSlideIdx + 1]['id']);
+    // for exit button
+    // const searchObj = getSearchObjectFromHistory(this.props.history);
+    const projectFilePathToLoad = state.loadedProjectFilePath;
+    // console.log(projectFilePathToLoad);
     return (
       <div id="presenter">
         {/* <Prompt
@@ -224,7 +263,7 @@ class PresenterPage extends Component {
           ]}
         />
         {/* <ButtonsPanel /> */}
-        <AFramePanel />
+        <AFramePanel disableVR={true}/>
         <SlidesPanel isEditing={false} socket={state.socket} />
         {/* <TimelinePanel /> */}
         {/* <InfoPanel /> */}
@@ -237,6 +276,49 @@ class PresenterPage extends Component {
           })}
         </div>
         <div className="viewerCount-panel">{viewerCount}</div>
+        <div className="slideFunctions-panel">
+          <div className="buttons-group">
+            <div className={`button-prevSlide${currentSlideIdx === 0? ' disabled': ''}`}
+              onClick={() => {
+                if (prevSlide) {
+                  sceneContext.selectSlide(prevSlide);
+                }
+              }}
+            >
+              <FontAwesomeIcon icon="angle-left"/>
+            </div>
+            <div className="button-playSlide"
+              onClick={() => {
+                sceneContext.playSlide();
+              }}
+            >
+              <FontAwesomeIcon icon="play"/>              
+            </div>
+            <div className={`button-nextSlide${currentSlideIdx === slidesList.length - 1? ' disabled': ''}`} onClick={() => {
+                if (nextSlide) {
+                  sceneContext.selectSlide(nextSlide);
+                }
+              }}>
+              <FontAwesomeIcon icon="angle-right"/>            
+            </div>
+          </div>
+          <div className="buttons-group">
+            <select value={currentSlide}
+              onChange={e => {
+                sceneContext.selectSlide(e.currentTarget.value);
+              }}
+            >
+              {
+                slidesList.map((slide, idx) => {
+                  return <option key={slide.id} value={slide.id}>Slide {idx + 1}</option>
+                })
+              }
+            </select>
+          </div>
+          <div className="buttons-group">
+            <Link to={routes.editorWithProjectFilePathQuery(projectFilePathToLoad)}>Exit</Link>
+          </div>
+        </div>
       </div>
     );
   }

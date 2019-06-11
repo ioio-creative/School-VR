@@ -1,4 +1,4 @@
-.interfaceIp-panel {
+#presenter .interfaceIp-panel {
   position: absolute;
   right: 25px;
   top: 50px;
@@ -7,14 +7,14 @@
   border-radius: 15px;
   color: #FFFFFF;
 }
-.interfaceIp-panel .ip {
+#presenter .interfaceIp-panel .ip {
   background-color: #03141c;
   text-align: center;
   padding: 10px 0;
   border-radius: 50px;
   margin: 5px 0 15px;
 }
-.viewerCount-panel {
+#presenter .viewerCount-panel {
   position: absolute;
   top: 50px;
   left: 25px;
@@ -22,4 +22,71 @@
   padding: 10px 20px;
   border-radius: 50px;
   color: #FFFFFF;
+}
+#presenter .slideFunctions-panel {
+  position: absolute;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  background-color: rgba(13, 12, 30, 0.8);
+  border-radius: 50px;
+}
+
+#presenter .slideFunctions-panel .buttons-group {
+  padding: 10px 30px;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+#presenter .slideFunctions-panel .buttons-group:after {
+  content: '';
+  width: 1px;
+  height: 20px;
+  background-color: #4d5054;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#presenter .slideFunctions-panel .buttons-group .button-prevSlide,
+#presenter .slideFunctions-panel .buttons-group .button-playSlide,
+#presenter .slideFunctions-panel .buttons-group .button-nextSlide {
+  margin: 0 10px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  color: #FFFFFF;
+}
+#presenter .slideFunctions-panel .buttons-group .button-prevSlide.disabled,
+#presenter .slideFunctions-panel .buttons-group .button-nextSlide.disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+#presenter .slideFunctions-panel .buttons-group .button-playSlide {
+  color: #1ebdff;
+}
+
+#presenter .slideFunctions-panel .buttons-group select {
+  background-color: #2b3337;
+  color: #4d5054;
+  padding: 10px 30px;
+  border-radius: 50px;
+  border: 0;
+  outline: none;
+}
+#presenter .slideFunctions-panel .buttons-group select:hover {
+  color: #FFFFFF;
+}
+#presenter .slideFunctions-panel .buttons-group a {
+  padding: 5px 15px;
+  text-decoration: none;
+  color: #4d5054;
+}
+#presenter .slideFunctions-panel .buttons-group a:hover {
+  color: #ffffff;
 }

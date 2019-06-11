@@ -334,7 +334,7 @@
   width: 250px;
   right: 25px;
   background-color: rgba(3, 20, 28, 0.6);
-  color: var(--text-color);
+  color: #FFFFFF;/* var(--text-color); */
   z-index: 1;
   border-radius: 15px;
 }

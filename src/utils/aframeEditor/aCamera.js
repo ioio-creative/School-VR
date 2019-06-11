@@ -52,6 +52,21 @@ class ACamera extends AEntity {
   setCameraPreviewEl(canvasEl) {
     this.cameraPreviewEl = this.cameraPreviewEl || canvasEl;
   }
+  updateEntityAttributes(attrs) {
+    if (typeof(attrs) !== 'object') return;
+    // console.log(attrs);
+    const self = this;
+    for (let key in attrs) {
+      if (self.animatableAttributes.hasOwnProperty(key)) {
+        self._el.parentElement.setAttribute(key, attrs[key]);
+      } else {
+        const staticAttribute = self.staticAttributes.find(attr => attr.attributeKey === key);
+        if (staticAttribute) {
+          self._el.parentElement.setAttribute(key, attrs[key]);
+        }
+      }
+    }
+  }
   renderCameraPreview() {
     if (this.cameraPreviewEl) {
 
@@ -62,7 +77,7 @@ class ACamera extends AEntity {
   
       const width = renderer.domElement.width;
       const height = renderer.domElement.height;
-      const newHeight = 270 / width * height;
+      const newHeight = this.cameraPreviewEl.offsetWidth / width * height;
       const canvas = this.cameraPreviewEl;
       const ctx = canvas.getContext('2d');
   
@@ -78,7 +93,7 @@ class ACamera extends AEntity {
         editor.sceneHelpers.children[i].visible = helper_status[i];
       }
       
-      canvas.width = 270;
+      canvas.width = this.cameraPreviewEl.offsetWidth;
       canvas.height = newHeight;
       // if (camera.aspect > 1) {
       //   this.cameraPreviewScreenEl.setAttribute( 'width', canvas.width / 270 * 0.6 );

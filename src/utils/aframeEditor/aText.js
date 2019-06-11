@@ -25,29 +25,23 @@ class AText extends AEntity {
     };
     this._staticAttributes = [
       // {
-      //   type: 'image',
-      //   name: 'Texture',
-      //   attributeKey: 'material',
-      //   attributeField: 'src'
+      //   type: 'text',
+      //   name: 'Text',
+      //   attributeKey: 'ttfFont',
+      //   attributeField: 'value'
+      // },
+      // {
+      //   type: 'number',
+      //   name: 'Font Size',
+      //   attributeKey: 'ttfFont',
+      //   attributeField: 'fontSize'
       // },
       {
         type: 'text',
-        name: 'Text',
-        attributeKey: 'ttfFont',
+        name: 'Width',
+        attributeKey: 'text',
         attributeField: 'value'
       },
-      {
-        type: 'number',
-        name: 'Font Size',
-        attributeKey: 'ttfFont',
-        attributeField: 'fontSize'
-      },
-      // {
-      //   type: 'text',
-      //   name: 'Width',
-      //   attributeKey: 'text',
-      //   attributeField: 'width'
-      // },
       // text: [
       //   // 'align',
       //   // 'anchor',
@@ -100,6 +94,7 @@ class AText extends AEntity {
         z: 0
       },
       ttfFont: {
+      // text: {
         color: '#000000',
         opacity: 1,
         // fontSize: 1

@@ -106,7 +106,9 @@ class OpacityPicker extends Component {
       <div className="opacity-preview" 
         onClick={ this.handlePreviewClick }
       >
-        <img src={iconOpacity} alt=""/>
+        <img src={iconOpacity} alt="" style={{
+          opacity: state.opacity
+        }} />
       </div>
       { this.state.displayOpacityPicker ? 
         <div className="opacity-panel">

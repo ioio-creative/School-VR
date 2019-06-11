@@ -48,7 +48,8 @@ class TimelinePanel extends Component {
       editingName: null,
       timelineListElWidth: 0,
       entitiesList: [],
-      fetchedEntitiesList: {}
+      fetchedEntitiesList: {},
+      showContextMenu: false
     };
     this.entitiesList = {
       scrollLeft: 0,
@@ -62,7 +63,13 @@ class TimelinePanel extends Component {
     this.handleWheel = this.handleWheel.bind(this);
     this.handleResize = this.handleResize.bind(this);
     this.changeCurrentTime = this.changeCurrentTime.bind(this);
+    this.selectEntity = this.selectEntity.bind(this);
     this.deleteEntity = this.deleteEntity.bind(this);
+    
+    this.showContextMenu = this.showContextMenu.bind(this);
+    this.hideContextMenu = this.hideContextMenu.bind(this);
+
+    this.copyEntity = this.copyEntity.bind(this);
     // this.selectEntityTimelinePosition = this.selectEntityTimelinePosition.bind(this)
   }
   componentDidMount() {
@@ -244,6 +251,30 @@ class TimelinePanel extends Component {
     entitiesListWrap.style.marginTop = -entitiesList.scrollTop + 'px';
     timeIndicatorWrap.style.marginLeft = -entitiesList.scrollLeft + 'px';
   }
+
+  showContextMenu(e) {
+    e.preventDefault();
+    // if (this.props.isEditing === false) return;
+    this.setState({
+      showContextMenu: true,
+      menuPosition: {
+        x: e.clientX,
+        y: e.clientY,
+      }
+    })
+  }
+  
+  hideContextMenu(e) {
+    e.preventDefault();
+    this.setState({
+      showContextMenu: false
+    })
+  }
+
+  copyEntity() {
+    this.props.sceneContext.copyEntity();
+  }
+
   render() {
     const props = this.props;
     const state = this.state;
@@ -257,7 +288,7 @@ class TimelinePanel extends Component {
     // console.log(currentTime);
     return (
       <div id="timeline-panel" className="panel opened" onClick={(event)=>{
-          this.contextMenu.style.display = 'none';
+          {/* this.contextMenu.style.display = 'none'; */}
           {/* this.selectEntityTimelinePosition(event); */}
         }}
         ref={(ref) =>this.timelinePanel = ref}
@@ -344,11 +375,18 @@ class TimelinePanel extends Component {
                     <div className="entity-name"
                       onClick={(event) => {
                         {/* console.log('Ctrl pressed: ', event.ctrlKey); */}
+                        console.log('entityId: ', [entityId, selectedEntityId]);
                         this.selectEntity(event, entityId)
+                      }}
+                      onContextMenu={(event) => {
+                        this.selectEntity(event, entityId);
+                        if (entity['type'] !== 'a-camera') {
+                          this.showContextMenu(event);
+                        }
                       }}
                       onDoubleClick={(event) => this.setState({editingName: entityId})}
                     >
-                      {state.editingName == entityId ? 
+                      {entityId !== null && state.editingName == entityId ? 
                         <input type="text" 
                           onChange={(event) => this.changeEntityName(event, entityId)} 
                           onBlur={(event) => this.setState({editingName: null})}
@@ -500,9 +538,19 @@ class TimelinePanel extends Component {
               )
             })}
           </div>
-          <div className="context-menu" style={{position: 'fixed', zIndex: 1, display: 'none'}} ref={(ref)=>this.contextMenu = ref}>
-            delete
-          </div>
+          {state.showContextMenu &&
+            <div className="context-menu-container" onClick={this.hideContextMenu} onContextMenu={this.hideContextMenu}>
+              <div className="content-menu-overlay" />
+              <div className="context-menu" style={{
+                top: state.menuPosition.y,
+                left: state.menuPosition.x,
+              }}>
+                <div className="menu-item-wrapper">
+                  <div className="menu-item" onClick={this.copyEntity}>Copy Object</div>
+                </div>
+              </div>
+            </div>
+          }
         </div>
       </div>
     );

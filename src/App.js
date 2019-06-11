@@ -64,7 +64,10 @@ const faIconsNeed = [
   "faPause",
   "faTrashAlt",
   "faEye",
-  "faEyeSlash"
+  "faEyeSlash",
+  "faAngleLeft",
+  "faAngleRight",
+
 ];
 
 faIconsNeed.forEach(iconName => {
@@ -90,7 +93,7 @@ class App extends Component {
   constructor(props) {
     super(props);
     // check if in electron
-    this.isElectronApp = Boolean(window.require);
+    this.isElectronApp = true; // Boolean(window.require);
   }
   render() {    
     return (

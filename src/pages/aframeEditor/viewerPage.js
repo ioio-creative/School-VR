@@ -104,7 +104,7 @@ class ViewerPage extends Component {
     const state = this.state;
     const sceneContext = this.props.sceneContext;
     return (
-      <div id="presenter">
+      <div id="viewer">
         {/* <Prompt
           when={true}
           message='You have unsaved changes, are you sure you want to leave?'

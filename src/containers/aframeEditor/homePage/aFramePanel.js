@@ -290,7 +290,7 @@ class AFramePanel extends Component {
     	<div id="aframe-panel">
 	    	<a-scene embedded background="color:#6EBAA7" el-name="Background" ref={ref=> {
           this.sceneEl = ref;
-        }} >
+        }} vr-mode-ui={`enabled: ${props.disableVR? 'false': 'true'}`}>
           <a-assets>
             {/* try load some fonts */}
 

@@ -234,7 +234,7 @@ Editor.prototype = {
 
   selectEntity: function (entity) {
     // console.log(entity);
-    if (entity && entity.parentEl !== AFRAME.scenes[0]) {
+    if (entity && !entity.components['camera'] && entity.parentEl !== AFRAME.scenes[0]) {
       entity = entity.parentEl;
     }
     this.selectedEntity = entity;
