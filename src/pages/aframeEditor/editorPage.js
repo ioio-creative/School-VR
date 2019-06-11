@@ -36,7 +36,7 @@ import getProjectFilePathFromSearchObject from 'utils/queryString/getProjectFile
 import './editorPage.css';
 import fileHelper from 'utils/fileHelper/fileHelper';
 const Events = require('vendor/Events.js');
-const uuid = require('uuid/v1');
+//const uuid = require('uuid/v1');
 
 // const jsonSchemaValidator = require('jsonschema').Validator;
 // const validator = new jsonSchemaValidator();
