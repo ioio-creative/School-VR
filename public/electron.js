@@ -184,7 +184,9 @@ async function openWebServer() {
   const isAppAsarDestPathInWorkingDirectoryExists = await fileSystem.existsPromise(appAsarDestPathInWorkingDirectory);
   if (!isAppAsarDestPathInWorkingDirectoryExists) {
     await fileSystem.myDeletePromise(appAsarDestPathInWorkingDirectory);
+    console.log(`Before extracting ${appAsarInstallationPath} to ${appAsarDestPathInWorkingDirectory}`);
     fileSystem.extractAll(appAsarInstallationPath, appAsarDestPathInWorkingDirectory);
+    console.log(`After extracting ${appAsarInstallationPath} to ${appAsarDestPathInWorkingDirectory}`);
   }
   
   const indexHtmlPath = (isDev ? `${myPath.join(__dirname, '../build')}` : webServerRootDirectory);
