@@ -180,11 +180,11 @@ function createWindow() {
 }
 
 async function openWebServer() {
-  if (false) {
+  // TODO: have to do the following extracting build directory process in installer
+  const isAppAsarDestPathInWorkingDirectoryExists = await fileSystem.existsPromise(appAsarDestPathInWorkingDirectory);
+  if (!isAppAsarDestPathInWorkingDirectoryExists) {
     await fileSystem.myDeletePromise(appAsarDestPathInWorkingDirectory);
-    console.log("reach here 1");
     fileSystem.extractAll(appAsarInstallationPath, appAsarDestPathInWorkingDirectory);
-    console.log("reach here 2");
   }
   
   const indexHtmlPath = (isDev ? `${myPath.join(__dirname, '../build')}` : webServerRootDirectory);
@@ -197,6 +197,7 @@ async function openWebServer() {
   });      
 }
 
+// TODO:
 function closeWebServer() {
 
 }

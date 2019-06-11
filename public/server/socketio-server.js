@@ -4,26 +4,29 @@
 // Load required modules
 var http = require("http");              // http server core module
 var express = require("express");           // web framework external module
-var serveStatic = require('serve-static');  // serve static files
 var socketIo = require("socket.io");        // web socket external module
 var getIp = require("../utils/getIp").getIp;
-// var easyrtc = require("easyrtc");               // EasyRTC external module
 
 // const myPath = require('../utils/fileSystem/myPath');
 
 
 // Set process name
-// process.title = "node-easyrtc";
+process.title = "node-socketio-server";
 
 // Get port or default to 8080
 //var port = process.env.PORT || 8080;
 
 
-function openServer(port, rootDirPath = 'public/server/static') {
+function openServer(port, rootDirPath = 'public/server/static', filesDirPath = null) {
   // Setup and configure Express http server. Expect a subfolder called "static" to be the web root.
   var app = express();  
   console.log('rootDirPath: ' + rootDirPath);
-  app.use(serveStatic(rootDirPath, {'index': ['index.html']}));
+  app.use(express.static(rootDirPath, {'index': ['index.html']}));
+
+  if (filesDirPath) {
+    console.log('filesDirPath: ' + rootDirPath);
+    app.use(express.static(rootDirPath, {'index': ['index.html']}));
+  }
 
   // Start Express http server
   var webServer = http.createServer(app);

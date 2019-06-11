@@ -20,7 +20,7 @@ let ifnameAddressMap = null;
 /* private functions */
 
 const initializeIfnameAddressMap = _ => {
-  ifnameAddressMap = new Map();
+  ifnameAddressMap = {};
 
   Object.keys(ifaces).forEach(function (ifname) {
     let alias = 0;
@@ -42,7 +42,7 @@ const initializeIfnameAddressMap = _ => {
       ++alias;
   
       // added by chris
-      ifnameAddressMap.set(ifname, iface.address);
+      ifnameAddressMap[ifname] = iface.address;
     });
   });
 };
@@ -56,7 +56,7 @@ const getIpByInterfaceName = (interfaceName) => {
   if (!ifnameAddressMap) {
     initializeIfnameAddressMap();
   }
-  return ifnameAddressMap.get(interfaceName);
+  return ifnameAddressMap[interfaceName];
 };
 
 const getAllIps = () => {
