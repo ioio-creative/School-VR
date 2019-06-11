@@ -23,6 +23,7 @@ import iconText from 'media/icons/text.svg';
 import iconImage from 'media/icons/image.svg';
 import iconVideo from 'media/icons/video.svg';
 import iconSky from 'media/icons/360.svg';
+import iconNavigation from 'media/icons/navigation.svg';
 
 import iconUndo from 'media/icons/undo.svg';
 import iconRedo from 'media/icons/redo.svg';
@@ -86,9 +87,6 @@ class ButtonsPanel extends Component {
             <button onClick={()=>this.addNewEntity('a-cone')} title={'Add a cone'}>
               <img src={iconCone} alt=""/>
             </button>
-            <button onClick={()=>this.addNewEntity('a-navigation')} style={{fontSize: 35}} title={'Add a navigation'}>
-              ⬇
-            </button>
           </div>
         </div>
         <div className="seperator"></div>
@@ -123,6 +121,10 @@ class ButtonsPanel extends Component {
             <button onClick={()=>this.addNewEntity('a-sky')}>
               scale
             </button> */}
+            
+            <button onClick={()=>this.addNewEntity('a-navigation')} style={{fontSize: 35}} title={'Add a navigation'}>
+              <img src={iconNavigation} alt=""/>
+            </button>
           </div>
         </div>
         <div className="buttons-list buttons-presentation">

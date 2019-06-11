@@ -239,12 +239,23 @@ class InfoPanel extends Component {
                   // use electron api to load
                   inputField = <div onClick={_=> {
                     ipcHelper.openImageDialog((err, data) => {
-                      sceneContext.updateEntity({
+                      if (isNonEmptyArray(data.filePaths)) {
+                        const filePath =data.filePaths[0];
+                        const ext = filePath.split('.').slice(-1)[0];
+                        const newAssetData = sceneContext.addAsset({
+                          filePath: filePath,
+                          type: (ext === 'gif'? 'gif': 'image')
+                        });
+                        sceneContext.updateEntity({
                           material: {
-                            src: `url(${data.filePaths})`
+                            src: `#${newAssetData.id}`,
+                            shader: newAssetData.shader
                           }
                         }, selectedEntity['id']);
-                      selectedEntity.el.setAttribute('material', `src:url(${data.filePaths})`);
+                        selectedEntity.el.setAttribute('material', `src:#${newAssetData.id};shader:${newAssetData.shader}`);
+                      } else {
+                        selectedEntity.el.removeAttribute('material', 'src');
+                      }
                     })
                   }}>choose</div>
                   // temp use browser api to debug
@@ -299,22 +310,23 @@ class InfoPanel extends Component {
                       const filePaths = data.filePaths;
 
                       if (!isNonEmptyArray(filePaths)) {
-                        return;
+                        selectedEntity.el.removeAttribute('material', 'src');
+                      } else {
+                        const newAssetData = sceneContext.addAsset({
+                          filePath: filePaths[0],
+                          type: 'video/mp4', // data.type not pass from the ipc
+                        });
+                        selectedEntity.el.setAttribute('material', `src:#${newAssetData.id};shader: ${newAssetData.shader}`);
+                        sceneContext.updateEntity({
+                          material: {
+                            src: `#${newAssetData.id}`,
+                            shader: newAssetData.shader
+                          }
+                        }, selectedEntity['id']);
                       }
 
                       {/* const mimeType = fileHelper.getMimeType(filePaths[0]); */}
 
-                      const newAssetData = sceneContext.addAsset({
-                        filePath: filePaths[0],
-                        type: 'video/mp4', // data.type not pass from the ipc
-                      });
-                      selectedEntity.el.setAttribute('material', `src:#${newAssetData.id};shader: ${newAssetData.shader}`);
-                      sceneContext.updateEntity({
-                        material: {
-                          src: `#${newAssetData.id}`,
-                          shader: newAssetData.shader
-                        }
-                      }, selectedEntity['id']);
                       {/* sceneContext.updateEntity({
                         material: {
                           src: `url(${data.filePaths})`
