@@ -5,7 +5,7 @@
 var http = require("http");              // http server core module
 var express = require("express");           // web framework external module
 var socketIo = require("socket.io");        // web socket external module
-var getIp = require("../utils/getIp").getIp;
+//var getIp = require("../utils/getIp").getIp;
 
 // const myPath = require('../utils/fileSystem/myPath');
 

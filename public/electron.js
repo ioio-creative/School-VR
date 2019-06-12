@@ -39,15 +39,16 @@ let splashScreenDurationInMillis = 2000;
 
 let developmentServerPort = process.env.PORT || 1234;
 
-//const appAsarInstallationPath = myPath.join(app.getAppPath(), 'resources', 'app.asar');
-const appAsarInstallationPath = myPath.join(app.getPath('appData'), '..', 'Local', 'Programs', app.getName(), 'resources', 'app.asar');
-console.log('appAsarInstallationPath: ' + appAsarInstallationPath);
-const appAsarDestPathInWorkingDirectory = myPath.join(appDirectory.appTempAppWorkingDirectory, 'resources');
-console.log('appAsarDestPathInWorkingDirectory: ' + appAsarDestPathInWorkingDirectory);
-const webServerRootDirectory = myPath.join(appAsarDestPathInWorkingDirectory, 'build');
-console.log('webServerRootDirectory: ' + webServerRootDirectory);
-const webServerFilesDirectory = myPath.join(appDirectory.appTempAppWorkingDirectory, 'files');
-console.log('webServerFilesDirectory: ' + webServerFilesDirectory);
+const appAsarInstallationPath = appDirectory.appAsarInstallationPath;
+console.log(`appAsarInstallationPath: ${appAsarInstallationPath}`);
+const appAsarDestPathInWebContainerDirectory = appDirectory.appAsarDestPathInWebContainerDirectory
+console.log(`appAsarDestPathInWebContainerDirectory: ${appAsarDestPathInWebContainerDirectory}`);
+const webServerRootDirectory = appDirectory.webServerRootDirectory;
+console.log(`webServerRootDirectory: ${webServerRootDirectory}`);
+const webServerFilesDirectory = appDirectory.webServerFilesDirectory;
+console.log(`webServerFilesDirectory: ${webServerFilesDirectory}`);
+
+const serverProgramPath = myPath.join(__dirname, 'server', 'socketio-server.js');
 
 /* end of constants */
 
@@ -57,7 +58,7 @@ console.log('webServerFilesDirectory: ' + webServerFilesDirectory);
 let mainWindow;
 // https://fabiofranchino.com/blog/use-electron-as-local-webserver/
 // let webServerProcess = fork(`${myPath.join(__dirname, 'server', 'easyrtc-server.js')}`);
-let webServerProcess = fork(`${myPath.join(__dirname, 'server', 'socketio-server.js')}`);
+let webServerProcess;
 let paramsFromExternalConfigForReact;
 
 /* end of global variables */
@@ -157,7 +158,7 @@ function createWindow() {
   menu.append(new MenuItem({
     label: 'Toggle DevTools',
     accelerator: 'F12',
-    click: () => { 
+    click: _ => { 
       mainWindow.webContents.toggleDevTools();
     }
   }));
@@ -170,7 +171,7 @@ function createWindow() {
   menu.append(new MenuItem({
     label: 'Refresh',
     accelerator: 'F5',
-    click: () => {              
+    click: _ => {              
       mainWindow.reload();            
     }
   }));
@@ -183,12 +184,12 @@ function createWindow() {
 
 async function extractAppAsarForWebServerAsync() {
   // TODO: have to do the following extracting build directory process in installer
-  const isAppAsarDestPathInWorkingDirectoryExists = await fileSystem.existsPromise(appAsarDestPathInWorkingDirectory);
-  if (!isAppAsarDestPathInWorkingDirectoryExists && !isDev) {
-    await fileSystem.myDeletePromise(appAsarDestPathInWorkingDirectory);
-    console.log(`Before extracting ${appAsarInstallationPath} to ${appAsarDestPathInWorkingDirectory}`);
-    fileSystem.extractAll(appAsarInstallationPath, appAsarDestPathInWorkingDirectory);
-    console.log(`After extracting ${appAsarInstallationPath} to ${appAsarDestPathInWorkingDirectory}`);
+  const isAppAsarDestPathInWebContainerDirectoryExists = await fileSystem.existsPromise(appAsarDestPathInWebContainerDirectory);
+  if (!isAppAsarDestPathInWebContainerDirectoryExists && !isDev) {
+    await fileSystem.myDeletePromise(appAsarDestPathInWebContainerDirectory);
+    console.log(`Before extracting ${appAsarInstallationPath} to ${appAsarDestPathInWebContainerDirectory}`);
+    fileSystem.extractAll(appAsarInstallationPath, appAsarDestPathInWebContainerDirectory);
+    console.log(`After extracting ${appAsarInstallationPath} to ${appAsarDestPathInWebContainerDirectory}`);
   }
 }
 
@@ -198,6 +199,8 @@ async function openWebServerAsync() {
   await fileSystem.createDirectoryIfNotExistsPromise(webServerFilesDirectory);
 
   const indexHtmlPath = (isDev ? `${myPath.join(__dirname, '../build')}` : webServerRootDirectory);
+
+  webServerProcess = fork(serverProgramPath);
 
   // https://nodejs.org/api/child_process.html#child_process_subprocess_send_message_sendhandle_options_callback
   webServerProcess.send({
@@ -637,8 +640,7 @@ ipcMain.on('isCurrentLoadedProject', (event, arg) => {
 
 // window dialog
 
-ipcMain.on('openImageDialog', (event, arg) => {
-  console.log('openImageDialog');
+ipcMain.on('openImageDialog', (event, arg) => {  
   openImageDialog((filePaths) => {
     event.sender.send('openImageDialogResponse', {
       data: {
