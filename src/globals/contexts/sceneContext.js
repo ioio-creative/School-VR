@@ -1481,10 +1481,11 @@ class SceneContextProvider extends Component {
     if (newFile.id) {
       const assetsData = this.state.assetsData;
       for (let i = 0; i< assetsData.length; i++) {
-        if (assetsData[i].id === newFile.id)
+        if (assetsData[i].id === newFile.id) {
           console.log('asset exist, skip');
           // asset exists, return current assets list
           return assetsData;
+        }
       }
     }
     const sceneEl = this.editor.sceneEl;
