@@ -182,6 +182,9 @@ function createWindow() {
   /* end of setting up menu for hot keys purpose only */
 }
 
+
+/* web server */
+
 async function extractAppAsarForWebServerAsync() {
   // TODO: have to do the following extracting build directory process in installer
   const isAppAsarDestPathInWebContainerDirectoryExists = await fileSystem.existsPromise(appAsarDestPathInWebContainerDirectory);
@@ -195,9 +198,8 @@ async function extractAppAsarForWebServerAsync() {
 
 async function openWebServerAsync() {
   await extractAppAsarForWebServerAsync();
-
-  // TODO: delete webServerFilesDirectory first 
-
+  
+  await fileSystem.myDeletePromise(webServerFilesDirectory);
   await fileSystem.createDirectoryIfNotExistsPromise(webServerFilesDirectory);
 
   const indexHtmlPath = isDev ? myPath.join(__dirname, '../build') : webServerRootDirectory;
@@ -211,13 +213,18 @@ async function openWebServerAsync() {
     rootDirPath: indexHtmlPath,
     filesDirPath: webServerFilesDirectory,
     webServerStaticFilesPathPrefix: config.webServerStaticFilesPathPrefix,
-  });      
+  });  
 }
 
-// TODO:
 function closeWebServer() {
-
+  if (webServerProcess) {
+    webServerProcess.send({
+      address: 'close-server'      
+    });    
+  }
 }
+
+/* end of web server */
 
 
 /* app lifecycles */
@@ -287,9 +294,15 @@ ipcMain.on('getAppData', (event, arg) => {
 });
 
 // shell
+
 ipcMain.on('shellOpenItem', (event, arg) => {
   const filePath = arg;
   shell.openItem(filePath);
+});
+
+ipcMain.on('shellOpenExternal', (event, arg) => {
+  const url = arg;
+  shell.openExternal(url);
 });
 
 // electron window api
@@ -720,9 +733,10 @@ ipcMain.on('showSaveDialog', (event, arg) => {
 // for presentation
 
 ipcMain.on('getPresentationServerInfo', (event, arg) => {
+  const interfaceIpMap = getIp.getAllIps();
   event.sender.send('getPresentationServerInfoResponse', {
     data: {
-      interfaceIpMap: getIp.getAllIps(),
+      interfaceIpMap: interfaceIpMap,
       port: webServerPort
     }
   });
@@ -742,8 +756,9 @@ ipcMain.on('openWebServerAndLoadProject', async (event, arg) => {
     /* end of load project file */
 
     /* open web server */    
-    await openWebServerAsync();    
-    await copyTempProjectDirectoryToExternalDirectoryAsync(filePath, myPath.join(webServerFilesDirectory, projectName));    
+    await openWebServerAsync();
+    const externalServerDirectory = myPath.join(webServerFilesDirectory, projectName);
+    await copyTempProjectDirectoryToExternalDirectoryAsync(filePath, externalServerDirectory);
     /* end of open web server */
     
     event.sender.send('openWebServerAndLoadProjectResponse', {
@@ -759,6 +774,13 @@ ipcMain.on('openWebServerAndLoadProject', async (event, arg) => {
       data: null
     });
   }  
+});
+
+ipcMain.on('closeWebServer', (event, arg) => {
+  closeWebServer();  
+  event.sender.send('closeWebServerResponse', {
+    err: null
+  });
 });
 
 /* end of ipc main event listeners */

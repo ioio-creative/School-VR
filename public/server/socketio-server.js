@@ -5,9 +5,6 @@
 var http = require("http");              // http server core module
 var express = require("express");           // web framework external module
 var socketIo = require("socket.io");        // web socket external module
-//var getIp = require("../utils/getIp").getIp;
-
-// const myPath = require('../utils/fileSystem/myPath');
 
 
 // Set process name
@@ -16,10 +13,20 @@ process.title = "node-socketio-server";
 // Get port or default to 8080
 //var port = process.env.PORT || 8080;
 
+// constants
+var closeServerTimeoutInMillis = 3000;
+
+// global variables
+var webServer;  // node http
+var app;  // e.g. express
+var socketServer;  // socket.io server
+
+
+/* open server */
 
 function openServer(port, rootDirPath = 'public/server/static', filesDirPath = null, webServerStaticFilesPathPrefix = null) {
   // Setup and configure Express http server. Expect a subfolder called "static" to be the web root.
-  var app = express();  
+  app = express();  
   console.log('rootDirPath: ' + rootDirPath);
   app.use(express.static(rootDirPath, {'index': ['index.html']}));
 
@@ -29,10 +36,10 @@ function openServer(port, rootDirPath = 'public/server/static', filesDirPath = n
   }
 
   // Start Express http server
-  var webServer = http.createServer(app);
+  webServer = http.createServer(app);
 
   // Start Socket.io so it attaches itself to Express server
-  var socketServer = socketIo.listen(webServer);
+  socketServer = socketIo.listen(webServer);
 
   // listen on port
   webServer.listen(port, function () {
@@ -125,6 +132,37 @@ function openServer(port, rootDirPath = 'public/server/static', filesDirPath = n
     */
   })
 }
+
+/* end of open server */
+
+
+/* close server */
+
+function closeServer() {
+  socketServer.close(_ => {
+    socketServer = null;
+    webServer.close((err) => {
+      app = null;
+      webServer = null;
+      exitSuccess();
+    });
+  });
+  setTimeout(_ => {
+    socketServer = null;
+    app = null;
+    webServer = null;
+    exitSuccess();
+  }, closeServerTimeoutInMillis);
+}
+
+function exitSuccess() {
+  console.log("socketio-server: web server closed.");
+  process.exit(0);
+}
+
+/* end of close server */
+
+
 /* ipc */
 // https://nodejs.org/api/child_process.html#child_process_subprocess_send_message_sendhandle_options_callback
 

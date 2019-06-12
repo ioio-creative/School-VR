@@ -100,8 +100,8 @@ function shellOpenItem(filePath) {
   generalIpcCall('shellOpenItem', null, filePath);
 };
 
-function shellOpenExternal(filePath) {
-  generalIpcCall('shellOpenExternal', null, filePath);
+function shellOpenExternal(url) {
+  generalIpcCall('shellOpenExternal', null, url);
 }
 
 /* end of shell */
@@ -288,6 +288,10 @@ function openWebServerAndLoadProject(filePath, callBack) {
   generalIpcCall('openWebServerAndLoadProject', callBack, filePath);
 }
 
+function closeWebServer(callBack) {
+  generalIpcCall('closeWebServer', callBack);
+}
+
 /* end of for presentation */
 
 
@@ -303,6 +307,7 @@ export default {
 
   // shell
   shellOpenItem,
+  shellOpenExternal,
 
   // electron window api
   newBrowserWindow,
@@ -346,5 +351,6 @@ export default {
 
   // for presentation
   getPresentationServerInfo,
-  openWebServerAndLoadProject
+  openWebServerAndLoadProject,
+  closeWebServer,
 };

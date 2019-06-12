@@ -42,29 +42,35 @@ const uuid = require('uuid/v1');
 class PresenterPage extends Component {
   constructor(props) {
     super(props);
-    // this.inited = false;
+    
     this.state = {
       socket: null,
       localIps: [],
       viewerCount: 0,
       loadedProjectFilePath: ''
-    }
-    // this.onEditorLoad = this.onEditorLoad.bind(this);
-    // Events.on('editor-load', this.onEditorLoad);
-    this.handleHomeButtonClick = this.handleHomeButtonClick.bind(this);
-    this.handleOpenProjectButtonClick = this.handleOpenProjectButtonClick.bind(this);
-    this.handleExitButtonClick = this.handleExitButtonClick.bind(this);
-    this.loadProject = this.loadProject.bind(this);
-    this.onEditorLoad = this.onEditorLoad.bind(this);
+    };
+    
+    [
+      'onEditorLoad',
+      'handleHomeButtonClick',
+      'handleOpenProjectButtonClick',
+      'handleExitButtonClick',
+
+      'loadProject',
+    ].forEach(methodName => {
+      this[methodName] = this[methodName].bind(this);
+    });    
   }
+
+
+  /* react lifecycles */
+
   componentDidMount() {
     const props = this.props;
     const sceneContext = props.sceneContext;
     this.editor = new Editor();
     Events.on('editor-load', this.onEditorLoad)
-    sceneContext.updateEditor(this.editor);
-    // this.props.sceneContext
-    // this.inited = true;
+    sceneContext.updateEditor(this.editor);    
 
     // TODO: ask Hung to check after getting port from electron
     ipcHelper.getPresentationServerInfo((err, data) => {
@@ -75,10 +81,12 @@ class PresenterPage extends Component {
 
       const presentationServerPort = data.port;
       // get the ip and port from ipc
-      // const socket = io(window.location.origin);    
-      const socket = io(`http://localhost:${presentationServerPort}`);
+      // const socket = io(window.location.origin);
+      const presentationUrl = `http://localhost:${presentationServerPort}`;
+      const socket = io(presentationUrl);
       socket.on('connect', () => {
         console.log('connected!!!'); // socket.connected); // true
+        ipcHelper.shellOpenExternal(presentationUrl);
         socket.emit('registerPresenter');
       });
       socket.on('serverMsg', (msg) => {
@@ -145,9 +153,26 @@ class PresenterPage extends Component {
       return false;
     })
   }
-  // disableEditor(editor) {
-  //   editor.close();
-  // }
+
+  componentWillUnmount() {
+    this.editor = null;
+    ipcHelper.closeWebServer((err) => {    
+      if (err) {
+        handleErrorWithUiDefault(err);
+        return;
+      }      
+    });
+    Events.removeListener('editor-load', this.onEditorLoad)
+  }
+
+  /* end of react lifecycles */
+
+
+  
+
+
+  /* event handlers */
+
   onEditorLoad(editor) {
     // const props = this.props;
     // const savedProjectStr = localStorage.getItem('schoolVRSave');
@@ -168,17 +193,6 @@ class PresenterPage extends Component {
       this.loadProject(projectFilePathToLoad);
     }
   }
-
-  componentWillUnmount() {
-    // Events.removeListener('editor-load', this.onEditorLoad);
-    this.editor = null;
-    // document.removeEventListener('dblclick', this.sendMessage);
-    Events.removeListener('editor-load', this.onEditorLoad)
-  }
-
-  // sendMessage(msg) {
-  //   this.state.socket.emit('test', 'hello');
-  // }
 
   handleHomeButtonClick(event) {
     this.props.history.push(routes.home);
@@ -204,6 +218,11 @@ class PresenterPage extends Component {
     ipcHelper.closeWindow();
   }
 
+  /* end of event handlers */
+
+
+  /* methods */
+
   loadProject(projectFilePath) {
     const state = this.state;
     const sceneContext = this.props.sceneContext;    
@@ -216,7 +235,7 @@ class PresenterPage extends Component {
       if (err) {
         handleErrorWithUiDefault(err);
         return;                         
-      }
+      }      
       
       const projectJsonData = data.projectJson;
       //console.log(projectJsonData);
@@ -227,6 +246,17 @@ class PresenterPage extends Component {
       sceneContext.loadProject(projectJsonData);   
     });
   }
+
+  // disableEditor(editor) {
+  //   editor.close();
+  // }  
+
+  // sendMessage(msg) {
+  //   this.state.socket.emit('test', 'hello');
+  // }
+
+  /* end of methods */
+
 
   render() {
     const state = this.state;
