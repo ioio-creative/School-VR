@@ -196,6 +196,8 @@ async function extractAppAsarForWebServerAsync() {
 async function openWebServerAsync() {
   await extractAppAsarForWebServerAsync();
 
+  // TODO: delete webServerFilesDirectory first 
+
   await fileSystem.createDirectoryIfNotExistsPromise(webServerFilesDirectory);
 
   const indexHtmlPath = isDev ? myPath.join(__dirname, '../build') : webServerRootDirectory;
@@ -741,7 +743,7 @@ ipcMain.on('openWebServerAndLoadProject', async (event, arg) => {
 
     /* open web server */    
     await openWebServerAsync();    
-    await copyTempProjectDirectoryToExternalDirectoryAsync(filePath, webServerFilesDirectory);    
+    await copyTempProjectDirectoryToExternalDirectoryAsync(filePath, myPath.join(webServerFilesDirectory, projectName));    
     /* end of open web server */
     
     event.sender.send('openWebServerAndLoadProjectResponse', {

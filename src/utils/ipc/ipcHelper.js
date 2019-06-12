@@ -100,6 +100,10 @@ function shellOpenItem(filePath) {
   generalIpcCall('shellOpenItem', null, filePath);
 };
 
+function shellOpenExternal(filePath) {
+  generalIpcCall('shellOpenExternal', null, filePath);
+}
+
 /* end of shell */
 
 
@@ -305,7 +309,7 @@ export default {
   closeWindow,
   minimizeWindow,
   toggleMaximizeWindow,
-  toggleDevTools,  
+  toggleDevTools,
 
   // fileSystem
   mimeStat,
