@@ -7,23 +7,24 @@ const schoolVrProjectArchiveExtensionWithLeadingDot = '.ivr';
 let config = {};
 let appDirectory = {};
 const setAppData = (appName, homePath, appDataPath, documentsPath, callBack) => {
-  appDirectory = {
-    // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname  
-    homeDirectory: homePath,
-    
-    appProjectsDirectory: fileHelper.join(documentsPath, `${appName}-Projects`),
-    
-    appDataDirectory: fileHelper.join(appDataPath, `${appName}-Data`),  
-      
-    appTempDirectory: fileHelper.join(appDataPath, `${appName}-Temp`),
-    appTempProjectsDirectory: fileHelper.join(appDirectory.appTempDirectory, `${appName}-Projects`),
-    appTempAppWorkingDirectory: fileHelper.join(appDirectory.appTempDirectory, `${appName}-App-Working`),
-    appTempWebContainerDirectory: fileHelper.join(appDirectory.appTempAppWorkingDirectory, 'web'),  
-  };
+  // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname  
+  appDirectory.homeDirectory = homePath;
+            
+  appDirectory.appProjectsDirectory = fileHelper.join(documentsPath, `${appName}-Projects`);
+
+  appDirectory.appDataDirectory = fileHelper.join(appDataPath, `${appName}-Data`);
+
+  appDirectory.appTempDirectory = fileHelper.join(appDataPath, `${appName}-Temp`);
+  appDirectory.appTempProjectsDirectory = fileHelper.join(appDirectory.appTempDirectory, `${appName}-Projects`);
+  appDirectory.appTempAppWorkingDirectory = fileHelper.join(appDirectory.appTempDirectory, `${appName}-App-Working`);
+  appDirectory.appTempWebContainerDirectory = fileHelper.join(appDirectory.appTempAppWorkingDirectory, 'web');
+
+  appDirectory.webServerFilesDirectory = fileHelper.join(appDirectory.appTempWebContainerDirectory, 'files');
 
   config = {
     appName: appName,
     appDirectory: appDirectory,
+    webServerStaticFilesPathPrefix: 'files',
     schoolVrProjectArchiveExtensionWithLeadingDot: schoolVrProjectArchiveExtensionWithLeadingDot,
     jsonFileExtensionWithLeadingDot: '.json'
   };

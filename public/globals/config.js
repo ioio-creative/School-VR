@@ -5,27 +5,29 @@ const myPath = require('../utils/fileSystem/myPath');
 
 const appName = app.getName();
 
-const appDirectory = {
-  // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname
-  appProjectsDirectory: myPath.join(app.getPath('documents'), `${appName}-Projects`), 
-  
-  appDataDirectory: myPath.join(app.getPath('appData'), `${appName}-Data`),      
-  
-  appTempDirectory: myPath.join(app.getPath('appData'), `${appName}-Temp`),
-  appTempProjectsDirectory: myPath.join(appDirectory.appTempDirectory, `${appName}-Projects`),
-  appTempAppWorkingDirectory: myPath.join(appDirectory.appTempDirectory, `${appName}-App-Working`),
-  appTempWebContainerDirectory: myPath.join(appDirectory.appTempAppWorkingDirectory, 'web'),  
+// https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname
+const appDirectory = {};
 
-  //appAsarInstallationPath: myPath.join(app.getAppPath(), 'resources', 'app.asar'),
-  appAsarInstallationPath: myPath.join(app.getPath('appData'), '..', 'Local', 'Programs', app.getName(), 'resources', 'app.asar'),
-  appAsarDestPathInWebContainerDirectory: myPath.join(appDirectory.appTempWebContainerDirectory, 'resources'),
-  webServerRootDirectory: myPath.join(appDirectory.appAsarDestPathInWebContainerDirectory, 'build'),
-  webServerFilesDirectory: myPath.join(appDirectory.appTempWebContainerDirectory, 'files'),
-};
+appDirectory.appProjectsDirectory = myPath.join(app.getPath('documents'), `${appName}-Projects`);
+
+appDirectory.appDataDirectory = myPath.join(app.getPath('appData'), `${appName}-Data`);
+
+appDirectory.appTempDirectory = myPath.join(app.getPath('appData'), `${appName}-Temp`);
+appDirectory.appTempProjectsDirectory = myPath.join(appDirectory.appTempDirectory, `${appName}-Projects`);
+appDirectory.appTempAppWorkingDirectory = myPath.join(appDirectory.appTempDirectory, `${appName}-App-Working`);
+appDirectory.appTempWebContainerDirectory = myPath.join(appDirectory.appTempAppWorkingDirectory, 'web');
+ 
+//appDirectory.appAsarInstallationPath = myPath.join(app.getAppPath(), 'resources', 'app.asar');
+appDirectory.appAsarInstallationPath = myPath.join(app.getPath('appData'), '..', 'Local', 'Programs', app.getName(), 'resources', 'app.asar');
+appDirectory.appAsarDestPathInWebContainerDirectory = myPath.join(appDirectory.appTempWebContainerDirectory, 'resources');
+appDirectory.webServerRootDirectory = myPath.join(appDirectory.appAsarDestPathInWebContainerDirectory, 'build');
+appDirectory.webServerFilesDirectory = myPath.join(appDirectory.appTempWebContainerDirectory, 'files');
+
 
 const config = {
   appName: appName,
   appDirectory: appDirectory,
+  webServerStaticFilesPathPrefix: 'files',
   schoolVrProjectArchiveExtensionWithLeadingDot: '.ivr',
   jsonFileExtensionWithLeadingDot: '.json'
 };

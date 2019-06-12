@@ -53,8 +53,7 @@ function openGifDialog(callBack) {
     "Please select a gif file.", callBack);  
 }
 
-function openVideoDialog(callBack) {
-  console.log(['openVideoDialog', openFileDialogFilter.video]);
+function openVideoDialog(callBack) {  
   showDialogCommon([openFileDialogFilter.video],
     "Please select a video file.", callBack, DialogType.Open);
 }

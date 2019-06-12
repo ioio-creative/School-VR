@@ -14,7 +14,7 @@ import asyncLoadingComponent from 'components/asyncLoadingComponent';
 // import EditorPage from 'pages/aframeEditor/editorPage';
 // import PresenterPage from 'pages/aframeEditor/presenterPage';
 
-import {SceneContextProvider} from 'globals/contexts/sceneContext';\
+import {SceneContextProvider} from 'globals/contexts/sceneContext';
 
 import './App.css';
 

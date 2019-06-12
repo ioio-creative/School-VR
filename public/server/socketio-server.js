@@ -17,7 +17,7 @@ process.title = "node-socketio-server";
 //var port = process.env.PORT || 8080;
 
 
-function openServer(port, rootDirPath = 'public/server/static', filesDirPath = null) {
+function openServer(port, rootDirPath = 'public/server/static', filesDirPath = null, webServerStaticFilesPathPrefix = null) {
   // Setup and configure Express http server. Expect a subfolder called "static" to be the web root.
   var app = express();  
   console.log('rootDirPath: ' + rootDirPath);
@@ -25,7 +25,7 @@ function openServer(port, rootDirPath = 'public/server/static', filesDirPath = n
 
   if (filesDirPath) {
     console.log('filesDirPath: ' + filesDirPath);
-    app.use('/files', express.static(filesDirPath));
+    app.use(`/${webServerStaticFilesPathPrefix}`, express.static(filesDirPath));
   }
 
   // Start Express http server
@@ -131,7 +131,7 @@ function openServer(port, rootDirPath = 'public/server/static', filesDirPath = n
 process.on('message', (message) => {
   switch (message.address) {
     case 'open-server':      
-      openServer(message.port, message.rootDirPath, message.filesDirPath);
+      openServer(message.port, message.rootDirPath, message.filesDirPath, message.webServerStaticFilesPathPrefix);
       break;
     case 'close-server':
       closeServer();

@@ -6,7 +6,7 @@ const BrowserWindow = electron.BrowserWindow;
 const dialog = electron.dialog;
 const shell = electron.shell;
 
-const {appDirectory} = require('./globals/config');
+const {appDirectory, webServerStaticFilesPathPrefix} = require('./globals/config');
 
 const myPath = require('./utils/fileSystem/myPath');
 //const url = require('url');
@@ -198,7 +198,7 @@ async function openWebServerAsync() {
 
   await fileSystem.createDirectoryIfNotExistsPromise(webServerFilesDirectory);
 
-  const indexHtmlPath = (isDev ? `${myPath.join(__dirname, '../build')}` : webServerRootDirectory);
+  const indexHtmlPath = isDev ? myPath.join(__dirname, '../build') : webServerRootDirectory;
 
   webServerProcess = fork(serverProgramPath);
 
@@ -208,6 +208,7 @@ async function openWebServerAsync() {
     port: webServerPort,
     rootDirPath: indexHtmlPath,
     filesDirPath: webServerFilesDirectory,
+    webServerStaticFilesPathPrefix: webServerStaticFilesPathPrefix,
   });      
 }
 
@@ -729,8 +730,11 @@ ipcMain.on('openWebServerAndLoadProject', async (event, arg) => {
   try {
     /* load project file */
     const filePath = arg;
-    const isKeepAssetPathsRelative = true;
-    const projectJson = await loadProjectByProjectFilePathAsync(filePath, isKeepAssetPathsRelative);
+    const projectName = new ProjectFile(null, filePath, null).name;
+    const staticAssetUrlPathPrefixForWebPresentation = myPath.join(webServerStaticFilesPathPrefix, projectName);
+    console.log(`staticAssetUrlPathPrefixForWebPresentation: ${staticAssetUrlPathPrefixForWebPresentation}`);
+    const projectJson = await loadProjectByProjectFilePathAsync(filePath, staticAssetUrlPathPrefixForWebPresentation);
+    console.log(projectJson);
     /* end of load project file */
 
     /* open web server */    

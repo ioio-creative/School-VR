@@ -39,7 +39,7 @@ class ProjectFile {
 
     if (projectFilePath) {
       if (!this.name) {
-        this.name = myPath.getFileNameWithoutExtension(projectFilePath)
+        this.name = myPath.getFileNameWithoutExtension(projectFilePath);
       }
       if (!this.savedProjectFilePath) {
         this.savedProjectFilePath = projectFilePath;
@@ -473,11 +473,11 @@ class ProjectFile {
     // check if tempProjectDir already exists, if exists, delete it
     // actually this step may be redundant because I would check isProjectNameUsedAsync        
     if (!ProjectFile.isCurrentLoadedProject(this.savedProjectFilePath)) {
-      console.log("is not current loaded project");
+      //console.log("is not current loaded project");
       await fileSystem.myDeletePromise(this.tempProjectDirectoryPath);            
       savedProjectObj = await this.saveToLocalDetailAsync(entitiesList, assetsList);      
     } else {
-      console.log("is current loaded project");
+      //console.log("is current loaded project");
       savedProjectObj = await this.saveToLocalDetailAsync(entitiesList, assetsList);      
     }
 
@@ -486,7 +486,7 @@ class ProjectFile {
   /* end of saveProject */
 
   /* loadProject */
-  async loadProjectAsync(isKeepAssetPathsRelative = false) {
+  async loadProjectAsync(staticAssetUrlPathPrefixForWebPresentation = null) {
     const savedProjectFilePath = this.savedProjectFilePath;
 
     if (!savedProjectFilePath) {
@@ -511,10 +511,14 @@ class ProjectFile {
     // change any relative file path in assets to absolute path
     const assetsList = projectJson.assetsList;
     assetsList.forEach((asset) => {
-      if (!webServerFilesDirectory) {
+      if (staticAssetUrlPathPrefixForWebPresentation) {
+        const assetPath = asset.src;
+        asset.src = ProjectFile.isAssetPathRelative(assetPath) ?
+          myPath.join(staticAssetUrlPathPrefixForWebPresentation, assetPath) : assetPath;
+      } else {
         asset.src = 
           this.getTempProjectAssetAbsolutePathFromProvidedPathIfIsRelative(asset.src);
-      }   
+      }  
     });
   
     this.projectJson = projectJson;
@@ -522,9 +526,9 @@ class ProjectFile {
     return projectJson
   }
 
-  static async loadProjectByFilePathAsync(filePath, isKeepAssetPathsRelative = false) {
+  static async loadProjectByFilePathAsync(filePath, staticAssetUrlPathPrefixForWebPresentation = null) {
     const projectFile = new ProjectFile(null, filePath, null);
-    return await projectFile.loadProjectAsync(isKeepAssetPathsRelative);
+    return await projectFile.loadProjectAsync(staticAssetUrlPathPrefixForWebPresentation);
   }
   /* end of loadProject */
 
@@ -540,8 +544,8 @@ class ProjectFile {
     return currentLoadedProjectFilePath === aFilePath;
   };
 
-  static async loadCurrentLoadedProjectAsync(isKeepAssetPathsRelative = false) {    
-    return await ProjectFile.loadProjectByFilePathAsync(currentLoadedProjectFilePath, isKeepAssetPathsRelative);
+  static async loadCurrentLoadedProjectAsync(staticAssetUrlPathPrefixForWebPresentation = null) {    
+    return await ProjectFile.loadProjectByFilePathAsync(currentLoadedProjectFilePath, staticAssetUrlPathPrefixForWebPresentation);
   };
 
   /* end of current loaded project (singleton) */
