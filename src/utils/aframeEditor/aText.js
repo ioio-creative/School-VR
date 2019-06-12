@@ -17,6 +17,7 @@ class AText extends AEntity {
       position: ['x', 'y', 'z'],
       scale: ['x', 'y', 'z'],
       rotation: ['x', 'y', 'z'],
+      // text: [
       ttfFont: [
         'color',
         'opacity',
@@ -24,24 +25,24 @@ class AText extends AEntity {
       ]
     };
     this._staticAttributes = [
-      // {
-      //   type: 'text',
-      //   name: 'Text',
-      //   attributeKey: 'ttfFont',
-      //   attributeField: 'value'
-      // },
-      // {
-      //   type: 'number',
-      //   name: 'Font Size',
-      //   attributeKey: 'ttfFont',
-      //   attributeField: 'fontSize'
-      // },
       {
         type: 'text',
-        name: 'Width',
-        attributeKey: 'text',
+        name: 'Text',
+        attributeKey: 'ttfFont',
         attributeField: 'value'
       },
+      {
+        type: 'number',
+        name: 'Font Size',
+        attributeKey: 'ttfFont',
+        attributeField: 'fontSize'
+      },
+      // {
+      //   type: 'text',
+      //   name: 'Width',
+      //   attributeKey: 'text',
+      //   attributeField: 'value'
+      // },
       // text: [
       //   // 'align',
       //   // 'anchor',

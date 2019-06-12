@@ -113,6 +113,12 @@ class PresenterPage extends Component {
       const prevSlide = (currentSlideIdx < 1? null: slidesList[currentSlideIdx - 1]['id']);
       if (prevSlide) {
         sceneContext.selectSlide(prevSlide);
+        this.state.socket.emit('updateSceneStatus', {
+          action: 'selectSlide',
+          details: {
+            slideId: prevSlide
+          }
+        })
       }
       return false;
     })
@@ -124,6 +130,12 @@ class PresenterPage extends Component {
       const nextSlide = (currentSlideIdx > slidesList.length - 2? null: slidesList[currentSlideIdx + 1]['id']);
       if (nextSlide) {
         sceneContext.selectSlide(nextSlide);
+        this.state.socket.emit('updateSceneStatus', {
+          action: 'selectSlide',
+          details: {
+            slideId: nextSlide
+          }
+        })
       }
       return false;
     })
@@ -209,7 +221,7 @@ class PresenterPage extends Component {
 
   render() {
     const state = this.state;
-    //const sceneContext = this.props.sceneContext;
+    const sceneContext = this.props.sceneContext;
     const localIps = state.localIps;
     const port = state.port;
     const viewerCount = state.viewerCount;
@@ -281,6 +293,12 @@ class PresenterPage extends Component {
               onClick={() => {
                 if (prevSlide) {
                   sceneContext.selectSlide(prevSlide);
+                  state.socket.emit('updateSceneStatus', {
+                    action: 'selectSlide',
+                    details: {
+                      slideId: prevSlide
+                    }
+                  })
                 }
               }}
             >
@@ -289,6 +307,9 @@ class PresenterPage extends Component {
             <div className="button-playSlide"
               onClick={() => {
                 sceneContext.playSlide();
+                state.socket.emit('updateSceneStatus', {
+                  action: 'playSlide'
+                })
               }}
             >
               <FontAwesomeIcon icon="play"/>              
@@ -296,6 +317,12 @@ class PresenterPage extends Component {
             <div className={`button-nextSlide${currentSlideIdx === slidesList.length - 1? ' disabled': ''}`} onClick={() => {
                 if (nextSlide) {
                   sceneContext.selectSlide(nextSlide);
+                  state.socket.emit('updateSceneStatus', {
+                    action: 'selectSlide',
+                    details: {
+                      slideId: nextSlide
+                    }
+                  })
                 }
               }}>
               <FontAwesomeIcon icon="angle-right"/>            
@@ -305,6 +332,12 @@ class PresenterPage extends Component {
             <select value={currentSlide}
               onChange={e => {
                 sceneContext.selectSlide(e.currentTarget.value);
+                state.socket.emit('updateSceneStatus', {
+                  action: 'selectSlide',
+                  details: {
+                    slideId: e.currentTarget.value
+                  }
+                })
               }}
             >
               {
