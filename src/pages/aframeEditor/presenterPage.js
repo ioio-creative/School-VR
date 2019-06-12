@@ -90,13 +90,12 @@ class PresenterPage extends Component {
         })
       })
       // document.addEventListener('dblclick', this.sendMessage);
-      const interfaceIpArr = [];
-      for (let interfaceName of Object.keys(data.interfaceIpMap)) {
-        interfaceIpArr.push({
+      const interfaceIpArr = Object.keys(data.interfaceIpMap).map(interfaceName => {
+        return {
           interface: interfaceName,
           ip: data.interfaceIpMap[interfaceName]
-        })
-      }
+        }
+      });      
       this.setState({
         localIps: interfaceIpArr,
         port: presentationServerPort,

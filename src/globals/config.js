@@ -11,10 +11,14 @@ const setAppData = (appName, homePath, appDataPath, documentsPath, callBack) => 
     // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname  
     homeDirectory: homePath,
     
+    appProjectsDirectory: fileHelper.join(documentsPath, `${appName}-Projects`),
+    
     appDataDirectory: fileHelper.join(appDataPath, `${appName}-Data`),  
-    appProjectsDirectory: fileHelper.join(documentsPath, `${appName}-Projects`),  
+      
     appTempDirectory: fileHelper.join(appDataPath, `${appName}-Temp`),
-    appTempProjectsDirectory: fileHelper.join(appDataPath, `${appName}-Temp`, `${appName}-Projects`)
+    appTempProjectsDirectory: fileHelper.join(appDirectory.appTempDirectory, `${appName}-Projects`),
+    appTempAppWorkingDirectory: fileHelper.join(appDirectory.appTempDirectory, `${appName}-App-Working`),
+    appTempWebContainerDirectory: fileHelper.join(appDirectory.appTempAppWorkingDirectory, 'web'),  
   };
 
   config = {
