@@ -264,11 +264,11 @@ function saveSchoolVrFileDialog(callBack) {
 /* vanilla electron dialog */
 
 function showOpenDialog(options, callBack) {  
-  generalIpcCall('showOpenDialog', options, callBack);
+  generalIpcCall('showOpenDialog', callBack, options);
 }
 
 function showSaveDialog(options, callBack) {  
-  generalIpcCall('showSaveDialog', options, callBack);
+  generalIpcCall('showSaveDialog', callBack, options);
 }
 
 /* end of vanilla electron dialog */
@@ -281,7 +281,7 @@ function getPresentationServerInfo(callBack) {
 }
 
 function openWebServerAndLoadProject(filePath, callBack) {
-  generalIpcCall('openWebServerAndLoadProject', filePath, callBack);
+  generalIpcCall('openWebServerAndLoadProject', callBack, filePath);
 }
 
 /* end of for presentation */
