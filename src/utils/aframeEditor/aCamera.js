@@ -42,15 +42,13 @@ class ACamera extends AEntity {
     // });
     this.renderCameraPreview = this.renderCameraPreview.bind(this);
 
-    // Events.on('refreshsidebarobject3d', _=> {
-    //   requestAnimationFrame(this.renderCameraPreview);
-    // })
+    Events.on('refreshsidebarobject3d', this.renderCameraPreview);
   }
   setEditorInstance(editorInstance) {
     this.editor = editorInstance;
   }
   setCameraPreviewEl(canvasEl) {
-    this.cameraPreviewEl = this.cameraPreviewEl || canvasEl;
+    this.cameraPreviewEl = canvasEl || this.cameraPreviewEl ;
   }
   updateEntityAttributes(attrs) {
     if (typeof(attrs) !== 'object') return;
@@ -71,13 +69,15 @@ class ACamera extends AEntity {
     if (this.cameraPreviewEl) {
 
       const editor = this.editor;
+      if (!editor) return this.unmount();
       const renderer = editor.sceneEl.renderer;
       const scene = editor.sceneEl.object3D;
       const camera = editor.currentCameraEl.getObject3D('camera');
-  
+      if (!camera) return this.unmount();
+      const newWidth = this.cameraPreviewEl.parentElement.offsetWidth;
       const width = renderer.domElement.width;
       const height = renderer.domElement.height;
-      const newHeight = this.cameraPreviewEl.offsetWidth / width * height;
+      const newHeight = newWidth / width * height;
       const canvas = this.cameraPreviewEl;
       const ctx = canvas.getContext('2d');
   
@@ -93,7 +93,7 @@ class ACamera extends AEntity {
         editor.sceneHelpers.children[i].visible = helper_status[i];
       }
       
-      canvas.width = this.cameraPreviewEl.offsetWidth;
+      canvas.width = newWidth;
       canvas.height = newHeight;
       // if (camera.aspect > 1) {
       //   this.cameraPreviewScreenEl.setAttribute( 'width', canvas.width / 270 * 0.6 );
@@ -103,7 +103,15 @@ class ACamera extends AEntity {
       //   this.cameraPreviewScreenEl.setAttribute( 'height', canvas.height / newHeight * 0.6 );
       // }
       ctx.drawImage(renderer.domElement, 0, 0, canvas.width, canvas.height);
+      const editorCamera = editor.editorCameraEl.getObject3D('camera');
+      renderer.render(scene, editorCamera);
+    } else {
+      // assume unmounted
     }
+  }
+  unmount() {
+    Events.removeListener('refreshsidebarobject3d', this.renderCameraPreview);
+    return false;
   }
 }
 export default ACamera;

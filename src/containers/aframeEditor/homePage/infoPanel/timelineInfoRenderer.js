@@ -317,8 +317,7 @@ class TimelineInfoRenderer extends Component {
               {/* props.model.setEditorInstance(this.editor) */}
               props.model.setCameraPreviewEl(ref)
               props.model.setEditorInstance(props.sceneContext.editor)
-            }} onClick={_=> {
-              props.model.renderCameraPreview(props.sceneContext);
+              props.model.renderCameraPreview();
             }} />
           </div>}
         </div>

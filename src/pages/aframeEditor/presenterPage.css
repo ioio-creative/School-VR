@@ -49,6 +49,9 @@
   top: 50%;
   transform: translate(-50%, -50%);
 }
+#presenter .slideFunctions-panel .buttons-group:last-of-type:after {
+  display: none;
+}
 
 #presenter .slideFunctions-panel .buttons-group .button-prevSlide,
 #presenter .slideFunctions-panel .buttons-group .button-playSlide,

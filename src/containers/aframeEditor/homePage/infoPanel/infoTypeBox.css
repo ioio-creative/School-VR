@@ -10,7 +10,10 @@
   align-items: center;
   margin-bottom: 15px;
 }
-
+.attribute-buttons-wrapper .attribute-button.preview-col {
+  width: 100%;
+  flex: 0 0 100%;
+}
 .attribute-button .back-button {
   padding: 5px 10px 0;
   display: inline-block;

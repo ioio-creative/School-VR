@@ -294,7 +294,8 @@ class SlidePanel extends Component {
       this.props.socket.emit('updateSceneStatus', {
         action: 'selectSlide',
         details: {
-          slideId: selectedSlideId
+          slideId: selectedSlideId,
+          autoPlay: true
         }
       })
     }

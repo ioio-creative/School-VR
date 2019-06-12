@@ -3,7 +3,7 @@ import isFunction from 'utils/variableType/isFunction';
 
 const electron = window.require ? window.require('electron') : null;
 const dummyFunc = (param1, param2, param3) => { 
-  console.log(param1, param2, param3);
+  // console.log(param1, param2, param3);
   // console.log('not in electron app, no ipc')
   if (param1 === "saveProject") {
     localStorage.setItem('schoolVRSave', JSON.stringify(param2));

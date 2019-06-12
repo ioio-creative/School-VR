@@ -50,6 +50,7 @@ class ViewerPage extends Component {
     // TODO
     // need to get the current machine ip and port from ipc
     const socket = io(window.location.origin);
+    // const socket = io('http://10.0.1.111:1413');
     socket.on('connect', () => {
       console.log('connected!!!'); // socket.connected); // true
       socket.emit('registerViewer');
@@ -79,7 +80,7 @@ class ViewerPage extends Component {
         case 'selectSlide': {
           sceneContext.selectSlide(
             statusMsg.details.slideId,
-            autoPlay
+            statusMsg.details.autoPlay
           );
           break;
         }
@@ -94,7 +95,9 @@ class ViewerPage extends Component {
     })
   }
   componentWillUnmount() {
-    this.state.socket.close();
+    if (this.state.socket) {
+      this.state.socket.close();
+    }
   }
   
   // onClick() {
@@ -148,7 +151,7 @@ class ViewerPage extends Component {
           ]}
         /> */}
         {/* <ButtonsPanel /> */}
-        <AFramePanel />
+        <AFramePanel disableVR={false} />
         {/* <SlidesPanel isEditing={false} /> */}
         {/* <TimelinePanel /> */}
         {/* <InfoPanel /> */}

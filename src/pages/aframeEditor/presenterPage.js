@@ -111,14 +111,17 @@ class PresenterPage extends Component {
       const currentSlide = sceneContext.getCurrentSlideId();
       const currentSlideIdx = slidesList.findIndex(slide => slide.id === currentSlide);
       const prevSlide = (currentSlideIdx < 1? null: slidesList[currentSlideIdx - 1]['id']);
+      const socket = this.state.socket;
       if (prevSlide) {
         sceneContext.selectSlide(prevSlide);
-        this.state.socket.emit('updateSceneStatus', {
-          action: 'selectSlide',
-          details: {
-            slideId: prevSlide
-          }
-        })
+        if (socket) {
+          socket.emit('updateSceneStatus', {
+            action: 'selectSlide',
+            details: {
+              slideId: prevSlide
+            }
+          })
+        }
       }
       return false;
     })
@@ -128,14 +131,17 @@ class PresenterPage extends Component {
       const currentSlide = sceneContext.getCurrentSlideId();
       const currentSlideIdx = slidesList.findIndex(slide => slide.id === currentSlide);
       const nextSlide = (currentSlideIdx > slidesList.length - 2? null: slidesList[currentSlideIdx + 1]['id']);
+      const socket = this.state.socket;
       if (nextSlide) {
         sceneContext.selectSlide(nextSlide);
-        this.state.socket.emit('updateSceneStatus', {
-          action: 'selectSlide',
-          details: {
-            slideId: nextSlide
-          }
-        })
+        if (socket) {
+          socket.emit('updateSceneStatus', {
+            action: 'selectSlide',
+            details: {
+              slideId: nextSlide
+            }
+          })
+        }
       }
       return false;
     })
@@ -205,7 +211,9 @@ class PresenterPage extends Component {
   loadProject(projectFilePath) {
     const state = this.state;
     const sceneContext = this.props.sceneContext;    
-    ipcHelper.openWebServerAndLoadProject(projectFilePath, (err, data) => {
+  
+    // ipcHelper.openWebServerAndLoadProject(projectFilePath, (err, data) => {
+    ipcHelper.loadProjectByProjectFilePath(projectFilePath, (err, data) => {
       if (err) {
         handleErrorWithUiDefault(err);
         return;                         
@@ -214,7 +222,9 @@ class PresenterPage extends Component {
       const projectJsonData = data.projectJson;
       //console.log(projectJsonData);
       // send a copy to server
-      state.socket.emit('useSceneData', projectJsonData);
+      if (state.socket) {
+        state.socket.emit('useSceneData', projectJsonData);
+      }
       sceneContext.loadProject(projectJsonData);   
     });
   }
@@ -293,12 +303,15 @@ class PresenterPage extends Component {
               onClick={() => {
                 if (prevSlide) {
                   sceneContext.selectSlide(prevSlide);
-                  state.socket.emit('updateSceneStatus', {
-                    action: 'selectSlide',
-                    details: {
-                      slideId: prevSlide
-                    }
-                  })
+                  if (state.socket) {
+                    state.socket.emit('updateSceneStatus', {
+                      action: 'selectSlide',
+                      details: {
+                        slideId: prevSlide,
+                        autoPlay: false
+                      }
+                    })
+                  }
                 }
               }}
             >
@@ -307,9 +320,11 @@ class PresenterPage extends Component {
             <div className="button-playSlide"
               onClick={() => {
                 sceneContext.playSlide();
-                state.socket.emit('updateSceneStatus', {
-                  action: 'playSlide'
-                })
+                if (state.socket) {
+                  state.socket.emit('updateSceneStatus', {
+                    action: 'playSlide'
+                  })
+                }
               }}
             >
               <FontAwesomeIcon icon="play"/>              
@@ -317,12 +332,15 @@ class PresenterPage extends Component {
             <div className={`button-nextSlide${currentSlideIdx === slidesList.length - 1? ' disabled': ''}`} onClick={() => {
                 if (nextSlide) {
                   sceneContext.selectSlide(nextSlide);
-                  state.socket.emit('updateSceneStatus', {
-                    action: 'selectSlide',
-                    details: {
-                      slideId: nextSlide
-                    }
-                  })
+                  if (state.socket) {
+                    state.socket.emit('updateSceneStatus', {
+                      action: 'selectSlide',
+                      details: {
+                        slideId: nextSlide,
+                        autoPlay: false
+                      }
+                    })
+                  }
                 }
               }}>
               <FontAwesomeIcon icon="angle-right"/>            
@@ -332,12 +350,15 @@ class PresenterPage extends Component {
             <select value={currentSlide}
               onChange={e => {
                 sceneContext.selectSlide(e.currentTarget.value);
-                state.socket.emit('updateSceneStatus', {
-                  action: 'selectSlide',
-                  details: {
-                    slideId: e.currentTarget.value
-                  }
-                })
+                if (state.socket) {
+                  state.socket.emit('updateSceneStatus', {
+                    action: 'selectSlide',
+                    details: {
+                      slideId: e.currentTarget.value,
+                      autoPlay: false
+                    }
+                  })
+                }
               }}
             >
               {

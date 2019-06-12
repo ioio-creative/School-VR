@@ -331,11 +331,14 @@ class SceneContextProvider extends Component {
   }
   updateCameraEl(cameraEl) {
     this.setState((prevState) => {
+      const currentCameraId = cameraEl.getAttribute('id') || uuid();
+      cameraEl.setAttribute('id', currentCameraId);
       const newSceneData = jsonCopy(prevState.sceneData);
       newSceneData.slides.forEach(slide => {
         const cameraData = slide.entities.find(entity => entity.type='a-camera');
+        console.log(cameraEl.getAttribute('id'));
         cameraData.el = cameraEl;
-        cameraData.id = cameraEl.getAttribute('id');
+        cameraData.id = currentCameraId;
       })
       return {
         sceneData: newSceneData
@@ -551,7 +554,7 @@ class SceneContextProvider extends Component {
         entityId: null,
         timelineId: null,
         timelinePosition: null,
-        animationTimeline: null,
+        // animationTimeline: null,
         currentTime: 0,
         slideId: slideId
       }
@@ -1325,7 +1328,7 @@ class SceneContextProvider extends Component {
         const currentSlide = prevState.sceneData.slides.find(slide => slide.id === prevState.slideId);
         if (prevState.animationTimeline) {
           // delete old animation timeline
-          prevState.animationTimeline.kill();
+          prevState.animationTimeline.stop().kill();
         }
         const tl = new TimelineMax({
           paused: true
@@ -1348,6 +1351,13 @@ class SceneContextProvider extends Component {
               entityMedia['mediaEl'] = mediaEl;
             }
             // debugger;
+          }
+          if (entity['type'] === 'a-camera' && entity.timelines.length === 0) {
+            // camera only
+            // no timeline, just set the component
+            tl.add(() => {
+              aEntity.updateEntityAttributes(entity.components);
+            }, deltaOffset);
           }
           entity.timelines.forEach(timeline => {
             const {
