@@ -14,6 +14,7 @@ import ASky from 'utils/aframeEditor/aSky';
 import AVideo from 'utils/aframeEditor/aVideo';
 import ACamera from 'utils/aframeEditor/aCamera';
 import { TimelineMax, TweenMax, Power0 } from 'gsap';
+import { exists } from 'fs';
 
 const mergeJSON = require('deepmerge').default;
 const Events = require('vendor/Events.js');
@@ -336,7 +337,7 @@ class SceneContextProvider extends Component {
       const newSceneData = jsonCopy(prevState.sceneData);
       newSceneData.slides.forEach(slide => {
         const cameraData = slide.entities.find(entity => entity.type='a-camera');
-        console.log(cameraEl.getAttribute('id'));
+        // console.log(cameraEl.getAttribute('id'));
         cameraData.el = cameraEl;
         cameraData.id = currentCameraId;
       })
@@ -1476,6 +1477,16 @@ class SceneContextProvider extends Component {
   }
 
   addAsset(newFile) {
+    // prevent duplicate assets added
+    if (newFile.id) {
+      const assetsData = this.state.assetsData;
+      for (let i = 0; i< assetsData.length; i++) {
+        if (assetsData[i].id === newFile.id)
+          console.log('asset exist, skip');
+          // asset exists, return current assets list
+          return assetsData;
+      }
+    }
     const sceneEl = this.editor.sceneEl;
     let assetEl = sceneEl.querySelector('a-assets');
     // create a-assets element in case not exist

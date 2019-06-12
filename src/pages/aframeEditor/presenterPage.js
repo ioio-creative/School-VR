@@ -197,9 +197,6 @@ class PresenterPage extends Component {
       if (!isNonEmptyArray(filePaths)) {
         return;
       }
-      this.setState({
-        loadedProjectFilePath: filePaths[0]
-      })
       this.loadProject(filePaths[0]);
     });
   }
@@ -212,8 +209,11 @@ class PresenterPage extends Component {
     const state = this.state;
     const sceneContext = this.props.sceneContext;    
   
-    // ipcHelper.openWebServerAndLoadProject(projectFilePath, (err, data) => {
-    ipcHelper.loadProjectByProjectFilePath(projectFilePath, (err, data) => {
+    this.setState({
+      loadedProjectFilePath: projectFilePath
+    })
+    ipcHelper.openWebServerAndLoadProject(projectFilePath, (err, data) => {
+    // ipcHelper.loadProjectByProjectFilePath(projectFilePath, (err, data) => {
       if (err) {
         handleErrorWithUiDefault(err);
         return;                         
@@ -243,7 +243,7 @@ class PresenterPage extends Component {
     // for exit button
     // const searchObj = getSearchObjectFromHistory(this.props.history);
     const projectFilePathToLoad = state.loadedProjectFilePath;
-    // console.log(projectFilePathToLoad);
+    console.log(projectFilePathToLoad);
     return (
       <div id="presenter">
         {/* <Prompt

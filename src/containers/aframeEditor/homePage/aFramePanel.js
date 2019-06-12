@@ -294,12 +294,12 @@ class AFramePanel extends Component {
           <a-assets>
             {/* try load some fonts */}
 
-            <canvas ref={(ref)=>this.cameraPreviewEl=ref} id="camera-preview"/>
+            {/* <canvas ref={(ref)=>this.cameraPreviewEl=ref} id="camera-preview"/> */}
             
             {/* <a-asset-item id="dcjaiModelObj" src={dcjaiobj}></a-asset-item>
             <img id="dcjaiModelTex" src={dcjaitex} /> */}
             {/* <a-asset-item id="fontSchoolbellRegular" src={fontSchoolbellRegular} /> */}
-            <img src={fontSchoolbellRegular} id="fontSchoolbellRegularImg" />
+            {/* <img src={fontSchoolbellRegular} id="fontSchoolbellRegularImg" /> */}
             {/* <a-asset-item id="fontNotoSerifTC" src={fontNotoSerifTC} /> */}
           </a-assets>
           {/* <a-sky el-name="sky" el-isSystem={true} color="#FF0000"></a-sky> */}
