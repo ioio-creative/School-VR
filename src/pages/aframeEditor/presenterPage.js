@@ -163,6 +163,9 @@ class PresenterPage extends Component {
         return;
       }      
     });
+    
+    const sceneContext = this.props.sceneContext;
+    sceneContext.setProjectName('');
     Events.removeListener('editor-load', this.onEditorLoad)
   }
 

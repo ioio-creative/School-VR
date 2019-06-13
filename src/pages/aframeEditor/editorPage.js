@@ -91,6 +91,8 @@ class EditorPage extends Component {
   }
 
   componentWillUnmount() {
+    const sceneContext = this.props.sceneContext;
+    sceneContext.setProjectName('');
     Events.removeListener('editor-load', this.onEditorLoad);
     this.editor = null;
   }

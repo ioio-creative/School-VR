@@ -90,8 +90,8 @@ class SceneContextProvider extends Component {
     this.editor = null;
 
     this.setAppName = this.setAppName.bind(this);
-    // // this.setProjectName = this.setProjectName.bind(this);
     this.getAppName = this.getAppName.bind(this);
+    this.setProjectName = this.setProjectName.bind(this);
     this.getProjectName = this.getProjectName.bind(this);
     this.newProject = this.newProject.bind(this);
     this.saveProject = this.saveProject.bind(this);
