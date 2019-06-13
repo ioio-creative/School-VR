@@ -37,7 +37,7 @@ const Media = {
   image: {
     typeName: 'image',
     directoryUnderProjectDirectory: 'Images',
-    openFileDialogFilter: { name: 'Images', extensions: ['jpg', 'png', 'gif'] }
+    openFileDialogFilter: { name: 'Images', extensions: ['jpg', 'png', 'gif', 'svg'] }
   },
   gif: {
     typeName: 'gif',

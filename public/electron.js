@@ -28,6 +28,7 @@ const getIp = require("./utils/getIp");
 
 /* constants */
 
+const isForceTestExtractAppAsarForWebServer = true;
 const configFilePath = './config.jsonc';
 
 // default values
@@ -120,10 +121,36 @@ function createWindow() {
 
   splashScreen.on('ready-to-show', () => {    
     splashScreen.show();
-    setTimeout(_ => {
+
+    const onCanHideSplashScreen = _ => {
       splashScreenCountdowned = true;
-      showMainWindow();      
-    }, splashScreenDurationInMillis);
+      showMainWindow();
+    };
+
+    if (isDev && (!isForceTestExtractAppAsarForWebServer)) {
+      setTimeout(_ => {
+        onCanHideSplashScreen();
+      }, splashScreenDurationInMillis);
+    } else {
+      // this setTimeout is to allow time for splash screen to show
+      // before the thread is being blocked by running fileSystem.extractAll()
+      setTimeout(_ => {
+        // until isAppAsarDestPathInWebContainerDirectoryExists === true, splash screen will be shown
+        const splashScreenTimerIntervalInMillis = 100;
+        let splashScreenTimerTimerHandler = null;
+
+        extractAppAsarForWebServerAsync();
+
+        splashScreenTimerTimerHandler = setInterval(async _ => {
+          const isAppAsarDestPathInWebContainerDirectoryExists = await getIsAppAsarDestPathInWebContainerDirectoryExists();
+          if (isAppAsarDestPathInWebContainerDirectoryExists) {
+            clearInterval(splashScreenTimerTimerHandler);
+            splashScreenTimerTimerHandler = null;
+            onCanHideSplashScreen();
+          }
+        }, splashScreenTimerIntervalInMillis);
+      }, 1000);
+    }    
   });
 
   /* main window lifecycles */
@@ -179,17 +206,19 @@ function createWindow() {
   Menu.setApplicationMenu(menu);
 
   /* end of setting up menu for hot keys purpose only */
-
-  openWebServerAsync();
 }
 
 
 /* web server */
 
+async function getIsAppAsarDestPathInWebContainerDirectoryExists() {
+  return await fileSystem.existsPromise(appAsarDestPathInWebContainerDirectory);
+} 
+
 async function extractAppAsarForWebServerAsync() {
-  // TODO: have to do the following extracting build directory process in installer
-  const isAppAsarDestPathInWebContainerDirectoryExists = await fileSystem.existsPromise(appAsarDestPathInWebContainerDirectory);
-  if (!isAppAsarDestPathInWebContainerDirectoryExists && !isDev) {
+  // until isAppAsarDestPathInWebContainerDirectoryExists === true, splash screen will be shown  
+  const isAppAsarDestPathInWebContainerDirectoryExists = await getIsAppAsarDestPathInWebContainerDirectoryExists();
+  if (!isAppAsarDestPathInWebContainerDirectoryExists && (isForceTestExtractAppAsarForWebServer || !isDev)) {
     await fileSystem.myDeletePromise(appAsarDestPathInWebContainerDirectory);
     console.log(`Before extracting ${appAsarInstallationPath} to ${appAsarDestPathInWebContainerDirectory}`);
     fileSystem.extractAll(appAsarInstallationPath, appAsarDestPathInWebContainerDirectory);
@@ -237,7 +266,6 @@ app.on('ready', async _ => {
     console.error(err);
   }
 
-  await extractAppAsarForWebServerAsync();
   createWindow(); 
 });
 
@@ -767,7 +795,7 @@ ipcMain.on('openWebServerAndLoadProject', async (event, arg) => {
     /* end of load project file */
 
     /* open web server */    
-    //await openWebServerAsync();    
+    await openWebServerAsync();    
     const externalServerDirectory = myPath.join(webServerFilesDirectory, projectName);
     await copyTempProjectDirectoryToExternalDirectoryAsync(filePath, externalServerDirectory);
     /* end of open web server */
