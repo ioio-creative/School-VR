@@ -30,14 +30,14 @@ const setAppData = (appName, homePath, appDataPath, documentsPath, callBack) => 
   };
 
   callBack();
-}
+};
 
 // https://electronjs.org/docs/api/dialog
 const Media = {
   image: {
     typeName: 'image',
     directoryUnderProjectDirectory: 'Images',
-    openFileDialogFilter: { name: 'Images', extensions: ['jpg', 'png'] }
+    openFileDialogFilter: { name: 'Images', extensions: ['jpg', 'png', 'gif'] }
   },
   gif: {
     typeName: 'gif',

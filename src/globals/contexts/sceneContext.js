@@ -13,8 +13,9 @@ import AText from 'utils/aframeEditor/aText';
 import ASky from 'utils/aframeEditor/aSky';
 import AVideo from 'utils/aframeEditor/aVideo';
 import ACamera from 'utils/aframeEditor/aCamera';
-import { TimelineMax, TweenMax, Power0 } from 'gsap';
-import { exists } from 'fs';
+import {TimelineMax, TweenMax, Power0} from 'gsap';
+
+import {mediaType} from 'globals/config';
 
 const mergeJSON = require('deepmerge').default;
 const Events = require('vendor/Events.js');
@@ -1467,6 +1468,7 @@ class SceneContextProvider extends Component {
       }
     })
   }
+  
   seekSlide(timeInSec) {
     if (this.state.animationTimeline) {
       this.state.animationTimeline.seek(timeInSec, false);
@@ -1515,7 +1517,7 @@ class SceneContextProvider extends Component {
       // for loadProject
       case 'image': {
         // normal still images
-        newAssetData.type = 'image';
+        newAssetData.type = mediaType.image;
         newEl = document.createElement('img');
         newEl.setAttribute('id', newId);
         newEl.setAttribute('src', newFileUrl);
@@ -1526,7 +1528,7 @@ class SceneContextProvider extends Component {
       case 'image/gif':
       case 'gif': {
         // may be animated
-        newAssetData.type = 'gif';
+        newAssetData.type = mediaType.gif;
         newAssetData.shader = 'gif';
         newEl = document.createElement('img');
         newEl.setAttribute('id', newId);
@@ -1538,7 +1540,7 @@ class SceneContextProvider extends Component {
       // for loadProject
       case 'video': {
         // video
-        newAssetData.type = 'video';
+        newAssetData.type = mediaType.video;
         newEl = document.createElement('video');
         newEl.setAttribute('id', newId);
         newEl.setAttribute('src', newFileUrl);

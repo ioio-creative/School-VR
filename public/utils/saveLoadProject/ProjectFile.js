@@ -386,7 +386,7 @@ class ProjectFile {
       const assetSrcAbsolutePath = this.convertAssetSrcToProperAbsolutePath(asset.src);
   
       let saveFileToTempAsyncFunc = null;    
-      switch (asset.media_type) {
+      switch (asset.type) {
         case mediaType.image:
           saveFileToTempAsyncFunc = this.saveImageToTempAsync;
           break;
@@ -417,7 +417,7 @@ class ProjectFile {
     // modify assetsList node in jsonForSave to reflect the relative paths of the project folder structure to be zipped
     jsonForSave.assetsList.forEach((asset) => {
       let getAssetFilePathRelativeToProjectDirectoryFunc = null;
-      switch (asset.media_type) {
+      switch (asset.type) {
         case mediaType.image:
           getAssetFilePathRelativeToProjectDirectoryFunc = ProjectFile.getImageFilePathRelativeToProjectDirectory;
           break;
