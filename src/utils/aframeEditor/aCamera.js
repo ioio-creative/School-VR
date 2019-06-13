@@ -8,7 +8,7 @@ class ACamera extends AEntity {
     this._type = 'a-camera';
     this._animatableAttributes = {
       position: ['x', 'y', 'z'],
-      // rotation: ['x', 'y', 'z'],
+      rotation: ['x', 'y', 'z'],
       cameraPreview: true
     }
     this._staticAttributes = [
@@ -103,10 +103,13 @@ class ACamera extends AEntity {
       //   this.cameraPreviewScreenEl.setAttribute( 'height', canvas.height / newHeight * 0.6 );
       // }
       ctx.drawImage(renderer.domElement, 0, 0, canvas.width, canvas.height);
-      const editorCamera = editor.editorCameraEl.getObject3D('camera');
-      renderer.render(scene, editorCamera);
+      if (editor.opened) {
+        const editorCamera = editor.editorCameraEl.getObject3D('camera');
+        renderer.render(scene, editorCamera);
+      }
     } else {
       // assume unmounted
+      this.unmount();
     }
   }
   unmount() {

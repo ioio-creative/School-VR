@@ -152,6 +152,8 @@ class SceneContextProvider extends Component {
 
     this.resetView = this.resetView.bind(this);
 
+    this.takeSnapshot = this.takeSnapshot.bind(this);
+
     this.events = {
       'editor-load': obj => {
         console.log('editor-load')
@@ -1327,7 +1329,10 @@ class SceneContextProvider extends Component {
     return new Promise((resolve, reject) => {
       // use timelinemax to build the timeline here
       this.setState((prevState) => {
-        const currentSlide = prevState.sceneData.slides.find(slide => slide.id === prevState.slideId);
+        const currentSlideId = prevState.sceneData.slides.findIndex(slide => slide.id === prevState.slideId);
+        const newSceneData = jsonCopy(prevState.sceneData);
+        // const newSlides = jsonCopy(prevState.sceneData.slides);
+        const currentSlide = newSceneData.slides[currentSlideId];
         if (prevState.animationTimeline) {
           // delete old animation timeline
           prevState.animationTimeline.stop().kill();
@@ -1336,6 +1341,7 @@ class SceneContextProvider extends Component {
           paused: true
         });
         const deltaOffset = 0.001;
+        const mediaElsList = [];
         currentSlide.entities.forEach(entity => {
           // animation here
           const element = entity.el;
@@ -1351,6 +1357,7 @@ class SceneContextProvider extends Component {
             const mediaElType = Object.prototype.toString.call(mediaEl);
             if (mediaElType === '[object HTMLVideoElement]') {
               entityMedia['mediaEl'] = mediaEl;
+              mediaElsList.push(mediaEl);
             }
             // debugger;
           }
@@ -1397,7 +1404,7 @@ class SceneContextProvider extends Component {
               tl.add(() => {
                 entityMedia['mediaEl'].loop = true;
                 if (!tl.paused())
-                  entityMedia['mediaEl'].play();
+                  entityMedia['mediaEl'].play(0);
               }, firstTimeline.start + deltaOffset);
               tl.add(() => {
                 entityMedia['mediaEl'].pause();
@@ -1406,12 +1413,17 @@ class SceneContextProvider extends Component {
           }
         })
         // tl.eventCallback('onStart', () => {
-        // })
+        // })j
         tl.eventCallback('onUpdate', () => {
           // Events.emit('refreshsidebarobject3d');
           this.setState({
             currentTime: tl.progress() * tl.duration()
           });
+        })
+        tl.eventCallback('onPause', () => {
+          for (let i = 0; i < mediaElsList.length; i++) {
+            mediaElsList[i].pause();
+          }
         })
         tl.eventCallback('onComplete', () => {
           // Events.emit('refreshsidebarobject3d');
@@ -1424,6 +1436,19 @@ class SceneContextProvider extends Component {
           })
         })
         // tl.play(0, false).stop().seek(0.001).seek(0, false);
+        // const snapshot = this.takeSnapshot();
+        currentSlide.image = this.takeSnapshot();
+        // setTimeout(()=>{
+        //   tl.seek(prevState.currentTime);
+        //   tl.eventCallback('onUpdate', () => {
+        //     // Events.emit('refreshsidebarobject3d');
+        //     this.setState({
+        //       currentTime: tl.progress() * tl.duration()
+        //     });
+        //   })
+        // },100)
+
+        // console.log(currentSlide.image);
         // if (autoPlay) {
         //   tl.play(0, false);
         // }
@@ -1433,7 +1458,8 @@ class SceneContextProvider extends Component {
         //   console.log(tl.progress())
         // })
         return {
-          animationTimeline: tl
+          animationTimeline: tl,
+          sceneData: newSceneData
         }
       })
     });
@@ -1450,6 +1476,43 @@ class SceneContextProvider extends Component {
       }
     })
     
+  }
+
+  takeSnapshot() {
+    const editor = this.editor;
+    const renderer = editor.sceneEl.renderer;
+    const scene = editor.sceneEl.object3D;
+    const camera = editor.currentCameraEl.getObject3D('camera');
+    const width = renderer.domElement.width;
+    const height = renderer.domElement.height;
+
+    const helper_status = [];
+    for (let i = 0; i < editor.sceneHelpers.children.length; i++){
+      helper_status[i] = editor.sceneHelpers.children[i].visible;
+      editor.sceneHelpers.children[i].visible = false;
+    }
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.render(scene, camera);
+    for (let i = 0; i < editor.sceneHelpers.children.length; i++){
+      editor.sceneHelpers.children[i].visible = helper_status[i];
+    }
+    
+    // canvas.width = width;
+    // canvas.height = height;
+    // if (camera.aspect > 1) {
+    //   this.cameraPreviewScreenEl.setAttribute( 'width', canvas.width / 270 * 0.6 );
+    //   this.cameraPreviewScreenEl.setAttribute( 'height', canvas.height / 270 * 0.6 );
+    // } else {
+    //   this.cameraPreviewScreenEl.setAttribute( 'width', canvas.width / newHeight * 0.6 );
+    //   this.cameraPreviewScreenEl.setAttribute( 'height', canvas.height / newHeight * 0.6 );
+    // }
+    const snapshot = renderer.domElement.toDataURL();
+    if (editor.opened) {
+      const editorCamera = editor.editorCameraEl.getObject3D('camera');
+      renderer.render(scene, editorCamera);
+    }
+    return snapshot;
   }
   stopSlide() {
     this.setState((prevState) => {

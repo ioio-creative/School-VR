@@ -85,13 +85,14 @@ function createWindow() {
   let mainWindowReady = false;
   let splashScreenCountdowned = false;
   const splashScreen = new BrowserWindow({
-    width: 400,
-    height: 300,
+    width: 586,
+    height: 345,
     resizable: false,
     movable: false,
     frame: false,
     skipTaskbar: true,
-    show: false
+    show: false,
+    transparent: true
   });
   
   

@@ -324,6 +324,7 @@ class SlidePanel extends Component {
     const sceneContext = props.sceneContext;
     const slidesList = sceneContext.getSlidesList();
     const selectedSlideId = sceneContext.getCurrentSlideId();
+    
     // console.log(selectedSlideId);
     let prevSlideId = null;
     const panelClassList = [];
@@ -346,18 +347,20 @@ class SlidePanel extends Component {
           >
             {slidesList.map((slide, idx) => {
               const slideId = slide['id'];
-              const totalTime = idx;// slide['totalTime'];
+              const slideImg = slide['image'];
+              {/* const totalTime = idx;// slide['totalTime']; */}
               return (
                 <div key={slideId}
                   className={"slide" + (slideId === selectedSlideId? " selected":"" )}
                   // onClick={()=>{ sceneContext.selectSlide(idx) }}
                   onContextMenu={this.showContextMenu}
                 >
+                  <div className="slide-idx">{idx + 1}</div>
                   <div className="preview-img">
                     <img
                       // className={((this.state.selectedSlide === slideId && this.state.animateIndex === idx)? 'active': '')}
                       // key={idx} 
-                      // src={src}
+                      src={slideImg}
                     />
                   </div>
                   <div className="slide-info">
