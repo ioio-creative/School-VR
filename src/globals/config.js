@@ -25,7 +25,9 @@ const setAppData = (appName, homePath, appDataPath, documentsPath, callBack) => 
 
   appDirectory.webServerFilesDirectory = fileHelper.join(appDirectory.appTempWebContainerDirectory, 'files');
 
-  config.appName = appName;    
+  config.appName = appName.split('-').map(str => {
+    return str.charAt(0).toUpperCase() + str.substr(1);
+  }).join(' ');
   config.appDirectory = appDirectory;
 
   callBack();

@@ -98,7 +98,7 @@ class App extends Component {
   constructor(props) {
     super(props);
     // check if in electron
-    this.isElectronApp = true; // Boolean(window.require);
+    this.isElectronApp = Boolean(window.require);
   }
   render() {    
     return (

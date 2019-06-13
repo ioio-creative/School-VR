@@ -267,7 +267,8 @@ app.on('ready', async _ => {
     console.error(err);
   }
 
-  createWindow(); 
+  createWindow();
+  openWebServerAsync();
 });
 
 app.on('window-all-closed', () => {
@@ -796,7 +797,7 @@ ipcMain.on('openWebServerAndLoadProject', async (event, arg) => {
     /* end of load project file */
 
     /* open web server */    
-    await openWebServerAsync();    
+    // await openWebServerAsync();    
     const externalServerDirectory = myPath.join(webServerFilesDirectory, projectName);
     await copyTempProjectDirectoryToExternalDirectoryAsync(filePath, externalServerDirectory);
     /* end of open web server */
