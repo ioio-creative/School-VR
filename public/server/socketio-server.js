@@ -84,7 +84,7 @@ function openServer(port, rootDirPath = 'public/server/static', filesDirPath = n
       if (presenter === socket) {
         // only let presenter send msg
         // if (data.action === "hello") {
-          socket.broadcast.emit(data);
+          socket.broadcast.emit('test', data);          
         // }
       }
     });
@@ -105,8 +105,7 @@ function openServer(port, rootDirPath = 'public/server/static', filesDirPath = n
       if (presenter.id === socket.id) {
         // console.log('updateSceneStatus');
       // only let presenter send msg
-      // if (data.action === "hello") {
-        // sceneData = data;
+      // if (data.action === "hello") {        
         socket.broadcast.emit('updateSceneStatus', data);
         // }
       }

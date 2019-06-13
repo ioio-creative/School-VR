@@ -2,8 +2,8 @@ const ProjectFile = require('./ProjectFile');
 const fileSystem = require('../fileSystem/fileSystem');
 
 
-const loadProjectByProjectFilePathAsync = async (projectFilePath, staticAssetUrlPathPrefixForWebPresentation = null) => {  
-  const projectJson = await ProjectFile.loadProjectByFilePathAsync(projectFilePath, staticAssetUrlPathPrefixForWebPresentation);
+const loadProjectByProjectFilePathAsync = async (projectFilePath) => {  
+  const projectJson = await ProjectFile.loadProjectByFilePathAsync(projectFilePath);
   return projectJson;
 };
 

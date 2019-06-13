@@ -4,7 +4,11 @@ import fileHelper from 'utils/fileHelper/fileHelper';
 const schoolVrProjectArchiveExtensionWithLeadingDot = '.ivr';
 
 
-let config = {};
+let config = {
+  webServerStaticFilesPathPrefix: 'files',
+  schoolVrProjectArchiveExtensionWithLeadingDot: schoolVrProjectArchiveExtensionWithLeadingDot,
+  jsonFileExtensionWithLeadingDot: '.json'
+};  
 let appDirectory = {};
 const setAppData = (appName, homePath, appDataPath, documentsPath, callBack) => {
   // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname  
@@ -21,13 +25,8 @@ const setAppData = (appName, homePath, appDataPath, documentsPath, callBack) => 
 
   appDirectory.webServerFilesDirectory = fileHelper.join(appDirectory.appTempWebContainerDirectory, 'files');
 
-  config = {
-    appName: appName,
-    appDirectory: appDirectory,
-    webServerStaticFilesPathPrefix: 'files',
-    schoolVrProjectArchiveExtensionWithLeadingDot: schoolVrProjectArchiveExtensionWithLeadingDot,
-    jsonFileExtensionWithLeadingDot: '.json'
-  };
+  config.appName = appName;    
+  config.appDirectory = appDirectory;
 
   callBack();
 };
