@@ -56,16 +56,27 @@ AFRAME.registerComponent('cursor-listener', {
         childrenEls.forEach(childEl => {
           childEl.setAttribute('material', 'color', clickColor);
         })
-        
-        const nextSlideId = this.sceneEl.data.sceneContext.getCurrentEntity(this.id)['navigateToSlideId'];
+        const sceneEl = this.sceneEl;
+        const nextSlideId = sceneEl.data.sceneContext.getCurrentEntity(this.id)['navigateToSlideId'];
         // console.log(nextSlideId);
         setTimeout(_=> {
           this.setAttribute('material', 'color', defaultColor);
           childrenEls.forEach(childEl => {
             childEl.setAttribute('material', 'color', defaultColor);
           })
-          this.sceneEl.data.sceneContext.selectSlide(nextSlideId);
-          this.sceneEl.data.sceneContext.playSlide();
+          if (!sceneEl.getAttribute('vr-mode-ui')['enabled']) {
+            if (sceneEl.data.socket) {
+              sceneEl.data.socket.emit('updateSceneStatus', {
+                action: 'selectSlide',
+                details: {
+                  slideId: nextSlideId,
+                  autoPlay: true
+                }
+              })
+            }
+            sceneEl.data.sceneContext.selectSlide(nextSlideId);
+            sceneEl.data.sceneContext.playSlide();
+          }
         }, 250);
       }
     });
@@ -224,7 +235,13 @@ class AFramePanel extends Component {
     const props = this.props;
     const sceneContext = props.sceneContext;
     this.sceneEl.data = {
+      socket: props.socket,      
       sceneContext: sceneContext
+    }
+  }
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.socket !== prevProps.socket) {
+      this.sceneEl.data.socket = this.props.socket;
     }
   }
   updateCameraView() {
