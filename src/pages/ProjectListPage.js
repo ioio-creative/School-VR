@@ -13,6 +13,8 @@ import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefau
 import isInViewport from 'utils/ui/isInViewport';
 import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 
+import iconPlus from 'media/icons/plus.svg';
+
 import './ProjectListPage.css';
 
 
@@ -163,7 +165,9 @@ class ProjectList extends Component {
       <div className="project-list" onScroll={this.handleProjectListScroll}>
         <div className="project-item create-new-project" ref={props.setCreateNewProjectBlockRefFunc}>
           <Link to='/editor'>
-            <div className="create-new-project-content">+</div>
+            <div className="create-new-project-content">
+              <img src={iconPlus} />
+            </div>
           </Link>
         </div>
         {displayedProjectElements}

@@ -180,6 +180,8 @@ function createWindow() {
   Menu.setApplicationMenu(menu);
 
   /* end of setting up menu for hot keys purpose only */
+
+  openWebServerAsync();
 }
 
 
@@ -756,7 +758,7 @@ ipcMain.on('openWebServerAndLoadProject', async (event, arg) => {
     /* end of load project file */
 
     /* open web server */    
-    await openWebServerAsync();
+    // await openWebServerAsync();
     const externalServerDirectory = myPath.join(webServerFilesDirectory, projectName);
     await copyTempProjectDirectoryToExternalDirectoryAsync(filePath, externalServerDirectory);
     /* end of open web server */

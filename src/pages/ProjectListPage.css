@@ -4,7 +4,8 @@
 
   --projectTopZIndex: 1;
 
-  background-image: linear-gradient(190DEG, #2b435e, #0c4a61);
+  /* background-image: linear-gradient(190DEG, #2b435e, #0c4a61); */
+  background-color: #042635;
   height: 100%;
   padding-top: 30px;
 }
@@ -117,7 +118,7 @@
 /* project order select https://www.w3schools.com/howto/howto_custom_select.asp */
 /*the container must be positioned relative:*/
 #project-list-page .custom-select {
-  --backgroundColor: DodgerBlue;
+  --backgroundColor: #042635;
 
   position: relative;
   /* font-family: Arial; */
@@ -128,7 +129,7 @@
 }
 
 #project-list-page .select-selected {  
-  background-color: var(--backgroundColor);
+  background-color: #042635;
 }
 
 /*style the arrow inside the select element:*/
@@ -151,18 +152,21 @@
 
 /*style the items (options), including the selected item:*/
 #project-list-page .select-items div,.select-selected {
-  color: #ffffff;
+  color: #8697AD;
   padding: 8px 16px;
   border: 1px solid transparent;
-  border-color: transparent transparent rgba(0, 0, 0, 0.1) transparent;
+  /* border-color: transparent transparent rgba(0, 0, 0, 0.1) transparent; */
   cursor: pointer;
   user-select: none;
+}
+#project-list-page .select-items div {
+  border-bottom-color: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 /*style items (options):*/
 #project-list-page .select-items {
   position: absolute;
-  background-color: var(--backgroundColor);
+  background-color: #F00; /* var(--backgroundColor); */
   top: 100%;
   left: 0;
   right: 0;
@@ -184,7 +188,7 @@
 }
 
 #project-list-page .project-search input[type="text"] {
-  border-radius: 50px;
+  /* border-radius: 50px; */
   width: 300px;
   height: var(--elementHeight);
 
@@ -206,7 +210,7 @@
   --projectImageHeight: 65%;
 
   border-radius: 5px;
-  background-color: #0a1d34;  
+  background-color: #042635;  
   margin: 0;  
   color: #ffffff;
 
@@ -220,7 +224,7 @@
 
 /* create new project button in project-item */
 #project-list-page .project-list .project-item.create-new-project {
-  padding: 1rem;
+  /* padding: 0; */
 }
 
 #project-list-page .project-list .project-item.create-new-project a {
@@ -230,16 +234,21 @@
 #project-list-page .project-list .project-item.create-new-project .create-new-project-content {
   width: 100%;
   height: 100%;
-  border-radius: 20px;
+  border-radius: 25px;
   cursor: pointer;
-
-  border: 0.05em dashed #FFFFFF;
-  color: #FFFFFF;
+  border: 1px solid #1EBDFF;
+  color: #1EBDFF;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 7.5em;
   font-family: sans-serif;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+#project-list-page .project-list .project-item.create-new-project .create-new-project-content img {
+  width: 20%;
 }
 
 /* end of create new project button in project-item */
@@ -321,7 +330,6 @@
 #project-list-page .project-handles-container.hide {
   opacity: 0;
   visibility: hidden;
-
   height: 0%;
 }
 

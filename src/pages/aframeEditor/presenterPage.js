@@ -156,12 +156,12 @@ class PresenterPage extends Component {
 
   componentWillUnmount() {
     this.editor = null;
-    ipcHelper.closeWebServer((err) => {    
-      if (err) {
-        handleErrorWithUiDefault(err);
-        return;
-      }      
-    });
+    // ipcHelper.closeWebServer((err) => {    
+    //   if (err) {
+    //     handleErrorWithUiDefault(err);
+    //     return;
+    //   }      
+    // });
     Events.removeListener('editor-load', this.onEditorLoad)
   }
 
