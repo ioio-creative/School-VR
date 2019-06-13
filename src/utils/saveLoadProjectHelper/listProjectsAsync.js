@@ -1,4 +1,4 @@
-const funcFactoryForCompareFileStatsByProperty = (fileStatPropSelectFunc, isOrderByDesc) => {
+const funcFactoryForCompareFileStatsByProperty = (fileStatPropSelectFunc, isOrderByDesc = false) => {
   return (fileStat1, fileStat2) => {
     let valueToReturn = 0;
 

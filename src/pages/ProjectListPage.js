@@ -114,7 +114,7 @@ class ProjectList extends Component {
     if (projectSearchText === "") {
       return true;
     }
-    return project.name.includes(projectSearchText);
+    return project.name.toLowerCase().includes(projectSearchText.toLowerCase());
   }
 
   render() {
@@ -136,16 +136,16 @@ class ProjectList extends Component {
     let compareProjectFunc;
     switch (props.projectOrderSelectValue) {
       case "most-recent":
-        compareProjectFunc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.atimeMs, false);
-        break;
-      case "least-recent":
         compareProjectFunc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.atimeMs, true);
         break;
+      case "least-recent":
+        compareProjectFunc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.atimeMs, false);
+        break;
       case "by-name":
-        compareProjectFunc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.name, true);
+        compareProjectFunc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.name.toLowerCase(), false);
         break;
       case "by-name-reverse":
-        compareProjectFunc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.name, false);
+        compareProjectFunc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.name.toLowerCase(), true);
         break;
     }
     const orderedFilteredProjects = compareProjectFunc ? filteredProjects.sort(compareProjectFunc) : filteredProjects;

@@ -86,7 +86,7 @@ class PresenterPage extends Component {
       const socket = io(presentationUrl);
       socket.on('connect', () => {
         console.log('connected!!!'); // socket.connected); // true
-        ipcHelper.shellOpenExternal(presentationUrl);
+        //ipcHelper.shellOpenExternal(presentationUrl);
         socket.emit('registerPresenter');
       });
       socket.on('serverMsg', (msg) => {
@@ -168,23 +168,15 @@ class PresenterPage extends Component {
   /* end of react lifecycles */
 
 
-  
-
-
   /* event handlers */
 
   onEditorLoad(editor) {
-    // const props = this.props;
-    // const savedProjectStr = localStorage.getItem('schoolVRSave');
-    // if (props.match.params.projectId === undefined || !savedProjectStr) {
-    //   props.sceneContext.newProject();
-    // } else {
-    //   props.sceneContext.loadProject(JSON.parse(savedProjectStr));
-    // }
+    const props = this.props;
+
     editor.close();
 
     // load project
-    const searchObj = getSearchObjectFromHistory(this.props.history);
+    const searchObj = getSearchObjectFromHistory(props.history);
     const projectFilePathToLoad = getProjectFilePathFromSearchObject(searchObj);
 
     console.log("project path to load: " + projectFilePathToLoad);

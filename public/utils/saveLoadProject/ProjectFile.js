@@ -197,7 +197,7 @@ class ProjectFile {
 
 
   /* listProjects */
-  static funcFactoryForCompareFileStatsByProperty(fileStatPropSelectFunc, isOrderByDesc) {
+  static funcFactoryForCompareFileStatsByProperty(fileStatPropSelectFunc, isOrderByDesc = false) {
     return (fileStat1, fileStat2) => {
       let valueToReturn = 0;
   
