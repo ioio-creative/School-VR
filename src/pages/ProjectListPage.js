@@ -68,6 +68,8 @@ class ProjectItem extends Component {
 
     const project = props.item;
 
+    const thumbnailSrc = project.base64ThumbnailStr || getAbsoluteUrlFromRelativeUrl("images/ProjectListPage/thumbnail1.svg");
+
     return (    
       <div className="project-item"
         // https://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_onmousemove_leave_out     
@@ -76,8 +78,8 @@ class ProjectItem extends Component {
       >
         <div className="project-info-container">
           <div className="project-info">
-            <div className="project-image">
-              <img src={getAbsoluteUrlFromRelativeUrl("images/ProjectListPage/thumbnail1.svg")} alt={"test"}/>
+            <div className="project-image">              
+              <img src={thumbnailSrc} alt={"thumbnail"}/>
             </div>
             <div className="project-info-text-container">
               <div className="project-info-text">
@@ -438,7 +440,7 @@ class ProjectListPage extends Component {
 
       this.isEnumerateProjectsSuccessful = true;
 
-      const projectFileStats = data.projectFileObjs;
+      const projectFileStats = data.projectFileObjs;      
       this.setState({
         projects: projectFileStats
       });      

@@ -25,11 +25,15 @@ class ProjectFile {
   // just need to enter either 1 of the 3 arguments, others can be null
   // if 1st argument is not null, 2nd and 3rd arguments will be ignored
   // so on and so forth
-  constructor(projectName, projectFilePath, customedProjectFileStats) {    
+  constructor(projectName, projectFilePath, customedProjectFileStats, base64ThumbnailStr = null) {    
     this.name = "";
     // saved project
     this.savedProjectFilePath = ""; 
     this.projectFileStats = null;
+    this.customedProjectFileStats = null;
+
+    this.base64ThumbnailStr = base64ThumbnailStr;
+
     this.projectJson = null;  // set in loadProjectByFilePathAsync
     
     if (projectName) {
@@ -46,7 +50,8 @@ class ProjectFile {
       }  
     }
 
-    if (customedProjectFileStats) {      
+    if (customedProjectFileStats) {
+      this.customedProjectFileStats = customedProjectFileStats;
       if (!this.name) {        
         this.name = customedProjectFileStats.fileNameWithoutExtension;
       }
@@ -60,7 +65,7 @@ class ProjectFile {
 
 
     // set derived properties        
-    // temp project directories    
+    // temp project directories        
     this.tempProjectDirectoryPath = myPath.join(appDirectory.appTempProjectsDirectory, this.name);
     this.tempProjectImageDirectoryPath = myPath.join(this.tempProjectDirectoryPath, projectDirectoryStructure.image);
     this.tempProjectGifDirectoryPath = myPath.join(this.tempProjectDirectoryPath, projectDirectoryStructure.gif);
@@ -241,11 +246,19 @@ class ProjectFile {
     //const compareFileStatsByModifiedTimeDesc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.mtimeMs, true);
 
     const sortedFileStatObjs = 
-      filteredFileStatObjs.sort(compareFileStatsByAccessTimeDesc);
+      filteredFileStatObjs.sort(compareFileStatsByAccessTimeDesc);    
 
     const sortedProjectFileObjs = sortedFileStatObjs.map(fileStatObj => new ProjectFile(null, null, fileStatObj));
+
+    // extract each project file to get thumbnail from project json
+    const sortedProjectFileObjsWithThumbnail = [];
+    for (let projectFile of sortedProjectFileObjs) {
+      const projectJson = await projectFile.loadProjectAsync();
+      const base64ThumbnailStr = projectJson.entitiesList.slides[0].image;
+      sortedProjectFileObjsWithThumbnail.push(new ProjectFile(null, null, projectFile.customedProjectFileStats, base64ThumbnailStr));
+    }
     
-    return sortedProjectFileObjs;
+    return sortedProjectFileObjsWithThumbnail;
   }
 
   static async getExistingProjectNamesAsync() {
