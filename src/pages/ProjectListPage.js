@@ -389,14 +389,7 @@ class ProjectListPage extends Component {
 
     // ref
     this.createNewProjectBlock = null;
-    this.setCreateNewProjectBlockRef = element => this.createNewProjectBlock = element;
-
-    // constants
-    this.enumerateProjectsRetryIntervalInMillis = 100;
-
-    // variables
-    this.enumerateProjectsTimerHandler = null;
-    this.isEnumerateProjectsSuccessful = false;
+    this.setCreateNewProjectBlockRef = element => this.createNewProjectBlock = element;  
 
     // state
     this.state = {
@@ -411,17 +404,7 @@ class ProjectListPage extends Component {
   /* react lifecycles */
 
   componentDidMount() {
-    // mechanism to retry enumerateProjects()
-    // because appDirectory.appProjectsDirectory may not have been created at componentDidMount
-    this.enumerateProjectsTimerHandler = setInterval(_ => {
-      if (!this.isEnumerateProjectsSuccessful) {
-        this.enumerateProjects();
-      } else {
-        clearInterval(this.enumerateProjectsTimerHandler);
-        this.enumerateProjectsTimerHandler = null;
-      }      
-    }, this.enumerateProjectsRetryIntervalInMillis);
-    
+    this.enumerateProjects();    
   }
 
   /* end of react lifecycles */
@@ -433,12 +416,9 @@ class ProjectListPage extends Component {
     //const props = this.props;
     ipcHelper.listProjects((err, data) => {
       if (err) {
-        handleErrorWithUiDefault(err);
-        this.isEnumerateProjectsSuccessful = false;
+        handleErrorWithUiDefault(err);        
         return;
       }
-
-      this.isEnumerateProjectsSuccessful = true;
 
       const projectFileStats = data.projectFileObjs;      
       this.setState({

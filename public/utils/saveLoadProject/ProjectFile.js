@@ -30,6 +30,8 @@ class ProjectFile {
     // saved project
     this.savedProjectFilePath = ""; 
     this.projectFileStats = null;
+
+    // TODO: can be deleted later
     this.customedProjectFileStats = null;
 
     this.base64ThumbnailStr = base64ThumbnailStr;
@@ -219,6 +221,7 @@ class ProjectFile {
     };
   }
 
+  // TODO: this function has to be optimized
   static async listProjectsAsync() {
     const appProjectsDirectory = appDirectory.appProjectsDirectory;  
     const fileCustomedStatsObjs = await fileSystem.readdirWithStatPromise(appProjectsDirectory);
