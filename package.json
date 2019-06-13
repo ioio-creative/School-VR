@@ -1,6 +1,6 @@
 {
   "name": "school-vr",
-  "productName": "School VR",
+  "productName": "school-vr",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
