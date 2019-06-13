@@ -3,7 +3,7 @@ import isFunction from 'utils/variableType/isFunction';
 
 const electron = window.require ? window.require('electron') : null;
 const dummyFunc = (param1, param2, param3) => { 
-  console.log(param1, param2, param3);
+  // console.log(param1, param2, param3);
   // console.log('not in electron app, no ipc')
   if (param1 === "saveProject") {
     localStorage.setItem('schoolVRSave', JSON.stringify(param2));
@@ -99,6 +99,10 @@ function getAppData(callBack) {
 function shellOpenItem(filePath) {
   generalIpcCall('shellOpenItem', null, filePath);
 };
+
+function shellOpenExternal(url) {
+  generalIpcCall('shellOpenExternal', null, url);
+}
 
 /* end of shell */
 
@@ -264,11 +268,11 @@ function saveSchoolVrFileDialog(callBack) {
 /* vanilla electron dialog */
 
 function showOpenDialog(options, callBack) {  
-  generalIpcCall('showOpenDialog', options, callBack);
+  generalIpcCall('showOpenDialog', callBack, options);
 }
 
 function showSaveDialog(options, callBack) {  
-  generalIpcCall('showSaveDialog', options, callBack);
+  generalIpcCall('showSaveDialog', callBack, options);
 }
 
 /* end of vanilla electron dialog */
@@ -278,6 +282,14 @@ function showSaveDialog(options, callBack) {
 
 function getPresentationServerInfo(callBack) {
   generalIpcCall('getPresentationServerInfo', callBack);
+}
+
+function openWebServerAndLoadProject(filePath, callBack) {
+  generalIpcCall('openWebServerAndLoadProject', callBack, filePath);
+}
+
+function closeWebServer(callBack) {
+  generalIpcCall('closeWebServer', callBack);
 }
 
 /* end of for presentation */
@@ -295,13 +307,14 @@ export default {
 
   // shell
   shellOpenItem,
+  shellOpenExternal,
 
   // electron window api
   newBrowserWindow,
   closeWindow,
   minimizeWindow,
   toggleMaximizeWindow,
-  toggleDevTools,  
+  toggleDevTools,
 
   // fileSystem
   mimeStat,
@@ -338,4 +351,6 @@ export default {
 
   // for presentation
   getPresentationServerInfo,
+  openWebServerAndLoadProject,
+  closeWebServer,
 };

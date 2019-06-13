@@ -4,35 +4,41 @@ import fileHelper from 'utils/fileHelper/fileHelper';
 const schoolVrProjectArchiveExtensionWithLeadingDot = '.ivr';
 
 
-let config = {};
+let config = {
+  webServerStaticFilesPathPrefix: 'files',
+  schoolVrProjectArchiveExtensionWithLeadingDot: schoolVrProjectArchiveExtensionWithLeadingDot,
+  jsonFileExtensionWithLeadingDot: '.json'
+};  
 let appDirectory = {};
 const setAppData = (appName, homePath, appDataPath, documentsPath, callBack) => {
-  appDirectory = {
-    // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname  
-    homeDirectory: homePath,
-    
-    appDataDirectory: fileHelper.join(appDataPath, `${appName}-Data`),  
-    appProjectsDirectory: fileHelper.join(documentsPath, `${appName}-Projects`),  
-    appTempDirectory: fileHelper.join(appDataPath, `${appName}-Temp`),
-    appTempProjectsDirectory: fileHelper.join(appDataPath, `${appName}-Temp`, `${appName}-Projects`)
-  };
+  // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname  
+  appDirectory.homeDirectory = homePath;
+            
+  appDirectory.appProjectsDirectory = fileHelper.join(documentsPath, `${appName}-Projects`);
 
-  config = {
-    appName: appName,
-    appDirectory: appDirectory,
-    schoolVrProjectArchiveExtensionWithLeadingDot: schoolVrProjectArchiveExtensionWithLeadingDot,
-    jsonFileExtensionWithLeadingDot: '.json'
-  };
+  appDirectory.appDataDirectory = fileHelper.join(appDataPath, `${appName}-Data`);
+
+  appDirectory.appTempDirectory = fileHelper.join(appDataPath, `${appName}-Temp`);
+  appDirectory.appTempProjectsDirectory = fileHelper.join(appDirectory.appTempDirectory, `${appName}-Projects`);
+  appDirectory.appTempAppWorkingDirectory = fileHelper.join(appDirectory.appTempDirectory, `${appName}-App-Working`);
+  appDirectory.appTempWebContainerDirectory = fileHelper.join(appDirectory.appTempAppWorkingDirectory, 'web');
+
+  appDirectory.webServerFilesDirectory = fileHelper.join(appDirectory.appTempWebContainerDirectory, 'files');
+
+  config.appName = appName.split('-').map(str => {
+    return str.charAt(0).toUpperCase() + str.substr(1);
+  }).join(' ');
+  config.appDirectory = appDirectory;
 
   callBack();
-}
+};
 
 // https://electronjs.org/docs/api/dialog
 const Media = {
   image: {
     typeName: 'image',
     directoryUnderProjectDirectory: 'Images',
-    openFileDialogFilter: { name: 'Images', extensions: ['jpg', 'png'] }
+    openFileDialogFilter: { name: 'Images', extensions: ['jpeg', 'jpg', 'png', 'gif', 'svg'] }
   },
   gif: {
     typeName: 'gif',

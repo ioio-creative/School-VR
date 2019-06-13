@@ -42,19 +42,18 @@ function showDialogCommon(fileFilters, dialogMessage, callBack, defaultPath, dia
   });
 }
 
-function openImageDialog(callBack) {
-  console.log(['openImageDialog', openFileDialogFilter.image]);
+function openImageDialog(callBack) {  
   showDialogCommon([openFileDialogFilter.image],
     "Please select an image file.", callBack, DialogType.Open);  
 }
 
+// probably not used in future as now openImageDialog() includes open gif files
 function openGifDialog(callBack) {
   showDialogCommon([openFileDialogFilter.gif],
     "Please select a gif file.", callBack);  
 }
 
-function openVideoDialog(callBack) {
-  console.log(['openVideoDialog', openFileDialogFilter.video]);
+function openVideoDialog(callBack) {  
   showDialogCommon([openFileDialogFilter.video],
     "Please select a video file.", callBack, DialogType.Open);
 }

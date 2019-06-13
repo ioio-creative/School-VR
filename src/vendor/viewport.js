@@ -263,7 +263,8 @@ function Viewport (editor) {
   // controls need to be added *after* main logic,
   // otherwise controls.enabled doesn't work.
   var controls = new EditorControls(camera, editor.container);
-
+  editor.editorControls = controls;
+  
   function disableControls () {
     editor.container.removeEventListener('mousedown', onMouseDown);
     editor.container.removeEventListener('touchstart', onTouchStart);

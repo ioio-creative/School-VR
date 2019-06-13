@@ -25,11 +25,17 @@ class ProjectFile {
   // just need to enter either 1 of the 3 arguments, others can be null
   // if 1st argument is not null, 2nd and 3rd arguments will be ignored
   // so on and so forth
-  constructor(projectName, projectFilePath, customedProjectFileStats) {    
+  constructor(projectName, projectFilePath, customedProjectFileStats, base64ThumbnailStr = null) {    
     this.name = "";
     // saved project
     this.savedProjectFilePath = ""; 
     this.projectFileStats = null;
+
+    // TODO: can be deleted later
+    this.customedProjectFileStats = null;
+
+    this.base64ThumbnailStr = base64ThumbnailStr;
+
     this.projectJson = null;  // set in loadProjectByFilePathAsync
     
     if (projectName) {
@@ -39,14 +45,15 @@ class ProjectFile {
 
     if (projectFilePath) {
       if (!this.name) {
-        this.name = myPath.getFileNameWithoutExtension(projectFilePath)
+        this.name = myPath.getFileNameWithoutExtension(projectFilePath);
       }
       if (!this.savedProjectFilePath) {
         this.savedProjectFilePath = projectFilePath;
       }  
     }
 
-    if (customedProjectFileStats) {      
+    if (customedProjectFileStats) {
+      this.customedProjectFileStats = customedProjectFileStats;
       if (!this.name) {        
         this.name = customedProjectFileStats.fileNameWithoutExtension;
       }
@@ -60,7 +67,7 @@ class ProjectFile {
 
 
     // set derived properties        
-    // temp project directories    
+    // temp project directories        
     this.tempProjectDirectoryPath = myPath.join(appDirectory.appTempProjectsDirectory, this.name);
     this.tempProjectImageDirectoryPath = myPath.join(this.tempProjectDirectoryPath, projectDirectoryStructure.image);
     this.tempProjectGifDirectoryPath = myPath.join(this.tempProjectDirectoryPath, projectDirectoryStructure.gif);
@@ -72,6 +79,8 @@ class ProjectFile {
     ];
     // temp project files
     this.tempProjectJsonFilePath = myPath.join(this.tempProjectDirectoryPath, this.name + config.jsonFileExtensionWithLeadingDot);
+    // web server project directories
+    this.webServerProjectDirectoryPath = '';    
 
     // fileStats properties
     if (this.projectFileStats) {
@@ -176,13 +185,13 @@ class ProjectFile {
 
   async saveImageToTempAsync(srcFilePath, assetId, isAssumeDestDirExists) {
     const destFilePath = this.getTempImageFilePath(assetId, myPath.getFileExtensionWithLeadingDot(srcFilePath));
-    await this.copyFileAsync(srcFilePath, destFilePath, isAssumeDestDirExists);
+    await ProjectFile.copyFileAsync(srcFilePath, destFilePath, isAssumeDestDirExists);
     return destFilePath;
   }
   
   async saveGifToTempAsync(srcFilePath, assetId, isAssumeDestDirExists) {
-    const destFilePath = this.getTempGifFilePath(assetId, myPath.getFileExtensionWithLeadingDot(srcFilePath));
-    await this.copyFileAsync(srcFilePath, destFilePath, isAssumeDestDirExists);
+    const destFilePath = this.getTempGifFilePath(assetId, myPath.getFileExtensionWithLeadingDot(srcFilePath));    
+    await ProjectFile.copyFileAsync(srcFilePath, destFilePath, isAssumeDestDirExists);
     return destFilePath;
   }
   
@@ -195,7 +204,7 @@ class ProjectFile {
 
 
   /* listProjects */
-  static funcFactoryForCompareFileStatsByProperty(fileStatPropSelectFunc, isOrderByDesc) {
+  static funcFactoryForCompareFileStatsByProperty(fileStatPropSelectFunc, isOrderByDesc = false) {
     return (fileStat1, fileStat2) => {
       let valueToReturn = 0;
   
@@ -212,6 +221,7 @@ class ProjectFile {
     };
   }
 
+  // TODO: this function has to be optimized
   static async listProjectsAsync() {
     const appProjectsDirectory = appDirectory.appProjectsDirectory;  
     const fileCustomedStatsObjs = await fileSystem.readdirWithStatPromise(appProjectsDirectory);
@@ -239,11 +249,19 @@ class ProjectFile {
     //const compareFileStatsByModifiedTimeDesc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.mtimeMs, true);
 
     const sortedFileStatObjs = 
-      filteredFileStatObjs.sort(compareFileStatsByAccessTimeDesc);
+      filteredFileStatObjs.sort(compareFileStatsByAccessTimeDesc);    
 
     const sortedProjectFileObjs = sortedFileStatObjs.map(fileStatObj => new ProjectFile(null, null, fileStatObj));
+
+    // extract each project file to get thumbnail from project json
+    const sortedProjectFileObjsWithThumbnail = [];
+    for (let projectFile of sortedProjectFileObjs) {
+      const projectJson = await projectFile.loadProjectAsync();
+      const base64ThumbnailStr = projectJson.entitiesList.slides[0].image;
+      sortedProjectFileObjsWithThumbnail.push(new ProjectFile(null, null, projectFile.customedProjectFileStats, base64ThumbnailStr));
+    }
     
-    return sortedProjectFileObjs;
+    return sortedProjectFileObjsWithThumbnail;
   }
 
   static async getExistingProjectNamesAsync() {
@@ -384,7 +402,7 @@ class ProjectFile {
       const assetSrcAbsolutePath = this.convertAssetSrcToProperAbsolutePath(asset.src);
   
       let saveFileToTempAsyncFunc = null;    
-      switch (asset.media_type) {
+      switch (asset.type) {
         case mediaType.image:
           saveFileToTempAsyncFunc = this.saveImageToTempAsync;
           break;
@@ -403,8 +421,10 @@ class ProjectFile {
   };
 
   async saveToLocalDetailAsync(entitiesList, assetsList) {    
+    // when using constructor new ProjectFile(null, projectFilePath, null),
+    // this.name depends on projectFilePath => correct behaviour
     const projectName = this.name;
-
+    
     const jsonForSave = parseDataToSaveFormat(projectName, entitiesList, assetsList);    
     // deal with assetsList
     await this.deleteNonUsedAssetsFromTempAsync(assetsList);
@@ -415,7 +435,7 @@ class ProjectFile {
     // modify assetsList node in jsonForSave to reflect the relative paths of the project folder structure to be zipped
     jsonForSave.assetsList.forEach((asset) => {
       let getAssetFilePathRelativeToProjectDirectoryFunc = null;
-      switch (asset.media_type) {
+      switch (asset.type) {
         case mediaType.image:
           getAssetFilePathRelativeToProjectDirectoryFunc = ProjectFile.getImageFilePathRelativeToProjectDirectory;
           break;
@@ -471,11 +491,11 @@ class ProjectFile {
     // check if tempProjectDir already exists, if exists, delete it
     // actually this step may be redundant because I would check isProjectNameUsedAsync        
     if (!ProjectFile.isCurrentLoadedProject(this.savedProjectFilePath)) {
-      console.log("is not current loaded project");
+      //console.log("is not current loaded project");
       await fileSystem.myDeletePromise(this.tempProjectDirectoryPath);            
       savedProjectObj = await this.saveToLocalDetailAsync(entitiesList, assetsList);      
     } else {
-      console.log("is current loaded project");
+      //console.log("is current loaded project");
       savedProjectObj = await this.saveToLocalDetailAsync(entitiesList, assetsList);      
     }
 
@@ -506,16 +526,19 @@ class ProjectFile {
     
     const projectJson = JSON.parse(projectJsonStr);
     
-    // change any relative file path in assets to absolute path
-    const assetsList = projectJson.assetsList;
+    // change any relative file path in assets to absolute path    
+    const assetsList = projectJson.assetsList;    
     assetsList.forEach((asset) => {
+      const assetSrc = asset.src;
       asset.src = 
-        this.getTempProjectAssetAbsolutePathFromProvidedPathIfIsRelative(asset.src);
+        this.getTempProjectAssetAbsolutePathFromProvidedPathIfIsRelative(assetSrc);
+      // keep reference to any relative path for web server presentation
+      asset.relativeSrc = assetSrc;        
     });
   
     this.projectJson = projectJson;
 
-    return projectJson
+    return projectJson;
   }
 
   static async loadProjectByFilePathAsync(filePath) {

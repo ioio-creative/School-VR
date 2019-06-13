@@ -6,10 +6,9 @@ const BrowserWindow = electron.BrowserWindow;
 const dialog = electron.dialog;
 const shell = electron.shell;
 
-const {appDirectory} = require('./globals/config');
+const {appDirectory, config} = require('./globals/config');
 
 const myPath = require('./utils/fileSystem/myPath');
-//const url = require('url');
 const isDev = require('electron-is-dev');
 const {fork} = require('child_process');
 const {forEach} = require('p-iteration');
@@ -20,7 +19,7 @@ const mime = require('./utils/fileSystem/mime');
 const fileSystem = require('./utils/fileSystem/fileSystem');
 const ProjectFile = require('./utils/saveLoadProject/ProjectFile');
 const {saveProjectToLocalAsync} = require('./utils/saveLoadProject/saveProject');
-const {loadProjectByProjectFilePathAsync} = require('./utils/saveLoadProject/loadProject');
+const {loadProjectByProjectFilePathAsync, copyTempProjectDirectoryToExternalDirectoryAsync} = require('./utils/saveLoadProject/loadProject');
 const {openImageDialog, openGifDialog, openVideoDialog, openSchoolVrFileDialog, saveSchoolVrFileDialog} = 
   require('./utils/aframeEditor/openFileDialog');
 const {parseDataToSaveFormat} = require('./utils/saveLoadProject/parseDataToSaveFormat');
@@ -29,6 +28,7 @@ const getIp = require("./utils/getIp");
 
 /* constants */
 
+const isForceTestExtractAppAsarForWebServer = false;
 const configFilePath = './config.jsonc';
 
 // default values
@@ -39,15 +39,16 @@ let splashScreenDurationInMillis = 2000;
 
 let developmentServerPort = process.env.PORT || 1234;
 
-//const appAsarInstallationPath = myPath.join(app.getAppPath(), 'resources', 'app.asar');
-const appAsarInstallationPath = myPath.join(app.getPath('appData'), '..', 'Local', 'Programs', app.getName(), 'resources', 'app.asar');
-console.log('appAsarInstallationPath: ' + appAsarInstallationPath);
-const appAsarDestPathInWorkingDirectory = myPath.join(appDirectory.appTempAppWorkingDirectory, 'resources');
-console.log('appAsarDestPathInWorkingDirectory: ' + appAsarDestPathInWorkingDirectory);
-const webServerRootDirectory = myPath.join(appAsarDestPathInWorkingDirectory, 'build');
-console.log('webServerRootDirectory: ' + webServerRootDirectory);
-const webServerFilesDirectory = myPath.join(appDirectory.appTempAppWorkingDirectory, 'files');
-console.log('webServerFilesDirectory: ' + webServerFilesDirectory);
+const appAsarInstallationPath = appDirectory.appAsarInstallationPath;
+console.log(`appAsarInstallationPath: ${appAsarInstallationPath}`);
+const appAsarDestPathInWebContainerDirectory = appDirectory.appAsarDestPathInWebContainerDirectory
+console.log(`appAsarDestPathInWebContainerDirectory: ${appAsarDestPathInWebContainerDirectory}`);
+const webServerRootDirectory = appDirectory.webServerRootDirectory;
+console.log(`webServerRootDirectory: ${webServerRootDirectory}`);
+const webServerFilesDirectory = appDirectory.webServerFilesDirectory;
+console.log(`webServerFilesDirectory: ${webServerFilesDirectory}`);
+
+const serverProgramPath = myPath.join(__dirname, 'server', 'socketio-server.js');
 
 /* end of constants */
 
@@ -57,13 +58,13 @@ console.log('webServerFilesDirectory: ' + webServerFilesDirectory);
 let mainWindow;
 // https://fabiofranchino.com/blog/use-electron-as-local-webserver/
 // let webServerProcess = fork(`${myPath.join(__dirname, 'server', 'easyrtc-server.js')}`);
-let webServerProcess = fork(`${myPath.join(__dirname, 'server', 'socketio-server.js')}`);
+let webServerProcess;
 let paramsFromExternalConfigForReact;
 
 /* end of global variables */
 
 
-async function readConfigFile(configFile) {
+async function readConfigFileAsync(configFile) {
   const data = await fileSystem.readFilePromise(configFile);
   const configObj = jsoncParser.parse(data);
   const configObjForElectron = configObj.electron;
@@ -84,13 +85,14 @@ function createWindow() {
   let mainWindowReady = false;
   let splashScreenCountdowned = false;
   const splashScreen = new BrowserWindow({
-    width: 400,
-    height: 300,
+    width: 586,
+    height: 345,
     resizable: false,
     movable: false,
     frame: false,
     skipTaskbar: true,
-    show: false
+    show: false,
+    transparent: true
   });
   
   
@@ -120,10 +122,36 @@ function createWindow() {
 
   splashScreen.on('ready-to-show', () => {    
     splashScreen.show();
-    setTimeout(_ => {
+
+    const onCanHideSplashScreen = _ => {
       splashScreenCountdowned = true;
-      showMainWindow();      
-    }, splashScreenDurationInMillis);
+      showMainWindow();
+    };
+
+    if (isDev && (!isForceTestExtractAppAsarForWebServer)) {
+      setTimeout(_ => {
+        onCanHideSplashScreen();
+      }, splashScreenDurationInMillis);
+    } else {
+      // this setTimeout is to allow time for splash screen to show
+      // before the thread is being blocked by running fileSystem.extractAll()
+      setTimeout(_ => {
+        // until isAppAsarDestPathInWebContainerDirectoryExists === true, splash screen will be shown
+        const splashScreenTimerIntervalInMillis = 100;
+        let splashScreenTimerTimerHandler = null;
+
+        extractAppAsarForWebServerAsync();
+
+        splashScreenTimerTimerHandler = setInterval(async _ => {
+          const isAppAsarDestPathInWebContainerDirectoryExists = await getIsAppAsarDestPathInWebContainerDirectoryExists();
+          if (isAppAsarDestPathInWebContainerDirectoryExists) {
+            clearInterval(splashScreenTimerTimerHandler);
+            splashScreenTimerTimerHandler = null;
+            onCanHideSplashScreen();
+          }
+        }, splashScreenTimerIntervalInMillis);
+      }, 1000);
+    }    
   });
 
   /* main window lifecycles */
@@ -157,7 +185,7 @@ function createWindow() {
   menu.append(new MenuItem({
     label: 'Toggle DevTools',
     accelerator: 'F12',
-    click: () => { 
+    click: _ => { 
       mainWindow.webContents.toggleDevTools();
     }
   }));
@@ -170,7 +198,7 @@ function createWindow() {
   menu.append(new MenuItem({
     label: 'Refresh',
     accelerator: 'F5',
-    click: () => {              
+    click: _ => {              
       mainWindow.reload();            
     }
   }));
@@ -181,19 +209,33 @@ function createWindow() {
   /* end of setting up menu for hot keys purpose only */
 }
 
-async function openWebServer() {
-  // TODO: have to do the following extracting build directory process in installer
-  const isAppAsarDestPathInWorkingDirectoryExists = await fileSystem.existsPromise(appAsarDestPathInWorkingDirectory);
-  if (!isAppAsarDestPathInWorkingDirectoryExists && !isDev) {
-    await fileSystem.myDeletePromise(appAsarDestPathInWorkingDirectory);
-    console.log(`Before extracting ${appAsarInstallationPath} to ${appAsarDestPathInWorkingDirectory}`);
-    fileSystem.extractAll(appAsarInstallationPath, appAsarDestPathInWorkingDirectory);
-    console.log(`After extracting ${appAsarInstallationPath} to ${appAsarDestPathInWorkingDirectory}`);
+
+/* web server */
+
+async function getIsAppAsarDestPathInWebContainerDirectoryExists() {
+  return await fileSystem.existsPromise(appAsarDestPathInWebContainerDirectory);
+} 
+
+async function extractAppAsarForWebServerAsync() {
+  // until isAppAsarDestPathInWebContainerDirectoryExists === true, splash screen will be shown  
+  const isAppAsarDestPathInWebContainerDirectoryExists = await getIsAppAsarDestPathInWebContainerDirectoryExists();
+  if (!isAppAsarDestPathInWebContainerDirectoryExists && (isForceTestExtractAppAsarForWebServer || !isDev)) {
+    await fileSystem.myDeletePromise(appAsarDestPathInWebContainerDirectory);
+    console.log(`Before extracting ${appAsarInstallationPath} to ${appAsarDestPathInWebContainerDirectory}`);
+    fileSystem.extractAll(appAsarInstallationPath, appAsarDestPathInWebContainerDirectory);
+    console.log(`After extracting ${appAsarInstallationPath} to ${appAsarDestPathInWebContainerDirectory}`);
   }
+}
+
+async function openWebServerAsync() {
+  await extractAppAsarForWebServerAsync();
   
+  await fileSystem.myDeletePromise(webServerFilesDirectory);
   await fileSystem.createDirectoryIfNotExistsPromise(webServerFilesDirectory);
 
-  const indexHtmlPath = (isDev ? `${myPath.join(__dirname, '../build')}` : webServerRootDirectory);
+  const indexHtmlPath = isDev ? myPath.join(__dirname, '../build') : webServerRootDirectory;
+
+  webServerProcess = fork(serverProgramPath);
 
   // https://nodejs.org/api/child_process.html#child_process_subprocess_send_message_sendhandle_options_callback
   webServerProcess.send({
@@ -201,26 +243,32 @@ async function openWebServer() {
     port: webServerPort,
     rootDirPath: indexHtmlPath,
     filesDirPath: webServerFilesDirectory,
-  });      
+    webServerStaticFilesPathPrefix: config.webServerStaticFilesPathPrefix,
+  });  
 }
 
-// TODO:
 function closeWebServer() {
-
+  if (webServerProcess) {
+    webServerProcess.send({
+      address: 'close-server'      
+    });    
+  }
 }
+
+/* end of web server */
 
 
 /* app lifecycles */
 
 app.on('ready', async _ => {
   try {
-    await readConfigFile(configFilePath);
+    await readConfigFileAsync(configFilePath);
   } catch (err) {
     console.error(err);
   }
 
-  await openWebServer();
-  createWindow(); 
+  createWindow();
+  openWebServerAsync();
 });
 
 app.on('window-all-closed', () => {
@@ -277,9 +325,15 @@ ipcMain.on('getAppData', (event, arg) => {
 });
 
 // shell
+
 ipcMain.on('shellOpenItem', (event, arg) => {
   const filePath = arg;
   shell.openItem(filePath);
+});
+
+ipcMain.on('shellOpenExternal', (event, arg) => {
+  const url = arg;
+  shell.openExternal(url);
 });
 
 // electron window api
@@ -633,8 +687,7 @@ ipcMain.on('isCurrentLoadedProject', (event, arg) => {
 
 // window dialog
 
-ipcMain.on('openImageDialog', (event, args) => {
-  console.log('openImageDialog');
+ipcMain.on('openImageDialog', (event, arg) => {  
   openImageDialog((filePaths) => {
     event.sender.send('openImageDialogResponse', {
       data: {
@@ -644,7 +697,7 @@ ipcMain.on('openImageDialog', (event, args) => {
   });
 });
 
-ipcMain.on('openGifDialog', (event, args) => {
+ipcMain.on('openGifDialog', (event, arg) => {
   openGifDialog((filePaths) => {
     event.sender.send('openGifDialogResponse', {
       data: {
@@ -654,7 +707,7 @@ ipcMain.on('openGifDialog', (event, args) => {
   });
 });
 
-ipcMain.on('openVideoDialog', (event, args) => {  
+ipcMain.on('openVideoDialog', (event, arg) => {  
   openVideoDialog((filePaths) => {    
     event.sender.send('openVideoDialogResponse', {      
       data: {
@@ -664,7 +717,7 @@ ipcMain.on('openVideoDialog', (event, args) => {
   });
 });
 
-ipcMain.on('openSchoolVrFileDialog', (event, args) => {
+ipcMain.on('openSchoolVrFileDialog', (event, arg) => {
   openSchoolVrFileDialog((filePaths) => {
     event.sender.send('openSchoolVrFileDialogResponse', {
       data: {
@@ -674,7 +727,7 @@ ipcMain.on('openSchoolVrFileDialog', (event, args) => {
   });
 });
 
-ipcMain.on('saveSchoolVrFileDialog', (event, args) => {
+ipcMain.on('saveSchoolVrFileDialog', (event, arg) => {
   saveSchoolVrFileDialog((filePath) => {    
     event.sender.send('saveSchoolVrFileDialogResponse', {
       data: {
@@ -686,8 +739,8 @@ ipcMain.on('saveSchoolVrFileDialog', (event, args) => {
 
 // vanilla electron dialog
 
-ipcMain.on('showOpenDialog', (event, args) => {
-  const options = args;
+ipcMain.on('showOpenDialog', (event, arg) => {
+  const options = arg;
   dialog.showOpenDialog(options, (filePaths) => {
     event.sender.send('showOpenDialogResponse', {
       data: {
@@ -697,8 +750,8 @@ ipcMain.on('showOpenDialog', (event, args) => {
   });
 });
 
-ipcMain.on('showSaveDialog', (event, args) => {
-  const options = args;
+ipcMain.on('showSaveDialog', (event, arg) => {
+  const options = arg;
   dialog.showOpenDialog(options, (filePath) => {
     event.sender.send('showSaveDialogResponse', {
       data: {
@@ -710,12 +763,64 @@ ipcMain.on('showSaveDialog', (event, args) => {
 
 // for presentation
 
-ipcMain.on('getPresentationServerInfo', (event, args) => {
+ipcMain.on('getPresentationServerInfo', (event, arg) => {
+  const interfaceIpMap = getIp.getAllIps();
   event.sender.send('getPresentationServerInfoResponse', {
     data: {
-      interfaceIpMap: getIp.getAllIps(),
+      interfaceIpMap: interfaceIpMap,
       port: webServerPort
     }
+  });
+});
+
+ipcMain.on('openWebServerAndLoadProject', async (event, arg) => {
+  try {
+    /* load project file */
+    const filePath = arg;
+    //console.log(`filePath: ${filePath}`);
+    const projectName = new ProjectFile(null, filePath, null).name;    
+    //console.log(`projectName: ${projectName}`);
+    const staticAssetUrlPathPrefixForWebPresentation = myPath.join(config.webServerStaticFilesPathPrefix, projectName);
+    //console.log(`staticAssetUrlPathPrefixForWebPresentation: ${staticAssetUrlPathPrefixForWebPresentation}`);
+    const projectJson = await loadProjectByProjectFilePathAsync(filePath);
+    //console.log(projectJson);    
+    
+    // TODO: poorly written (too many cross-references to ProjectFile class)
+    // add staticAssetUrlPathPrefixForWebPresentation to asset's relativeSrc
+    const newlyModifiedProjectJson = Object.assign(projectJson);
+    newlyModifiedProjectJson.assetsList.forEach((asset) => {
+      const assetRelativeSrc = asset.relativeSrc;
+      if (ProjectFile.isAssetPathRelative(assetRelativeSrc)) {
+        asset.relativeSrc = myPath.join(staticAssetUrlPathPrefixForWebPresentation, assetRelativeSrc);
+      }
+    });
+    /* end of load project file */
+
+    /* open web server */    
+    // await openWebServerAsync();    
+    const externalServerDirectory = myPath.join(webServerFilesDirectory, projectName);
+    await copyTempProjectDirectoryToExternalDirectoryAsync(filePath, externalServerDirectory);
+    /* end of open web server */
+    
+    event.sender.send('openWebServerAndLoadProjectResponse', {
+      err: null,
+      data: {
+        projectJson: newlyModifiedProjectJson
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    event.sender.send('openWebServerAndLoadProjectResponse', {
+      err: err.toString(),
+      data: null
+    });
+  }  
+});
+
+ipcMain.on('closeWebServer', (event, arg) => {
+  closeWebServer();  
+  event.sender.send('closeWebServerResponse', {
+    err: null
   });
 });
 

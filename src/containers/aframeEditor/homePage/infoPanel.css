@@ -169,10 +169,11 @@
 }
 #info-panel .opacity-col .opacity-drag-control {
   width: 125px;
-  height: 3px;
+  flex: 0 0 125px;
+  height: 5px;
   position: relative;
-  margin: 25px auto;
-  background-color: #000;
+  margin-right: 10px;
+  background-color: #8697AD;
 }
 
 #info-panel .opacity-col .opacity-drag-control:before {
@@ -190,22 +191,38 @@
   transform-origin: bottom left;
   pointer-events: none;
 }
+#info-panel .opacity-col .opacity-control-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px 0;
+}
 #info-panel .opacity-col .current-opacity {
   height: 3px;
-  background-color: #CCCCCC;
+  background-color: #1EBDFF;
   position: relative;
 }
-#info-panel .opacity-col .current-opacity:after {
+#info-panel .opacity-col .current-opacity .opacity-handle {
   content: '';
-  width: 9px;
-  height: 9px;
-  border-radius: 10px;
+  width: 15px;
+  height: 15px;
+  border-radius: 15px;
   display: block;
-  background-color: #CCCCCC;
+  background-color: #1EBDFF;
   position: absolute;
-  top: -3px;
-  right: -5px;
-  pointer-events: none;
+  top: 50%;
+  right: 0;
+  transform: translate(0, -50%);
+  /* pointer-events: none; */
+}
+#info-panel .opacity-col .current-opacity .opacity-handle > div {
+  right: 0 !important;
+  width: 100% !important;
+}
+#info-panel .opacity-col .opacity-text {
+  width: 40px;
+  flex: 0 0 40px;
+  text-align: right;
 }
 #info-panel .opacity-col .hide-button {
   flex: 0 0 25px;
@@ -334,7 +351,7 @@
   width: 250px;
   right: 25px;
   background-color: rgba(3, 20, 28, 0.6);
-  color: var(--text-color);
+  color: #FFFFFF;/* var(--text-color); */
   z-index: 1;
   border-radius: 15px;
 }
@@ -349,14 +366,31 @@
 #content-panel .panel-body {
   display: flex;
   padding: 25px;
-  flex-direction: column;
+  /* flex-direction: column; */
+  flex-wrap: wrap;
+  justify-content: center;
+}
+#content-panel .attribute-row {
+  flex: 0 0 100%;
 }
 #content-panel .attribute-button {
-  flex: 0 0 40px;
-  height: 40px;
-  margin-right: 5px;
-  background-color: #CCCCCC;
+  flex: 0 0 40%;
+  /* height: 40px; */
+  margin: 0 5%;
+  /* background-color: #CCCCCC; */
   overflow: hidden;
+  text-align: center;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 12px;
+}
+#content-panel .attribute-button:hover {
+  background-color: #03141c;
+}
+#content-panel .attribute-button img {
+  width: 50px;
+  height: 50px;
 }
 #content-panel .field-label {
   cursor: pointer;

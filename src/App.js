@@ -1,4 +1,4 @@
-import React, {Component, Fragment} from 'react';
+import React, {Component} from 'react';
 import {Switch, Route, Redirect} from 'react-router-dom';
 
 import routes from 'globals/routes';
@@ -14,8 +14,10 @@ import asyncLoadingComponent from 'components/asyncLoadingComponent';
 // import EditorPage from 'pages/aframeEditor/editorPage';
 // import PresenterPage from 'pages/aframeEditor/presenterPage';
 
+import {SceneContextProvider} from 'globals/contexts/sceneContext';
+
 import './App.css';
-import { SceneContextProvider } from 'globals/contexts/sceneContext';
+
 
 
 ipcHelper.getAppData((err, data) => {
@@ -40,6 +42,9 @@ ipcHelper.getAppData((err, data) => {
           return;
         }
         
+        Object.keys(appDirectory).forEach(appDirectoryKey => {
+          console.log(`${appDirectoryKey}: ${appDirectory[appDirectoryKey]}`);
+        });
         console.log('App directories created.');
       });
     });    
@@ -64,7 +69,10 @@ const faIconsNeed = [
   "faPause",
   "faTrashAlt",
   "faEye",
-  "faEyeSlash"
+  "faEyeSlash",
+  "faAngleLeft",
+  "faAngleRight",
+
 ];
 
 faIconsNeed.forEach(iconName => {

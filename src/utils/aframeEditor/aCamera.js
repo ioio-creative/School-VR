@@ -8,7 +8,7 @@ class ACamera extends AEntity {
     this._type = 'a-camera';
     this._animatableAttributes = {
       position: ['x', 'y', 'z'],
-      // rotation: ['x', 'y', 'z'],
+      rotation: ['x', 'y', 'z'],
       cameraPreview: true
     }
     this._staticAttributes = [
@@ -42,27 +42,42 @@ class ACamera extends AEntity {
     // });
     this.renderCameraPreview = this.renderCameraPreview.bind(this);
 
-    // Events.on('refreshsidebarobject3d', _=> {
-    //   requestAnimationFrame(this.renderCameraPreview);
-    // })
+    Events.on('refreshsidebarobject3d', this.renderCameraPreview);
   }
   setEditorInstance(editorInstance) {
     this.editor = editorInstance;
   }
   setCameraPreviewEl(canvasEl) {
-    this.cameraPreviewEl = this.cameraPreviewEl || canvasEl;
+    this.cameraPreviewEl = canvasEl || this.cameraPreviewEl ;
+  }
+  updateEntityAttributes(attrs) {
+    if (typeof(attrs) !== 'object') return;
+    // console.log(attrs);
+    const self = this;
+    for (let key in attrs) {
+      if (self.animatableAttributes.hasOwnProperty(key)) {
+        self._el.parentElement.setAttribute(key, attrs[key]);
+      } else {
+        const staticAttribute = self.staticAttributes.find(attr => attr.attributeKey === key);
+        if (staticAttribute) {
+          self._el.parentElement.setAttribute(key, attrs[key]);
+        }
+      }
+    }
   }
   renderCameraPreview() {
     if (this.cameraPreviewEl) {
 
       const editor = this.editor;
+      if (!editor) return this.unmount();
       const renderer = editor.sceneEl.renderer;
       const scene = editor.sceneEl.object3D;
       const camera = editor.currentCameraEl.getObject3D('camera');
-  
+      if (!camera) return this.unmount();
+      const newWidth = this.cameraPreviewEl.parentElement.offsetWidth;
       const width = renderer.domElement.width;
       const height = renderer.domElement.height;
-      const newHeight = 270 / width * height;
+      const newHeight = newWidth / width * height;
       const canvas = this.cameraPreviewEl;
       const ctx = canvas.getContext('2d');
   
@@ -78,7 +93,7 @@ class ACamera extends AEntity {
         editor.sceneHelpers.children[i].visible = helper_status[i];
       }
       
-      canvas.width = 270;
+      canvas.width = newWidth;
       canvas.height = newHeight;
       // if (camera.aspect > 1) {
       //   this.cameraPreviewScreenEl.setAttribute( 'width', canvas.width / 270 * 0.6 );
@@ -88,7 +103,18 @@ class ACamera extends AEntity {
       //   this.cameraPreviewScreenEl.setAttribute( 'height', canvas.height / newHeight * 0.6 );
       // }
       ctx.drawImage(renderer.domElement, 0, 0, canvas.width, canvas.height);
+      if (editor.opened) {
+        const editorCamera = editor.editorCameraEl.getObject3D('camera');
+        renderer.render(scene, editorCamera);
+      }
+    } else {
+      // assume unmounted
+      this.unmount();
     }
+  }
+  unmount() {
+    Events.removeListener('refreshsidebarobject3d', this.renderCameraPreview);
+    return false;
   }
 }
 export default ACamera;

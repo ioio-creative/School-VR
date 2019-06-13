@@ -19,6 +19,7 @@
     "jsonschema": "^1.2.4",
     "moment": "^2.24.0",
     "mousetrap": "^1.6.3",
+    "ncp": "^2.0.0",
     "opentype.js": "^1.1.0",
     "p-iteration": "^1.1.7",
     "path": "^0.12.7",
@@ -67,7 +68,8 @@
     "appId": "com.ioiocreative.school-vr",
     "files": [
       "build/**/*",
-      "node_modules/**/*"
+      "node_modules/**/*",
+      "build/favicon.ico"
     ],
     "directories": {
       "buildResources": "assets"
@@ -75,6 +77,13 @@
     "fileAssociations": {
       "ext": "ivr",
       "name": "School-VR Project"
+    },
+    "nsis": {
+      "installerIcon": "build/favicon.ico",
+      "uninstallerIcon": "build/favicon.ico"
+    },
+    "win": {
+      "icon": "build/favicon.ico"
     },
     "mac": {
       "category": "public.app-category.education"

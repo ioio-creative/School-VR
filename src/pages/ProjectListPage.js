@@ -13,6 +13,8 @@ import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefau
 import isInViewport from 'utils/ui/isInViewport';
 import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 
+import iconPlus from 'media/icons/plus.svg';
+
 import './ProjectListPage.css';
 
 
@@ -66,6 +68,8 @@ class ProjectItem extends Component {
 
     const project = props.item;
 
+    const thumbnailSrc = project.base64ThumbnailStr || getAbsoluteUrlFromRelativeUrl("images/ProjectListPage/thumbnail1.svg");
+
     return (    
       <div className="project-item"
         // https://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_onmousemove_leave_out     
@@ -74,8 +78,8 @@ class ProjectItem extends Component {
       >
         <div className="project-info-container">
           <div className="project-info">
-            <div className="project-image">
-              <img src={getAbsoluteUrlFromRelativeUrl("images/ProjectListPage/thumbnail1.svg")} alt={"test"}/>
+            <div className="project-image">              
+              <img src={thumbnailSrc} alt={"thumbnail"}/>
             </div>
             <div className="project-info-text-container">
               <div className="project-info-text">
@@ -114,7 +118,7 @@ class ProjectList extends Component {
     if (projectSearchText === "") {
       return true;
     }
-    return project.name.includes(projectSearchText);
+    return project.name.toLowerCase().includes(projectSearchText.toLowerCase());
   }
 
   render() {
@@ -136,16 +140,16 @@ class ProjectList extends Component {
     let compareProjectFunc;
     switch (props.projectOrderSelectValue) {
       case "most-recent":
-        compareProjectFunc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.atimeMs, false);
-        break;
-      case "least-recent":
         compareProjectFunc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.atimeMs, true);
         break;
+      case "least-recent":
+        compareProjectFunc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.atimeMs, false);
+        break;
       case "by-name":
-        compareProjectFunc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.name, true);
+        compareProjectFunc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.name.toLowerCase(), false);
         break;
       case "by-name-reverse":
-        compareProjectFunc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.name, false);
+        compareProjectFunc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.name.toLowerCase(), true);
         break;
     }
     const orderedFilteredProjects = compareProjectFunc ? filteredProjects.sort(compareProjectFunc) : filteredProjects;
@@ -163,7 +167,9 @@ class ProjectList extends Component {
       <div className="project-list" onScroll={this.handleProjectListScroll}>
         <div className="project-item create-new-project" ref={props.setCreateNewProjectBlockRefFunc}>
           <Link to='/editor'>
-            <div className="create-new-project-content">+</div>
+            <div className="create-new-project-content">
+              <img src={iconPlus} />
+            </div>
           </Link>
         </div>
         {displayedProjectElements}
@@ -383,14 +389,7 @@ class ProjectListPage extends Component {
 
     // ref
     this.createNewProjectBlock = null;
-    this.setCreateNewProjectBlockRef = element => this.createNewProjectBlock = element;
-
-    // constants
-    this.enumerateProjectsRetryIntervalInMillis = 100;
-
-    // variables
-    this.enumerateProjectsTimerHandler = null;
-    this.isEnumerateProjectsSuccessful = false;
+    this.setCreateNewProjectBlockRef = element => this.createNewProjectBlock = element;  
 
     // state
     this.state = {
@@ -405,17 +404,7 @@ class ProjectListPage extends Component {
   /* react lifecycles */
 
   componentDidMount() {
-    // mechanism to retry enumerateProjects()
-    // because appDirectory.appProjectsDirectory may not have been created at componentDidMount
-    this.enumerateProjectsTimerHandler = setInterval(_ => {
-      if (!this.isEnumerateProjectsSuccessful) {
-        this.enumerateProjects();
-      } else {
-        clearInterval(this.enumerateProjectsTimerHandler);
-        this.enumerateProjectsTimerHandler = null;
-      }      
-    }, this.enumerateProjectsRetryIntervalInMillis);
-    
+    this.enumerateProjects();    
   }
 
   /* end of react lifecycles */
@@ -427,14 +416,11 @@ class ProjectListPage extends Component {
     //const props = this.props;
     ipcHelper.listProjects((err, data) => {
       if (err) {
-        handleErrorWithUiDefault(err);
-        this.isEnumerateProjectsSuccessful = false;
+        handleErrorWithUiDefault(err);        
         return;
       }
 
-      this.isEnumerateProjectsSuccessful = true;
-
-      const projectFileStats = data.projectFileObjs;
+      const projectFileStats = data.projectFileObjs;      
       this.setState({
         projects: projectFileStats
       });      

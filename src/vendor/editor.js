@@ -234,7 +234,7 @@ Editor.prototype = {
 
   selectEntity: function (entity) {
     // console.log(entity);
-    if (entity && entity.parentEl !== AFRAME.scenes[0]) {
+    if (entity && !entity.components['camera'] && entity.parentEl !== AFRAME.scenes[0]) {
       entity = entity.parentEl;
     }
     this.selectedEntity = entity;
@@ -260,7 +260,7 @@ Editor.prototype = {
       // Alt + Ctrl + i: Shorcut to toggle the editor
       // var shortcutPressed = evt.keyCode === 73 && evt.ctrlKey && evt.altKey;
       // j: Shorcut to toggle the editor
-      var shortcutPressed = evt.keyCode === 74;
+      var shortcutPressed = ((evt.keyCode === 32) && evt.ctrlKey);
       if (shortcutPressed) {
         this.toggle();
       }
@@ -275,8 +275,12 @@ Editor.prototype = {
     });
 
     Events.on('editormodechanged', active => {
+      const sceneEl = this.sceneEl;
       this.editorActive = active;
       this.sceneHelpers.visible = this.editorActive;
+      setTimeout(()=>{
+        sceneEl.resize();
+      }, 100);
     });
 
     Events.on('createnewentity', definition => {
@@ -502,7 +506,6 @@ Editor.prototype = {
   open: function () {
     this.sceneEl = AFRAME.scenes[0];
     this.opened = true;
-    Events.emit('editormodechanged', true);
 
     if (!this.sceneEl.hasAttribute('aframe-editor-motion-capture-replaying')) {
       this.sceneEl.pause();
@@ -516,7 +519,7 @@ Editor.prototype = {
     }
 
     document.body.classList.add('aframe-editor-opened');
-    this.sceneEl.resize();
+    Events.emit('editormodechanged', true);    
   },
   /**
    * Closes the editor and gives the control back to the scene

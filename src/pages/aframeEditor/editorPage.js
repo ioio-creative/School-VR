@@ -43,15 +43,12 @@ const Events = require('vendor/Events.js');
 // const schema = require('schema/aframe_schema_20181108.json');
 
 
-
 class EditorPage extends Component {
   constructor(props) {
     super(props);
 
     // variables
-    this.inited = false;
-    // TODO: ask hung to put into sceneContext
-    this.loadedProjectFilePath = '';
+    this.inited = false;    
 
     // state
     this.state = {
@@ -94,6 +91,8 @@ class EditorPage extends Component {
   }
 
   componentWillUnmount() {
+    const sceneContext = this.props.sceneContext;
+    sceneContext.setProjectName('');
     Events.removeListener('editor-load', this.onEditorLoad);
     this.editor = null;
   }
@@ -126,9 +125,7 @@ class EditorPage extends Component {
     // fileDialog.multiple = true;
     // fileDialog.accept = ['image/x-png','image/gif'];
     // fileDialog.click();
-
-    // TODO: ask hung to put into sceneContext
-    this.loadedProjectFilePath = '';
+    
     this.setState({
       loadedProjectFilePath: ''
     });
@@ -136,18 +133,15 @@ class EditorPage extends Component {
     this.props.sceneContext.newProject();
   }
 
-  loadProject(projectFilePath) {
+  loadProject(projectFilePath) {    
     ipcHelper.loadProjectByProjectFilePath(projectFilePath, (err, data) => {
       if (err) {
         handleErrorWithUiDefault(err);
         return;                         
-      }
-
-      // TODO: ask hung to put into sceneContext
-      this.loadedProjectFilePath = projectFilePath;
+      }      
       this.setState({
         loadedProjectFilePath: projectFilePath
-      })
+      });
       const projectJsonData = data.projectJson;
       //console.log(projectJsonData);
       this.props.sceneContext.loadProject(projectJsonData);   
@@ -161,16 +155,15 @@ class EditorPage extends Component {
 
     const sceneContext = this.props.sceneContext;
     const {entitiesList, assetsList} = sceneContext.saveProject();    
-    const projectName = fileHelper.getFileNameWithoutExtension(projectFilePath);
+    //const projectName = fileHelper.getFileNameWithoutExtension(projectFilePath);
     //console.log(projectName, entitiesList, assetsList);
-    entitiesList.projectName = projectName;
+    // TODO:
+    //entitiesList.projectName = projectName;
     ipcHelper.saveProject(projectFilePath, entitiesList, assetsList, (err) => {
       if (err) {
         handleErrorWithUiDefault(err);
         return;
-      }
-      // TODO: ask hung to put into sceneContext
-      this.loadedProjectFilePath = projectFilePath;
+      }      
       this.setState({
         loadedProjectFilePath: projectFilePath
       });
@@ -219,8 +212,7 @@ class EditorPage extends Component {
     });
   }
 
-  handleSaveProjectButtonClick(event) {
-    // TODO: ask hung to put into sceneContext
+  handleSaveProjectButtonClick(event) {    
     ipcHelper.isCurrentLoadedProject(this.state.loadedProjectFilePath, (err, data) => {
       if (err) {
         handleErrorWithUiDefault(err);

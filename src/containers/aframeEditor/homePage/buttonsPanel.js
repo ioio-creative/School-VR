@@ -55,7 +55,7 @@ class ButtonsPanel extends Component {
     sceneContext.addNewEntity(type);
   }
   toggleEditor() {
-    this.props.editor.toggle();
+    this.props.sceneContext.editor.toggle();
   }
   resetView() {
     const props = this.props;
@@ -141,7 +141,7 @@ class ButtonsPanel extends Component {
             </button>
             <div className="seperator"></div>
             <button className="button-preview"
-              // onClick={this.resetView}
+              onClick={this.toggleEditor}
             >
               <img src={iconPreview} alt="" />
             </button>

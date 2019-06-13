@@ -10,6 +10,8 @@ import ipcHelper from 'utils/ipc/ipcHelper';
 
 import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 
+import appIcon from 'app_icon.png';
+
 import './systemPanel.css';
 
 // import consts from 'globals/consts';
@@ -33,7 +35,9 @@ class SystemPanel extends Component {
   render() {
     return (
       <div id="system-panel">
-        <div id="app-icon"></div>
+        <div id="app-icon">
+          <img src={appIcon} />
+        </div>
         {/* <div id="app-name">School VR</div> */}
         <div id="app-buttons">
           <div className="menu-group">

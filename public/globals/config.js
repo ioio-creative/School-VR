@@ -1,22 +1,33 @@
 const electron = require('electron');
-const { app } = electron;
+const {app} = electron;
 const myPath = require('../utils/fileSystem/myPath');
 
 
 const appName = app.getName();
 
-const appDirectory = {
-  // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname  
-  appDataDirectory: myPath.join(app.getPath('appData'), `${appName}-Data`),  
-  appProjectsDirectory: myPath.join(app.getPath('documents'), `${appName}-Projects`),  
-  appTempDirectory: myPath.join(app.getPath('appData'), `${appName}-Temp`),
-  appTempProjectsDirectory: myPath.join(app.getPath('appData'), `${appName}-Temp`, `${appName}-Projects`),
-  appTempAppWorkingDirectory: myPath.join(app.getPath('appData'), `${appName}-Temp`, `${appName}-App-Working`),
-};
+// https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname
+const appDirectory = {};
+
+appDirectory.appProjectsDirectory = myPath.join(app.getPath('documents'), `${appName}-Projects`);
+
+appDirectory.appDataDirectory = myPath.join(app.getPath('appData'), `${appName}-Data`);
+
+appDirectory.appTempDirectory = myPath.join(app.getPath('appData'), `${appName}-Temp`);
+appDirectory.appTempProjectsDirectory = myPath.join(appDirectory.appTempDirectory, `${appName}-Projects`);
+appDirectory.appTempAppWorkingDirectory = myPath.join(appDirectory.appTempDirectory, `${appName}-App-Working`);
+appDirectory.appTempWebContainerDirectory = myPath.join(appDirectory.appTempAppWorkingDirectory, 'web');
+ 
+//appDirectory.appAsarInstallationPath = myPath.join(app.getAppPath(), 'resources', 'app.asar');
+appDirectory.appAsarInstallationPath = myPath.join(app.getPath('appData'), '..', 'Local', 'Programs', app.getName(), 'resources', 'app.asar');
+appDirectory.appAsarDestPathInWebContainerDirectory = myPath.join(appDirectory.appTempWebContainerDirectory, 'resources');
+appDirectory.webServerRootDirectory = myPath.join(appDirectory.appAsarDestPathInWebContainerDirectory, 'build');
+appDirectory.webServerFilesDirectory = myPath.join(appDirectory.appTempWebContainerDirectory, 'files');
+
 
 const config = {
   appName: appName,
   appDirectory: appDirectory,
+  webServerStaticFilesPathPrefix: 'files',
   schoolVrProjectArchiveExtensionWithLeadingDot: '.ivr',
   jsonFileExtensionWithLeadingDot: '.json'
 };
@@ -26,7 +37,7 @@ const Media = {
   image: {
     typeName: 'image',
     directoryUnderProjectDirectory: 'Images',
-    openFileDialogFilter: { name: 'Images', extensions: ['jpg', 'png'] }
+    openFileDialogFilter: { name: 'Images', extensions: ['jpeg', 'jpg', 'png', 'gif', 'svg'] }
   },
   gif: {
     typeName: 'gif',

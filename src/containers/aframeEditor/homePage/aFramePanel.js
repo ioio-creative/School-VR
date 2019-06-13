@@ -195,30 +195,12 @@ AFRAME.registerComponent('ttfFont', {
 
   }
 });
-// pyramid
-// AFRAME.registerGeometry('pyramid', {
-//   schema: {
-//     vertices: {
-//       default: ['-10 10 0', '-10 -10 0', '10 -10 0', '10 -10 0'],
-//     }
-//   },
-
-//   init: function (data) {
-//     var geometry = new THREE.Geometry();
-//     geometry.vertices = data.vertices.map(function (vertex) {
-//         var points = vertex.split(' ').map(function(x){return parseInt(x);});
-//         return new THREE.Vector3(points[0], points[1], points[2]);
-//     });
-//     geometry.computeBoundingBox();
-//     geometry.faces.push(new THREE.Face3(0, 1, 2));
-//     geometry.faces.push(new THREE.Face3(0, 2, 3));
-//     geometry.mergeVertices();
-//     geometry.computeFaceNormals();
-//     geometry.computeVertexNormals();
-//     this.geometry = geometry;
-//   }
-// });
-
+AFRAME.registerComponent('disable-inspector', {
+  dependencies: ['inspector'],
+  init: function () {
+    this.el.components.inspector.remove();
+  }
+});
 class AFramePanel extends Component {
   constructor(props) {
     super(props);
@@ -238,7 +220,7 @@ class AFramePanel extends Component {
     // Events.on('refreshsidebarobject3d', _=> {
     //   this.updateCameraView();
     // })
-    // window.addEventListener('resize', this.updateCameraView);s
+    // window.addEventListener('resize', this.updateCameraView);
     const props = this.props;
     const sceneContext = props.sceneContext;
     this.sceneEl.data = {
@@ -289,17 +271,19 @@ class AFramePanel extends Component {
     return (
     	<div id="aframe-panel">
 	    	<a-scene embedded background="color:#6EBAA7" el-name="Background" ref={ref=> {
-          this.sceneEl = ref;
-        }} >
+            this.sceneEl = ref;
+          }} vr-mode-ui={`enabled: ${props.disableVR? 'false': 'true'}`}
+          disable-inspector
+        >
           <a-assets>
             {/* try load some fonts */}
 
-            <canvas ref={(ref)=>this.cameraPreviewEl=ref} id="camera-preview"/>
+            {/* <canvas ref={(ref)=>this.cameraPreviewEl=ref} id="camera-preview"/> */}
             
             {/* <a-asset-item id="dcjaiModelObj" src={dcjaiobj}></a-asset-item>
             <img id="dcjaiModelTex" src={dcjaitex} /> */}
             {/* <a-asset-item id="fontSchoolbellRegular" src={fontSchoolbellRegular} /> */}
-            <img src={fontSchoolbellRegular} id="fontSchoolbellRegularImg" />
+            {/* <img src={fontSchoolbellRegular} id="fontSchoolbellRegularImg" /> */}
             {/* <a-asset-item id="fontNotoSerifTC" src={fontNotoSerifTC} /> */}
           </a-assets>
           {/* <a-sky el-name="sky" el-isSystem={true} color="#FF0000"></a-sky> */}

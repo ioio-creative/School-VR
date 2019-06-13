@@ -13,7 +13,9 @@ import AText from 'utils/aframeEditor/aText';
 import ASky from 'utils/aframeEditor/aSky';
 import AVideo from 'utils/aframeEditor/aVideo';
 import ACamera from 'utils/aframeEditor/aCamera';
-import { TimelineMax, TweenMax, Power0 } from 'gsap';
+import {TimelineMax, TweenMax, Power0} from 'gsap';
+
+import {mediaType} from 'globals/config';
 
 const mergeJSON = require('deepmerge').default;
 const Events = require('vendor/Events.js');
@@ -88,8 +90,8 @@ class SceneContextProvider extends Component {
     this.editor = null;
 
     this.setAppName = this.setAppName.bind(this);
-    // // this.setProjectName = this.setProjectName.bind(this);
     this.getAppName = this.getAppName.bind(this);
+    this.setProjectName = this.setProjectName.bind(this);
     this.getProjectName = this.getProjectName.bind(this);
     this.newProject = this.newProject.bind(this);
     this.saveProject = this.saveProject.bind(this);
@@ -108,7 +110,8 @@ class SceneContextProvider extends Component {
     this.getEntitiesList = this.getEntitiesList.bind(this);
     this.getCurrentEntity = this.getCurrentEntity.bind(this);
     this.getCurrentEntityId = this.getCurrentEntityId.bind(this);
-    
+    this.copyEntity = this.copyEntity.bind(this);
+
     this.addEntity = this.addEntity.bind(this);
     this.deleteEntity = this.deleteEntity.bind(this);
     this.selectEntity = this.selectEntity.bind(this);
@@ -148,6 +151,8 @@ class SceneContextProvider extends Component {
     this.addAsset = this.addAsset.bind(this);
 
     this.resetView = this.resetView.bind(this);
+
+    this.takeSnapshot = this.takeSnapshot.bind(this);
 
     this.events = {
       'editor-load': obj => {
@@ -330,11 +335,14 @@ class SceneContextProvider extends Component {
   }
   updateCameraEl(cameraEl) {
     this.setState((prevState) => {
+      const currentCameraId = cameraEl.getAttribute('id') || uuid();
+      cameraEl.setAttribute('id', currentCameraId);
       const newSceneData = jsonCopy(prevState.sceneData);
       newSceneData.slides.forEach(slide => {
         const cameraData = slide.entities.find(entity => entity.type='a-camera');
+        // console.log(cameraEl.getAttribute('id'));
         cameraData.el = cameraEl;
-        cameraData.id = cameraEl.getAttribute('id');
+        cameraData.id = currentCameraId;
       })
       return {
         sceneData: newSceneData
@@ -550,7 +558,7 @@ class SceneContextProvider extends Component {
         entityId: null,
         timelineId: null,
         timelinePosition: null,
-        animationTimeline: null,
+        // animationTimeline: null,
         currentTime: 0,
         slideId: slideId
       }
@@ -649,6 +657,63 @@ class SceneContextProvider extends Component {
   }
   getCurrentEntityId() {
     return this.state.entityId;
+  }
+  copyEntity(entityId = this.state.entityId) {
+    const state = this.state;
+    const copyFromEntity = this.getCurrentEntity(entityId);
+    const type = copyFromEntity.type;
+    const objectModel = new entityModel[type];
+    const elementId = uuid();
+    const newElement = {
+      type: type,
+      id: elementId,
+      name: ('copy of ' + copyFromEntity.name).substr(0, 10),
+      element: 'a-entity',
+      timelines: []
+    };
+    newElement['components'] = mergeJSON(
+      objectModel.animatableAttributesValues,
+      objectModel.fixedAttributes
+    );
+    newElement['components'] = mergeJSON(
+      newElement['components'],
+      copyFromEntity['components']
+    );
+    newElement['components']['id'] = elementId;
+
+    const newEl = this.editor.createNewEntity(newElement);
+    // need a setAttribute to trigger the ttfFont init
+    if (newElement['components']['ttfFont'] && newElement['components']['ttfFont']['opacity']) {
+      // console.log('sdfsaf');
+      newEl.setAttribute('ttfFont', 'opacity', !newElement['components']['ttfFont']['opacity']);
+      newEl.setAttribute('ttfFont', 'opacity', newElement['components']['ttfFont']['opacity']);
+    }
+    // newEl.removeAttribute('something');
+    newElement['el'] = newEl;
+    objectModel.setEl(newEl);
+    this.setState((prevState) => {
+      const newSceneData = jsonCopy(prevState.sceneData);
+      const newUndoQueue = jsonCopy(prevState.undoQueue);
+      const currentSlide = newSceneData.slides.find(slide => slide.id === prevState.slideId);
+      currentSlide.entities.push(newElement);
+      newUndoQueue.push({
+        sceneData: jsonCopy(prevState.sceneData),
+        slideId: prevState.slideId,
+        entityId: prevState.entityId,
+        timelineId: prevState.timelineId,
+        timelinePosition: prevState.timelinePosition,
+        currentTime: prevState.currentTime,
+      });
+      // prevState.undoQueue.push(jsonCopy(prevState.sceneData));
+      return {
+        sceneData: newSceneData,
+        entityId: elementId,
+        undoQueue: newUndoQueue,
+        redoQueue: [],
+      }
+    }, _=> {
+      this.rebuildTimeline().then(tl => tl.seek(this.state.currentTime, false));
+    })
   }
   updateEntity(newAttrs, entityId) {
     this.setState((prevState) => {
@@ -1264,15 +1329,19 @@ class SceneContextProvider extends Component {
     return new Promise((resolve, reject) => {
       // use timelinemax to build the timeline here
       this.setState((prevState) => {
-        const currentSlide = prevState.sceneData.slides.find(slide => slide.id === prevState.slideId);
+        const currentSlideId = prevState.sceneData.slides.findIndex(slide => slide.id === prevState.slideId);
+        const newSceneData = jsonCopy(prevState.sceneData);
+        // const newSlides = jsonCopy(prevState.sceneData.slides);
+        const currentSlide = newSceneData.slides[currentSlideId];
         if (prevState.animationTimeline) {
           // delete old animation timeline
-          prevState.animationTimeline.kill();
+          prevState.animationTimeline.stop().kill();
         }
         const tl = new TimelineMax({
           paused: true
         });
         const deltaOffset = 0.001;
+        const mediaElsList = [];
         currentSlide.entities.forEach(entity => {
           // animation here
           const element = entity.el;
@@ -1288,8 +1357,16 @@ class SceneContextProvider extends Component {
             const mediaElType = Object.prototype.toString.call(mediaEl);
             if (mediaElType === '[object HTMLVideoElement]') {
               entityMedia['mediaEl'] = mediaEl;
+              mediaElsList.push(mediaEl);
             }
             // debugger;
+          }
+          if (entity['type'] === 'a-camera' && entity.timelines.length === 0) {
+            // camera only
+            // no timeline, just set the component
+            tl.add(() => {
+              aEntity.updateEntityAttributes(entity.components);
+            }, deltaOffset);
           }
           entity.timelines.forEach(timeline => {
             const {
@@ -1327,7 +1404,7 @@ class SceneContextProvider extends Component {
               tl.add(() => {
                 entityMedia['mediaEl'].loop = true;
                 if (!tl.paused())
-                  entityMedia['mediaEl'].play();
+                  entityMedia['mediaEl'].play(0);
               }, firstTimeline.start + deltaOffset);
               tl.add(() => {
                 entityMedia['mediaEl'].pause();
@@ -1336,12 +1413,17 @@ class SceneContextProvider extends Component {
           }
         })
         // tl.eventCallback('onStart', () => {
-        // })
+        // })j
         tl.eventCallback('onUpdate', () => {
           // Events.emit('refreshsidebarobject3d');
           this.setState({
             currentTime: tl.progress() * tl.duration()
           });
+        })
+        tl.eventCallback('onPause', () => {
+          for (let i = 0; i < mediaElsList.length; i++) {
+            mediaElsList[i].pause();
+          }
         })
         tl.eventCallback('onComplete', () => {
           // Events.emit('refreshsidebarobject3d');
@@ -1354,6 +1436,19 @@ class SceneContextProvider extends Component {
           })
         })
         // tl.play(0, false).stop().seek(0.001).seek(0, false);
+        // const snapshot = this.takeSnapshot();
+        currentSlide.image = this.takeSnapshot();
+        // setTimeout(()=>{
+        //   tl.seek(prevState.currentTime);
+        //   tl.eventCallback('onUpdate', () => {
+        //     // Events.emit('refreshsidebarobject3d');
+        //     this.setState({
+        //       currentTime: tl.progress() * tl.duration()
+        //     });
+        //   })
+        // },100)
+
+        // console.log(currentSlide.image);
         // if (autoPlay) {
         //   tl.play(0, false);
         // }
@@ -1363,7 +1458,8 @@ class SceneContextProvider extends Component {
         //   console.log(tl.progress())
         // })
         return {
-          animationTimeline: tl
+          animationTimeline: tl,
+          sceneData: newSceneData
         }
       })
     });
@@ -1380,6 +1476,43 @@ class SceneContextProvider extends Component {
       }
     })
     
+  }
+
+  takeSnapshot() {
+    const editor = this.editor;
+    const renderer = editor.sceneEl.renderer;
+    const scene = editor.sceneEl.object3D;
+    const camera = editor.currentCameraEl.getObject3D('camera');
+    const width = renderer.domElement.width;
+    const height = renderer.domElement.height;
+
+    const helper_status = [];
+    for (let i = 0; i < editor.sceneHelpers.children.length; i++){
+      helper_status[i] = editor.sceneHelpers.children[i].visible;
+      editor.sceneHelpers.children[i].visible = false;
+    }
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.render(scene, camera);
+    for (let i = 0; i < editor.sceneHelpers.children.length; i++){
+      editor.sceneHelpers.children[i].visible = helper_status[i];
+    }
+    
+    // canvas.width = width;
+    // canvas.height = height;
+    // if (camera.aspect > 1) {
+    //   this.cameraPreviewScreenEl.setAttribute( 'width', canvas.width / 270 * 0.6 );
+    //   this.cameraPreviewScreenEl.setAttribute( 'height', canvas.height / 270 * 0.6 );
+    // } else {
+    //   this.cameraPreviewScreenEl.setAttribute( 'width', canvas.width / newHeight * 0.6 );
+    //   this.cameraPreviewScreenEl.setAttribute( 'height', canvas.height / newHeight * 0.6 );
+    // }
+    const snapshot = renderer.domElement.toDataURL();
+    if (editor.opened) {
+      const editorCamera = editor.editorCameraEl.getObject3D('camera');
+      renderer.render(scene, editorCamera);
+    }
+    return snapshot;
   }
   stopSlide() {
     this.setState((prevState) => {
@@ -1398,6 +1531,7 @@ class SceneContextProvider extends Component {
       }
     })
   }
+  
   seekSlide(timeInSec) {
     if (this.state.animationTimeline) {
       this.state.animationTimeline.seek(timeInSec, false);
@@ -1408,6 +1542,13 @@ class SceneContextProvider extends Component {
   }
 
   addAsset(newFile) {
+    // prevent duplicate assets added
+    if (newFile.id) {
+      // not checking states, check element instead
+      if (document.getElementById(newFile.id)) {
+        return this.state.assetsData;
+      }
+    }
     const sceneEl = this.editor.sceneEl;
     let assetEl = sceneEl.querySelector('a-assets');
     // create a-assets element in case not exist
@@ -1439,7 +1580,7 @@ class SceneContextProvider extends Component {
       // for loadProject
       case 'image': {
         // normal still images
-        newAssetData.type = 'image';
+        newAssetData.type = mediaType.image;
         newEl = document.createElement('img');
         newEl.setAttribute('id', newId);
         newEl.setAttribute('src', newFileUrl);
@@ -1450,7 +1591,7 @@ class SceneContextProvider extends Component {
       case 'image/gif':
       case 'gif': {
         // may be animated
-        newAssetData.type = 'gif';
+        newAssetData.type = mediaType.gif;
         newAssetData.shader = 'gif';
         newEl = document.createElement('img');
         newEl.setAttribute('id', newId);
@@ -1462,7 +1603,7 @@ class SceneContextProvider extends Component {
       // for loadProject
       case 'video': {
         // video
-        newAssetData.type = 'video';
+        newAssetData.type = mediaType.video;
         newEl = document.createElement('video');
         newEl.setAttribute('id', newId);
         newEl.setAttribute('src', newFileUrl);
@@ -1475,47 +1616,32 @@ class SceneContextProvider extends Component {
       }
     }
     this.setState((prevState) => {
-      return {
-        assetsData: [
-          ...prevState.assetsData,
+      const assetsData = prevState.assetsData;
+      let newStateAssetsData = [...assetsData];
+      let needInsert = true;
+      for (let i = 0; i< assetsData.length; i++) {
+        if (assetsData[i].id === newFile.id) {
+          needInsert = false;
+          break;   
+        }
+      }
+      if (needInsert) {
+        newStateAssetsData = [
+          ...newStateAssetsData,
           newAssetData
         ]
       }
+      return {
+        assetsData: newStateAssetsData
+      }
     });
     return newAssetData;
-
-    //   case 'VIDEO':
-    //     newid = 'vid_' + uuid(); // 'vid_' + document.querySelectorAll('video').length;
-    //     el.loop = true;
-    //     fileMediaType = mediaType.video;
-    //     break;
-    //   case 'IMG':
-    //     newid = 'img_' + uuid() // 'img_' + document.querySelectorAll('img').length;
-        
-    //     const fileExtensionWithoutDot = fileSystem.getFileExtensionWithoutLeadingDot(el.src);
-    //     const isGif = openFileDialogFilter.gif.extensions.includes(fileExtensionWithoutDot);
-    //     fileMediaType = isGif ? mediaType.gif : mediaType.image;      
-
-    //     break;
-    //   default:
-    //     console.log('editorFunctions_addToAsset: ???');
-    //     break;
-    // }
-    // if (existingUuidStr !== undefined) {
-    //   newid = existingUuidStr;
-    // }
-    // el.setAttribute('id', newid);
-    // Events.emit('addAsset', 
-    //   fileMediaType,
-    //   newid,
-    //   el.src
-    // );
-    // return newid;
   }
 
   resetView() {
     this.editor.EDITOR_CAMERA.position.set(20, 10, 20);
     this.editor.EDITOR_CAMERA.lookAt(0,0,0);
+    this.editor.editorControls.center.set(0, 0, 0);
   }
 
   updateEditor(editor) {
@@ -1554,6 +1680,7 @@ class SceneContextProvider extends Component {
           getEntitiesList: this.getEntitiesList,
           getCurrentEntity: this.getCurrentEntity,
           getCurrentEntityId: this.getCurrentEntityId,
+          copyEntity: this.copyEntity,
     
           addEntity: this.addEntity,
           deleteEntity: this.deleteEntity,

@@ -5,6 +5,7 @@ import { Rnd as ResizableAndDraggable} from 'react-rnd';
 import {roundTo} from 'globals/helperfunctions';
 
 import iconOpacity from 'media/icons/opacity.svg';
+import iconPrev from 'media/icons/prev.svg';
 
 class OpacityPicker extends Component {
   constructor(props) {
@@ -106,7 +107,9 @@ class OpacityPicker extends Component {
       <div className="opacity-preview" 
         onClick={ this.handlePreviewClick }
       >
-        <img src={iconOpacity} alt=""/>
+        <img src={iconOpacity} alt="" style={{
+          opacity: state.opacity
+        }} />
       </div>
       { this.state.displayOpacityPicker ? 
         <div className="opacity-panel">
@@ -119,7 +122,7 @@ class OpacityPicker extends Component {
           }} onClick={this.handleClose} />
           <div className="back-button"
             onClick={this.handleClose}>
-            back
+            <img src={iconPrev} alt="Back"/>
           </div>
           <div className="hide-button" onClick={this.handleClick}>
             {state.opacity?
@@ -127,54 +130,58 @@ class OpacityPicker extends Component {
               <FontAwesomeIcon icon="eye" />
             }
           </div>
-          <div className="opacity-drag-control"
-            title={state.opacity * 100 + '%'}
-            ref={ref=> this.opacityControl = ref}
-            onClick={(event) => {
+          <div className="opacity-control-row">
+            <div className="opacity-drag-control"
+              title={state.opacity * 100 + '%'}
+              ref={ref=> this.opacityControl = ref}
+              onClick={(event) => {
 
-              const clickPercent = (event.clientX - event.currentTarget.getBoundingClientRect().left) / event.currentTarget.getBoundingClientRect().width;
-              {/* this.changeObjectField('material.opacity', roundTo(clickPercent, 2)); */}
-              this.handleChanged(clickPercent);
-            }}
-          >
-            <ResizableAndDraggable
-              className="current-opacity"
-              disableDragging={true}
-              bounds="parent"
-              minWidth={0}
-              maxWidth="100%"
-              maxHeight={3}
-              default={{
-                x: 0,
-                y: 0
-              }}
-              size={{
-                height: 3,
-                width: state.opacity * 100 + '%'
-              }}
-              dragAxis='x'
-              enableResizing={{
-                top: false, right: true, bottom: false, left: false,
-                topRight: false, bottomRight: false, bottomLeft: false, topLeft: false
-              }}
-              onResizeStart={(event, dir, ref, delta,pos)=>{
-
-              }}
-              onResize={(event, dir, ref, delta, pos)=>{
-                {/* console.log(event, dir, ref, delta, pos); */}
-                {/* console.log(ref.getBoundingClientRect().width, this.opacityControl.getBoundingClientRect().width); */}
-                this.handleChange(roundTo(ref.getBoundingClientRect().width / (this.opacityControl.getBoundingClientRect().width - 1), 2));
-              }}
-              onResizeStop={(event, dir, ref, delta, pos)=>{
-                {/* console.log(delta.width, this.opacityControl.getBoundingClientRect().width); */}
-                // this.opacityInput.value = delta.width;
-                // this.opacityInput.value = (150 + delta.width) / 150;
-                {/* this.changeObjectField('material.opacity', roundTo(state.opacity + delta.width / this.opacityControl.getBoundingClientRect().width, 2)); */}
-                this.handleChanged();
+                const clickPercent = (event.clientX - event.currentTarget.getBoundingClientRect().left) / event.currentTarget.getBoundingClientRect().width;
+                {/* this.changeObjectField('material.opacity', roundTo(clickPercent, 2)); */}
+                this.handleChanged(clickPercent);
               }}
             >
-              <div className="current-opacity" />
-            </ResizableAndDraggable>  
+              <ResizableAndDraggable
+                className="current-opacity"
+                disableDragging={true}
+                resizeHandleWrapperClass="opacity-handle"
+                bounds="parent"
+                minWidth={0}
+                maxWidth="100%"
+                maxHeight={5}
+                default={{
+                  x: 0,
+                  y: 0
+                }}
+                size={{
+                  height: 15,
+                  width: state.opacity * 100 + '%'
+                }}
+                dragAxis='x'
+                enableResizing={{
+                  top: false, right: true, bottom: false, left: false,
+                  topRight: false, bottomRight: false, bottomLeft: false, topLeft: false
+                }}
+                onResizeStart={(event, dir, ref, delta,pos)=>{
+
+                }}
+                onResize={(event, dir, ref, delta, pos)=>{
+                  {/* console.log(event, dir, ref, delta, pos); */}
+                  {/* console.log(ref.getBoundingClientRect().width, this.opacityControl.getBoundingClientRect().width); */}
+                  this.handleChange(roundTo(ref.getBoundingClientRect().width / this.opacityControl.getBoundingClientRect().width, 2));
+                }}
+                onResizeStop={(event, dir, ref, delta, pos)=>{
+                  {/* console.log(delta.width, this.opacityControl.getBoundingClientRect().width); */}
+                  // this.opacityInput.value = delta.width;
+                  // this.opacityInput.value = (150 + delta.width) / 150;
+                  {/* this.changeObjectField('material.opacity', roundTo(state.opacity + delta.width / this.opacityControl.getBoundingClientRect().width, 2)); */}
+                  this.handleChanged();
+                }}
+              >
+                {/* <div className="opacity-handle" /> */}
+              </ResizableAndDraggable>  
+            </div>
+            <div className="opacity-text">{Math.round(state.opacity * 100) + '%'}</div>
           </div>
         </div>: null}
     </div>;

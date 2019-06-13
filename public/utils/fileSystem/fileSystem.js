@@ -2,6 +2,7 @@
 
 const rimraf = require('rimraf');
 const fx = require('./mkdir-recursive');
+const ncp = require('ncp').ncp;
 const {map} = require('p-iteration');
 
 const myPath = require('./myPath');
@@ -313,6 +314,15 @@ const copyFileSync = (src, dest) => {
 
 const copyFilePromise = promisify(copyFile);
 
+// most powerful
+const copy = (src, dest, callBack) => {
+  ncp(src, dest, (err) => {
+    handleGeneralErr(callBack, err);
+  });
+}
+
+const copyPromise = promisify(copy);
+
 
 /**
  * Note: 
@@ -598,6 +608,8 @@ module.exports = {
   copyFile,  
   copyFileSync,
   copyFilePromise,
+  copy,  // most powerful
+  copyPromise,
   //deleteFileSafe,
   //deleteFileSafeSync,  
   stat,
