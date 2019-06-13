@@ -62,7 +62,7 @@ function openServer(port, rootDirPath = 'public/server/static', filesDirPath = n
       console.log('viewer connected');
       socket.emit('serverMsg', 'You are now viewer');
       viewer.push(socket);
-      console.log(sceneData);
+      // console.log(sceneData);
       if (sceneData) {
         socket.emit('updateSceneData', sceneData);
       }
@@ -80,6 +80,7 @@ function openServer(port, rootDirPath = 'public/server/static', filesDirPath = n
       }
     });
     socket.on('test', (data) => {
+      console.log('test');
       if (presenter === socket) {
         // only let presenter send msg
         // if (data.action === "hello") {
@@ -88,7 +89,7 @@ function openServer(port, rootDirPath = 'public/server/static', filesDirPath = n
       }
     });
     socket.on('useSceneData', (data) => {
-      console.log('useSceneData', presenter.id, socket.id);
+      console.log('useSceneData');
       if (presenter.id === socket.id) {
         console.log('useSceneData');
       // only let presenter send msg
@@ -100,8 +101,9 @@ function openServer(port, rootDirPath = 'public/server/static', filesDirPath = n
     });
     socket.on('updateSceneStatus', (data) => {
       // console.log('updateSceneStatus', presenter.id, socket.id);
+      console.log('updateSceneStatus');
       if (presenter.id === socket.id) {
-        console.log('updateSceneStatus');
+        // console.log('updateSceneStatus');
       // only let presenter send msg
       // if (data.action === "hello") {
         // sceneData = data;

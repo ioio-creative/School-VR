@@ -86,7 +86,7 @@ class PresenterPage extends Component {
       const socket = io(presentationUrl);
       socket.on('connect', () => {
         console.log('connected!!!'); // socket.connected); // true
-        //ipcHelper.shellOpenExternal(presentationUrl);
+        // ipcHelper.shellOpenExternal(presentationUrl);
         socket.emit('registerPresenter');
       });
       socket.on('serverMsg', (msg) => {

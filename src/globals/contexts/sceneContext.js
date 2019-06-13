@@ -1479,13 +1479,9 @@ class SceneContextProvider extends Component {
   addAsset(newFile) {
     // prevent duplicate assets added
     if (newFile.id) {
-      const assetsData = this.state.assetsData;
-      for (let i = 0; i< assetsData.length; i++) {
-        if (assetsData[i].id === newFile.id) {
-          console.log('asset exist, skip');
-          // asset exists, return current assets list
-          return assetsData;
-        }
+      // not checking states, check element instead
+      if (document.getElementById(newFile.id)) {
+        return this.state.assetsData;
       }
     }
     const sceneEl = this.editor.sceneEl;
@@ -1555,42 +1551,26 @@ class SceneContextProvider extends Component {
       }
     }
     this.setState((prevState) => {
-      return {
-        assetsData: [
-          ...prevState.assetsData,
+      const assetsData = prevState.assetsData;
+      let newStateAssetsData = [...assetsData];
+      let needInsert = true;
+      for (let i = 0; i< assetsData.length; i++) {
+        if (assetsData[i].id === newFile.id) {
+          needInsert = false;
+          break;   
+        }
+      }
+      if (needInsert) {
+        newStateAssetsData = [
+          ...newStateAssetsData,
           newAssetData
         ]
       }
+      return {
+        assetsData: newStateAssetsData
+      }
     });
     return newAssetData;
-
-    //   case 'VIDEO':
-    //     newid = 'vid_' + uuid(); // 'vid_' + document.querySelectorAll('video').length;
-    //     el.loop = true;
-    //     fileMediaType = mediaType.video;
-    //     break;
-    //   case 'IMG':
-    //     newid = 'img_' + uuid() // 'img_' + document.querySelectorAll('img').length;
-        
-    //     const fileExtensionWithoutDot = fileSystem.getFileExtensionWithoutLeadingDot(el.src);
-    //     const isGif = openFileDialogFilter.gif.extensions.includes(fileExtensionWithoutDot);
-    //     fileMediaType = isGif ? mediaType.gif : mediaType.image;      
-
-    //     break;
-    //   default:
-    //     console.log('editorFunctions_addToAsset: ???');
-    //     break;
-    // }
-    // if (existingUuidStr !== undefined) {
-    //   newid = existingUuidStr;
-    // }
-    // el.setAttribute('id', newid);
-    // Events.emit('addAsset', 
-    //   fileMediaType,
-    //   newid,
-    //   el.src
-    // );
-    // return newid;
   }
 
   resetView() {
