@@ -23,6 +23,7 @@ import io from 'socket.io-client';
 import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 import ipcHelper from 'utils/ipc/ipcHelper';
+import {jsonCopy} from "globals/helperfunctions";
 import routes from 'globals/routes';
 
 import getSearchObjectFromHistory from 'utils/queryString/getSearchObjectFromHistory';
@@ -57,6 +58,7 @@ class PresenterPage extends Component {
       'handleExitButtonClick',
 
       'loadProject',
+      'getNewSceneDataWithAssetsListChangedToUsingRelativePaths',
     ].forEach(methodName => {
       this[methodName] = this[methodName].bind(this);
     });    
@@ -71,8 +73,7 @@ class PresenterPage extends Component {
     this.editor = new Editor();
     Events.on('editor-load', this.onEditorLoad)
     sceneContext.updateEditor(this.editor);    
-
-    // TODO: ask Hung to check after getting port from electron
+    
     ipcHelper.getPresentationServerInfo((err, data) => {
       if (err) {
         handleErrorWithUiDefault(err);
@@ -156,12 +157,12 @@ class PresenterPage extends Component {
 
   componentWillUnmount() {
     this.editor = null;
-    // ipcHelper.closeWebServer((err) => {    
-    //   if (err) {
-    //     handleErrorWithUiDefault(err);
-    //     return;
-    //   }      
-    // });
+    ipcHelper.closeWebServer((err) => {    
+      if (err) {
+        handleErrorWithUiDefault(err);
+        return;
+      }      
+    });
     Events.removeListener('editor-load', this.onEditorLoad)
   }
 
@@ -221,22 +222,37 @@ class PresenterPage extends Component {
   
     this.setState({
       loadedProjectFilePath: projectFilePath
-    })
+    });
+    
     ipcHelper.openWebServerAndLoadProject(projectFilePath, (err, data) => {
-    // ipcHelper.loadProjectByProjectFilePath(projectFilePath, (err, data) => {
+      // ipcHelper.loadProjectByProjectFilePath(projectFilePath, (err, data) => {
       if (err) {
         handleErrorWithUiDefault(err);
         return;                         
       }      
       
-      const projectJsonData = data.projectJson;
+      const projectJsonData = data.projectJson;      
       //console.log(projectJsonData);
+
       // send a copy to server
       if (state.socket) {
-        state.socket.emit('useSceneData', projectJsonData);
+        // for the following projectJsonData, the assetsList's paths all are changed to web server relative path
+        const newProjectJsonData = this.getNewSceneDataWithAssetsListChangedToUsingRelativePaths(projectJsonData);        
+        state.socket.emit('useSceneData', newProjectJsonData);
       }
       sceneContext.loadProject(projectJsonData);   
     });
+  }
+
+  // TODO: poorly written (too many cross-references to ProjectFile class)
+  // for web server presentation, use asset's relativeSrc to replace src
+  getNewSceneDataWithAssetsListChangedToUsingRelativePaths(sceneData) {
+    const projectJson = jsonCopy(sceneData);           
+    const assetsList = projectJson.assetsList;
+    assetsList.forEach(asset => {
+      asset.src = asset.relativeSrc;
+    });
+    return projectJson;
   }
 
   // disableEditor(editor) {
@@ -264,7 +280,7 @@ class PresenterPage extends Component {
     // for exit button
     // const searchObj = getSearchObjectFromHistory(this.props.history);
     const projectFilePathToLoad = state.loadedProjectFilePath;
-    console.log(projectFilePathToLoad);
+    //console.log(projectFilePathToLoad);
     return (
       <div id="presenter">
         {/* <Prompt

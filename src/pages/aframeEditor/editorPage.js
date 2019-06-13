@@ -48,9 +48,7 @@ class EditorPage extends Component {
     super(props);
 
     // variables
-    this.inited = false;
-    // TODO: ask hung to put into sceneContext
-    this.loadedProjectFilePath = '';
+    this.inited = false;    
 
     // state
     this.state = {
@@ -125,9 +123,7 @@ class EditorPage extends Component {
     // fileDialog.multiple = true;
     // fileDialog.accept = ['image/x-png','image/gif'];
     // fileDialog.click();
-
-    // TODO: ask hung to put into sceneContext
-    this.loadedProjectFilePath = '';
+    
     this.setState({
       loadedProjectFilePath: ''
     });
@@ -140,13 +136,10 @@ class EditorPage extends Component {
       if (err) {
         handleErrorWithUiDefault(err);
         return;                         
-      }
-
-      // TODO: ask hung to put into sceneContext
-      this.loadedProjectFilePath = projectFilePath;
+      }      
       this.setState({
         loadedProjectFilePath: projectFilePath
-      })
+      });
       const projectJsonData = data.projectJson;
       //console.log(projectJsonData);
       this.props.sceneContext.loadProject(projectJsonData);   
@@ -168,9 +161,7 @@ class EditorPage extends Component {
       if (err) {
         handleErrorWithUiDefault(err);
         return;
-      }
-      // TODO: ask hung to put into sceneContext
-      this.loadedProjectFilePath = projectFilePath;
+      }      
       this.setState({
         loadedProjectFilePath: projectFilePath
       });
@@ -219,8 +210,7 @@ class EditorPage extends Component {
     });
   }
 
-  handleSaveProjectButtonClick(event) {
-    // TODO: ask hung to put into sceneContext
+  handleSaveProjectButtonClick(event) {    
     ipcHelper.isCurrentLoadedProject(this.state.loadedProjectFilePath, (err, data) => {
       if (err) {
         handleErrorWithUiDefault(err);

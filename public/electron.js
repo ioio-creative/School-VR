@@ -9,7 +9,6 @@ const shell = electron.shell;
 const {appDirectory, config} = require('./globals/config');
 
 const myPath = require('./utils/fileSystem/myPath');
-//const url = require('url');
 const isDev = require('electron-is-dev');
 const {fork} = require('child_process');
 const {forEach} = require('p-iteration');
@@ -753,12 +752,22 @@ ipcMain.on('openWebServerAndLoadProject', async (event, arg) => {
     //console.log(`projectName: ${projectName}`);
     const staticAssetUrlPathPrefixForWebPresentation = myPath.join(config.webServerStaticFilesPathPrefix, projectName);
     //console.log(`staticAssetUrlPathPrefixForWebPresentation: ${staticAssetUrlPathPrefixForWebPresentation}`);
-    const projectJson = await loadProjectByProjectFilePathAsync(filePath, staticAssetUrlPathPrefixForWebPresentation);
-    //console.log(projectJson);
+    const projectJson = await loadProjectByProjectFilePathAsync(filePath);
+    //console.log(projectJson);    
+    
+    // TODO: poorly written (too many cross-references to ProjectFile class)
+    // add staticAssetUrlPathPrefixForWebPresentation to asset's relativeSrc
+    const newlyModifiedProjectJson = Object.assign(projectJson);
+    newlyModifiedProjectJson.assetsList.forEach((asset) => {
+      const assetRelativeSrc = asset.relativeSrc;
+      if (ProjectFile.isAssetPathRelative(assetRelativeSrc)) {
+        asset.relativeSrc = myPath.join(staticAssetUrlPathPrefixForWebPresentation, assetRelativeSrc);
+      }
+    });
     /* end of load project file */
 
     /* open web server */    
-    // await openWebServerAsync();
+    //await openWebServerAsync();    
     const externalServerDirectory = myPath.join(webServerFilesDirectory, projectName);
     await copyTempProjectDirectoryToExternalDirectoryAsync(filePath, externalServerDirectory);
     /* end of open web server */
@@ -766,7 +775,7 @@ ipcMain.on('openWebServerAndLoadProject', async (event, arg) => {
     event.sender.send('openWebServerAndLoadProjectResponse', {
       err: null,
       data: {
-        projectJson: projectJson
+        projectJson: newlyModifiedProjectJson
       }
     });
   } catch (err) {
