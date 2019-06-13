@@ -10,6 +10,10 @@ import Mousetrap from 'mousetrap';
 import ipcHelper from 'utils/ipc/ipcHelper';
 import {invokeIfIsFunction} from 'utils/variableType/isFunction';
 
+import appIcon from 'app_icon.png';
+
+import config from 'globals/config';
+
 import './menuComponent.css';
 
 
@@ -89,11 +93,13 @@ class MenuComponent extends Component {
     const props = this.props;
     const state = this.state;
     this.buttons.length = 0;
-    const projectName = '';//props.sceneContext.getProjectName();
-    const appName = '';//props.sceneContext.getAppName();
+    const projectName = props.sceneContext.getProjectName();
+    const appName = config.appName;
     return (
       <div id="system-panel">
-        <div id="app-icon"></div>
+        <div id="app-icon">
+          <img src={appIcon} />
+        </div>
         {/* <div id="app-name">School VR</div> */}
         <div id="app-buttons">
           {props.menuButtons.map((rootBtn, idx) => {
