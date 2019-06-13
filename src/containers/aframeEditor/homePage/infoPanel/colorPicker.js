@@ -1,5 +1,6 @@
 import React, {Component, Fragment} from 'react';
 import {SketchPicker} from 'react-color';
+import iconPrev from 'media/icons/prev.svg';
 
 class ColorPicker extends Component {
   constructor(props) {
@@ -83,7 +84,7 @@ class ColorPicker extends Component {
         }} onClick={this.handleClose} />
         <div className="back-button" 
           onClick={this.handleClose}>
-          back
+          <img src={iconPrev} alt="Back"/>
         </div>
         <SketchPicker
           color={state.color}
@@ -106,11 +107,12 @@ class ColorPicker extends Component {
                 width: '100%',
                 //height: '100%',
                 boxSizing: 'border-box',
-                borderRadius: 15
+                borderRadius: 15,
+                paddingTop: 0,
               },
               hue: {
                 position: 'relative',
-                height: '24px',
+                height: '20px',
                 overflow: 'hidden'
               },
               saturation: {
@@ -119,10 +121,10 @@ class ColorPicker extends Component {
             },
             disableAlpha: {
               hue: {
-                height: '24px'
+                height: '20px'
               },
               color: {
-                height: '24px'
+                height: '20px'
               }
             }
           }}
