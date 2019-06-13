@@ -254,6 +254,11 @@ class ProjectFile {
     const sortedProjectFileObjs = sortedFileStatObjs.map(fileStatObj => new ProjectFile(null, null, fileStatObj));
 
     // extract each project file to get thumbnail from project json
+    /**
+     * !!!Important!!!
+     * Cannot run the following for loop in parallel p-iteration library
+     * because projectFile.loadProjectAsync() would call ProjectFile.deleteAllTempProjectDirectoriesAsync()
+     */
     const sortedProjectFileObjsWithThumbnail = [];
     for (let projectFile of sortedProjectFileObjs) {
       const projectJson = await projectFile.loadProjectAsync();
