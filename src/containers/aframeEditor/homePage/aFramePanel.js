@@ -50,7 +50,7 @@ AFRAME.registerComponent('cursor-listener', {
     this.el.addEventListener('click', function (evt) {
       // lastIndex = (lastIndex + 1) % COLORS.length;
       const isVisible = this.getAttribute('material')['opacity'];
-      console.log(isVisible);
+      // console.log(isVisible);
       if (isVisible) {
         this.setAttribute('material', 'color', clickColor);
         childrenEls.forEach(childEl => {
@@ -58,26 +58,28 @@ AFRAME.registerComponent('cursor-listener', {
         })
         const sceneEl = this.sceneEl;
         const nextSlideId = sceneEl.data.sceneContext.getCurrentEntity(this.id)['navigateToSlideId'];
-        // console.log(nextSlideId);
-        setTimeout(_=> {
-          this.setAttribute('material', 'color', defaultColor);
-          childrenEls.forEach(childEl => {
-            childEl.setAttribute('material', 'color', defaultColor);
-          })
-          if (!sceneEl.getAttribute('vr-mode-ui')['enabled']) {
-            if (sceneEl.data.socket) {
-              sceneEl.data.socket.emit('updateSceneStatus', {
-                action: 'selectSlide',
-                details: {
-                  slideId: nextSlideId,
-                  autoPlay: true
+        console.log(nextSlideId);
+          setTimeout(_=> {
+            this.setAttribute('material', 'color', defaultColor);
+            childrenEls.forEach(childEl => {
+              childEl.setAttribute('material', 'color', defaultColor);
+            })
+            if (nextSlideId) {
+              if (!sceneEl.getAttribute('vr-mode-ui')['enabled']) {
+                if (sceneEl.data.socket) {
+                  sceneEl.data.socket.emit('updateSceneStatus', {
+                    action: 'selectSlide',
+                    details: {
+                      slideId: nextSlideId,
+                      autoPlay: true
+                    }
+                  })
                 }
-              })
+                sceneEl.data.sceneContext.selectSlide(nextSlideId);
+                sceneEl.data.sceneContext.playSlide();
+              }
             }
-            sceneEl.data.sceneContext.selectSlide(nextSlideId);
-            sceneEl.data.sceneContext.playSlide();
-          }
-        }, 250);
+          }, 250);
       }
     });
     this.el.addEventListener('mouseenter', function (evt) {

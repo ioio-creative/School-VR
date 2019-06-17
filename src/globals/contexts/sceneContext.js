@@ -1336,6 +1336,11 @@ class SceneContextProvider extends Component {
         if (prevState.animationTimeline) {
           // delete old animation timeline
           prevState.animationTimeline.stop().kill();
+          // can assume all media stop?
+          const videoEls = document.querySelectorAll('a-assets video');
+          for (let videoEl of videoEls) {
+            videoEl.pause();
+          }
         }
         const tl = new TimelineMax({
           paused: true
@@ -1394,6 +1399,7 @@ class SceneContextProvider extends Component {
               }
             ), start + deltaOffset);
           })
+
           if (firstTimeline) {
             tl.add(() => {
               aEntity.updateEntityAttributes(firstTimeline.startAttribute);
@@ -1403,28 +1409,45 @@ class SceneContextProvider extends Component {
             if (entityMedia['mediaEl']) {
               tl.add(() => {
                 entityMedia['mediaEl'].loop = true;
-                if (!tl.paused())
-                  entityMedia['mediaEl'].play(0);
+                if (!tl.paused()) {
+                  entityMedia['mediaEl'].load();
+                  entityMedia['mediaEl'].play();
+                }
               }, firstTimeline.start + deltaOffset);
+
+              
               tl.add(() => {
                 entityMedia['mediaEl'].pause();
               }, lastTimeline.start + lastTimeline.duration);
             }
           }
         })
-        // tl.eventCallback('onStart', () => {
-        // })j
+        let started = false;
+
+        tl.eventCallback('onStart', () => {
+          started = true;
+          // console.log(tl);
+        })
         tl.eventCallback('onUpdate', () => {
           // Events.emit('refreshsidebarobject3d');
+          if (started && tl.paused()) {
+            console.log('onUpdate');
+            for (let i = 0; i < mediaElsList.length; i++) {
+              mediaElsList[i].setAttribute('isPaused', mediaElsList[i].paused);
+              mediaElsList[i].pause();
+            }
+            started = false;
+          }
           this.setState({
             currentTime: tl.progress() * tl.duration()
           });
         })
-        tl.eventCallback('onPause', () => {
-          for (let i = 0; i < mediaElsList.length; i++) {
-            mediaElsList[i].pause();
-          }
-        })
+        // tl.eventCallback('onPaused', () => {
+        //   console.log('animation paused')
+        //   for (let i = 0; i < mediaElsList.length; i++) {
+        //     mediaElsList[i].pause();
+        //   }
+        // })
         tl.eventCallback('onComplete', () => {
           // Events.emit('refreshsidebarobject3d');
           // console.log('onComplete');
@@ -1437,7 +1460,9 @@ class SceneContextProvider extends Component {
         })
         // tl.play(0, false).stop().seek(0.001).seek(0, false);
         // const snapshot = this.takeSnapshot();
-        currentSlide.image = this.takeSnapshot();
+        if (this.editor.opened) {
+          currentSlide.image = this.takeSnapshot();
+        }
         // setTimeout(()=>{
         //   tl.seek(prevState.currentTime);
         //   tl.eventCallback('onUpdate', () => {
@@ -1470,7 +1495,7 @@ class SceneContextProvider extends Component {
       slideIsPlaying: true
     }, _=> {
       if (this.state.animationTimeline) {
-        this.state.animationTimeline.stop().seek(0.001).seek(0, false).play();
+        this.state.animationTimeline.seek(0.001).seek(0, false).play();
       } else {
         this.rebuildTimeline().then(tl => tl.stop().seek(0.001).seek(0, false));
       }
