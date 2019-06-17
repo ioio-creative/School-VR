@@ -176,10 +176,6 @@ function readdir(dirPath, callBack) {
   });
 }
 
-function createDirectoriesIfNotExists(directoryPaths, callBack) {  
-  generalIpcCall('createDirectoriesIfNotExists', callBack, directoryPaths);
-};
-
 function readFile(filePath, callBack) {  
   generalIpcCall('readFile', callBack, filePath);
 };
@@ -227,11 +223,6 @@ function parseDataToSaveFormat(projectName, entitiesList, assetsList, callBack) 
 function loadProjectByProjectFilePath(filePath, callBack) {  
   generalIpcCall('loadProjectByProjectFilePath', callBack, filePath);
 };
-
-// delete any cached temp project files
-function deleteAllTempProjectDirectories(callBack) {
-  generalIpcCall('deleteAllTempProjectDirectories', callBack);
-}
 
 function isCurrentLoadedProject(projectFilePath, callBack) {
   generalIpcCall('isCurrentLoadedProject', callBack, projectFilePath);
@@ -323,8 +314,7 @@ export default {
   base64Decode,
   createPackage,
   extractAll,
-  readdir,
-  createDirectoriesIfNotExists,
+  readdir,  
   readFile,
   writeFile,
   deleteFile,
@@ -334,8 +324,7 @@ export default {
   getExistingProjectNames,
   saveProject,
   parseDataToSaveFormat,
-  loadProjectByProjectFilePath,
-  deleteAllTempProjectDirectories,
+  loadProjectByProjectFilePath,  
   isCurrentLoadedProject,
 
   // window dialog

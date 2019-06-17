@@ -22,6 +22,10 @@ class ProjectItem extends Component {
   constructor(props) {
     super(props);
 
+    // constants
+    this.defaultThumbnailSrc = getAbsoluteUrlFromRelativeUrl("images/ProjectListPage/thumbnail1.svg");
+
+    // state
     this.state = {
       isShowProjectHandles: false
     };
@@ -67,8 +71,8 @@ class ProjectItem extends Component {
     const state = this.state;
 
     const project = props.item;
-
-    const thumbnailSrc = project.base64ThumbnailStr || getAbsoluteUrlFromRelativeUrl("images/ProjectListPage/thumbnail1.svg");
+    
+    const thumbnailSrc = project.base64ThumbnailStr || this.defaultThumbnailSrc;
 
     return (    
       <div className="project-item"
@@ -483,7 +487,7 @@ class ProjectListPage extends Component {
 
   render() {
     const props = this.props;
-    const state = this.state;    
+    const state = this.state;        
 
     return (
       <div id="project-list-page">        

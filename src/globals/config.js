@@ -1,4 +1,5 @@
 import fileHelper from 'utils/fileHelper/fileHelper';
+import {invokeIfIsFunction} from 'utils/variableType/isFunction';
 
 
 const schoolVrProjectArchiveExtensionWithLeadingDot = '.ivr';
@@ -10,7 +11,7 @@ let config = {
   jsonFileExtensionWithLeadingDot: '.json'
 };  
 let appDirectory = {};
-const setAppData = (appName, homePath, appDataPath, documentsPath, callBack) => {
+const setAppData = (appName, homePath, appDataPath, documentsPath, callBack = null) => {
   // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname  
   appDirectory.homeDirectory = homePath;
             
@@ -25,12 +26,13 @@ const setAppData = (appName, homePath, appDataPath, documentsPath, callBack) => 
 
   appDirectory.webServerFilesDirectory = fileHelper.join(appDirectory.appTempWebContainerDirectory, 'files');
 
+  // make first letter of each word upper-case
   config.appName = appName.split('-').map(str => {
     return str.charAt(0).toUpperCase() + str.substr(1);
   }).join(' ');
   config.appDirectory = appDirectory;
 
-  callBack();
+  invokeIfIsFunction(callBack);
 };
 
 // https://electronjs.org/docs/api/dialog

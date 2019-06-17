@@ -120,38 +120,43 @@ function createWindow() {
     }
   }
 
-  splashScreen.on('ready-to-show', () => {    
+  splashScreen.on('ready-to-show', async _ => {    
     splashScreen.show();
 
-    const onCanHideSplashScreen = _ => {
-      splashScreenCountdowned = true;
-      showMainWindow();
-    };
+    // things to do on start up
+    // splashScreen will be shown when we are doing these things
 
-    if (isDev && (!isForceTestExtractAppAsarForWebServer)) {
-      setTimeout(_ => {
-        onCanHideSplashScreen();
+    // this setTimeout is to allow time for splash screen to show
+    // before the thread is being blocked by running fileSystem.extractAll() in extractAppAsarForWebServerAsync()
+    setTimeout(async _ => {
+      // delete any cached temp project files
+      await ProjectFile.deleteAllTempProjectDirectoriesAsync();
+      
+      // create App Data directories if they do not exist
+      const appDirectoryKeys = Object.keys(appDirectory).filter((appDirectoryKey) => {
+        return !([
+          'appAsarInstallationPath',
+          'appAsarDestPathInWebContainerDirectory',
+          'webServerRootDirectory',
+          'webServerFilesDirectory'
+        ].includes(appDirectoryKey));
+      });
+      await forEach(appDirectoryKeys, async (appDirectoryKey) => {
+        const directoryPath = appDirectory[appDirectoryKey];
+        console.log(`${appDirectoryKey}: ${directoryPath}`);
+        await fileSystem.createDirectoryIfNotExistsPromise(directoryPath);
+      });
+      console.log('App directories created.');
+
+      await extractAppAsarForWebServerAsync();
+      await openWebServerAsync();
+
+      // hide splash screen
+      setTimeout(_ => {        
+        splashScreenCountdowned = true;
+        showMainWindow();
       }, splashScreenDurationInMillis);
-    } else {
-      // this setTimeout is to allow time for splash screen to show
-      // before the thread is being blocked by running fileSystem.extractAll()
-      setTimeout(_ => {
-        // until isAppAsarDestPathInWebContainerDirectoryExists === true, splash screen will be shown
-        const splashScreenTimerIntervalInMillis = 100;
-        let splashScreenTimerTimerHandler = null;
-
-        extractAppAsarForWebServerAsync();
-
-        splashScreenTimerTimerHandler = setInterval(async _ => {
-          const isAppAsarDestPathInWebContainerDirectoryExists = await getIsAppAsarDestPathInWebContainerDirectoryExists();
-          if (isAppAsarDestPathInWebContainerDirectoryExists) {
-            clearInterval(splashScreenTimerTimerHandler);
-            splashScreenTimerTimerHandler = null;
-            onCanHideSplashScreen();
-          }
-        }, splashScreenTimerIntervalInMillis);
-      }, 1000);
-    }    
+    }, 1000);
   });
 
   /* main window lifecycles */
@@ -228,7 +233,8 @@ async function extractAppAsarForWebServerAsync() {
 }
 
 async function openWebServerAsync() {
-  await extractAppAsarForWebServerAsync();
+  // the following needs not be done as it's already be done at start up
+  //await extractAppAsarForWebServerAsync();
   
   await fileSystem.myDeletePromise(webServerFilesDirectory);
   await fileSystem.createDirectoryIfNotExistsPromise(webServerFilesDirectory);
@@ -267,8 +273,7 @@ app.on('ready', async _ => {
     console.error(err);
   }
 
-  createWindow();
-  openWebServerAsync();
+  createWindow();  
 });
 
 app.on('window-all-closed', () => {
@@ -494,25 +499,6 @@ ipcMain.on('readdir', async (event, arg) => {
   }
 });
 
-ipcMain.on('createDirectoriesIfNotExists', async (event, arg) => {
-  const directoryPaths = arg;
-  try {
-    await forEach(directoryPaths, async (directoryPath) => {
-      await fileSystem.createDirectoryIfNotExistsPromise(directoryPath);
-    });
-    event.sender.send('createDirectoriesIfNotExistsResponse', {
-      err: null,
-      data: null
-    });
-  } catch (err) {
-    console.error(err);
-    event.sender.send('createDirectoriesIfNotExistsResponse', {
-      err: err.toString(),
-      data: null
-    });
-  }  
-});
-
 ipcMain.on('readFile', async (event, arg) => {
   try {
     const filePath = arg;
@@ -564,7 +550,8 @@ ipcMain.on('deleteFile', async (event, arg) => {
 // saveLoadProject
 
 ipcMain.on('listProjects', async (event, arg) => {  
-  ProjectFile.listProjectsAsync()
+  const isRequireLoadProject = true;
+  ProjectFile.listProjectsAsync(isRequireLoadProject)
     .then((projectFileObjs) => {      
       event.sender.send('listProjectsResponse', {
         err: null,
@@ -655,21 +642,6 @@ ipcMain.on('loadProjectByProjectFilePath', (event, arg) => {
       event.sender.send('loadProjectByProjectFilePathResponse', {
         err: err.toString(),
         data: null
-      });
-    });
-});
-
-ipcMain.on('deleteAllTempProjectDirectories', (event, arg) => {
-  ProjectFile.deleteAllTempProjectDirectoriesAsync()
-    .then(() => {
-      event.sender.send('deleteAllTempProjectDirectoriesResponse', {
-        err: null,        
-      });
-    })
-    .catch(err => {
-      console.error(err);
-      event.sender.send('deleteAllTempProjectDirectoriesResponse', {
-        err: err.toString(),
       });
     });
 });
