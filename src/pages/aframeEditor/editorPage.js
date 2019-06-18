@@ -163,10 +163,17 @@ class EditorPage extends Component {
       if (err) {
         handleErrorWithUiDefault(err);
         return;
-      }      
-      this.setState({
-        loadedProjectFilePath: projectFilePath
-      });
+      }
+
+      const state = this.state;
+
+      if (state.loadedProjectFilePath !== projectFilePath) {  // save as case
+        //this.loadProject(projectFilePath);
+
+        this.setState({
+          loadedProjectFilePath: projectFilePath
+        });
+      }    
     });
   }
 
@@ -249,7 +256,7 @@ class EditorPage extends Component {
 
   render() {
     //const props = this.props;
-    //const state = this.state;
+    const state = this.state;
     const sceneContext = this.props.sceneContext;
     // if (!sceneContext) {
     //   console.log('no context');
@@ -345,7 +352,7 @@ class EditorPage extends Component {
               } */}
             ]}
           />
-          <ButtonsPanel currentLoadedProjectPath={this.state.loadedProjectFilePath} />
+          <ButtonsPanel currentLoadedProjectPath={state.loadedProjectFilePath} />
           <AFramePanel />
           <SlidesPanel />
           <TimelinePanel />

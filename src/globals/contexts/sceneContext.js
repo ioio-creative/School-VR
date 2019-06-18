@@ -1644,7 +1644,7 @@ class SceneContextProvider extends Component {
       const assetsData = prevState.assetsData;
       let newStateAssetsData = [...assetsData];
       let needInsert = true;
-      for (let i = 0; i< assetsData.length; i++) {
+      for (let i = 0; i < assetsData.length; i++) {
         if (assetsData[i].id === newFile.id) {
           needInsert = false;
           break;   
