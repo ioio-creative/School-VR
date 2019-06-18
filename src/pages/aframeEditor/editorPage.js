@@ -172,6 +172,9 @@ class EditorPage extends Component {
          * !!!Important!!!: 
          * we run setState({loadedProjectFilePath}) and sceneContext.setProjectName()
          * instead of loadProject() because loadProject takes time
+         * 
+         * also using loadProject() would produce errors in sceneContext's addAsset() method,
+         * which would not update assetsList items (src, etc.) if asset has same id
          */
 
         //this.loadProject(projectFilePath);

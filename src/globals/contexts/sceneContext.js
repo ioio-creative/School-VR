@@ -1572,7 +1572,8 @@ class SceneContextProvider extends Component {
       // not checking states, check element instead
       const currentAssetEl = document.getElementById(newFile.id);
       if (currentAssetEl) {
-        currentAssetEl.parentElement.removeChild(currentAssetEl);
+        // currentAssetEl.parentElement.removeChild(currentAssetEl);
+        return this.state.assetsData;
       }
     }
     const sceneEl = this.editor.sceneEl;
