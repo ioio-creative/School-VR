@@ -168,12 +168,21 @@ class EditorPage extends Component {
       const state = this.state;
 
       if (state.loadedProjectFilePath !== projectFilePath) {  // save as case
+        /**
+         * !!!Important!!!: 
+         * we run setState({loadedProjectFilePath}) and sceneContext.setProjectName()
+         * instead of loadProject() because loadProject takes time
+         */
+
         //this.loadProject(projectFilePath);
 
         this.setState({
           loadedProjectFilePath: projectFilePath
         });
-      }    
+
+        const projectName = fileHelper.getFileNameWithoutExtension(projectFilePath);
+        sceneContext.setProjectName(projectName);
+      }
     });
   }
 

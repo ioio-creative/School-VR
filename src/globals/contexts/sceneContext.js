@@ -1570,8 +1570,9 @@ class SceneContextProvider extends Component {
     // prevent duplicate assets added
     if (newFile.id) {
       // not checking states, check element instead
-      if (document.getElementById(newFile.id)) {
-        return this.state.assetsData;
+      const currentAssetEl = document.getElementById(newFile.id);
+      if (currentAssetEl) {
+        currentAssetEl.parentElement.removeChild(currentAssetEl);
       }
     }
     const sceneEl = this.editor.sceneEl;
