@@ -598,25 +598,6 @@ ipcMain.on('listProjects', async (event, arg) => {
     });
 });
 
-ipcMain.on('getExistingProjectNames', async (event, arg) => {  
-  ProjectFile.getExistingProjectNamesAsync()
-    .then((existingProjectNames) => {      
-      event.sender.send('getExistingProjectNamesResponse', {
-        err: null,
-        data: {
-          existingProjectNames: existingProjectNames
-        }
-      });
-    })
-    .catch(err => {
-      console.error(err);
-      event.sender.send('getExistingProjectNamesResponse', {
-        err: err.toString(),
-        data: null
-      });
-    });
-});
-
 ipcMain.on('saveProject', (event, arg) => {
   saveProjectToLocalAsync(arg.projectFilePath, arg.entitiesList, arg.assetsList)
     .then((data) => {      
@@ -803,9 +784,10 @@ ipcMain.on('openWebServerAndLoadProject', async (event, arg) => {
     /* load project file */
     const filePath = arg;
     //console.log(`filePath: ${filePath}`);
-    const projectName = myPath.getFileNameWithoutExtension(filePath);    
-    //console.log(`projectName: ${projectName}`);
-    const staticAssetUrlPathPrefixForWebPresentation = myPath.join(config.webServerStaticFilesPathPrefix, projectName);
+    const projectFile = new ProjectFile(null, filePath, null);
+    const hashedFilePath = projectFile.hashedSavedProjectFilePath;
+    //console.log(`hashedFilePath: ${hashedFilePath}`);
+    const staticAssetUrlPathPrefixForWebPresentation = myPath.join(config.webServerStaticFilesPathPrefix, hashedFilePath);
     //console.log(`staticAssetUrlPathPrefixForWebPresentation: ${staticAssetUrlPathPrefixForWebPresentation}`);
     const projectJson = await loadProjectByProjectFilePathAsync(filePath);
     //console.log(projectJson);    
@@ -823,7 +805,7 @@ ipcMain.on('openWebServerAndLoadProject', async (event, arg) => {
 
     /* open web server */    
     // await openWebServerAsync();    
-    const externalServerDirectory = myPath.join(webServerFilesDirectory, projectName);
+    const externalServerDirectory = myPath.join(webServerFilesDirectory, hashedFilePath);
     await copyTempProjectDirectoryToExternalDirectoryAsync(filePath, externalServerDirectory);
     /* end of open web server */
     

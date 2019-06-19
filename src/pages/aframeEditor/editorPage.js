@@ -169,6 +169,8 @@ class EditorPage extends Component {
       const state = this.state;
 
       if (state.loadedProjectFilePath !== projectFilePath) {  // save as case
+        // TODO: is the following good enough?
+
         /**
          * !!!Important!!!: 
          * we run setState({loadedProjectFilePath}) and sceneContext.setProjectName()

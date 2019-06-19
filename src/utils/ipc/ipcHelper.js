@@ -214,10 +214,6 @@ function listProjects(callBack) {
   generalIpcCall('listProjects', callBack);
 }
 
-function getExistingProjectNames(callBack) {  
-  generalIpcCall('getExistingProjectNames', callBack);
-}
-
 function saveProject(projectFilePath, entitiesList, assetsList, callBack) {  
   generalIpcCall('saveProject', callBack, {
     projectFilePath: projectFilePath,    
@@ -355,8 +351,7 @@ export default {
   copyFile,
 
   // saveLoadProject
-  listProjects,
-  getExistingProjectNames,
+  listProjects,  
   saveProject,
   parseDataToSaveFormat,
   loadProjectByProjectFilePath,  
