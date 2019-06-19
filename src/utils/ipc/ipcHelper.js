@@ -168,7 +168,7 @@ function extractAll(archive, dest, callBack) {
     archive: archive,
     dest: dest
   });
-};
+}
 
 function readdir(dirPath, callBack) {  
   generalIpcCall('readdir', callBack, {
@@ -178,18 +178,25 @@ function readdir(dirPath, callBack) {
 
 function readFile(filePath, callBack) {  
   generalIpcCall('readFile', callBack, filePath);
-};
+}
 
 function writeFile(filePath, content, callBack) {  
   generalIpcCall('writeFile', callBack, {
     filePath: filePath,
     content: content
   });
-};
+}
 
 function deleteFile(filePath, callBack) {
   generalIpcCall('deleteFile', callBack, filePath);
-};
+}
+
+function renameFile(oldPath, newPath, callBack) {
+  generalIpcCall('renameFile', callBack, {
+    oldPath: oldPath,
+    newPath: newPath
+  });
+}
 
 /* end of fileSystem */
 
@@ -198,7 +205,7 @@ function deleteFile(filePath, callBack) {
 
 function listProjects(callBack) {  
   generalIpcCall('listProjects', callBack);
-};
+}
 
 function getExistingProjectNames(callBack) {  
   generalIpcCall('getExistingProjectNames', callBack);
@@ -337,6 +344,7 @@ export default {
   readFile,
   writeFile,
   deleteFile,
+  renameFile,
 
   // saveLoadProject
   listProjects,

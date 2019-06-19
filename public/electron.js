@@ -548,6 +548,20 @@ ipcMain.on('deleteFile', async (event, arg) => {
   } 
 });
 
+ipcMain.on('renameFile', async (event, arg) => {
+  try {
+    await fileSystem.renamePromise(arg.oldPath, arg.newPath);
+    event.sender.send('renameFileResponse', {
+      err: null
+    });
+  } catch (err) {
+    console.error(err);
+    event.sender.send('renameFileResponse', {
+      err: err.toString()
+    });
+  }
+});
+
 // saveLoadProject
 
 ipcMain.on('listProjects', async (event, arg) => {  

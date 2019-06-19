@@ -4,7 +4,6 @@ import {Link} from 'react-router-dom';
 import MenuComponent from 'components/menuComponent';
 import CrossButton from 'components/crossButton';
 
-import config from 'globals/config';
 import ipcHelper from 'utils/ipc/ipcHelper';
 import routes from 'globals/routes';
 import {funcFactoryForCompareFileStatsByProperty} from 'utils/saveLoadProjectHelper/listProjectsAsync';
@@ -51,6 +50,10 @@ class ProjectItem extends Component {
     }
   }
 
+  saveProject = _ => {
+
+  }
+
   /* end of methods */
 
 
@@ -65,7 +68,16 @@ class ProjectItem extends Component {
   }
 
   handleItemRenameClick = _ => {
+    ipcHelper.saveSchoolVrFileDialog((err, data) => {
+      if (err) {
+        handleErrorWithUiDefault(err);
+        return;
+      }
 
+      //consoel
+
+      //ipcHelper.renameFile()
+    });    
   }
 
   handleItemCopyToNewClick = _ => {
