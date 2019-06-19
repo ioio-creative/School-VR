@@ -1,4 +1,4 @@
-const electron = require('electron');
+ electron = require('electron');
 const app = electron.app;
 const ipcMain = electron.ipcMain;
 const BrowserWindow = electron.BrowserWindow;
@@ -22,6 +22,7 @@ const {saveProjectToLocalAsync} = require('./utils/saveLoadProject/saveProject')
 const {loadProjectByProjectFilePathAsync, copyTempProjectDirectoryToExternalDirectoryAsync} = require('./utils/saveLoadProject/loadProject');
 const {openImageDialog, openGifDialog, openVideoDialog, openSchoolVrFileDialog, saveSchoolVrFileDialog} = 
   require('./utils/aframeEditor/openFileDialog');
+const {showYesNoQuestionMessageBox, showYesNoWarningMessageBox} = require('./utils/aframeEditor/showMessageBox');
 const {parseDataToSaveFormat} = require('./utils/saveLoadProject/parseDataToSaveFormat');
 const getIp = require("./utils/getIp");
 
@@ -733,6 +734,30 @@ ipcMain.on('showSaveDialog', (event, arg) => {
   });
 });
 
+// show message showMessageBox
+
+ipcMain.on('showYesNoQuestionMessageBox', (event, arg) => {
+  showYesNoQuestionMessageBox(arg.message, arg.detail, (response) => {
+    const btnId = response;
+    event.sender.send('showYesNoQuestionMessageBoxResponse', {
+      data: {
+        buttonId: btnId
+      }
+    });
+  });
+});
+
+ipcMain.on('showYesNoWarningMessageBox', (event, arg) => {
+  showYesNoWarningMessageBox(arg.message, arg.detail, (response) => {
+    const btnId = response;
+    event.sender.send('showYesNoWarningMessageBoxResponse', {
+      data: {
+        buttonId: btnId
+      }
+    });
+  });
+});
+
 // for presentation
 
 ipcMain.on('getPresentationServerInfo', (event, arg) => {
@@ -750,7 +775,7 @@ ipcMain.on('openWebServerAndLoadProject', async (event, arg) => {
     /* load project file */
     const filePath = arg;
     //console.log(`filePath: ${filePath}`);
-    const projectName = new ProjectFile(null, filePath, null).name;    
+    const projectName = myPath.getFileNameWithoutExtension(filePath);    
     //console.log(`projectName: ${projectName}`);
     const staticAssetUrlPathPrefixForWebPresentation = myPath.join(config.webServerStaticFilesPathPrefix, projectName);
     //console.log(`staticAssetUrlPathPrefixForWebPresentation: ${staticAssetUrlPathPrefixForWebPresentation}`);
@@ -759,7 +784,7 @@ ipcMain.on('openWebServerAndLoadProject', async (event, arg) => {
     
     // TODO: poorly written (too many cross-references to ProjectFile class)
     // add staticAssetUrlPathPrefixForWebPresentation to asset's relativeSrc
-    const newlyModifiedProjectJson = Object.assign(projectJson);
+    const newlyModifiedProjectJson = Object.assign({}, projectJson);
     newlyModifiedProjectJson.assetsList.forEach((asset) => {
       const assetRelativeSrc = asset.relativeSrc;
       if (ProjectFile.isAssetPathRelative(assetRelativeSrc)) {

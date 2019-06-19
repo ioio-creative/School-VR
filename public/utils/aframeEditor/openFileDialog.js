@@ -1,4 +1,4 @@
-const { appDirectory, openFileDialogFilter } = require('../../globals/config');
+const { config, appDirectory, openFileDialogFilter } = require('../../globals/config');
 const { BrowserWindow, dialog } = require('electron');
 
 
@@ -13,16 +13,16 @@ const DialogType = {
 function showDialogCommon(fileFilters, dialogMessage, callBack, defaultPath, dialogType = DialogType.Open) {
   const browserWindow = BrowserWindow.getFocusedWindow();
     
-  let dialogTitle = '';
+  let dialogTitle = config.appName;
   let dialogFuncToCall = _ => {};  
   switch (dialogType) {    
     case DialogType.Save:
-      dialogTitle = 'Save';
+      dialogTitle += ' - Save';
       dialogFuncToCall = dialog.showSaveDialog;
       break;
     case DialogType.Open:      
     default:
-      dialogTitle = 'Open';
+      dialogTitle = ' - Open';
       dialogFuncToCall = dialog.showOpenDialog;
       break;
   }

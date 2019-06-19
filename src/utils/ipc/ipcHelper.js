@@ -62,8 +62,8 @@ function removeListener(channel, listener) {
 
 
 function generalIpcCall(channelName, callBack = null, objToSend = null) {
-  if (isFunction(callBack)) {
-    ipc.once(`${channelName}Response`, (event, arg) => {
+  if (isFunction(callBack)) {    
+    ipc.once(`${channelName}Response`, (event, arg) => {      
       if (arg.err) {
         callBack(`${channelName}: ${arg.err}`, arg.data);
       } else {
@@ -269,6 +269,25 @@ function showSaveDialog(options, callBack) {
 /* end of vanilla electron dialog */
 
 
+/* show message box */
+
+function showYesNoQuestionMessageBox(message, detail, callBack) {
+  generalIpcCall('showYesNoQuestionMessageBox', callBack, {    
+    message: message,
+    detail: detail
+  });
+}
+
+function showYesNoWarningMessageBox(message, detail, callBack) {
+  generalIpcCall('showYesNoWarningMessageBox', callBack, {    
+    message: message,
+    detail: detail
+  });
+}
+
+/* end of show message box */
+
+
 /* for presentation */
 
 function getPresentationServerInfo(callBack) {
@@ -337,6 +356,10 @@ export default {
   // vanilla electron dialog
   showOpenDialog,
   showSaveDialog,
+
+  // show message box
+  showYesNoQuestionMessageBox,
+  showYesNoWarningMessageBox,
 
   // for presentation
   getPresentationServerInfo,

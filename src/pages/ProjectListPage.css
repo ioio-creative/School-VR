@@ -404,7 +404,7 @@
 }
 
 #project-list-page .project-options-container {
-  display: none;
+  /* display: none; */
   position: absolute;
   top: var(--topButtonTop);
   right: var(--leftRightMargin);
@@ -417,6 +417,10 @@
 
 #project-list-page .project-options {
   color: #28c9d4;
+}
+
+#project-list-page .project-options-detail-item {
+  cursor: pointer;
 }
 
 #project-list-page .project-edit-container {
