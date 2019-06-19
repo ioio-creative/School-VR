@@ -64,7 +64,7 @@ class ProjectItem extends Component {
   }
 
   handleItemMouseLeave = _ => {
-    //this.hideProjectHandles();    
+    this.hideProjectHandles();    
   }
 
   handleItemRenameClick = _ => {
@@ -74,14 +74,41 @@ class ProjectItem extends Component {
         return;
       }
 
-      console.log()
+      const project = this.props.item;
+      const oldFilePath = project.savedProjectFilePath;
+      const newFilePath = data.filePath;      
 
-      //ipcHelper.renameFile()
+      ipcHelper.renameFile(oldFilePath, newFilePath, (err) => {
+        if (err) {
+          handleErrorWithUiDefault(err);
+          return;
+        }
+
+        this.props.handleItemRenameClickFunc(project);
+      });
     });    
   }
 
   handleItemCopyToNewClick = _ => {
-    
+    ipcHelper.saveSchoolVrFileDialog((err, data) => {
+      if (err) {
+        handleErrorWithUiDefault(err);
+        return;
+      }
+
+      const project = this.props.item;
+      const src = project.savedProjectFilePath;
+      const dest = data.filePath;      
+
+      ipcHelper.copyFile(src, dest, (err) => {
+        if (err) {
+          handleErrorWithUiDefault(err);
+          return;
+        }
+
+        this.props.handleItemCopyToNewClickFunc(project);
+      });
+    });
   }
 
   handleItemDeleteClick = _ => {
@@ -197,6 +224,14 @@ class ProjectList extends Component {
 
   /* event handlers */
 
+  handleItemRenameClick = project => {
+    this.props.handleItemRenameClickFunc(project);
+  }
+
+  handleItemCopyToNewClick = project => {
+    this.props.handleItemCopyToNewClickFunc(project);
+  }
+
   handleItemDeleteClick = project => {    
     this.props.handleItemDeleteClickFunc(project);
   }
@@ -241,7 +276,9 @@ class ProjectList extends Component {
           key={project.path}
           item={project}
 
-          handleItemDeleteClickFunc={this.handleItemDeleteClick}
+          handleItemRenameClickFunc={this.handleItemRenameClick}
+          handleItemCopyToNewClickFunc={this.handleItemCopyToNewClick}
+          handleItemDeleteClickFunc={this.handleItemDeleteClick}          
         />
       );
     });
@@ -562,12 +599,22 @@ class ProjectListPage extends Component {
     this.props.history.push(routes.editor);
   }
 
+  handleItemRenameClick = projectToRename => {
+    this.enumerateProjects();
+  }
+
+  handleItemCopyToNewClick = projectToCopyToNew => {
+    this.enumerateProjects();
+  }
+
   handleProjectDeleteClick = projectToDelete => {
-    this.setState((state, props) => {
-      return {
-        projects: state.projects.filter(project => project !== projectToDelete)
-      };
-    });
+    // this.setState((state, props) => {
+    //   return {
+    //     projects: state.projects.filter(project => project !== projectToDelete)
+    //   };
+    // });
+
+    this.enumerateProjects();
   }
 
   /* end of event handlers */
@@ -603,6 +650,8 @@ class ProjectListPage extends Component {
               projectSearchText={state.projectSearchText}
               setCreateNewProjectBlockRefFunc={this.setCreateNewProjectBlockRef}
 
+              handleItemRenameClickFunc={this.handleItemRenameClick}
+              handleItemCopyToNewClickFunc={this.handleItemCopyToNewClick}
               handleItemDeleteClickFunc={this.handleProjectDeleteClick}
             />
           </div>

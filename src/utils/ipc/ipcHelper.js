@@ -198,6 +198,13 @@ function renameFile(oldPath, newPath, callBack) {
   });
 }
 
+function copyFile(src, dest, callBack) {
+  generalIpcCall('copyFile', callBack, {
+    src: src,
+    dest: dest
+  });
+}
+
 /* end of fileSystem */
 
 
@@ -209,7 +216,7 @@ function listProjects(callBack) {
 
 function getExistingProjectNames(callBack) {  
   generalIpcCall('getExistingProjectNames', callBack);
-};
+}
 
 function saveProject(projectFilePath, entitiesList, assetsList, callBack) {  
   generalIpcCall('saveProject', callBack, {
@@ -217,7 +224,7 @@ function saveProject(projectFilePath, entitiesList, assetsList, callBack) {
     entitiesList: entitiesList,
     assetsList: assetsList
   });
-};
+}
 
 function parseDataToSaveFormat(projectName, entitiesList, assetsList, callBack) {  
   generalIpcCall('parseDataToSaveFormat', callBack, {
@@ -229,7 +236,7 @@ function parseDataToSaveFormat(projectName, entitiesList, assetsList, callBack) 
 
 function loadProjectByProjectFilePath(filePath, callBack) {  
   generalIpcCall('loadProjectByProjectFilePath', callBack, filePath);
-};
+}
 
 function isCurrentLoadedProject(projectFilePath, callBack) {
   generalIpcCall('isCurrentLoadedProject', callBack, projectFilePath);
@@ -345,6 +352,7 @@ export default {
   writeFile,
   deleteFile,
   renameFile,
+  copyFile,
 
   // saveLoadProject
   listProjects,

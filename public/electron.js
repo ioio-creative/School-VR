@@ -562,6 +562,20 @@ ipcMain.on('renameFile', async (event, arg) => {
   }
 });
 
+ipcMain.on('copyFile', async (event, arg) => {
+  try {
+    await fileSystem.copyFilePromise(arg.src, arg.dest);
+    event.sender.send('copyFileResponse', {
+      err: null
+    });
+  } catch (err) {
+    console.error(err);
+    event.sender.send('copyFileResponse', {
+      err: err.toString()
+    });
+  }
+});
+
 // saveLoadProject
 
 ipcMain.on('listProjects', async (event, arg) => {  
