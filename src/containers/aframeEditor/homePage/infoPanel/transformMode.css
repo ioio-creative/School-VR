@@ -1,0 +1,24 @@
+#info-panel .vec3D-btn-col button svg {
+  width: 26px;
+  height: 26px;
+  margin-bottom: 8px;
+  margin-top: 4px;
+}
+#info-panel .vec3D-btn-col button svg .st144,
+#info-panel .vec3D-btn-col button svg .st145 {
+  fill:none;
+  stroke:#CDD6E0;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  stroke-miterlimit:10;
+  transition: all 0.2s;
+}
+#info-panel .vec3D-btn-col button:hover svg .st144,
+#info-panel .vec3D-btn-col button:hover svg .st145,
+#info-panel .vec3D-btn-col button.selected svg .st144,
+#info-panel .vec3D-btn-col button.selected svg .st145 {
+  stroke:#28a8ff;
+}
+
+	

@@ -9,44 +9,21 @@
   right: 0;
   bottom: 0;
 }
-#save-debug-panel {
-  position: absolute;
-  top: 150px;
-  white-space: pre;
-  bottom: 300px;
-  width: 360px;
-  overflow: auto;
-  background-color: #FFFFFF;
+
+/* hide ui when preview */
+#editor #buttons-panel,
+#editor #timeline-panel,
+#editor #content-panel,
+#editor #info-panel {
+  transition: all 0.2s;
 }
-#save-debug-panel .json-display {
-  position: absolute;
-  top: 0px;
-  white-space: pre;
-  bottom: 50px;
-  left: 0;
-  right: 0;
-  overflow: auto;
+#editor.viewing #buttons-panel {
+  top: -60px;
 }
-#save-debug-panel .btn-list{
-  position: absolute;
-  bottom: 0px;
-  left: 0;
-  right: 0;
-  height: 50px;
-  display: flex;
-  background-color: #FFFFFF;
+#editor.viewing #timeline-panel {
+  bottom: -210px;
 }
-#save-debug-panel .btn-list .btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #FFFFFF;
-  cursor: pointer;
-}
-#save-debug-panel .btn-list .btn.btn-save {
-  background-color: #407940;
-}
-#save-debug-panel .btn-list .btn.btn-load {
-  background-color: #5858ca;
+#editor.viewing #content-panel,
+#editor.viewing #info-panel {
+  right: -250px;
 }

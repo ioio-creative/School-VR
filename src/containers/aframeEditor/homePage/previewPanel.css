@@ -1,0 +1,83 @@
+#preview-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+#preview-panel .slideFunctions-panel {
+  position: absolute;
+  bottom: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  background-color: rgba(13, 12, 30, 0.8);
+  border-radius: 50px;
+  transition: bottom 0.2s;
+}
+.viewing #preview-panel .slideFunctions-panel {
+  bottom: 120px;
+  transition: bottom 0.2s 0.25s;
+}
+
+#preview-panel .slideFunctions-panel .buttons-group {
+  padding: 10px 30px;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+#preview-panel .slideFunctions-panel .buttons-group:after {
+  content: '';
+  width: 1px;
+  height: 20px;
+  background-color: #4d5054;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+#preview-panel .slideFunctions-panel .buttons-group:last-of-type:after {
+  display: none;
+}
+
+#preview-panel .slideFunctions-panel .buttons-group .button-prevSlide,
+#preview-panel .slideFunctions-panel .buttons-group .button-playSlide,
+#preview-panel .slideFunctions-panel .buttons-group .button-nextSlide {
+  margin: 0 10px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  color: #FFFFFF;
+}
+#preview-panel .slideFunctions-panel .buttons-group .button-prevSlide.disabled,
+#preview-panel .slideFunctions-panel .buttons-group .button-nextSlide.disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+#preview-panel .slideFunctions-panel .buttons-group .button-playSlide {
+  color: #1ebdff;
+}
+
+#preview-panel .slideFunctions-panel .buttons-group select {
+  background-color: #2b3337;
+  color: #8597ad;
+  padding: 10px 30px;
+  border-radius: 50px;
+  border: 0;
+  outline: none;
+}
+#preview-panel .slideFunctions-panel .buttons-group select:hover {
+  color: #FFFFFF;
+}
+#preview-panel .slideFunctions-panel .buttons-group a {
+  padding: 5px 15px;
+  text-decoration: none;
+  color: #8597ad;
+  cursor: pointer;
+}
+#preview-panel .slideFunctions-panel .buttons-group a:hover {
+  color: #ffffff;
+}

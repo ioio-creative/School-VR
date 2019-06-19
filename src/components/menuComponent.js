@@ -95,6 +95,7 @@ class MenuComponent extends Component {
     this.buttons.length = 0;
     const projectName = props.sceneContext.getProjectName();
     const appName = config.appName;
+    // console.log(props.menuButtons);
     return (
       <div id="system-panel">
         <div id="app-icon">

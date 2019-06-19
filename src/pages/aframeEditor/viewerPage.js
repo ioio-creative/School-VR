@@ -151,7 +151,7 @@ class ViewerPage extends Component {
           ]}
         /> */}
         {/* <ButtonsPanel /> */}
-        <AFramePanel disableVR={false} />
+        <AFramePanel disableVR={false} user-mode="viewer" />
         {/* <SlidesPanel isEditing={false} /> */}
         {/* <TimelinePanel /> */}
         {/* <InfoPanel /> */}

@@ -13,7 +13,10 @@ import fontSchoolbellRegular from 'fonts/Schoolbell/SchoolbellRegular.png';
 // import fontNotoSansRegular from 'fonts/Noto_Sans_TC/NotoSansTC-Regular.otf';
 import fontYenHeavy from 'fonts/Yen_Heavy/wt009.ttf';
 
+import iconNavigation from "media/icons/navigation3D.svg";
+
 import './aFramePanel.css';
+import { TweenMax } from 'gsap';
 
 // console.log(AFRAME.THREE.Font);
 const Events = require('vendor/Events.js');
@@ -40,64 +43,161 @@ AFRAME.registerComponent('cursor-listener', {
   init: function () {
     var lastIndex = -1;
     const hoverColor = '#AAAAAA';
-    const clickColor = '#880000';
+    const clickColor = '#28a8ff';
+    const activeColor = '#AAAAAA';
     const defaultColor = '#FFFFFF';// this.el.getAttribute('material')['color'];
-    // console.log(defaultColor);
+    this.el.setAttribute('geometry', 'primitive', 'cylinder');
+    this.el.setAttribute('scale', '1 0.1 1');
+    this.el.setAttribute('rotation', '90 0 0');
+    // this.el.setAttribute('material', 'color', '#F00');
+    this.el.setAttribute('material', 'src', '#iconNavigation');
+    this.el.setAttribute('material', 'transparent', true);
+    const aniComponent = document.createElement('a-entity');
+    aniComponent.setAttribute('geometry', 'primitive', 'cylinder');
+    aniComponent.setAttribute('scale', '1 0.1 1');
+    // aniComponent.setAttribute('rotation', '0 90 90');
+    aniComponent.setAttribute('material', 'color', defaultColor);
+    aniComponent.setAttribute('material', 'opacity', 0);
+    this.el.appendChild(aniComponent);
+    aniComponent.addEventListener('loaded', () => {
+      // aniComponent.getObject3D('mesh').geometry.translate(0, 0.5, 0);
+    })
     let childrenEls = [];
-    if (this.el.children) {
-      childrenEls = Array.prototype.slice.call(this.el.children);
-    }
-    this.el.addEventListener('click', function (evt) {
-      // lastIndex = (lastIndex + 1) % COLORS.length;
-      const isVisible = this.getAttribute('material')['opacity'];
-      // console.log(isVisible);
-      if (isVisible) {
-        this.setAttribute('material', 'color', clickColor);
-        childrenEls.forEach(childEl => {
-          childEl.setAttribute('material', 'color', clickColor);
-        })
-        const sceneEl = this.sceneEl;
-        const nextSlideId = sceneEl.data.sceneContext.getCurrentEntity(this.id)['navigateToSlideId'];
-        console.log(nextSlideId);
-          setTimeout(_=> {
-            this.setAttribute('material', 'color', defaultColor);
-            childrenEls.forEach(childEl => {
-              childEl.setAttribute('material', 'color', defaultColor);
-            })
-            if (nextSlideId) {
-              if (!sceneEl.getAttribute('vr-mode-ui')['enabled']) {
-                if (sceneEl.data.socket) {
-                  sceneEl.data.socket.emit('updateSceneStatus', {
-                    action: 'selectSlide',
-                    details: {
-                      slideId: nextSlideId,
-                      autoPlay: true
-                    }
-                  })
-                }
-                sceneEl.data.sceneContext.selectSlide(nextSlideId);
-                sceneEl.data.sceneContext.playSlide();
-              }
-            }
-          }, 250);
-      }
-    });
+    // if (this.el.children) {
+    //   childrenEls = Array.prototype.slice.call(this.el.children);
+    // }
+    // this.el.addEventListener('click', function (evt) {
+    //   // lastIndex = (lastIndex + 1) % COLORS.length;
+    //   const isVisible = this.getAttribute('material')['opacity'];
+    //   // console.log(isVisible);
+    //   // const originalRotation = this.getAttribute('rotation');
+    //   // const cameraRotation = this.sceneEl.camera.el.getAttribute('rotation');
+    //   if (isVisible) {
+    //     // aniComponent.setAttribute('material', 'color', activeColor);
+    //     // this.setAttribute('rotation', {
+    //     //   x: -cameraRotation.x,
+    //     //   y: -cameraRotation.y,
+    //     //   z: -cameraRotation.z
+    //     // });
+    //     // childrenEls.forEach(childEl => {
+    //     //   childEl.setAttribute('material', 'color', clickColor);
+    //     // })
+    //     const sceneEl = this.sceneEl;
+    //     const nextSlideId = sceneEl.data.sceneContext.getCurrentEntity(this.id)['navigateToSlideId'];
+    //     // console.log(nextSlideId);
+    //       setTimeout(_=> {
+    //         aniComponent.setAttribute('material', 'color', clickColor);
+    //         console.log('clicked')
+    //         // this.setAttribute('rotation', originalRotation);
+    //         // childrenEls.forEach(childEl => {
+    //         //   childEl.setAttribute('material', 'color', defaultColor);
+    //         // })
+    //         if (nextSlideId) {
+    //           if (!sceneEl.getAttribute('vr-mode-ui')['enabled']) {
+    //             if (sceneEl.data.socket) {
+    //               sceneEl.data.socket.emit('updateSceneStatus', {
+    //                 action: 'selectSlide',
+    //                 details: {
+    //                   slideId: nextSlideId,
+    //                   autoPlay: true
+    //                 }
+    //               })
+    //             }
+    //             sceneEl.data.sceneContext.selectSlide(nextSlideId);
+    //             sceneEl.data.sceneContext.playSlide();
+    //           }
+    //         }
+    //       }, 250);
+    //   }
+    // });
+    // let currentOpacity = this.el.getAttribute('material')['opacity'];
+    let currentRotation = this.el.getAttribute('rotation');
+    let fillTimer = null;
+    let hovering = false;
     this.el.addEventListener('mouseenter', function (evt) {
       // lastIndex = (lastIndex + 1) % COLORS.length;
-      const isVisible = this.getAttribute('material')['opacity'];
-      if (isVisible) {
-        this.setAttribute('material', 'color', hoverColor);
-        childrenEls.forEach(childEl => {
-          childEl.setAttribute('material', 'color', hoverColor);
+      // if (hovering) { return; }
+      currentRotation = this.getAttribute('rotation');
+      const currentOpacity = this.getAttribute('material')['opacity'];
+      const currentColor = this.getAttribute('material')['color'];
+      const cameraRotation = this.sceneEl.camera.el.getAttribute('rotation');
+      // console.log(cameraRotation);
+      if (currentOpacity > 0) {
+        // this.setAttribute('material', 'color', hoverColor);
+        // hovering = true;
+        this.setAttribute('rotation', {
+          x: cameraRotation.x + 90,
+          y: cameraRotation.y, // + 90,
+          z: cameraRotation.z, // + 90
+        });
+        const obj3D = aniComponent.getObject3D('mesh');
+        const aniVar = {
+          y: 0.001,
+          color: '#FFFFFF'
+        };
+        if (fillTimer) fillTimer.kill();
+        fillTimer = TweenMax.to(aniVar, 1, {
+          y: 1,
+          color: clickColor,
+          onStart: _=> {
+            aniComponent.setAttribute('material', 'opacity', 1);
+            obj3D.scale.x = 0.001;
+            obj3D.scale.z = 0.001;
+          },
+          onUpdate: _=> {
+            // obj3D.material.map.repeat.y = aniVar.y;
+            obj3D.scale.x = aniVar.y;
+            obj3D.scale.z = aniVar.y;
+            aniComponent.setAttribute('material', 'color', aniVar.color);
+          },
+          onComplete: _=> {
+            // assume clicked
+            this.setAttribute('material', 'color', clickColor);
+            aniComponent.setAttribute('material', 'color', activeColor);
+            const sceneEl = this.sceneEl;
+            const nextSlideId = sceneEl.data.sceneContext.getCurrentEntity(this.id)['navigateToSlideId'];
+            // console.log(nextSlideId);
+            setTimeout(_=> {
+              this.setAttribute('material', 'color', currentColor);
+              this.setAttribute('rotation', currentRotation);
+              aniComponent.setAttribute('material', 'opacity', 0);
+              aniComponent.setAttribute('material', 'color', clickColor);
+              if (nextSlideId) {
+                if (sceneEl.getAttribute('user-mode') !== 'viewer') {
+                  if (sceneEl.data.socket) {
+                    sceneEl.data.socket.emit('updateSceneStatus', {
+                      action: 'selectSlide',
+                      details: {
+                        slideId: nextSlideId,
+                        autoPlay: true
+                      }
+                    })
+                  }
+                  sceneEl.data.sceneContext.selectSlide(nextSlideId);
+                  sceneEl.data.sceneContext.playSlide();
+                }
+              }
+            }, 250);
+          }
         })
+        // old //
+        // childrenEls.forEach(childEl => {
+        //   childEl.setAttribute('material', 'color', hoverColor);
+        // })
       }
     });
     this.el.addEventListener('mouseleave', function () {
       // lastIndex = (lastIndex + 1) % COLORS.length;
-      this.setAttribute('material', 'color', defaultColor);
-      childrenEls.forEach(childEl => {
-        childEl.setAttribute('material', 'color', defaultColor);
-      })
+      // this.setAttribute('material', 'opacity', currentOpacity);
+      // hovering = false;
+      if (fillTimer) fillTimer.kill();
+      this.setAttribute('rotation', currentRotation);
+      // aniComponent.getObject3D('mesh').scale.y = 0.001;
+      aniComponent.setAttribute('material', 'opacity', 0);
+      
+        // childrenEls.forEach(childEl => {
+      //   childEl.setAttribute('material', 'color', defaultColor);
+      // })
     });
   }
 });
@@ -292,11 +392,12 @@ class AFramePanel extends Component {
 	    	<a-scene embedded background="color:#6EBAA7" el-name="Background" ref={ref=> {
             this.sceneEl = ref;
           }} vr-mode-ui={`enabled: ${props.disableVR? 'false': 'true'}`}
+          user-mode={props['user-mode']}
           disable-inspector
         >
           <a-assets>
             {/* try load some fonts */}
-
+            <img src={iconNavigation} id="iconNavigation" />
             {/* <canvas ref={(ref)=>this.cameraPreviewEl=ref} id="camera-preview"/> */}
             
             {/* <a-asset-item id="dcjaiModelObj" src={dcjaiobj}></a-asset-item>
@@ -306,7 +407,7 @@ class AFramePanel extends Component {
             {/* <a-asset-item id="fontNotoSerifTC" src={fontNotoSerifTC} /> */}
           </a-assets>
           {/* <a-sky el-name="sky" el-isSystem={true} color="#FF0000"></a-sky> */}
-          <a-entity position="0 2 5">
+          <a-entity position="0 0 0">
             {/* test */}
             <a-camera el-isSystem={false} position="0 2 5" el-defaultCamera="true" look-controls ref={(ref)=>this.cameraEl=ref}>
               {/* camera model */}
@@ -318,7 +419,7 @@ class AFramePanel extends Component {
               {/* <a-plane position="0 0 1.61" material="src: #camera-preview" ref={ref=>this.cameraPreviewScreenEl=ref }scale="0.8 0.8 0.8" rotation="0 0 0"></a-plane> */}
               {/* camera model end */}
               {/* click pointer */}
-              <a-entity cursor="fuse: true; fuseTimeout: 500"
+              <a-entity cursor="fuse: true; fuseTimeout: 1000"
                 position="0 0 -1"
                 geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
                 material="color: black; shader: flat">

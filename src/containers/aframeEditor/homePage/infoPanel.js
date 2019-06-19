@@ -176,7 +176,7 @@ class InfoPanel extends Component {
           {/* <div className="panel-header">
             Content - {selectedEntity['name']}
           </div> */}
-          <div className="panel-body">
+          <div className={`panel-body buttons-${staticAttributes.length}`}>
             {staticAttributes.map(staticAttribute => {
               let inputField = null;
               let currentValue = '';
@@ -266,8 +266,8 @@ class InfoPanel extends Component {
                         }
                       })
                     }}>
-                      <img src={iconImage} alt="Add Image"/>
-                      <div>Add Image</div>
+                      <img src={iconImage} alt="Add Texture"/>
+                      <div>Add Texture</div>
                     </div>
                   </div>
                   // temp use browser api to debug
@@ -538,7 +538,24 @@ class InfoPanel extends Component {
             <div className="menu-item delete-timeline" onClick={() => {
               this.deleteTimeline();
             }}>
-              Delete
+              <svg viewBox="0 0 43.15 50.54" xmlSpace="preserve">
+                <g>
+                  <path fill="currentColor" className="bin-cover"
+                    d="M40.72,6.42H30.24V4.85c0-2.68-2.17-4.85-4.85-4.85h-7.64c-2.68,0-4.85,2.17-4.85,4.85v1.58H2.42
+                    C1.09,6.42,0,7.51,0,8.85c0,1.34,1.09,2.42,2.42,2.42h38.3c1.34,0,2.42-1.09,2.42-2.42C43.15,7.51,42.06,6.42,40.72,6.42z
+                    M17.75,6.42V3.89h7.64v2.53H17.75z"/>
+                  <path fill="currentColor" className="bin-body"
+                    d="M8.24,15.88c-1.34,0-2.42,1.09-2.42,2.42v23.75c0,4.69,3.8,8.48,8.48,8.48h14.54c4.69,0,8.48-3.8,8.48-8.48
+                    V18.3c0-1.34-1.09-2.42-2.42-2.42s-2.42,1.09-2.42,2.42v23.75c0,2.01-1.63,3.64-3.64,3.64H14.3c-2.01,0-3.64-1.63-3.64-3.64V18.3
+                    C10.67,16.96,9.58,15.88,8.24,15.88z"/>
+                  <path fill="currentColor" className="bin-body"
+                    d="M19.15,39.02V18.3c0-1.34-1.09-2.42-2.42-2.42s-2.42,1.09-2.42,2.42v20.72c0,1.34,1.09,2.42,2.42,2.42
+                    S19.15,40.36,19.15,39.02z"/>
+                  <path fill="currentColor" className="bin-body"
+                    d="M28.84,39.02V18.3c0-1.34-1.09-2.42-2.42-2.42S24,16.96,24,18.3v20.72c0,1.34,1.09,2.42,2.42,2.42
+                    S28.84,40.36,28.84,39.02z"/>
+                </g>
+              </svg>
             </div>
             {/* <div className="panel-header">
               Animation - {selectedEntity['name']}
