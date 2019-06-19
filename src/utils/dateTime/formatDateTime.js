@@ -3,7 +3,7 @@ import moment from 'moment';
 
 // https://momentjs.com/
 const dateFormatDefault = "YYYY/MM/DD";
-const timeFormatDefault = "hh:mm";
+const timeFormatDefault = "HH:mm";
 const dateTimeFormatDefault = `${dateFormatDefault} ${timeFormatDefault}`;
 
 
