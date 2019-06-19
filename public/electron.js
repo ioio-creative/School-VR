@@ -29,7 +29,7 @@ const getIp = require("./utils/getIp");
 
 /* constants */
 
-const isForceTestExtractAppAsarForWebServer = true;
+const isForceTestExtractAppAsarForWebServer = false;
 const configFilePath = './config.jsonc';
 
 // default values
