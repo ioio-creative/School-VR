@@ -324,14 +324,14 @@
   background-color: var(--selected-background-color);
 }
 #info-panel .menu-item.delete-timeline {
-  /* background-color: #e4bbbb; */
+  color: #4c4c4c;
   position: absolute;
   bottom: 7px;
   right: 7px;
   z-index: 1;
   cursor: pointer;
   width: 28px;
-  height: 31px;
+  height: 28px;
   padding: 6px 7px;
   border-radius: 31px;
   text-align: center;
@@ -456,6 +456,14 @@
 #content-panel .numberSelector .currentFontSize {
   color: #FFFFFF;
   font-size: 20px;
+  display: flex;
+}
+#content-panel .numberSelector .currentFontSize .label {
+  margin-right: 10px;
+}
+
+#content-panel .numberSelector .currentFontSize .value {
+  width: 25px;
 }
 #content-panel .numberSelector .decreaseFontSize,
 #content-panel .numberSelector .increaseFontSize {
@@ -481,7 +489,7 @@
   outline: none;
 }
 #content-panel .panel-body .attribute-row + .attribute-row {
-  border-top: 1px solid #4d5054;
+  border-top: 1px solid #203639;
 }
 #content-panel select {
   padding: 5px 15px;

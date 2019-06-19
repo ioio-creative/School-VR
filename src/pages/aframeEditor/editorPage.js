@@ -349,7 +349,7 @@ class EditorPage extends Component {
           />
           <ButtonsPanel currentLoadedProjectPath={state.loadedProjectFilePath} />
           <AFramePanel user-mode="editor" />
-          <SlidesPanel />
+          <SlidesPanel isEditing={sceneContext.editor && sceneContext.editor.opened} />
           <TimelinePanel />
           <InfoPanel />
           <PreviewPanel />

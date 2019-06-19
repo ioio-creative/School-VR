@@ -168,8 +168,22 @@
   height: 32px;
   width: 32px;
 }
-#buttons-panel .buttons-presentation .button-present img {
+#buttons-panel .buttons-presentation .button-present svg {
   height: 30px;
+}
+#buttons-panel .buttons-presentation .button-present svg .button-background {
+  fill:#1EBDFF;
+  stroke:#1EBDFF;
+  stroke-width:0.2602;
+  stroke-miterlimit:10;
+  transition: all 0.4s;
+}
+#buttons-panel .buttons-presentation .button-present:hover svg .button-background {
+  fill:#009aff;
+  stroke:#009aff;
+}
+#buttons-panel .buttons-presentation .button-present svg .button-text {
+  fill:#FFFFFF;
 }
 #buttons-panel button.button-preview img {
   width: 19px;

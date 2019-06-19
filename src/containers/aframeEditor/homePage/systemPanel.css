@@ -165,7 +165,7 @@ body.maximized #system-buttons button#btn-max-app:after {
   color: #ffffff;
 }
 #system-panel .menu-list .seperator {
-  background-color: #7F7F7F;
+  background-color: #4C4C4C;
   margin: 5px 8px;
   height: 1px;
 }

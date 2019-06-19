@@ -3,8 +3,11 @@
   left: 0;
   right: 0;
   bottom: 0;
+  transition: all 0.4s;
 }
-
+#preview-panel.hide-ui {
+  opacity: 0;
+}
 #preview-panel .slideFunctions-panel {
   position: absolute;
   bottom: -60px;
@@ -61,6 +64,10 @@
   color: #1ebdff;
 }
 
+#preview-panel .slideFunctions-panel .buttons-group .button-playSlide:hover {
+  color: #72d6ff;
+}
+
 #preview-panel .slideFunctions-panel .buttons-group select {
   background-color: #2b3337;
   color: #8597ad;
@@ -68,6 +75,7 @@
   border-radius: 50px;
   border: 0;
   outline: none;
+  font-size: 14px;
 }
 #preview-panel .slideFunctions-panel .buttons-group select:hover {
   color: #FFFFFF;

@@ -1,3 +1,6 @@
+#presenter #slides-panel {
+  transition: all 0.4s;
+}
 #presenter .interfaceIp-panel {
   position: absolute;
   right: 25px;
@@ -6,6 +9,7 @@
   padding: 15px;
   border-radius: 15px;
   color: #FFFFFF;
+  transition: all 0.4s;
 }
 #presenter .interfaceIp-panel .ip {
   background-color: #03141c;
@@ -22,6 +26,16 @@
   padding: 10px 20px;
   border-radius: 50px;
   color: #FFFFFF;
+  display: flex;
+  align-items:  center;
+  transition: all 0.4s;
+}
+/* #presenter .viewerCount-panel:hover {
+  color: #FFFFFF;
+} */
+#presenter .viewerCount-panel svg {
+  height: 16px;
+  margin-right: 10px;
 }
 #presenter .slideFunctions-panel {
   position: absolute;
@@ -31,6 +45,7 @@
   display: flex;
   background-color: rgba(13, 12, 30, 0.8);
   border-radius: 50px;
+  transition: all 0.4s;
 }
 
 #presenter .slideFunctions-panel .buttons-group {
@@ -74,6 +89,10 @@
   color: #1ebdff;
 }
 
+#presenter .slideFunctions-panel .buttons-group .button-playSlide:hover {
+  color: #72d6ff;
+}
+
 #presenter .slideFunctions-panel .buttons-group select {
   background-color: #2b3337;
   color: #8597ad;
@@ -92,4 +111,32 @@
 }
 #presenter .slideFunctions-panel .buttons-group a:hover {
   color: #ffffff;
+}
+
+#presenter.hide-ui .interfaceIp-panel {
+  opacity: 0;
+}
+#presenter.hide-ui .viewerCount-panel {
+  opacity: 0;
+}
+#presenter.hide-ui .slideFunctions-panel {
+  opacity: 0;
+}
+#presenter.hide-ui #slides-panel {
+  opacity: 0;
+}
+#presenter .show-ui-hints {
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  width: 150px;
+  height: 15px;
+  background-color: rgba(0,0,0,0.3);
+  border-radius: 30px;
+  transform: translate(-50%);
+  transition: all 0.4s;
+  z-index: 2;
+}
+#presenter.hide-ui .show-ui-hints {
+  bottom: 15px;
 }

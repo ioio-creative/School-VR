@@ -26,18 +26,48 @@ class PreviewPanel extends Component {
       selectedSlide: null,
       animateIndex: 0,
       isSorting: false,
-      showContextMenu: false
+      showContextMenu: false,
+      showUi: true
     };
     this.animateTick = null;
     this.backButtonClick = this.backButtonClick.bind(this);
+    this.showUi = this.showUi.bind(this);
+    this.hideUi = this.hideUi.bind(this);
+    this.showThenHideUi = this.showThenHideUi.bind(this);
+    this.hideUiTimer = null;
   }
   componentDidMount() {
+    this.hideUi();
+    Events.on('editormodechanged', this.showThenHideUi);
   }
   componentWillUnmount() {
+    Events.removeListener('editormodechanged', this.showThenHideUi);
   }
   backButtonClick(event) {
     event.preventDefault();
     this.props.sceneContext.editor.open();
+  }
+  showThenHideUi() {
+    this.showUi();
+    this.hideUi();
+  }
+  showUi() {
+    if (this.hideUiTimer) {
+      clearTimeout(this.hideUiTimer);
+    }
+    this.setState({
+      showUi: true
+    })
+  }
+  hideUi() {
+    if (this.hideUiTimer) {
+      clearTimeout(this.hideUiTimer);
+    }
+    this.hideUiTimer = setTimeout(()=>{
+      this.setState({
+        showUi: false
+      })
+    }, 2500);
   }
   render() {
     const props = this.props;
@@ -50,7 +80,10 @@ class PreviewPanel extends Component {
     const nextSlide = (currentSlideIdx > slidesList.length - 2? null: slidesList[currentSlideIdx + 1]['id']);
     
     return (
-      <div id="preview-panel" >
+      <div id="preview-panel" className={state.showUi? 'show-ui': 'hide-ui'}
+        onMouseEnter={this.showUi}
+        onMouseLeave={this.hideUi}
+      >
       <div className="slideFunctions-panel">
           <div className="buttons-group">
             <div className={`button-prevSlide${currentSlideIdx === 0? ' disabled': ''}`}

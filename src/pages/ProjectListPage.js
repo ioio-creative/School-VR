@@ -27,7 +27,8 @@ class ProjectItem extends Component {
 
     // state
     this.state = {
-      isShowProjectHandles: false
+      isShowProjectHandles: false,
+      isShowOptionOverlay: false
     };
   }
 
@@ -67,6 +68,16 @@ class ProjectItem extends Component {
     this.hideProjectHandles();    
   }
 
+  handleItemOptionMouseEnter = () => {
+    this.setState({
+      isShowOptionOverlay: true
+    });
+  }
+  handleItemOptionMouseLeave = () => {
+    this.setState({
+      isShowOptionOverlay: false
+    });
+  }
   handleItemRenameClick = _ => {
     ipcHelper.saveSchoolVrFileDialog((err, data) => {
       if (err) {
@@ -168,14 +179,18 @@ class ProjectItem extends Component {
             </div>
           </div>
         </div>      
-        <div className={`project-handles-container ${state.isShowProjectHandles ? 'show' : 'hide'}`}>
+        <div className={`project-handles-container ${state.isShowProjectHandles ? 'show' : 'hide'} ${state.isShowOptionOverlay ? 'show-overlay' : 'hide-overlay'}`}>
           <div className="project-handles">
             <div className="project-preview-container">
               <div className="project-preview">
                 <Link to={routes.presenterWithProjectFilePathQuery(project.path)}>Preview</Link>
               </div>
             </div>
-            <div className="project-options-container">
+            <div className="project-options-overlay" />
+            <div className="project-options-container"
+              onMouseEnter={this.handleItemOptionMouseEnter}
+              onMouseLeave={this.handleItemOptionMouseLeave}
+            >
               <div className="project-options">Options</div>
               <div className="project-options-detail">
                 <div className="project-options-detail-item"

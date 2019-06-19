@@ -237,7 +237,8 @@ class InfoPanel extends Component {
                           // }
                         }, selectedEntity['id']);
                       } */}
-                    }} value={currentValue} />
+                    }} value={currentValue} 
+                    placeholder="Input your text here" />
                   </div>
                   break;
                 }
@@ -398,7 +399,10 @@ class InfoPanel extends Component {
                       }}>
                         <img className="buttonImg" src={iconCircleMinus} />
                       </div>
-                      <div className="currentFontSize">{currentValue || 1}</div>
+                      <div className="currentFontSize">
+                        <div className="label">Size:</div>
+                        <div className="value">{currentValue || 1}</div>
+                      </div>
                       <div className={`increaseFontSize${currentValue === 20? ' disabled': ''}`} onClick={() => {
                         const newValue = Math.min(currentValue + 1, 20);
                         if (staticAttribute.attributeField) {
