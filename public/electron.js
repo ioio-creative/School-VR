@@ -109,17 +109,7 @@ function createWindow() {
     webPreferences: { webSecurity: false },  // for saving and loading assets via local path
   });
 
-  splashScreen.loadURL(`file://${myPath.join(__dirname, 'splash.html')}`);
-  //mainWindow.loadURL(isDev ? `http://localhost:${developmentServerPort}/file-explorer` : `file://${myPath.join(__dirname, '../build/index.html')}`);
-  //mainWindow.loadURL(isDev ? `http://localhost:${developmentServerPort}` : `file://${myPath.join(__dirname, '../build/index.html')}`);
-  mainWindow.loadURL(isDev ? `http://localhost:${developmentServerPort}/projectlist` : `file://${myPath.join(__dirname, '../build/index.html')}`);
-  
-  function showMainWindow() {
-    if (mainWindowReady && splashScreenCountdowned) {
-      mainWindow.show();
-      splashScreen.close();      
-    }
-  }
+  splashScreen.loadURL(`file://${myPath.join(__dirname, 'splash.html')}`);  
 
   splashScreen.on('ready-to-show', async _ => {    
     splashScreen.show();
@@ -130,6 +120,7 @@ function createWindow() {
     // this setTimeout is to allow time for splash screen to show
     // before the thread is being blocked by running fileSystem.extractAll() in extractAppAsarForWebServerAsync()
     setTimeout(async _ => {
+      console.log("splash screen");
       // delete any cached temp project files
       await ProjectFile.deleteAllTempProjectDirectoriesAsync();
       
@@ -155,7 +146,11 @@ function createWindow() {
       // hide splash screen
       setTimeout(_ => {        
         splashScreenCountdowned = true;
-        showMainWindow();
+
+        //mainWindow.loadURL(isDev ? `http://localhost:${developmentServerPort}/file-explorer` : `file://${myPath.join(__dirname, '../build/index.html')}`);
+        //mainWindow.loadURL(isDev ? `http://localhost:${developmentServerPort}` : `file://${myPath.join(__dirname, '../build/index.html')}`);
+        mainWindow.loadURL(isDev ? `http://localhost:${developmentServerPort}/projectlist` : `file://${myPath.join(__dirname, '../build/index.html')}`);
+
       }, splashScreenDurationInMillis);
     }, 1000);
   });
@@ -163,8 +158,9 @@ function createWindow() {
   /* main window lifecycles */
 
   mainWindow.on('ready-to-show', () => {    
-    mainWindowReady = true;
-    showMainWindow();
+    mainWindowReady = true;    
+    mainWindow.show();
+    splashScreen.close();
   });    
 
   mainWindow.on('closed', () => {
@@ -277,7 +273,13 @@ app.on('ready', async _ => {
   createWindow();  
 });
 
-app.on('window-all-closed', () => {
+app.on('window-all-closed', async _ => {
+  console.log('window-all-closed');
+
+  // delete any cached temp project files
+  await ProjectFile.deleteAllTempProjectDirectoriesAsync();
+  await fileSystem.myDeletePromise(webServerFilesDirectory);
+
   if (process.platform !== 'darwin') {
     app.quit();
   }
@@ -578,7 +580,8 @@ ipcMain.on('copyFile', async (event, arg) => {
 
 // saveLoadProject
 
-ipcMain.on('listProjects', async (event, arg) => {  
+ipcMain.on('listProjects', async (event, arg) => {
+  console.log('listProjects')
   const isRequireLoadProject = true;
   ProjectFile.listProjectsAsync(isRequireLoadProject)
     .then((projectFileObjs) => {      

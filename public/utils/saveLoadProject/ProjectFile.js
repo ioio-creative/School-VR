@@ -65,9 +65,9 @@ class ProjectFile {
 
 
     // set derived properties
-    this.hashedSavedProjectFilePath = hashForUniqueId(this.savedProjectFilePath);
+    this.hashedSavedProjectFilePath = `${this.name}_${hashForUniqueId(this.savedProjectFilePath)}`;
     // temp project directories        
-    this.tempProjectDirectoryPath = myPath.join(appDirectory.appTempProjectsDirectory, `${this.hashedSavedProjectFilePath}_${this.name}`);
+    this.tempProjectDirectoryPath = myPath.join(appDirectory.appTempProjectsDirectory, this.hashedSavedProjectFilePath);
     this.tempProjectImageDirectoryPath = myPath.join(this.tempProjectDirectoryPath, projectDirectoryStructure.image);
     this.tempProjectGifDirectoryPath = myPath.join(this.tempProjectDirectoryPath, projectDirectoryStructure.gif);
     this.tempProjectVideoDirectoryPath = myPath.join(this.tempProjectDirectoryPath, projectDirectoryStructure.video);
@@ -254,19 +254,10 @@ class ProjectFile {
     const sortedProjectFileObjs = sortedFileStatObjs.map(fileStatObj => new ProjectFile(null, null, fileStatObj));
 
     // call loadProjectAsync() so that this.projectJson is set.
-    /**
-     * !!!Important!!!
-     * Cannot run the following for loop in parallel p-iteration library
-     * because projectFile.loadProjectAsync() would call ProjectFile.deleteAllTempProjectDirectoriesAsync()
-     */
     if (isRequireLoadProject) {
-      /**
-       * !!!Important!!!
-       * Note that I don't use forEach() here as it's not the behaviour I want with await keyword.
-       */
-      for (let projectFile of sortedProjectFileObjs) {
+      await forEach(sortedProjectFileObjs, async (projectFile) => {
         await projectFile.loadProjectAsync();
-      }      
+      });       
     }
     
     return sortedProjectFileObjs;
@@ -491,7 +482,7 @@ class ProjectFile {
 
     ProjectFile.setCurrentLoadedProjectFilePath(savedProjectFilePath);
 
-    await ProjectFile.deleteAllTempProjectDirectoriesAsync();    
+    await fileSystem.myDeletePromise(tempProjectDirectoryPath);
     
     fileSystem.extractAll(savedProjectFilePath, tempProjectDirectoryPath);
     console.log(`loadProject - loadProjectByProjectNameAsync: Project extracted to ${tempProjectDirectoryPath}`);
