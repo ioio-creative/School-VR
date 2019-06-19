@@ -175,7 +175,7 @@ class TimelineInfoRenderer extends Component {
     return (
       <div className="animatable-params">
         {transformModes.length && 
-          <div className="vec3D-btn-col">
+          <div className={`vec3D-btn-col buttons-${transformModes.length}`}>
             <TransformMode 
               modes={transformModes} 
               onUpdate={(newPosition, newRotation, newScale) => {

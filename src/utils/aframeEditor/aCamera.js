@@ -56,11 +56,11 @@ class ACamera extends AEntity {
     const self = this;
     for (let key in attrs) {
       if (self.animatableAttributes.hasOwnProperty(key)) {
-        self._el.parentElement.setAttribute(key, attrs[key]);
+        self._el.setAttribute(key, attrs[key]);
       } else {
         const staticAttribute = self.staticAttributes.find(attr => attr.attributeKey === key);
         if (staticAttribute) {
-          self._el.parentElement.setAttribute(key, attrs[key]);
+          self._el.setAttribute(key, attrs[key]);
         }
       }
     }
