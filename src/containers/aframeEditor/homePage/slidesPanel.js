@@ -31,6 +31,7 @@ class SortableList extends Component {
       currentElement: null,
       startX: null,
       startY: null,
+      isHoverDeleteEl: false,
     }
     this.onSortStart = this.onSortStart.bind(this);
     this.onSorting = this.onSorting.bind(this);
@@ -105,9 +106,19 @@ class SortableList extends Component {
     const pointer = event.changedTouches ? event.changedTouches[ 0 ] : event;
     const state = this.state;
     const currentElement = state.currentElement;
-    this.setState({
-      newIdx: Math.round((pointer.pageX - state.startX) / state.sourceElement.offsetWidth) + state.originalIdx
-    })
+    const newState = {
+      newIdx: Math.round((pointer.pageX - state.startX) / state.sourceElement.offsetWidth) + state.originalIdx,
+      isHoverDeleteEl: false
+    };
+    if (props.deleteDropEl) {
+      const deleteArea = props.deleteDropEl.getBoundingClientRect();
+      if ((pointer.pageX >= deleteArea.left && pointer.pageX <= deleteArea.left + deleteArea.width) &&
+      (pointer.pageY >= deleteArea.top && pointer.pageY <= deleteArea.top + deleteArea.height)) {
+        // is on delete element
+        newState['isHoverDeleteEl'] = true;
+      }
+    }
+    this.setState(newState);
     TweenMax.set(currentElement, {
       x: pointer.pageX - state.startX,
       y: pointer.pageY - state.startY
@@ -217,7 +228,7 @@ class SortableList extends Component {
       }
     );
     
-    return <div className="sortable-list">
+    return <div className={`sortable-list ${state.isHoverDeleteEl? ' prepare-delete': ''}`}>
       {children}
     </div>
   }
@@ -357,11 +368,11 @@ class SlidePanel extends Component {
                 >
                   <div className="slide-idx">{idx + 1}</div>
                   <div className="preview-img">
-                    <img
+                    {slideImg && <img
                       // className={((this.state.selectedSlide === slideId && this.state.animateIndex === idx)? 'active': '')}
                       // key={idx} 
                       src={slideImg}
-                    />
+                    />}
                   </div>
                   <div className="slide-info">
                     {/*Math.floor(totalTime / 60).toString().padStart(2,'0') + ':' + Math.floor(totalTime % 60).toString().padStart(2,'0')*/}
@@ -375,7 +386,24 @@ class SlidePanel extends Component {
             <Fragment>
               <div className="slide add-slide" onClick={this.addSlide}></div>
               <div className="slide delete-slide" ref={ref=>this.deleteDropEl=ref}>
-                <FontAwesomeIcon icon="trash-alt" />
+                <svg viewBox="0 -20 43.15 50.54" xmlSpace="preserve">
+                  <g>
+                    <path fill="currentColor" className="bin-cover"
+                      d="M40.72,6.42H30.24V4.85c0-2.68-2.17-4.85-4.85-4.85h-7.64c-2.68,0-4.85,2.17-4.85,4.85v1.58H2.42
+                      C1.09,6.42,0,7.51,0,8.85c0,1.34,1.09,2.42,2.42,2.42h38.3c1.34,0,2.42-1.09,2.42-2.42C43.15,7.51,42.06,6.42,40.72,6.42z
+                      M17.75,6.42V3.89h7.64v2.53H17.75z"/>
+                    <path fill="currentColor" className="bin-body"
+                      d="M8.24,15.88c-1.34,0-2.42,1.09-2.42,2.42v23.75c0,4.69,3.8,8.48,8.48,8.48h14.54c4.69,0,8.48-3.8,8.48-8.48
+                      V18.3c0-1.34-1.09-2.42-2.42-2.42s-2.42,1.09-2.42,2.42v23.75c0,2.01-1.63,3.64-3.64,3.64H14.3c-2.01,0-3.64-1.63-3.64-3.64V18.3
+                      C10.67,16.96,9.58,15.88,8.24,15.88z"/>
+                    <path fill="currentColor" className="bin-body"
+                      d="M19.15,39.02V18.3c0-1.34-1.09-2.42-2.42-2.42s-2.42,1.09-2.42,2.42v20.72c0,1.34,1.09,2.42,2.42,2.42
+                      S19.15,40.36,19.15,39.02z"/>
+                    <path fill="currentColor" className="bin-body"
+                      d="M28.84,39.02V18.3c0-1.34-1.09-2.42-2.42-2.42S24,16.96,24,18.3v20.72c0,1.34,1.09,2.42,2.42,2.42
+                      S28.84,40.36,28.84,39.02z"/>
+                  </g>
+                </svg>
               </div>
             </Fragment>
           }
@@ -392,8 +420,8 @@ class SlidePanel extends Component {
             }}>
               <div className="menu-item-wrapper">
                 <div className="menu-item" onClick={this.copySlide}>Copy Slide</div>
-                <div className="seperator" onClick={(e)=>e.preventDefault()}></div>
-                <div className="menu-item" onClick={_=>alert('maybe need some slide properties settings here')}>Properties</div>
+                {/* <div className="seperator" onClick={(e)=>e.preventDefault()}></div>
+                <div className="menu-item" onClick={_=>alert('maybe need some slide properties settings here')}>Properties</div> */}
               </div>
             </div>
           </div>

@@ -425,7 +425,7 @@ class TimelinePanel extends Component {
                     (" item-count-" + entityTimelines.length)
                   }
                   style={{
-                    width: Math.max(state.timelineListElWidth, (Math.ceil(totalTime / 5) * 5 + 1) * state.timeScale) - 5
+                    width: Math.max(state.timelineListElWidth, (Math.ceil(totalTime / 5) * 5 + 1) * state.timeScale) - 10
                   }}
                 >
                   <div className="entity-timeline" onClick={(event) => {
@@ -435,7 +435,7 @@ class TimelinePanel extends Component {
                       }
                     }}
                     empty-text="Add animation +"
-                    style={{width: Math.max(state.timelineListElWidth, (Math.ceil(totalTime / 5) * 5 + 1) * state.timeScale) - 5}}
+                    style={{width: Math.max(state.timelineListElWidth, (Math.ceil(totalTime / 5) * 5 + 1) * state.timeScale) - 10}}
                   >
                     {entityTimelines.map((timelineData) => {
                       const self = this;

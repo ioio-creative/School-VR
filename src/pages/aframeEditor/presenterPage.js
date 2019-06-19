@@ -324,7 +324,7 @@ class PresenterPage extends Component {
           ]}
         />
         {/* <ButtonsPanel /> */}
-        <AFramePanel disableVR={true} socket={state.socket} />
+        <AFramePanel disableVR={true} socket={state.socket} user-mode="presenter" />
         <SlidesPanel isEditing={false} socket={state.socket} />
         {/* <TimelinePanel /> */}
         {/* <InfoPanel /> */}

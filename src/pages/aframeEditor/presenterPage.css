@@ -76,7 +76,7 @@
 
 #presenter .slideFunctions-panel .buttons-group select {
   background-color: #2b3337;
-  color: #4d5054;
+  color: #8597ad;
   padding: 10px 30px;
   border-radius: 50px;
   border: 0;
@@ -88,7 +88,7 @@
 #presenter .slideFunctions-panel .buttons-group a {
   padding: 5px 15px;
   text-decoration: none;
-  color: #4d5054;
+  color: #8597ad;
 }
 #presenter .slideFunctions-panel .buttons-group a:hover {
   color: #ffffff;

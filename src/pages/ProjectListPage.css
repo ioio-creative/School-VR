@@ -131,12 +131,15 @@
 #project-list-page .select-selected {  
   background-color: #042635;
 }
+#project-list-page .select-selected.select-arrow-active {  
+  background-color: #02141E;
+}
 
 /*style the arrow inside the select element:*/
 #project-list-page .select-selected:after {
   position: absolute;
   content: "";
-  top: 14px;
+  top: 17px;
   right: 10px;
   width: 0;
   height: 0;
@@ -147,7 +150,7 @@
 /*point the arrow upwards when the select box is open (active):*/
 #project-list-page .select-selected.select-arrow-active:after {
   border-color: transparent transparent #8697AD transparent;
-  top: 7px;
+  top: 10px;
 }
 
 /*style the items (options), including the selected item:*/
@@ -166,7 +169,7 @@
 /*style items (options):*/
 #project-list-page .select-items {
   position: absolute;
-  background-color: #F00; /* var(--backgroundColor); */
+  background-color: #02141E; /* var(--backgroundColor); */
   top: 100%;
   left: 0;
   right: 0;

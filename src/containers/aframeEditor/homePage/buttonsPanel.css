@@ -1,11 +1,12 @@
 #buttons-panel {
   position: absolute;
-  top: 30px;
+  top: 40px;
   left: 0;
   right: 0;
   z-index: 1;
-  background-color: rgba(13, 12, 30, 0.8);
+  background-color: rgba(2, 20, 30, 0.8);
   display: flex;
+  padding: 10px 0;
 }
 #buttons-panel button {
   background-color: transparent;
@@ -13,9 +14,13 @@
   cursor: pointer;
   vertical-align: middle;
   margin-right: 6px;
+  outline: 0;
+  color: #FFFFFF;
 }
 #buttons-panel button:hover {
-  border: 1px solid #444444;
+  /* border: 1px solid #444444; */
+  background-color: #254442;
+  border-radius: 5px;
 }
 #buttons-panel button img {
   width: 26px;
@@ -55,9 +60,6 @@
   padding-left: 0;
 }
 
-#buttons-panel button {
-  color: #FFFFFF;
-}
 #button-cone #cone-linear-gradient stop {
   transition: all 0.4s;
 }
@@ -152,8 +154,9 @@
   height: 19px;
   background: #4d5054;
   display: block;
-  top: 15.5px;
+  top: 50%;
   position: absolute;
+  transform: translateY(-50%);
 }
 
 #buttons-panel .buttons-list.buttons-2d .addText img {
@@ -166,7 +169,7 @@
   width: 32px;
 }
 #buttons-panel .buttons-presentation .button-present img {
-  height: 26px;
+  height: 30px;
 }
 #buttons-panel button.button-preview img {
   width: 19px;

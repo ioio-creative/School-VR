@@ -6,16 +6,18 @@
   --default-color: #8597ad;
 }
 #timeline-panel .timeline-list::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 10px;
+  height: 10px;
 }
 #timeline-panel .timeline-list::-webkit-scrollbar-thumb {
-  background-color: red;
+  background-color: #8597ad;
+  border-radius: 10px;
 }
 #timeline-panel .timeline-list::-webkit-scrollbar-corner {
-  border-top: 5px solid red;
-  border-right: 5px solid white;
+  /* border-top: 5px solid red;
+  border-right: 5px solid white; */
   display: contents;
+  border-top: 5px solid transparent;
 }
 #timeline-panel {
   background-color: var(--panel-background-color);
@@ -371,7 +373,7 @@
   right: 0;
   width: 25px;
   height: 20px;
-  padding: 7.5px 7.5px;
+  padding: 20px 7.5px;
   cursor: pointer;
 }
 .panel .panel-header .toggle-panel:after {

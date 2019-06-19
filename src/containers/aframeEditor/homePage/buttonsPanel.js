@@ -55,7 +55,7 @@ class ButtonsPanel extends Component {
     sceneContext.addNewEntity(type);
   }
   toggleEditor() {
-    this.props.sceneContext.editor.toggle();
+    this.props.sceneContext.toggleEditor();
   }
   resetView() {
     const props = this.props;
@@ -92,7 +92,7 @@ class ButtonsPanel extends Component {
         <div className="seperator"></div>
         <div className="buttons-list buttons-2d">
           <div className="buttons-list-wrapper">
-            <button onClick={()=>this.addNewEntity('a-plane')} title={'Add a image'}>
+            <button onClick={()=>this.addNewEntity('a-image')} title={'Add an image'}>
               <img src={iconImage} alt=""/>
             </button>
             <button onClick={()=>this.addNewEntity('a-video')} title={'Add a video'}>
@@ -122,7 +122,7 @@ class ButtonsPanel extends Component {
               scale
             </button> */}
             
-            <button onClick={()=>this.addNewEntity('a-navigation')} style={{fontSize: 35}} title={'Add a navigation'}>
+            <button onClick={()=>this.addNewEntity('a-navigation')} title={'Add a navigation'}>
               <img src={iconNavigation} alt=""/>
             </button>
           </div>
@@ -142,6 +142,8 @@ class ButtonsPanel extends Component {
             <div className="seperator"></div>
             <button className="button-preview"
               onClick={this.toggleEditor}
+              // disable it to prevent press space trigger it when hide
+              disabled={!(sceneContext.editor && sceneContext.editor.opened)}
             >
               <img src={iconPreview} alt="" />
             </button>

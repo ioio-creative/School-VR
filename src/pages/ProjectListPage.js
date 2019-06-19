@@ -440,22 +440,22 @@ function Menu(props) {
     <MenuComponent 
       menuButtons={[
         {
-          text: 'File',
+          label: 'File',
           // onClick: _=> { console.log('file') },
           children: [
             {
-              text: 'New',
+              label: 'New',
               onClick: handleBtnNewClick
             },
             {
-              text: 'Open',
+              label: 'Open',
               onClick: handleBtnOpenClick
             },
             {
-              text: '-'
+              label: '-'
             },
             {
-              text: 'Exit',
+              label: 'Exit',
               onClick: handleBtnExitClick
             }
           ]

@@ -1,14 +1,17 @@
 .attribute-buttons-wrapper {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
 }
 .attribute-buttons-wrapper .attribute-button {
-  flex: 0 0 50%;
+  flex: 0 0 37%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  margin-top: 11px;
 }
 .attribute-buttons-wrapper .attribute-button.preview-col {
   width: 100%;

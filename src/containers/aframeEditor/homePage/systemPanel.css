@@ -3,7 +3,7 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 30px;
+  height: 50px;
   z-index: 100;
   background-color: #3C3C3C;
   -webkit-app-region: drag;
@@ -24,7 +24,9 @@
   min-width: 0;
   display: flex;
   justify-content: center;
-  font-size: 12px;
+  font-size: 10px;
+  color: #c5c5c5;
+  margin-right: 10px;
 }
 #app-name .app-name,
 #app-name .hyphen,
@@ -45,13 +47,8 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  margin: 1px 5px 1px 5px;
+  margin: 1px 16px 1px 14px;
   align-self: center;
-}
-#app-name {
-  color: #FFFFFF;
-  /* line-height: 20px; */
-  margin-right: 10px;
 }
 #app-buttons,
 #system-buttons {

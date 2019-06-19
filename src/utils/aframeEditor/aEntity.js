@@ -3,6 +3,7 @@ import { jsonCopy } from "globals/helperfunctions";
 class AEntity {
   constructor(el) {
     this._type = 'a-entity';
+    this._name = 'entity';
     this._staticAttributesValues = {};
     this._animatableAttributesValues = {};
     this._staticAttributes = {};

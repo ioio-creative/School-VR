@@ -31,8 +31,9 @@ const entityModel = {
   'a-pyramid': APyramid,
   'a-sphere': ASphere,
   'a-plane': APlane, //InfoTypePlane,
+  'a-image': APlane, //InfoTypePlane,
   'a-triangle': ABox, //InfoTypeTriangle,
-  'a-image': ABox, //InfoTypeImage
+  // 'a-image': ABox, //InfoTypeImage
   'a-video': AVideo,
   'a-camera': ACamera,
   'a-sky': ASky,
@@ -152,6 +153,8 @@ class SceneContextProvider extends Component {
 
     this.resetView = this.resetView.bind(this);
 
+    this.toggleEditor = this.toggleEditor.bind(this);
+
     this.takeSnapshot = this.takeSnapshot.bind(this);
 
     this.events = {
@@ -185,6 +188,9 @@ class SceneContextProvider extends Component {
             timelineId: null
           })
         }
+      },
+      'editormodechanged': () => {
+        this.forceUpdate();
       }
     }
   }
@@ -193,6 +199,7 @@ class SceneContextProvider extends Component {
     // init the data
     this.startEventListener('editor-load');
     this.startEventListener('objectselected');
+    this.startEventListener('editormodechanged');
     // in case the editor loaded before context load
     // const autoInit = setInterval(() => {
     //   Events.emit('getEditorInstance', (o) => {
@@ -566,7 +573,7 @@ class SceneContextProvider extends Component {
       // console.log(this.editor);
       // debugger;
       this.editor && this.editor.selectEntity(null);
-      const newTl = this.rebuildTimeline();
+      const newTl = this.rebuildTimeline(false);
       if (autoPlay) {
         newTl.then(tl => tl.play(0));
       }
@@ -1287,7 +1294,9 @@ class SceneContextProvider extends Component {
     return this.state.redoQueue.length;
   }
   componentWillUnmount() {
-
+    this.stopEventListener('editor-load');
+    this.stopEventListener('objectselected');
+    this.stopEventListener('editormodechanged');
   }
   flattenJSON(json, prefix = '') {
     let flatted = {};
@@ -1325,7 +1334,7 @@ class SceneContextProvider extends Component {
     })
     return nested;
   }
-  rebuildTimeline() {
+  rebuildTimeline(generateThumb = true) {
     return new Promise((resolve, reject) => {
       // use timelinemax to build the timeline here
       this.setState((prevState) => {
@@ -1460,7 +1469,7 @@ class SceneContextProvider extends Component {
         })
         // tl.play(0, false).stop().seek(0.001).seek(0, false);
         // const snapshot = this.takeSnapshot();
-        if (this.editor.opened) {
+        if (this.editor.opened && generateThumb) {
           currentSlide.image = this.takeSnapshot();
         }
         // setTimeout(()=>{
@@ -1674,6 +1683,11 @@ class SceneContextProvider extends Component {
   updateEditor(editor) {
     this.editor = editor;
   }
+
+  toggleEditor() {
+    this.editor.toggle();
+    // this.forceUpdate();
+  }
   render() {
     // console.log('context render');
     const props = this.props;
@@ -1752,6 +1766,7 @@ class SceneContextProvider extends Component {
           // editor
           editor: this.editor,
           updateEditor: this.updateEditor,
+          toggleEditor: this.toggleEditor,
           // variables, should use functions to return?
           // appName: this.state.appName,
           // projectName: this.state.projectName,
