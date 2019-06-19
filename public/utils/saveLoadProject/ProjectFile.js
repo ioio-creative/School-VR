@@ -5,6 +5,7 @@ const myPath = require('../fileSystem/myPath');
 const CustomedFileStats = require('../fileSystem/CustomedFileStats');
 const isNonEmptyArray = require('../variableType/isNonEmptyArray');
 const parseDataToSaveFormat = require('./parseDataToSaveFormat');
+const {hashForUniqueId} = require('../crypto');
 
 
 /* current loaded project (singleton) */
@@ -31,7 +32,9 @@ class ProjectFile {
     this.savedProjectFilePath = ""; 
     this.projectFileStats = null;
 
-    this.projectJson = null;  // set in loadProjectByFilePathAsync
+    // the following are set in loadProjectByFilePathAsync
+    this.projectJson = null;  
+    this.base64ThumbnailStr = null;
     
     if (projectName) {
       this.name = projectName;
@@ -61,9 +64,10 @@ class ProjectFile {
     }
 
 
-    // set derived properties        
+    // set derived properties
+    this.hashedSavedProjectFilePath = hashForUniqueId(this.savedProjectFilePath);
     // temp project directories        
-    this.tempProjectDirectoryPath = myPath.join(appDirectory.appTempProjectsDirectory, this.name);
+    this.tempProjectDirectoryPath = myPath.join(appDirectory.appTempProjectsDirectory, `${this.hashedSavedProjectFilePath}_${this.name}`);
     this.tempProjectImageDirectoryPath = myPath.join(this.tempProjectDirectoryPath, projectDirectoryStructure.image);
     this.tempProjectGifDirectoryPath = myPath.join(this.tempProjectDirectoryPath, projectDirectoryStructure.gif);
     this.tempProjectVideoDirectoryPath = myPath.join(this.tempProjectDirectoryPath, projectDirectoryStructure.video);
@@ -97,10 +101,7 @@ class ProjectFile {
 
       'saveImageToTempAsync',
       'saveGifToTempAsync',
-      'saveVideoToTempAsync',
-
-      'isProjectFileExistAsync',
-      'isProjectNameUsedAsync',
+      'saveVideoToTempAsync',      
 
       'convertAssetSrcToProperAbsolutePath',
       'getAllExistingAssetFileAbsolutePathsInTempAsync',
@@ -119,6 +120,10 @@ class ProjectFile {
 
 
   /* getters or setters */
+  /**
+   * !!!Important!!!
+   * Note properties of objects retrieved via getters / setters cannot be sent via IPC
+   */  
 
   /* end of getters or setters */  
 
@@ -265,30 +270,8 @@ class ProjectFile {
     }
     
     return sortedProjectFileObjs;
-  }
-
-  static async getExistingProjectNamesAsync() {
-    const projects = await ProjectFile.listProjectsAsync();  
-    const projectNames = projects.map((project) => {
-      return project.name;
-    });
-    return projectNames;  
   }  
 
-  async isProjectFileExistAsync() {
-    const projectName = this.name;
-    const existingProjectNames = await ProjectFile.getExistingProjectNamesAsync();
-    const isTheNamedProjectExist = existingProjectNames.includes(projectName);
-    return isTheNamedProjectExist;
-  }
-
-  async isProjectNameUsedAsync() {
-    const projectName = this.name;
-    const existingProjectNames = await ProjectFile.getExistingProjectNamesAsync();
-    // TODO: isCurrentLoadedProject now is checking project file path instead of project name
-    const isNameUsed = !ProjectFile.isCurrentLoadedProject(projectName) && existingProjectNames.includes(projectName);
-    return isNameUsed;
-  }
   /* end of listProjects */
 
 
@@ -481,18 +464,8 @@ class ProjectFile {
     let savedProjectObj;
 
     // save in temp folder before zip (in appTempProjectsDirectory)
-      
-    // check if projectName is already used
-    // TODO: do we need to check isProjectNameUsedAsync() ?
-    // const isNameUsed = await this.isProjectNameUsedAsync(projectName);
-
-    // if (isNameUsed) {      
-    //   const projectNameTakenError = new Error(`Project name "${projectName}" is used`);
-    //   throw projectNameTakenError;
-    // }
-
-    // check if tempProjectDir already exists, if exists, delete it
-    // actually this step may be redundant because I would check isProjectNameUsedAsync        
+          
+    // check if tempProjectDir already exists, if exists, delete it      
     if (!ProjectFile.isCurrentLoadedProject(this.savedProjectFilePath)) {
       //console.log("is not current loaded project");
       await fileSystem.myDeletePromise(this.tempProjectDirectoryPath);            
