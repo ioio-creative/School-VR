@@ -4,6 +4,7 @@ import {Link} from 'react-router-dom';
 import MenuComponent from 'components/menuComponent';
 import CrossButton from 'components/crossButton';
 
+import config from 'globals/config';
 import ipcHelper from 'utils/ipc/ipcHelper';
 import routes from 'globals/routes';
 import {funcFactoryForCompareFileStatsByProperty} from 'utils/saveLoadProjectHelper/listProjectsAsync';
@@ -22,6 +23,10 @@ class ProjectItem extends Component {
   constructor(props) {
     super(props);
 
+    // constants
+    this.defaultThumbnailSrc = getAbsoluteUrlFromRelativeUrl("images/ProjectListPage/thumbnail1.svg");
+
+    // state
     this.state = {
       isShowProjectHandles: false
     };
@@ -56,7 +61,42 @@ class ProjectItem extends Component {
   }
 
   handleItemMouseLeave = _ => {
-    this.hideProjectHandles();    
+    //this.hideProjectHandles();    
+  }
+
+  handleItemRenameClick = _ => {
+
+  }
+
+  handleItemCopyToNewClick = _ => {
+    
+  }
+
+  handleItemDeleteClick = _ => {
+    const props = this.props;
+    const project = props.item;
+
+    const message = 'Are you sure you want to delete this project?';
+    const detail = project.savedProjectFilePath;
+    ipcHelper.showYesNoWarningMessageBox(message, detail, (err, data) => {
+      if (err) {
+        handleErrorWithUiDefault(err);
+        return;
+      }
+
+      const btnId = data.buttonId;
+      const isDelete = btnId === 0;
+      if (isDelete) {
+        ipcHelper.deleteFile(project.savedProjectFilePath, (err, data) => {
+          if (err) {
+            handleErrorWithUiDefault(err);
+            return;
+          }
+
+          props.handleItemDeleteClickFunc(project);
+        });
+      }
+    });
   }
 
   /* end of event handlers */
@@ -66,9 +106,9 @@ class ProjectItem extends Component {
     const props = this.props;
     const state = this.state;
 
-    const project = props.item;
-
-    const thumbnailSrc = project.base64ThumbnailStr || getAbsoluteUrlFromRelativeUrl("images/ProjectListPage/thumbnail1.svg");
+    const project = props.item;    
+    
+    const thumbnailSrc = project.base64ThumbnailStr || this.defaultThumbnailSrc;
 
     return (    
       <div className="project-item"
@@ -98,6 +138,23 @@ class ProjectItem extends Component {
             </div>
             <div className="project-options-container">
               <div className="project-options">Options</div>
+              <div className="project-options-detail">
+                <div className="project-options-detail-item"
+                  onClick={this.handleItemRenameClick}
+                >
+                  Rename
+                </div>
+                <div className="project-options-detail-item"
+                  onClick={this.handleItemCopyToNewClick}
+                >
+                  Copy to New
+                </div>
+                <div className="project-options-detail-item"
+                  onClick={this.handleItemDeleteClick}
+                >
+                  Delete
+                </div>
+              </div>
             </div>            
             <div className="project-edit-container">
               <div className="project-edit">
@@ -113,7 +170,9 @@ class ProjectItem extends Component {
 
   
 class ProjectList extends Component {
-  projectFilterPredicate = project => {
+  /* methods */
+
+  itemFilterPredicate = project => {
     const projectSearchText = this.props.projectSearchText;
     if (projectSearchText === "") {
       return true;
@@ -121,20 +180,30 @@ class ProjectList extends Component {
     return project.name.toLowerCase().includes(projectSearchText.toLowerCase());
   }
 
+  /* end of methods */
+
+
+  /* event handlers */
+
+  handleItemDeleteClick = project => {    
+    this.props.handleItemDeleteClickFunc(project);
+  }
+
+  /* end of event handlers */
+
+
   render() {
     const props = this.props;
 
-    const items = props.items;
+    const projects = props.items;
 
     // should still show new project button
-    // if (items.length === 0) {
+    // if (projects.length === 0) {
     //   return null;
     // }
 
-    const projects = items;
-
     // filter projects
-    const filteredProjects = projects.filter(this.projectFilterPredicate);
+    const filteredProjects = projects.filter(this.itemFilterPredicate);
 
     // order projects
     let compareProjectFunc;
@@ -159,6 +228,8 @@ class ProjectList extends Component {
         <ProjectItem 
           key={project.path}
           item={project}
+
+          handleItemDeleteClickFunc={this.handleItemDeleteClick}
         />
       );
     });
@@ -307,7 +378,7 @@ class ProjectOrderSelect extends Component {
 
 
   render() {
-    const state = this.state;
+    //const state = this.state;
     return (
       <div className="project-order-select custom-select" ref={this.setCustomSelectContainerRef}>
         <select ref={this.setCustomSelectRef}>
@@ -479,11 +550,19 @@ class ProjectListPage extends Component {
     this.props.history.push(routes.editor);
   }
 
+  handleProjectDeleteClick = projectToDelete => {
+    this.setState((state, props) => {
+      return {
+        projects: state.projects.filter(project => project !== projectToDelete)
+      };
+    });
+  }
+
   /* end of event handlers */
 
   render() {
     const props = this.props;
-    const state = this.state;    
+    const state = this.state;        
 
     return (
       <div id="project-list-page">        
@@ -511,6 +590,8 @@ class ProjectListPage extends Component {
               projectOrderSelectValue={state.projectOrderSelectValue}
               projectSearchText={state.projectSearchText}
               setCreateNewProjectBlockRefFunc={this.setCreateNewProjectBlockRef}
+
+              handleItemDeleteClickFunc={this.handleProjectDeleteClick}
             />
           </div>
           <div className={`project-new ${state.isShowSmallProjectNewButton ? 'show' : 'hide'}`}>

@@ -164,10 +164,29 @@ class EditorPage extends Component {
       if (err) {
         handleErrorWithUiDefault(err);
         return;
-      }      
-      this.setState({
-        loadedProjectFilePath: projectFilePath
-      });
+      }
+
+      const state = this.state;
+
+      if (state.loadedProjectFilePath !== projectFilePath) {  // save as case
+        /**
+         * !!!Important!!!: 
+         * we run setState({loadedProjectFilePath}) and sceneContext.setProjectName()
+         * instead of loadProject() because loadProject takes time
+         * 
+         * also using loadProject() would produce errors in sceneContext's addAsset() method,
+         * which would not update assetsList items (src, etc.) if asset has same id
+         */
+
+        //this.loadProject(projectFilePath);
+
+        this.setState({
+          loadedProjectFilePath: projectFilePath
+        });
+
+        const projectName = fileHelper.getFileNameWithoutExtension(projectFilePath);
+        sceneContext.setProjectName(projectName);
+      }
     });
   }
 
@@ -250,7 +269,7 @@ class EditorPage extends Component {
 
   render() {
     //const props = this.props;
-    //const state = this.state;
+    const state = this.state;
     const sceneContext = this.props.sceneContext;
     const menuButtons = [
       {
@@ -328,7 +347,7 @@ class EditorPage extends Component {
             // projectName="Untitled_1"
             menuButtons={menuButtons}
           />
-          <ButtonsPanel currentLoadedProjectPath={this.state.loadedProjectFilePath} />
+          <ButtonsPanel currentLoadedProjectPath={state.loadedProjectFilePath} />
           <AFramePanel user-mode="editor" />
           <SlidesPanel />
           <TimelinePanel />

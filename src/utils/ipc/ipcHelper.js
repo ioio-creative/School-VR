@@ -62,8 +62,8 @@ function removeListener(channel, listener) {
 
 
 function generalIpcCall(channelName, callBack = null, objToSend = null) {
-  if (isFunction(callBack)) {
-    ipc.once(`${channelName}Response`, (event, arg) => {
+  if (isFunction(callBack)) {    
+    ipc.once(`${channelName}Response`, (event, arg) => {      
       if (arg.err) {
         callBack(`${channelName}: ${arg.err}`, arg.data);
       } else {
@@ -176,10 +176,6 @@ function readdir(dirPath, callBack) {
   });
 }
 
-function createDirectoriesIfNotExists(directoryPaths, callBack) {  
-  generalIpcCall('createDirectoriesIfNotExists', callBack, directoryPaths);
-};
-
 function readFile(filePath, callBack) {  
   generalIpcCall('readFile', callBack, filePath);
 };
@@ -228,11 +224,6 @@ function loadProjectByProjectFilePath(filePath, callBack) {
   generalIpcCall('loadProjectByProjectFilePath', callBack, filePath);
 };
 
-// delete any cached temp project files
-function deleteAllTempProjectDirectories(callBack) {
-  generalIpcCall('deleteAllTempProjectDirectories', callBack);
-}
-
 function isCurrentLoadedProject(projectFilePath, callBack) {
   generalIpcCall('isCurrentLoadedProject', callBack, projectFilePath);
 }
@@ -276,6 +267,25 @@ function showSaveDialog(options, callBack) {
 }
 
 /* end of vanilla electron dialog */
+
+
+/* show message box */
+
+function showYesNoQuestionMessageBox(message, detail, callBack) {
+  generalIpcCall('showYesNoQuestionMessageBox', callBack, {    
+    message: message,
+    detail: detail
+  });
+}
+
+function showYesNoWarningMessageBox(message, detail, callBack) {
+  generalIpcCall('showYesNoWarningMessageBox', callBack, {    
+    message: message,
+    detail: detail
+  });
+}
+
+/* end of show message box */
 
 
 /* for presentation */
@@ -323,8 +333,7 @@ export default {
   base64Decode,
   createPackage,
   extractAll,
-  readdir,
-  createDirectoriesIfNotExists,
+  readdir,  
   readFile,
   writeFile,
   deleteFile,
@@ -334,8 +343,7 @@ export default {
   getExistingProjectNames,
   saveProject,
   parseDataToSaveFormat,
-  loadProjectByProjectFilePath,
-  deleteAllTempProjectDirectories,
+  loadProjectByProjectFilePath,  
   isCurrentLoadedProject,
 
   // window dialog
@@ -348,6 +356,10 @@ export default {
   // vanilla electron dialog
   showOpenDialog,
   showSaveDialog,
+
+  // show message box
+  showYesNoQuestionMessageBox,
+  showYesNoWarningMessageBox,
 
   // for presentation
   getPresentationServerInfo,

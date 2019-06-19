@@ -1,5 +1,6 @@
 import path from 'path';
 import mimeTypes from 'mime-types';
+import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 
 
 /* path api */
@@ -15,12 +16,21 @@ const getFileExtensionWithoutLeadingDot = (filePath) => {
 };
 
 const getFileNameWithExtension = (filePath) => {
-  return path.basename(filePath);
+  // TODO:
+  const customedSep = '\\';
+  const filePathComponents = filePath.split(customedSep);
+  if (isNonEmptyArray(filePathComponents)) {
+    return filePathComponents[filePathComponents.length - 1];
+  } else {
+    return "";
+  }  
 };
 
 const getFileNameWithoutExtension = (filePath) => {
-  // https://stackoverflow.com/questions/4250364/how-to-trim-a-file-extension-from-a-string-in-javascript
-  return path.basename(filePath).split('.').slice(0, -1).join('.');
+  // https://stackoverflow.com/questions/4250364/how-to-trim-a-file-extension-from-a-string-in-javascript  
+  //return path.basename(filePath).split('.').slice(0, -1).join('.');
+
+  return getFileNameWithExtension(filePath).split('.').slice(0, -1).join('.');
 };
 
 const join = (...paths) => {  

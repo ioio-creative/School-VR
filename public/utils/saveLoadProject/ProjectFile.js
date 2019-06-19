@@ -25,16 +25,11 @@ class ProjectFile {
   // just need to enter either 1 of the 3 arguments, others can be null
   // if 1st argument is not null, 2nd and 3rd arguments will be ignored
   // so on and so forth
-  constructor(projectName, projectFilePath, customedProjectFileStats, base64ThumbnailStr = null) {    
+  constructor(projectName, projectFilePath, customedProjectFileStats) {
     this.name = "";
     // saved project
     this.savedProjectFilePath = ""; 
     this.projectFileStats = null;
-
-    // TODO: can be deleted later
-    this.customedProjectFileStats = null;
-
-    this.base64ThumbnailStr = base64ThumbnailStr;
 
     this.projectJson = null;  // set in loadProjectByFilePathAsync
     
@@ -78,7 +73,7 @@ class ProjectFile {
       this.tempProjectVideoDirectoryPath
     ];
     // temp project files
-    this.tempProjectJsonFilePath = myPath.join(this.tempProjectDirectoryPath, this.name + config.jsonFileExtensionWithLeadingDot);
+    this.tempProjectJsonFilePath = myPath.join(this.tempProjectDirectoryPath, "project" + config.jsonFileExtensionWithLeadingDot);
     // web server project directories
     this.webServerProjectDirectoryPath = '';    
 
@@ -221,8 +216,8 @@ class ProjectFile {
     };
   }
 
-  // TODO: this function has to be optimized
-  static async listProjectsAsync() {
+  // TODO: this function may need to be optimized
+  static async listProjectsAsync(isRequireLoadProject = false) {
     const appProjectsDirectory = appDirectory.appProjectsDirectory;  
     const fileCustomedStatsObjs = await fileSystem.readdirWithStatPromise(appProjectsDirectory);
 
@@ -253,20 +248,23 @@ class ProjectFile {
 
     const sortedProjectFileObjs = sortedFileStatObjs.map(fileStatObj => new ProjectFile(null, null, fileStatObj));
 
-    // extract each project file to get thumbnail from project json
+    // call loadProjectAsync() so that this.projectJson is set.
     /**
      * !!!Important!!!
      * Cannot run the following for loop in parallel p-iteration library
      * because projectFile.loadProjectAsync() would call ProjectFile.deleteAllTempProjectDirectoriesAsync()
      */
-    const sortedProjectFileObjsWithThumbnail = [];
-    for (let projectFile of sortedProjectFileObjs) {
-      const projectJson = await projectFile.loadProjectAsync();
-      const base64ThumbnailStr = projectJson.entitiesList.slides[0].image;
-      sortedProjectFileObjsWithThumbnail.push(new ProjectFile(null, null, projectFile.customedProjectFileStats, base64ThumbnailStr));
+    if (isRequireLoadProject) {
+      /**
+       * !!!Important!!!
+       * Note that I don't use forEach() here as it's not the behaviour I want with await keyword.
+       */
+      for (let projectFile of sortedProjectFileObjs) {
+        await projectFile.loadProjectAsync();
+      }      
     }
     
-    return sortedProjectFileObjsWithThumbnail;
+    return sortedProjectFileObjs;
   }
 
   static async getExistingProjectNamesAsync() {
@@ -542,6 +540,7 @@ class ProjectFile {
     });
   
     this.projectJson = projectJson;
+    this.base64ThumbnailStr = this.projectJson.entitiesList.slides[0].image;
 
     return projectJson;
   }

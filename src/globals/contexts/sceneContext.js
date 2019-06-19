@@ -1579,7 +1579,9 @@ class SceneContextProvider extends Component {
     // prevent duplicate assets added
     if (newFile.id) {
       // not checking states, check element instead
-      if (document.getElementById(newFile.id)) {
+      const currentAssetEl = document.getElementById(newFile.id);
+      if (currentAssetEl) {
+        // currentAssetEl.parentElement.removeChild(currentAssetEl);
         return this.state.assetsData;
       }
     }
@@ -1653,7 +1655,7 @@ class SceneContextProvider extends Component {
       const assetsData = prevState.assetsData;
       let newStateAssetsData = [...assetsData];
       let needInsert = true;
-      for (let i = 0; i< assetsData.length; i++) {
+      for (let i = 0; i < assetsData.length; i++) {
         if (assetsData[i].id === newFile.id) {
           needInsert = false;
           break;   
