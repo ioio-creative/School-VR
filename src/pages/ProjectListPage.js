@@ -74,7 +74,7 @@ class ProjectItem extends Component {
         return;
       }
 
-      //consoel
+      console.log()
 
       //ipcHelper.renameFile()
     });    
