@@ -256,6 +256,8 @@ function Viewport (editor) {
 
     if (intersects.length > 0) {
       var intersect = intersects[ 0 ];
+      if (intersect.distance > 4900) return;
+      console.log(intersect);
       Events.emit('objectfocused', intersect.object);
     }
   }

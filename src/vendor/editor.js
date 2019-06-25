@@ -1,5 +1,7 @@
 // import * as THREE from 'three';
 import AFRAME from 'aframe';
+import { CameraHelper } from './threejs/CameraHelper';
+
 const AFrameExtras = require('aframe-extras');
 // use the THREE in aframe
 const THREE = AFRAME.THREE;
@@ -170,7 +172,9 @@ Editor.prototype = {
     return function (object) {
       var helper;
       if (object instanceof THREE.Camera) {
-        this.cameraHelper = helper = new THREE.CameraHelper(object, 0.1);
+        // no camera helper
+        // return;
+        this.cameraHelper = helper = new CameraHelper(object, 0.1);
       } else if (object instanceof THREE.PointLight) {
         // hide all lights controls 
         return;

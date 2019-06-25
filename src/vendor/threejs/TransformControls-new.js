@@ -312,8 +312,13 @@ export default ( function () {
 				space = 'world';
 
 			}
-
+      
 			if ( object === undefined || axis === null || this.dragging === false || ( pointer.button !== undefined && pointer.button !== 0 ) ) return;
+      
+      // if (object && object.el && object.el.components['camera']) {
+			// 	space = 'local';
+      // }
+      // console.log(object);
 
 			ray.setFromCamera( pointer, this.camera );
 

@@ -8,8 +8,8 @@ class ACamera extends AEntity {
     this._type = 'a-camera';
     this._animatableAttributes = {
       position: ['x', 'y', 'z'],
-      rotation: ['x', 'y', 'z'],
-      cameraPreview: true
+      // rotation: ['x', 'y', 'z'],
+      // cameraPreview: true
     }
     this._staticAttributes = [
       // {
@@ -57,6 +57,14 @@ class ACamera extends AEntity {
     for (let key in attrs) {
       if (self.animatableAttributes.hasOwnProperty(key)) {
         self._el.setAttribute(key, attrs[key]);
+        // if (key === 'rotation') {
+        //   self._el.components['look-controls'].yawObject.rotation.x = attrs[key]['x'];
+        //   self._el.components['look-controls'].yawObject.rotation.y = attrs[key]['y'];
+        //   self._el.components['look-controls'].yawObject.rotation.z = attrs[key]['z'];
+        //   self._el.components['look-controls'].pitchObject.rotation.x = attrs[key]['x'];
+        //   self._el.components['look-controls'].pitchObject.rotation.y = attrs[key]['y'];
+        //   self._el.components['look-controls'].pitchObject.rotation.z = attrs[key]['z'];
+        // }
       } else {
         const staticAttribute = self.staticAttributes.find(attr => attr.attributeKey === key);
         if (staticAttribute) {
