@@ -415,15 +415,25 @@ const createPackageWithTransformOptionPromise = promisify(createPackageWithTrans
 const createPackageWithOptions = (src, dest, options, callBack) => {
   //console.log(asar);  
   asar.createPackageWithOptions(src, dest, options, (err) => {
-    if (!err) {
-      console.log(`fileSystem - createPackageWithOptions: ${src} packaged to ${dest}`);
+    if (err) {
+      handleGeneralErr(callBack, err);
+      return;
     }
-    
-    handleGeneralErr(callBack, err);
+
+    console.log(`fileSystem - createPackageWithOptions: ${src} packaged to ${dest}`);    
   });
 };
 
 const createPackageWithOptionsPromise = promisify(createPackageWithOptions);
+
+const extractFile = (archive, fileName) => {
+  try {
+    asar.uncache(archive);
+    asar.extractFile(archive, fileName);
+  } catch (err) {
+    console.error(err);
+  }
+};
 
 const extractAll = (archive, dest) => {
   try {    
@@ -628,12 +638,12 @@ module.exports = {
 
   // asar - Electron Archive
   createPackage,
-  createPackagePromise,
-  createPackageWithTransformOptionPromise,
+  createPackagePromise,  
   createPackageWithTransformOption, 
   createPackageWithTransformOptionPromise,
   createPackageWithOptions,
   createPackageWithOptionsPromise,
+  extractFile,
   extractAll,
 
   // directory api

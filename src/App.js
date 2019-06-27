@@ -76,7 +76,8 @@ class App extends Component {
     // check if in electron
     this.isElectronApp = Boolean(window.require);
   }
-  render() {    
+  render() {
+    console.log(`isElectronApp: ${this.isElectronApp}`);
     return (
       <SceneContextProvider>
         <div id="App">
@@ -84,7 +85,6 @@ class App extends Component {
             this.isElectronApp ?
           
             <Switch>
-
               {/* maybe add some checking here, if !electron, return viewer page only */}
               <Route exact path="/file-explorer" render={() => <AsyncTestFileExplorer />} />
               <Route exact path={routes.editor} component={AsyncEditorPage} />
