@@ -66,7 +66,7 @@ class ProjectFile {
 
     // set derived properties
     this.hashedSavedProjectFilePath = `${this.name}_${hashForUniqueId(this.savedProjectFilePath)}`;
-    // temp project directories        
+    // temp project directories
     this.tempProjectDirectoryPath = myPath.join(appDirectory.appTempProjectsDirectory, this.hashedSavedProjectFilePath);
     this.tempProjectImageDirectoryPath = myPath.join(this.tempProjectDirectoryPath, projectDirectoryStructure.image);
     this.tempProjectGifDirectoryPath = myPath.join(this.tempProjectDirectoryPath, projectDirectoryStructure.gif);
@@ -113,6 +113,8 @@ class ProjectFile {
       'saveToLocalDetailAsync',
       'saveToLocalAsync',
       'loadProjectAsync',
+      'setProjectJson',
+      'readAndSetProjectJsonAsync',
     ].forEach(methodName => {
       this[methodName] = this[methodName].bind(this);
     });
@@ -222,7 +224,7 @@ class ProjectFile {
   }
 
   // TODO: this function may need to be optimized
-  static async listProjectsAsync(isRequireLoadProject = false) {
+  static async listProjectsAsync(isLoadProjectJson = false) {
     const appProjectsDirectory = appDirectory.appProjectsDirectory;  
     const fileCustomedStatsObjs = await fileSystem.readdirWithStatPromise(appProjectsDirectory);
 
@@ -231,17 +233,7 @@ class ProjectFile {
     }
 
     const filteredFileStatObjs = await filter(fileCustomedStatsObjs, async (fileCustomedStatsObj) => {
-      // remove directory
-      if (fileCustomedStatsObj.isDirectory()) {
-        return false;
-      }
-
-      // remove file with other extension
-      if (fileCustomedStatsObj.fileExtensionWithLeadingDot !== config.schoolVrProjectArchiveExtensionWithLeadingDot) {
-        return false;
-      }
-
-      return true;
+      return fileCustomedStatsObj.fileExtensionWithLeadingDot === config.schoolVrProjectArchiveExtensionWithLeadingDot;
     });
 
     //const compareFileStatsByAccessTimeAsc = funcFactoryForCompareFileStatsByProperty(fileStatObj => fileStatObj.atimeMs, false);
@@ -254,7 +246,7 @@ class ProjectFile {
     const sortedProjectFileObjs = sortedFileStatObjs.map(fileStatObj => new ProjectFile(null, null, fileStatObj));
 
     // call loadProjectAsync() so that this.projectJson is set.
-    if (isRequireLoadProject) {
+    if (isLoadProjectJson) {
       await forEach(sortedProjectFileObjs, async (projectFile) => {
         await projectFile.loadProjectAsync();
       });       
@@ -487,11 +479,9 @@ class ProjectFile {
     fileSystem.extractAll(savedProjectFilePath, tempProjectDirectoryPath);
     console.log(`loadProject - loadProjectByProjectNameAsync: Project extracted to ${tempProjectDirectoryPath}`);
   
-    const projectJsonStr = await fileSystem.readFilePromise(this.tempProjectJsonFilePath);
+    const [projectJsonStr, projectJson] = await this.readAndSetProjectJsonAsync(this.tempProjectJsonFilePath);
     //console.log(projectJsonStr);
-    console.log(`loadProject - loadProjectByProjectNameAsync: Project ${savedProjectFilePath} json loaded.`);
-    
-    const projectJson = JSON.parse(projectJsonStr);
+    console.log(`loadProject - loadProjectByProjectNameAsync: Project ${savedProjectFilePath} json loaded.`);        
     
     // change any relative file path in assets to absolute path    
     const assetsList = projectJson.assetsList;    
@@ -501,10 +491,7 @@ class ProjectFile {
         this.getTempProjectAssetAbsolutePathFromProvidedPathIfIsRelative(assetSrc);
       // keep reference to any relative path for web server presentation
       asset.relativeSrc = assetSrc;        
-    });
-  
-    this.projectJson = projectJson;
-    this.base64ThumbnailStr = this.projectJson.entitiesList.slides[0].image;
+    });      
 
     return projectJson;
   }
@@ -512,6 +499,18 @@ class ProjectFile {
   static async loadProjectByFilePathAsync(filePath) {
     const projectFile = new ProjectFile(null, filePath, null);
     return await projectFile.loadProjectAsync();
+  }
+
+  setProjectJson(projectJson) {
+    this.projectJson = projectJson;
+    this.base64ThumbnailStr = this.projectJson.entitiesList.slides[0].image;
+  }
+
+  async readAndSetProjectJsonAsync(projectJsonPath) {    
+    const projectJsonStr = await fileSystem.readFilePromise(projectJsonPath);
+    const projectJson = JSON.parse(projectJsonStr);
+    this.setProjectJson(projectJson);
+    return [projectJsonStr, projectJson];
   }
   /* end of loadProject */
 
