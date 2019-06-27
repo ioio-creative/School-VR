@@ -1676,6 +1676,7 @@ class SceneContextProvider extends Component {
 
   resetView() {
     this.editor.EDITOR_CAMERA.position.set(20, 10, 20);
+    this.editor.EDITOR_CAMERA.el.setAttribute('position', '0 0 0');
     this.editor.EDITOR_CAMERA.lookAt(0,0,0);
     this.editor.editorControls.center.set(0, 0, 0);
   }
