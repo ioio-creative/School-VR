@@ -225,6 +225,8 @@ async function extractAppAsarForWebServerAsync() {
     await fileSystem.myDeletePromise(appAsarDestPathInWebContainerDirectory);
     console.log(`Before extracting ${appAsarInstallationPath} to ${appAsarDestPathInWebContainerDirectory}`);
     fileSystem.extractAll(appAsarInstallationPath, appAsarDestPathInWebContainerDirectory);
+    //fileSystem.extractFile(appAsarInstallationPath, "build");
+    //console.log(fileSystem.readFileSync('C:\\Users\\IOIO\\AppData\\Local\\Programs\\school-vr\\resources\\app.asar\\build\\index.html'));
     console.log(`After extracting ${appAsarInstallationPath} to ${appAsarDestPathInWebContainerDirectory}`);
   }
 }
@@ -581,9 +583,9 @@ ipcMain.on('copyFile', async (event, arg) => {
 // saveLoadProject
 
 ipcMain.on('listProjects', async (event, arg) => {
-  console.log('listProjects')
-  const isRequireLoadProject = true;
-  ProjectFile.listProjectsAsync(isRequireLoadProject)
+  console.log('listProjects');
+  const isLoadProjectJson = true;
+  ProjectFile.listProjectsAsync(isLoadProjectJson)
     .then((projectFileObjs) => {      
       event.sender.send('listProjectsResponse', {
         err: null,
