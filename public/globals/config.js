@@ -19,8 +19,7 @@ appDirectory.appTempWebContainerDirectory = myPath.join(appDirectory.appTempAppW
  
 //appDirectory.appAsarInstallationPath = myPath.join(app.getAppPath(), 'resources', 'app.asar');
 appDirectory.appAsarInstallationPath = myPath.join(app.getPath('appData'), '..', 'Local', 'Programs', app.getName(), 'resources', 'app.asar');
-appDirectory.appAsarDestPathInWebContainerDirectory = myPath.join(appDirectory.appTempWebContainerDirectory, 'resources');
-appDirectory.webServerRootDirectory = myPath.join(appDirectory.appAsarDestPathInWebContainerDirectory, 'build');
+appDirectory.webServerRootDirectory = myPath.join(appDirectory.appAsarInstallationPath, 'build');  // directly serves within app.asar (which acts as a directory)
 appDirectory.webServerFilesDirectory = myPath.join(appDirectory.appTempWebContainerDirectory, 'files');
 
 

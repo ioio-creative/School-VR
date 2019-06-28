@@ -29,7 +29,6 @@ const getIp = require("./utils/getIp");
 
 /* constants */
 
-const isForceTestExtractAppAsarForWebServer = false;
 const configFilePath = './config.jsonc';
 
 // default values
@@ -42,8 +41,6 @@ let developmentServerPort = process.env.PORT || 1234;
 
 const appAsarInstallationPath = appDirectory.appAsarInstallationPath;
 console.log(`appAsarInstallationPath: ${appAsarInstallationPath}`);
-const appAsarDestPathInWebContainerDirectory = appDirectory.appAsarDestPathInWebContainerDirectory
-console.log(`appAsarDestPathInWebContainerDirectory: ${appAsarDestPathInWebContainerDirectory}`);
 const webServerRootDirectory = appDirectory.webServerRootDirectory;
 console.log(`webServerRootDirectory: ${webServerRootDirectory}`);
 const webServerFilesDirectory = appDirectory.webServerFilesDirectory;
@@ -118,7 +115,7 @@ function createWindow() {
     // splashScreen will be shown when we are doing these things
 
     // this setTimeout is to allow time for splash screen to show
-    // before the thread is being blocked by running fileSystem.extractAll() in extractAppAsarForWebServerAsync()
+    // before the thread is being blocked by running fileSystem.extractAll() or something like that
     setTimeout(async _ => {
       console.log("splash screen");
       // delete any cached temp project files
@@ -127,8 +124,7 @@ function createWindow() {
       // create App Data directories if they do not exist
       const appDirectoryKeys = Object.keys(appDirectory).filter((appDirectoryKey) => {
         return !([
-          'appAsarInstallationPath',
-          'appAsarDestPathInWebContainerDirectory',
+          'appAsarInstallationPath',       
           'webServerRootDirectory',
           'webServerFilesDirectory'
         ].includes(appDirectoryKey));
@@ -139,8 +135,7 @@ function createWindow() {
         await fileSystem.createDirectoryIfNotExistsPromise(directoryPath);
       });
       console.log('App directories created.');
-
-      await extractAppAsarForWebServerAsync();
+      
       await openWebServerAsync();
 
       // hide splash screen
@@ -214,32 +209,11 @@ function createWindow() {
 
 /* web server */
 
-async function getIsAppAsarDestPathInWebContainerDirectoryExists() {
-  return await fileSystem.existsPromise(appAsarDestPathInWebContainerDirectory);
-} 
-
-async function extractAppAsarForWebServerAsync() {
-  // until isAppAsarDestPathInWebContainerDirectoryExists === true, splash screen will be shown  
-  const isAppAsarDestPathInWebContainerDirectoryExists = await getIsAppAsarDestPathInWebContainerDirectoryExists();
-  if (!isAppAsarDestPathInWebContainerDirectoryExists && (isForceTestExtractAppAsarForWebServer || !isDev)) {
-    await fileSystem.myDeletePromise(appAsarDestPathInWebContainerDirectory);
-    console.log(`Before extracting ${appAsarInstallationPath} to ${appAsarDestPathInWebContainerDirectory}`);
-    fileSystem.extractAll(appAsarInstallationPath, appAsarDestPathInWebContainerDirectory);
-    //fileSystem.extractFile(appAsarInstallationPath, "build");
-    //console.log(fileSystem.readFileSync('C:\\Users\\IOIO\\AppData\\Local\\Programs\\school-vr\\resources\\app.asar\\build\\index.html'));
-    console.log(`After extracting ${appAsarInstallationPath} to ${appAsarDestPathInWebContainerDirectory}`);
-  }
-}
-
-async function openWebServerAsync() {
-  // the following needs not be done as it's already be done at start up
-  //await extractAppAsarForWebServerAsync();
-  
+async function openWebServerAsync() {    
   await fileSystem.myDeletePromise(webServerFilesDirectory);
   await fileSystem.createDirectoryIfNotExistsPromise(webServerFilesDirectory);
 
-  const indexHtmlPath = "C:\\Users\\IOIO\\AppData\\Local\\Programs\\school-vr\\resources\\app.asar\\build";
-    //isDev ? myPath.join(__dirname, '../build') : webServerRootDirectory;
+  const indexHtmlPath = isDev ? myPath.join(__dirname, '../build') : webServerRootDirectory;
 
   webServerProcess = fork(serverProgramPath);
 

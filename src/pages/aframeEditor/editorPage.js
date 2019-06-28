@@ -189,6 +189,8 @@ class EditorPage extends Component {
         const projectName = fileHelper.getFileNameWithoutExtension(projectFilePath);
         sceneContext.setProjectName(projectName);
       }
+
+      alert("Project saved!");
     });
   }
 
