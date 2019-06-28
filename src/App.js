@@ -5,7 +5,7 @@ import routes from 'globals/routes';
 import {library} from '@fortawesome/fontawesome-svg-core'
 // import {faArrowsAlt, faArrowsAlt} from '@fortawesome/free-solid-svg-icons'
 
-import {setAppData, appDirectory, setParamsReadFromExternalConfig} from 'globals/config';
+import {setAppData, setParamsReadFromExternalConfig} from 'globals/config';
 import ipcHelper from 'utils/ipc/ipcHelper';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 
@@ -50,7 +50,6 @@ const faIconsNeed = [
   "faEyeSlash",
   "faAngleLeft",
   "faAngleRight",
-
 ];
 
 faIconsNeed.forEach(iconName => {
@@ -63,12 +62,12 @@ faIconsNeed.forEach(iconName => {
 // Code Splitting and React Router v4
 // https://serverless-stack.com/chapters/code-splitting-in-create-react-app.html
 const ViewerPage = require('pages/aframeEditor/viewerPage').default;
-const AsyncEditorPage = asyncLoadingComponent(() => import('pages/aframeEditor/editorPage'));
-const AsyncViewerPage = asyncLoadingComponent(() => import('pages/aframeEditor/viewerPage'));
-const AsyncPresenterPage = asyncLoadingComponent(() => import('pages/aframeEditor/presenterPage'));
-//const AsyncTestSaveLoad = asyncLoadingComponent(() => import('pages/TestSaveLoad'));
-const AsyncTestFileExplorer = asyncLoadingComponent(() => import('pages/TestFileExplorer/TestFileExplorer'));
-const AsyncProjectListPage = asyncLoadingComponent(() => import('pages/ProjectListPage'));
+const AsyncEditorPage = asyncLoadingComponent(_ => import('pages/aframeEditor/editorPage'));
+const AsyncViewerPage = asyncLoadingComponent(_ => import('pages/aframeEditor/viewerPage'));
+const AsyncPresenterPage = asyncLoadingComponent(_ => import('pages/aframeEditor/presenterPage'));
+//const AsyncTestSaveLoad = asyncLoadingComponent(_ => import('pages/TestSaveLoad'));
+const AsyncTestFileExplorer = asyncLoadingComponent(_ => import('pages/TestFileExplorer/TestFileExplorer'));
+const AsyncProjectListPage = asyncLoadingComponent(_ => import('pages/ProjectListPage'));
 
 class App extends Component {  
   constructor(props) {

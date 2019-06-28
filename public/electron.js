@@ -238,7 +238,8 @@ async function openWebServerAsync() {
   await fileSystem.myDeletePromise(webServerFilesDirectory);
   await fileSystem.createDirectoryIfNotExistsPromise(webServerFilesDirectory);
 
-  const indexHtmlPath = isDev ? myPath.join(__dirname, '../build') : webServerRootDirectory;
+  const indexHtmlPath = "C:\\Users\\IOIO\\AppData\\Local\\Programs\\school-vr\\resources\\app.asar\\build";
+    //isDev ? myPath.join(__dirname, '../build') : webServerRootDirectory;
 
   webServerProcess = fork(serverProgramPath);
 

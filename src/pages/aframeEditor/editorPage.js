@@ -155,11 +155,11 @@ class EditorPage extends Component {
     }
 
     const sceneContext = this.props.sceneContext;
-    const {entitiesList, assetsList} = sceneContext.saveProject();    
+    let {entitiesList, assetsList} = sceneContext.saveProject();    
     //const projectName = fileHelper.getFileNameWithoutExtension(projectFilePath);
     //console.log(projectName, entitiesList, assetsList);
     // TODO:
-    //entitiesList.projectName = projectName;
+    //entitiesList.projectName = projectName;    
     ipcHelper.saveProject(projectFilePath, entitiesList, assetsList, (err) => {
       if (err) {
         handleErrorWithUiDefault(err);
