@@ -12,7 +12,7 @@ const CustomedFileStats = require('./CustomedFileStats');
 const toBase64Str = require('../base64/toBase64Str');
 const fromBase64Str = require('../base64/fromBase64Str');
 
-const {isFunction} = require('../variableType/isFunction');
+const {isFunction, invokeIfIsFunction} = require('../variableType/isFunction');
 
 // https://github.com/electron/asar
 // http://www.tc4shell.com/en/7zip/asar/
@@ -82,7 +82,7 @@ const handleGeneralErr = (callBack, err) => {
 const handleGeneralErrAndData = (callBack, err, data) => {
   //console.log("fileSystem - handleGeneralErrAndData");  
   const callBackCall = (newErr, theData) => {
-    isFunction(callBack) && callBack(newErr, theData);
+    invokeIfIsFunction(callBack, newErr, theData);
   };
   if (err) {
     console.error(err.stack);
