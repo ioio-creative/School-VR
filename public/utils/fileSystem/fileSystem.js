@@ -415,12 +415,13 @@ const createPackageWithTransformOptionPromise = promisify(createPackageWithTrans
 const createPackageWithOptions = (src, dest, options, callBack) => {
   //console.log(asar);  
   asar.createPackageWithOptions(src, dest, options, (err) => {
-    if (err) {
-      handleGeneralErr(callBack, err);
-      return;
+    const isSuccess = !err;
+
+    if (isSuccess) {            
+      console.log(`fileSystem - createPackageWithOptions: ${src} packaged to ${dest}`);  
     }
 
-    console.log(`fileSystem - createPackageWithOptions: ${src} packaged to ${dest}`);    
+    handleGeneralErr(callBack, err);      
   });
 };
 

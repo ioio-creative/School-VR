@@ -391,7 +391,7 @@ class ProjectFile {
 
   async saveToLocalDetailAsync(entitiesList, assetsList) {    
     // when using constructor new ProjectFile(null, projectFilePath, null),
-    // this.name depends on projectFilePath => correct behaviour
+    // this.name depends on projectFilePath => correct behaviour    
     const projectName = this.name;
     
     const jsonForSave = parseDataToSaveFormat(projectName, entitiesList, assetsList);    
