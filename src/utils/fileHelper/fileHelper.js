@@ -5,7 +5,12 @@ import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 
 /* path api */
 
-const sep = path.sep;
+let sep = path.sep;  // path library may not be good enough
+//console.log(`sep: ${sep}`);
+if (window.navigator && window.navigator.platform.toLowerCase().includes("win")) {
+  sep = "\\";
+}
+//console.log(`sep: ${sep}`);
 
 const getFileExtensionWithLeadingDot = (filePath) => {
   return path.extname(filePath);
@@ -16,9 +21,7 @@ const getFileExtensionWithoutLeadingDot = (filePath) => {
 };
 
 const getFileNameWithExtension = (filePath) => {
-  // TODO:
-  const customedSep = '\\';
-  const filePathComponents = filePath.split(customedSep);
+  const filePathComponents = filePath.split(sep);
   if (isNonEmptyArray(filePathComponents)) {
     return filePathComponents[filePathComponents.length - 1];
   } else {
