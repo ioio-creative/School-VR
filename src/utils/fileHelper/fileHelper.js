@@ -7,8 +7,11 @@ import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 
 let sep = path.sep;  // path library may not be good enough
 //console.log(`sep: ${sep}`);
-if (window.navigator && window.navigator.platform.toLowerCase().includes("win")) {
-  sep = "\\";
+if (window.navigator) {
+  const platform = window.navigator.platform.toLowerCase();
+  if (platform.includes("win") && !platform.includes("darwin")) {
+    sep = "\\";
+  }
 }
 //console.log(`sep: ${sep}`);
 

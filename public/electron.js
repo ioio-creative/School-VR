@@ -257,7 +257,8 @@ app.on('window-all-closed', async _ => {
   await ProjectFile.deleteAllTempProjectDirectoriesAsync();
   await fileSystem.myDeletePromise(webServerFilesDirectory);
 
-  if (process.platform !== 'darwin') {
+  const platform = process.platform.toLowerCase();
+  if (platform !== 'darwin') {
     app.quit();
   }
 });
