@@ -13,10 +13,12 @@ function invokeIfIsFunction(obj) {
     if (arguments.length > 1) {
       const argumentsArray = Array.prototype.slice.call(arguments);
       const argumentsForFunc = argumentsArray.slice(1);
-      obj(...argumentsForFunc);
+      return obj(...argumentsForFunc);
     } else {
-      obj();
+      return obj();
     }
+  } else {
+    return null;
   }
 }
 
