@@ -9,12 +9,12 @@ let config = {
   webServerStaticFilesPathPrefix: 'files',
   schoolVrProjectArchiveExtensionWithLeadingDot: schoolVrProjectArchiveExtensionWithLeadingDot,
   jsonFileExtensionWithLeadingDot: '.json'
-};  
+};
 let appDirectory = {};
 const setAppData = (appName, homePath, appDataPath, documentsPath, callBack = null) => {
-  // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname  
+  // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname
   appDirectory.homeDirectory = homePath;
-            
+
   appDirectory.appProjectsDirectory = fileHelper.join(documentsPath, `${appName}-Projects`);
 
   appDirectory.appDataDirectory = fileHelper.join(appDataPath, `${appName}-Data`);
@@ -63,10 +63,10 @@ let mediaType = {},
 
 for (let key of Object.keys(Media)) {
   const MediumTypeObj = Media[key];
-  
+
   mediaType[key] = MediumTypeObj.typeName;
   projectDirectoryStructure[key] = MediumTypeObj.directoryUnderProjectDirectory;
-  
+
   // https://electronjs.org/docs/api/dialog
   openFileDialogFilter[key] = MediumTypeObj.openFileDialogFilter;
 }
@@ -81,7 +81,7 @@ let paramsReadFromExternalConfig = {
   something: 1,
 };
 let setParamsReadFromExternalConfig = (configObj) => {
-  paramsReadFromExternalConfig = {...paramsReadFromExternalConfig, ...configObj};  
+  paramsReadFromExternalConfig = {...paramsReadFromExternalConfig, ...configObj};
 };
 
 

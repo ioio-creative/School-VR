@@ -20,7 +20,7 @@ const fileSystem = require('./utils/fileSystem/fileSystem');
 const ProjectFile = require('./utils/saveLoadProject/ProjectFile');
 const {saveProjectToLocalAsync} = require('./utils/saveLoadProject/saveProject');
 const {loadProjectByProjectFilePathAsync, copyTempProjectDirectoryToExternalDirectoryAsync} = require('./utils/saveLoadProject/loadProject');
-const {openImageDialog, openGifDialog, openVideoDialog, openSchoolVrFileDialog, saveSchoolVrFileDialog} = 
+const {openImageDialog, openGifDialog, openVideoDialog, openSchoolVrFileDialog, saveSchoolVrFileDialog} =
   require('./utils/aframeEditor/openFileDialog');
 const {showYesNoQuestionMessageBox, showYesNoWarningMessageBox} = require('./utils/aframeEditor/showMessageBox');
 const {parseDataToSaveFormat} = require('./utils/saveLoadProject/parseDataToSaveFormat');
@@ -66,15 +66,15 @@ async function readConfigFileAsync(configFile) {
   const data = await fileSystem.readFilePromise(configFile);
   const configObj = jsoncParser.parse(data);
   const configObjForElectron = configObj.electron;
-  paramsFromExternalConfigForReact = configObj.react;      
+  paramsFromExternalConfigForReact = configObj.react;
 
   // set some global variables
   developmentServerPort = configObjForElectron.developmentServerPort || developmentServerPort;
 
   webServerPort = configObjForElectron.webServerPort || webServerPort;
-  //webServerRootDirPath = configObjForElectron.webServerRootDirPath || webServerRootDirPath;      
+  //webServerRootDirPath = configObjForElectron.webServerRootDirPath || webServerRootDirPath;
 
-  splashScreenDurationInMillis = configObjForElectron.splashScreenDurationInMillis || splashScreenDurationInMillis;          
+  splashScreenDurationInMillis = configObjForElectron.splashScreenDurationInMillis || splashScreenDurationInMillis;
 }
 
 function createWindow() {
@@ -92,8 +92,8 @@ function createWindow() {
     show: false,
     transparent: true
   });
-  
-  
+
+
   /* setting up mainWindow */
 
   mainWindow = new BrowserWindow({
@@ -102,13 +102,13 @@ function createWindow() {
     minWidth: 800,
     minHeight: 600,
     frame: false,
-    show: false, 
+    show: false,
     webPreferences: { webSecurity: false },  // for saving and loading assets via local path
   });
 
-  splashScreen.loadURL(`file://${myPath.join(__dirname, 'splash.html')}`);  
+  splashScreen.loadURL(`file://${myPath.join(__dirname, 'splash.html')}`);
 
-  splashScreen.on('ready-to-show', async _ => {    
+  splashScreen.on('ready-to-show', async _ => {
     splashScreen.show();
 
     // things to do on start up
@@ -120,11 +120,11 @@ function createWindow() {
       console.log("splash screen");
       // delete any cached temp project files
       await ProjectFile.deleteAllTempProjectDirectoriesAsync();
-      
+
       // create App Data directories if they do not exist
       const appDirectoryKeys = Object.keys(appDirectory).filter((appDirectoryKey) => {
         return !([
-          'appAsarInstallationPath',       
+          'appAsarInstallationPath',
           'webServerRootDirectory',
           'webServerFilesDirectory'
         ].includes(appDirectoryKey));
@@ -135,11 +135,11 @@ function createWindow() {
         await fileSystem.createDirectoryIfNotExistsPromise(directoryPath);
       });
       console.log('App directories created.');
-      
+
       await openWebServerAsync();
 
       // hide splash screen
-      setTimeout(_ => {        
+      setTimeout(_ => {
         splashScreenCountdowned = true;
 
         //mainWindow.loadURL(isDev ? `http://localhost:${developmentServerPort}/file-explorer` : `file://${myPath.join(__dirname, '../build/index.html')}`);
@@ -152,20 +152,20 @@ function createWindow() {
 
   /* main window lifecycles */
 
-  mainWindow.on('ready-to-show', () => {    
-    mainWindowReady = true;    
+  mainWindow.on('ready-to-show', () => {
+    mainWindowReady = true;
     mainWindow.show();
     splashScreen.close();
-  });    
+  });
 
   mainWindow.on('closed', () => {
-    mainWindow = null;    
-  });    
+    mainWindow = null;
+  });
 
   mainWindow.on('maximize', () => {
     mainWindow.webContents.send('maximize');
   });
-  
+
   mainWindow.on('unmaximize', () => {
     mainWindow.webContents.send('unmaximize');
   });
@@ -182,7 +182,7 @@ function createWindow() {
   menu.append(new MenuItem({
     label: 'Toggle DevTools',
     accelerator: 'F12',
-    click: _ => { 
+    click: _ => {
       mainWindow.webContents.toggleDevTools();
     }
   }));
@@ -195,8 +195,8 @@ function createWindow() {
   menu.append(new MenuItem({
     label: 'Refresh',
     accelerator: 'F5',
-    click: _ => {              
-      mainWindow.reload();            
+    click: _ => {
+      mainWindow.reload();
     }
   }));
 
@@ -209,7 +209,7 @@ function createWindow() {
 
 /* web server */
 
-async function openWebServerAsync() {    
+async function openWebServerAsync() {
   await fileSystem.myDeletePromise(webServerFilesDirectory);
   await fileSystem.createDirectoryIfNotExistsPromise(webServerFilesDirectory);
 
@@ -224,14 +224,14 @@ async function openWebServerAsync() {
     rootDirPath: indexHtmlPath,
     filesDirPath: webServerFilesDirectory,
     webServerStaticFilesPathPrefix: config.webServerStaticFilesPathPrefix,
-  });  
+  });
 }
 
 function closeWebServer() {
   if (webServerProcess) {
     webServerProcess.send({
-      address: 'close-server'      
-    });    
+      address: 'close-server'
+    });
   }
 }
 
@@ -247,7 +247,7 @@ app.on('ready', async _ => {
     console.error(err);
   }
 
-  createWindow();  
+  createWindow();
 });
 
 app.on('window-all-closed', async _ => {
@@ -274,11 +274,11 @@ app.on('activate', () => {
 
 /* ipc main event listeners */
 /**
- * !!! Important !!! 
+ * !!! Important !!!
  * Note Error object cannot be passed as argument.
  */
 
-function getSenderWindowFromEvent(ipcEvent) {  
+function getSenderWindowFromEvent(ipcEvent) {
   return BrowserWindow.fromWebContents(ipcEvent.sender);
 }
 
@@ -287,7 +287,7 @@ function getSenderWindowFromEvent(ipcEvent) {
 //   event.sender.send('actionReply', result);
 // });
 
-ipcMain.on('getParamsFromExternalConfig', (event, arg) => { 
+ipcMain.on('getParamsFromExternalConfig', (event, arg) => {
   event.sender.send('getParamsFromExternalConfigResponse', {
     err: null,
     data: paramsFromExternalConfigForReact
@@ -337,17 +337,17 @@ ipcMain.on('newBrowserWindow', (event, arg) => {
   });
 });
 
-ipcMain.on('close', (event, arg) => {  
+ipcMain.on('close', (event, arg) => {
   const senderWindow = getSenderWindowFromEvent(event);
-  senderWindow.close();  
+  senderWindow.close();
 });
 
-ipcMain.on('minimize', (event, arg) => {  
+ipcMain.on('minimize', (event, arg) => {
   const senderWindow = getSenderWindowFromEvent(event);
-  senderWindow.minimize();  
+  senderWindow.minimize();
 });
 
-ipcMain.on('toggleMaximize', (event, arg) => {  
+ipcMain.on('toggleMaximize', (event, arg) => {
   const senderWindow = getSenderWindowFromEvent(event);
   if (senderWindow.isMaximized()) {
     senderWindow.unmaximize();
@@ -378,7 +378,7 @@ ipcMain.on('mimeStat', (event, arg) => {
       err: err.toString(),
       data: null
     });
-  }  
+  }
 });
 
 ipcMain.on('mimeStats', (event, arg) => {
@@ -397,7 +397,7 @@ ipcMain.on('mimeStats', (event, arg) => {
       err: err.toString(),
       data: null
     });
-  }  
+  }
 });
 
 ipcMain.on('base64Encode', async (event, arg) => {
@@ -416,52 +416,52 @@ ipcMain.on('base64Encode', async (event, arg) => {
       err: err.toString(),
       data: null
     });
-  }  
+  }
 });
 
-ipcMain.on('base64Decode', async (event, arg) => {  
+ipcMain.on('base64Decode', async (event, arg) => {
   try {
     await fileSystem.base64DecodePromise(arg.locationToSaveFile, arg.encodedStr);
     event.sender.send('base64DecodeResponse', {
-      err: null,      
+      err: null,
     });
   } catch (err) {
     console.error(err);
     event.sender.send('base64DecodeResponse', {
-      err: err.toString(),      
+      err: err.toString(),
     });
-  }  
+  }
 });
 
-ipcMain.on('createPackage', async (event, arg) => {  
+ipcMain.on('createPackage', async (event, arg) => {
   try {
     await fileSystem.createPackagePromise(arg.src, arg.dest);
     event.sender.send('createPackageResponse', {
-      err: null,      
+      err: null,
     });
   } catch (err) {
     console.error(err);
     event.sender.send('createPackageResponse', {
-      err: err.toString(),      
+      err: err.toString(),
     });
   }
 });
 
-ipcMain.on('extractAll', (event, arg) => {  
+ipcMain.on('extractAll', (event, arg) => {
   try {
     fileSystem.extractAll(arg.archive, arg.dest);
     event.sender.send('extractAllResponse', {
-      err: null,      
+      err: null,
     });
   } catch (err) {
     console.error(err);
     event.sender.send('extractAllResponse', {
-      err: err.toString(),      
+      err: err.toString(),
     });
   }
 });
 
-ipcMain.on('readdir', async (event, arg) => {  
+ipcMain.on('readdir', async (event, arg) => {
   try {
     const dirPath = arg;
     const fileNames = await fileSystem.readdirPromise(dirPath);
@@ -469,7 +469,7 @@ ipcMain.on('readdir', async (event, arg) => {
       err: null,
       data: {
         fileNames: fileNames
-      }   
+      }
     });
   } catch (err) {
     console.error(err);
@@ -496,36 +496,36 @@ ipcMain.on('readFile', async (event, arg) => {
       err: err.toString(),
       data: null
     });
-  } 
+  }
 });
 
 ipcMain.on('writeFile', async (event, arg) => {
   try {
-    await fileSystem.writeFilePromise(arg.filePath, arg.content);    
+    await fileSystem.writeFilePromise(arg.filePath, arg.content);
     event.sender.send('writeFileResponse', {
-      err: null      
+      err: null
     });
   } catch (err) {
     console.error(err);
     event.sender.send('writeFileResponse', {
-      err: err.toString()      
+      err: err.toString()
     });
-  } 
+  }
 });
 
 ipcMain.on('deleteFile', async (event, arg) => {
   try {
     const filePath = arg;
-    await fileSystem.myDeletePromise(filePath);    
+    await fileSystem.myDeletePromise(filePath);
     event.sender.send('deleteFileResponse', {
       err: null
     });
   } catch (err) {
     console.error(err);
     event.sender.send('deleteFileResponse', {
-      err: err.toString()      
+      err: err.toString()
     });
-  } 
+  }
 });
 
 ipcMain.on('renameFile', async (event, arg) => {
@@ -562,7 +562,7 @@ ipcMain.on('listProjects', async (event, arg) => {
   console.log('listProjects');
   const isLoadProjectJson = true;
   ProjectFile.listProjectsAsync(isLoadProjectJson)
-    .then((projectFileObjs) => {      
+    .then((projectFileObjs) => {
       event.sender.send('listProjectsResponse', {
         err: null,
         data: {
@@ -581,7 +581,7 @@ ipcMain.on('listProjects', async (event, arg) => {
 
 ipcMain.on('saveProject', (event, arg) => {
   saveProjectToLocalAsync(arg.projectFilePath, arg.entitiesList, arg.assetsList)
-    .then((data) => {      
+    .then((data) => {
       event.sender.send('saveProjectResponse', {
         err: null,
         data: {
@@ -600,7 +600,7 @@ ipcMain.on('saveProject', (event, arg) => {
 
 ipcMain.on('parseDataToSaveFormat', (event, arg) => {
   parseDataToSaveFormat(arg.projectName, arg.entitiesList, arg.assetsList)
-    .then((data) => {           
+    .then((data) => {
       event.sender.send('parseDataToSaveFormatResponse', {
         err: null,
         data: {
@@ -620,7 +620,7 @@ ipcMain.on('parseDataToSaveFormat', (event, arg) => {
 ipcMain.on('loadProjectByProjectFilePath', (event, arg) => {
   const filePath = arg;
   loadProjectByProjectFilePathAsync(filePath)
-    .then((data) =>{      
+    .then((data) =>{
       event.sender.send('loadProjectByProjectFilePathResponse', {
         err: null,
         data: {
@@ -638,19 +638,19 @@ ipcMain.on('loadProjectByProjectFilePath', (event, arg) => {
 });
 
 ipcMain.on('isCurrentLoadedProject', (event, arg) => {
-  const projectFilePath = arg;  
+  const projectFilePath = arg;
   const isCurrentLoadedProject = ProjectFile.isCurrentLoadedProject(projectFilePath);
   event.sender.send('isCurrentLoadedProjectResponse', {
-    err: null, 
+    err: null,
     data: {
       isCurrentLoadedProject: isCurrentLoadedProject
     }
-  });  
+  });
 });
 
 // window dialog
 
-ipcMain.on('openImageDialog', (event, arg) => {  
+ipcMain.on('openImageDialog', (event, arg) => {
   openImageDialog((filePaths) => {
     event.sender.send('openImageDialogResponse', {
       data: {
@@ -670,11 +670,11 @@ ipcMain.on('openGifDialog', (event, arg) => {
   });
 });
 
-ipcMain.on('openVideoDialog', (event, arg) => {  
-  openVideoDialog((filePaths) => {    
-    event.sender.send('openVideoDialogResponse', {      
+ipcMain.on('openVideoDialog', (event, arg) => {
+  openVideoDialog((filePaths) => {
+    event.sender.send('openVideoDialogResponse', {
       data: {
-        filePaths: filePaths        
+        filePaths: filePaths
       }
     });
   });
@@ -691,7 +691,7 @@ ipcMain.on('openSchoolVrFileDialog', (event, arg) => {
 });
 
 ipcMain.on('saveSchoolVrFileDialog', (event, arg) => {
-  saveSchoolVrFileDialog((filePath) => {    
+  saveSchoolVrFileDialog((filePath) => {
     event.sender.send('saveSchoolVrFileDialogResponse', {
       data: {
         filePath: filePath
@@ -771,8 +771,8 @@ ipcMain.on('openWebServerAndLoadProject', async (event, arg) => {
     const staticAssetUrlPathPrefixForWebPresentation = myPath.join(config.webServerStaticFilesPathPrefix, hashedFilePath);
     //console.log(`staticAssetUrlPathPrefixForWebPresentation: ${staticAssetUrlPathPrefixForWebPresentation}`);
     const projectJson = await loadProjectByProjectFilePathAsync(filePath);
-    //console.log(projectJson);    
-    
+    //console.log(projectJson);
+
     // TODO: poorly written (too many cross-references to ProjectFile class)
     // add staticAssetUrlPathPrefixForWebPresentation to asset's relativeSrc
     const newlyModifiedProjectJson = Object.assign({}, projectJson);
@@ -784,12 +784,12 @@ ipcMain.on('openWebServerAndLoadProject', async (event, arg) => {
     });
     /* end of load project file */
 
-    /* open web server */    
-    // await openWebServerAsync();    
+    /* open web server */
+    // await openWebServerAsync();
     const externalServerDirectory = myPath.join(webServerFilesDirectory, hashedFilePath);
     await copyTempProjectDirectoryToExternalDirectoryAsync(filePath, externalServerDirectory);
     /* end of open web server */
-    
+
     event.sender.send('openWebServerAndLoadProjectResponse', {
       err: null,
       data: {
@@ -802,11 +802,11 @@ ipcMain.on('openWebServerAndLoadProject', async (event, arg) => {
       err: err.toString(),
       data: null
     });
-  }  
+  }
 });
 
 ipcMain.on('closeWebServer', (event, arg) => {
-  closeWebServer();  
+  closeWebServer();
   event.sender.send('closeWebServerResponse', {
     err: null
   });

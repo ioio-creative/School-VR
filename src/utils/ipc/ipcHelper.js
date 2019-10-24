@@ -2,7 +2,7 @@ import isFunction from 'utils/variableType/isFunction';
 
 
 const electron = window.require ? window.require('electron') : null;
-const dummyFunc = (param1, param2, param3) => { 
+const dummyFunc = (param1, param2, param3) => {
   // console.log(param1, param2, param3);
   // console.log('not in electron app, no ipc')
   if (param1 === "saveProject") {
@@ -62,8 +62,8 @@ function removeListener(channel, listener) {
 
 
 function generalIpcCall(channelName, callBack = null, objToSend = null) {
-  if (isFunction(callBack)) {    
-    ipc.once(`${channelName}Response`, (event, arg) => {      
+  if (isFunction(callBack)) {
+    ipc.once(`${channelName}Response`, (event, arg) => {
       if (arg.err) {
         callBack(`${channelName}: ${arg.err}`, arg.data);
       } else {
@@ -80,7 +80,7 @@ function generalIpcCall(channelName, callBack = null, objToSend = null) {
 }
 
 
-function getParamsFromExternalConfig(callBack) {  
+function getParamsFromExternalConfig(callBack) {
   generalIpcCall('getParamsFromExternalConfig', callBack);
 };
 
@@ -88,7 +88,7 @@ function getParamsFromExternalConfig(callBack) {
 /* app */
 
 function getAppData(callBack) {
-  generalIpcCall('getAppData', callBack);  
+  generalIpcCall('getAppData', callBack);
 };
 
 /* end of app */
@@ -137,50 +137,50 @@ function toggleDevTools() {
 
 /* fileSystem */
 
-function mimeStat(filePath, callBack) {  
+function mimeStat(filePath, callBack) {
   generalIpcCall('mimeStat', callBack, filePath);
 }
 
-function mimeStats(filePaths, callBack) {  
+function mimeStats(filePaths, callBack) {
   generalIpcCall('mimeStats', callBack, filePaths);
 }
 
-function base64Encode(filePath, callBack) {  
+function base64Encode(filePath, callBack) {
   generalIpcCall('base64Encode', callBack, filePath);
 };
 
-function base64Decode(locationToSaveFile, encodedStr, callBack) {  
+function base64Decode(locationToSaveFile, encodedStr, callBack) {
   generalIpcCall('base64Decode', callBack, {
     locationToSaveFile: locationToSaveFile,
     encodedStr: encodedStr
   });
 };
 
-function createPackage(src, dest, callBack) {  
+function createPackage(src, dest, callBack) {
   generalIpcCall('createPackage', callBack, {
     src: src,
     dest: dest
   });
 };
 
-function extractAll(archive, dest, callBack) {  
+function extractAll(archive, dest, callBack) {
   generalIpcCall('extractAll', callBack, {
     archive: archive,
     dest: dest
   });
 }
 
-function readdir(dirPath, callBack) {  
+function readdir(dirPath, callBack) {
   generalIpcCall('readdir', callBack, {
-    dirPath: dirPath,    
+    dirPath: dirPath,
   });
 }
 
-function readFile(filePath, callBack) {  
+function readFile(filePath, callBack) {
   generalIpcCall('readFile', callBack, filePath);
 }
 
-function writeFile(filePath, content, callBack) {  
+function writeFile(filePath, content, callBack) {
   generalIpcCall('writeFile', callBack, {
     filePath: filePath,
     content: content
@@ -210,19 +210,19 @@ function copyFile(src, dest, callBack) {
 
 /* saveLoadProject */
 
-function listProjects(callBack) {  
+function listProjects(callBack) {
   generalIpcCall('listProjects', callBack);
 }
 
-function saveProject(projectFilePath, entitiesList, assetsList, callBack) {  
+function saveProject(projectFilePath, entitiesList, assetsList, callBack) {
   generalIpcCall('saveProject', callBack, {
-    projectFilePath: projectFilePath,    
+    projectFilePath: projectFilePath,
     entitiesList: entitiesList,
     assetsList: assetsList
   });
 }
 
-function parseDataToSaveFormat(projectName, entitiesList, assetsList, callBack) {  
+function parseDataToSaveFormat(projectName, entitiesList, assetsList, callBack) {
   generalIpcCall('parseDataToSaveFormat', callBack, {
     projectName: projectName,
     entitiesList: entitiesList,
@@ -230,7 +230,7 @@ function parseDataToSaveFormat(projectName, entitiesList, assetsList, callBack) 
   });
 }
 
-function loadProjectByProjectFilePath(filePath, callBack) {  
+function loadProjectByProjectFilePath(filePath, callBack) {
   generalIpcCall('loadProjectByProjectFilePath', callBack, filePath);
 }
 
@@ -243,19 +243,19 @@ function isCurrentLoadedProject(projectFilePath, callBack) {
 
 /* window diaglog */
 
-function openImageDialog(callBack) {  
+function openImageDialog(callBack) {
   generalIpcCall('openImageDialog', callBack);
 }
 
-function openGifDialog(callBack) {  
+function openGifDialog(callBack) {
   generalIpcCall('openGifDialog', callBack);
 }
 
-function openVideoDialog(callBack) {  
+function openVideoDialog(callBack) {
   generalIpcCall('openVideoDialog', callBack);
 }
 
-function openSchoolVrFileDialog(callBack) {  
+function openSchoolVrFileDialog(callBack) {
   generalIpcCall('openSchoolVrFileDialog', callBack);
 }
 
@@ -268,11 +268,11 @@ function saveSchoolVrFileDialog(callBack) {
 
 /* vanilla electron dialog */
 
-function showOpenDialog(options, callBack) {  
+function showOpenDialog(options, callBack) {
   generalIpcCall('showOpenDialog', callBack, options);
 }
 
-function showSaveDialog(options, callBack) {  
+function showSaveDialog(options, callBack) {
   generalIpcCall('showSaveDialog', callBack, options);
 }
 
@@ -282,14 +282,14 @@ function showSaveDialog(options, callBack) {
 /* show message box */
 
 function showYesNoQuestionMessageBox(message, detail, callBack) {
-  generalIpcCall('showYesNoQuestionMessageBox', callBack, {    
+  generalIpcCall('showYesNoQuestionMessageBox', callBack, {
     message: message,
     detail: detail
   });
 }
 
 function showYesNoWarningMessageBox(message, detail, callBack) {
-  generalIpcCall('showYesNoWarningMessageBox', callBack, {    
+  generalIpcCall('showYesNoWarningMessageBox', callBack, {
     message: message,
     detail: detail
   });
@@ -343,7 +343,7 @@ export default {
   base64Decode,
   createPackage,
   extractAll,
-  readdir,  
+  readdir,
   readFile,
   writeFile,
   deleteFile,
@@ -351,10 +351,10 @@ export default {
   copyFile,
 
   // saveLoadProject
-  listProjects,  
+  listProjects,
   saveProject,
   parseDataToSaveFormat,
-  loadProjectByProjectFilePath,  
+  loadProjectByProjectFilePath,
   isCurrentLoadedProject,
 
   // window dialog
