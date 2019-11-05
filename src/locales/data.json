@@ -1,0 +1,21 @@
+ {
+  "en": {
+    "Menu.FileLabel":"File",
+    "Menu.File.NewLabel":"New",
+    "Menu.File.OpenLabel":"Open",
+    "Menu.File.ExitLabel":"Exit",
+
+    "ProjectOrderSelect.Options.MostRecentLabel":"Most recent",
+    "ProjectOrderSelect.Options.LeastRecentLabel":"Least recent",
+    "ProjectOrderSelect.Options.ByNameLabel":"By name",
+    "ProjectOrderSelect.Options.ByNameReverseLabel":"By name reverse",
+
+    "ProjectItem.Info.LastAccessedLabel":"Last accessed",
+    "ProjectItem.Handles.PreviewLabel":"Preview",
+    "ProjectItem.Handles.EditLabel":"Edit",
+    "ProjectItem.Handles.OptionsLabel":"Options",
+    "ProjectItem.Handles.RenameLabel":"Rename",
+    "ProjectItem.Handles.CopyToNewLabel":"Copy to New",
+    "ProjectItem.Handles.DeleteLabel":"Delete"    
+  }
+}

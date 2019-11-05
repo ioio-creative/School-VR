@@ -1,4 +1,4 @@
- electron = require('electron');
+electron = require('electron');
 const app = electron.app;
 const ipcMain = electron.ipcMain;
 const BrowserWindow = electron.BrowserWindow;
@@ -6,24 +6,24 @@ const BrowserWindow = electron.BrowserWindow;
 const dialog = electron.dialog;
 const shell = electron.shell;
 
-const {appDirectory, config} = require('./globals/config');
+const { appDirectory, config } = require('./globals/config');
 
 const myPath = require('./utils/fileSystem/myPath');
 const isDev = require('electron-is-dev');
-const {fork} = require('child_process');
-const {forEach} = require('p-iteration');
+const { fork } = require('child_process');
+const { forEach } = require('p-iteration');
 
 const jsoncParser = require('jsonc-parser');
 
 const mime = require('./utils/fileSystem/mime');
 const fileSystem = require('./utils/fileSystem/fileSystem');
 const ProjectFile = require('./utils/saveLoadProject/ProjectFile');
-const {saveProjectToLocalAsync} = require('./utils/saveLoadProject/saveProject');
-const {loadProjectByProjectFilePathAsync, copyTempProjectDirectoryToExternalDirectoryAsync} = require('./utils/saveLoadProject/loadProject');
-const {openImageDialog, openGifDialog, openVideoDialog, openSchoolVrFileDialog, saveSchoolVrFileDialog} =
+const { saveProjectToLocalAsync } = require('./utils/saveLoadProject/saveProject');
+const { loadProjectByProjectFilePathAsync, copyTempProjectDirectoryToExternalDirectoryAsync } = require('./utils/saveLoadProject/loadProject');
+const { openImageDialog, openGifDialog, openVideoDialog, openSchoolVrFileDialog, saveSchoolVrFileDialog } =
   require('./utils/aframeEditor/openFileDialog');
-const {showYesNoQuestionMessageBox, showYesNoWarningMessageBox} = require('./utils/aframeEditor/showMessageBox');
-const {parseDataToSaveFormat} = require('./utils/saveLoadProject/parseDataToSaveFormat');
+const { showYesNoQuestionMessageBox, showYesNoWarningMessageBox } = require('./utils/aframeEditor/showMessageBox');
+const { parseDataToSaveFormat } = require('./utils/saveLoadProject/parseDataToSaveFormat');
 const getIp = require("./utils/getIp");
 
 
@@ -620,7 +620,7 @@ ipcMain.on('parseDataToSaveFormat', (event, arg) => {
 ipcMain.on('loadProjectByProjectFilePath', (event, arg) => {
   const filePath = arg;
   loadProjectByProjectFilePathAsync(filePath)
-    .then((data) =>{
+    .then((data) => {
       event.sender.send('loadProjectByProjectFilePathResponse', {
         err: null,
         data: {

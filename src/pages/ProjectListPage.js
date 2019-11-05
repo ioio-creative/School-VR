@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 
+import {LanguageContext} from 'globals/contexts/languageContext';
+
 import MenuComponent from 'components/menuComponent';
 import CrossButton from 'components/crossButton';
 
@@ -60,12 +62,12 @@ class ProjectItem extends Component {
 
   /* event handlers */
 
-  handleItemMouseEnter = _ => {    
-    this.showProjectHandles();    
+  handleItemMouseEnter = _ => {
+    this.showProjectHandles();
   }
 
   handleItemMouseLeave = _ => {
-    this.hideProjectHandles();    
+    this.hideProjectHandles();
   }
 
   handleItemOptionMouseEnter = () => {
@@ -87,7 +89,7 @@ class ProjectItem extends Component {
 
       const project = this.props.item;
       const oldFilePath = project.savedProjectFilePath;
-      const newFilePath = data.filePath;      
+      const newFilePath = data.filePath;
 
       ipcHelper.renameFile(oldFilePath, newFilePath, (err) => {
         if (err) {
@@ -97,7 +99,7 @@ class ProjectItem extends Component {
 
         this.props.handleItemRenameClickFunc(project);
       });
-    });    
+    });
   }
 
   handleItemCopyToNewClick = _ => {
@@ -109,7 +111,7 @@ class ProjectItem extends Component {
 
       const project = this.props.item;
       const src = project.savedProjectFilePath;
-      const dest = data.filePath;      
+      const dest = data.filePath;
 
       ipcHelper.copyFile(src, dest, (err) => {
         if (err) {
@@ -156,20 +158,20 @@ class ProjectItem extends Component {
     const props = this.props;
     const state = this.state;
 
-    const project = props.item;    
-    
+    const project = props.item;
+
     const thumbnailSrc = project.base64ThumbnailStr || this.defaultThumbnailSrc;
 
-    return (    
+    return (
       <div className="project-item"
-        // https://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_onmousemove_leave_out     
-        onMouseEnter={this.handleItemMouseEnter}      
+        // https://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_onmousemove_leave_out
+        onMouseEnter={this.handleItemMouseEnter}
         onMouseLeave={this.handleItemMouseLeave}
       >
         <div className="project-info-container">
           <div className="project-info">
-            <div className="project-image">              
-              <img src={thumbnailSrc} alt={"thumbnail"}/>
+            <div className="project-image">
+              <img src={thumbnailSrc} alt="thumbnail" />
             </div>
             <div className="project-info-text-container">
               <div className="project-info-text">
@@ -178,7 +180,7 @@ class ProjectItem extends Component {
               </div>
             </div>
           </div>
-        </div>      
+        </div>
         <div className={`project-handles-container ${state.isShowProjectHandles ? 'show' : 'hide'} ${state.isShowOptionOverlay ? 'show-overlay' : 'hide-overlay'}`}>
           <div className="project-handles">
             <div className="project-preview-container">
@@ -209,10 +211,10 @@ class ProjectItem extends Component {
                   Delete
                 </div>
               </div>
-            </div>            
+            </div>
             <div className="project-edit-container">
               <div className="project-edit">
-                <Link to={routes.editorWithProjectFilePathQuery(project.path)}>Edit</Link>                
+                <Link to={routes.editorWithProjectFilePathQuery(project.path)}>Edit</Link>
               </div>
             </div>
           </div>
@@ -222,7 +224,7 @@ class ProjectItem extends Component {
   }
 }
 
-  
+
 class ProjectList extends Component {
   /* methods */
 
@@ -247,7 +249,7 @@ class ProjectList extends Component {
     this.props.handleItemCopyToNewClickFunc(project);
   }
 
-  handleItemDeleteClick = project => {    
+  handleItemDeleteClick = project => {
     this.props.handleItemDeleteClickFunc(project);
   }
 
@@ -285,15 +287,15 @@ class ProjectList extends Component {
     }
     const orderedFilteredProjects = compareProjectFunc ? filteredProjects.sort(compareProjectFunc) : filteredProjects;
 
-    const displayedProjectElements = orderedFilteredProjects.map((project) => {  
+    const displayedProjectElements = orderedFilteredProjects.map((project) => {
       return (
-        <ProjectItem 
+        <ProjectItem
           key={project.path}
           item={project}
 
           handleItemRenameClickFunc={this.handleItemRenameClick}
           handleItemCopyToNewClickFunc={this.handleItemCopyToNewClick}
-          handleItemDeleteClickFunc={this.handleItemDeleteClick}          
+          handleItemDeleteClickFunc={this.handleItemDeleteClick}
         />
       );
     });
@@ -368,7 +370,7 @@ class ProjectOrderSelect extends Component {
 
   createCustomSelectStyle = _ => {
     const self = this;
-    
+
     /*create a new DIV that will act as the selected item:*/
     const a = document.createElement("DIV");
     a.setAttribute("class", "select-selected");
@@ -382,11 +384,11 @@ class ProjectOrderSelect extends Component {
       create a new DIV that will act as an option item:*/
       const c = document.createElement("DIV");
       const cValue = this.customSelect.options[j].getAttribute("value");
-      c.innerHTML = this.customSelect.options[j].innerHTML;      
+      c.innerHTML = this.customSelect.options[j].innerHTML;
       c.setAttribute("data-value", cValue);
       c.addEventListener("click", function(e) {
           /*when an item is clicked, update the original select box,
-          and the selected item:*/          
+          and the selected item:*/
           const s = this.parentNode.parentNode.getElementsByTagName("select")[0];
           const h = this.parentNode.previousSibling;
           for (let i = 0; i < s.length; i++) {
@@ -447,8 +449,8 @@ class ProjectOrderSelect extends Component {
       <div className="project-order-select custom-select" ref={this.setCustomSelectContainerRef}>
         <select ref={this.setCustomSelectRef}>
           {/* first option is default option */}
-          <option value="most-recent">Most recent</option> 
-          <option value="most-recent">Most recent</option> 
+          <option value="most-recent">Most recent</option>
+          <option value="most-recent">Most recent</option>
           <option value="least-recent">Least recent</option>
           <option value="by-name">By name</option>
           <option value="by-name-reverse">By name reverse</option>
@@ -462,7 +464,7 @@ class ProjectOrderSelect extends Component {
 function Menu(props) {
   /* event handlers */
 
-  function handleBtnNewClick(event) {    
+  function handleBtnNewClick(event) {
     props.history.push(routes.editor);
   };
 
@@ -474,12 +476,12 @@ function Menu(props) {
       }
 
       const filePaths = data.filePaths;
-      if (isNonEmptyArray(filePaths)) {        
-        props.history.push(routes.editorWithProjectFilePathQuery(filePaths[0]));        
-      } else {                      
+      if (isNonEmptyArray(filePaths)) {
+        props.history.push(routes.editorWithProjectFilePathQuery(filePaths[0]));
+      } else {
         //alert('No files are selected!');
       }
-    });    
+    });
   };
 
   function handleBtnExitClick(event) {
@@ -489,31 +491,41 @@ function Menu(props) {
   /* end of event handlers */
 
   return (
-    <MenuComponent 
-      menuButtons={[
-        {
-          label: 'File',
-          // onClick: _=> { console.log('file') },
-          children: [
-            {
-              label: 'New',
-              onClick: handleBtnNewClick
-            },
-            {
-              label: 'Open',
-              onClick: handleBtnOpenClick
-            },
-            {
-              label: '-'
-            },
-            {
-              label: 'Exit',
-              onClick: handleBtnExitClick
-            }
-          ]
+    <LanguageContext.Consumer>
+      {
+        value => {
+          const langCode = value.language.code;
+          const messages = value.messages;
+          return (
+            <MenuComponent
+              menuButtons={[
+                {
+                  label: messages["Menu.FileLabel"],
+                  // onClick: _=> { console.log('file') },
+                  children: [
+                    {
+                      label: messages["Menu.File.NewLabel"],
+                      onClick: handleBtnNewClick
+                    },
+                    {
+                      label: messages["Menu.File.OpenLabel"],
+                      onClick: handleBtnOpenClick
+                    },
+                    {
+                      label: '-'
+                    },
+                    {
+                      label: messages["Menu.File.ExitLabel"],
+                      onClick: handleBtnExitClick
+                    }
+                  ]
+                }
+              ]}
+            />
+          );
         }
-      ]}
-    />
+      }
+    </LanguageContext.Consumer>
   );
 }
 
@@ -524,7 +536,7 @@ class ProjectListPage extends Component {
 
     // ref
     this.createNewProjectBlock = null;
-    this.setCreateNewProjectBlockRef = element => this.createNewProjectBlock = element;  
+    this.setCreateNewProjectBlockRef = element => this.createNewProjectBlock = element;
 
     // state
     this.state = {
@@ -539,7 +551,7 @@ class ProjectListPage extends Component {
   /* react lifecycles */
 
   componentDidMount() {
-    this.enumerateProjects();    
+    this.enumerateProjects();
   }
 
   /* end of react lifecycles */
@@ -551,15 +563,15 @@ class ProjectListPage extends Component {
     //const props = this.props;
     ipcHelper.listProjects((err, data) => {
       if (err) {
-        handleErrorWithUiDefault(err);        
+        handleErrorWithUiDefault(err);
         return;
       }
 
-      const projectFileStats = data.projectFileObjs;      
+      const projectFileStats = data.projectFileObjs;
       this.setState({
         projects: projectFileStats
-      });      
-    });    
+      });
+    });
   }
 
   showSmallProjectNewButton = _ => {
@@ -581,7 +593,7 @@ class ProjectListPage extends Component {
   /* end of methods */
 
 
-  /* event handlers */  
+  /* event handlers */
 
   handleOuterContainerScroll = (event) => {
     if (this.createNewProjectBlock) {
@@ -591,14 +603,14 @@ class ProjectListPage extends Component {
       } else {
         this.showSmallProjectNewButton();
       }
-    }    
+    }
   }
 
   handleProjectOrderSelectChange = (newSelectedValue) => {
     if (newSelectedValue !== this.state.projectOrderSelectValue) {
       this.setState({
         projectOrderSelectValue: newSelectedValue
-      });      
+      });
     }
   }
 
@@ -610,7 +622,7 @@ class ProjectListPage extends Component {
     }
   }
 
-  handleSmallProjectNewButtonClick = _ => {    
+  handleSmallProjectNewButtonClick = _ => {
     this.props.history.push(routes.editor);
   }
 
@@ -636,13 +648,13 @@ class ProjectListPage extends Component {
 
   render() {
     const props = this.props;
-    const state = this.state;        
+    const state = this.state;
 
     return (
-      <div id="project-list-page">        
+      <div id="project-list-page">
         <div className="outer-container" onScroll={this.handleOuterContainerScroll}>
           <div className="inner-container">
-            <Menu 
+            <Menu
               history={props.history}
             />
             <div className="project-top">
@@ -650,16 +662,16 @@ class ProjectListPage extends Component {
                 <ProjectOrderSelect
                   handleSelectChangeFunc={this.handleProjectOrderSelectChange}
                 />
-              </div>           
+              </div>
               <div className="project-search">
                 <input type="text" name="projectSearchTxt"
                   placeholder="project name"
                   value={state.projectSearchText}
                   onChange={this.handleProjectSearchTxtChange}
-                />             
+                />
               </div>
             </div>
-            <ProjectList          
+            <ProjectList
               items={state.projects}
               projectOrderSelectValue={state.projectOrderSelectValue}
               projectSearchText={state.projectSearchText}
@@ -682,7 +694,7 @@ class ProjectListPage extends Component {
               rotationInDeg={45}
             />
           </div>
-        </div>        
+        </div>
       </div>
     );
   }
