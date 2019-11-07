@@ -3,6 +3,7 @@ import AEntity from "./aEntity";
 class AVideo extends AEntity {
   constructor(el) {
     super(el);
+    this._messageId = 'SceneObjects.Video.DefaultName';
     this._type = 'a-plane';
     this._animatableAttributes = {
       position: ['x', 'y', 'z'],

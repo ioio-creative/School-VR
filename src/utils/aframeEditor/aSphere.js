@@ -3,6 +3,7 @@ import AEntity from "./aEntity";
 class ASphere extends AEntity {
   constructor(defaultAttributes) {
     super(defaultAttributes);
+    this._messageId = 'SceneObjects.Sphere.DefaultName';
     this._type = 'a-sphere';
     this._animatableAttributes = {
       position: ['x', 'y', 'z'],

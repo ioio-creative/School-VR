@@ -3,6 +3,7 @@ import AEntity from "./aEntity";
 class ACone extends AEntity {
   constructor(defaultAttributes) {
     super(defaultAttributes);
+    this._messageId = 'SceneObjects.Cone.DefaultName';
     this._animatableAttributes = {
       position: ['x', 'y', 'z'],
       scale: ['x', 'y', 'z'],

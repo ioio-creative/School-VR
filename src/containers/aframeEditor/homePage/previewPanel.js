@@ -10,6 +10,7 @@ import React, {Component, Fragment} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 import {withSceneContext} from 'globals/contexts/sceneContext';
+import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/languageContext';
 
 import {TweenMax} from 'gsap';
 // import {SortableContainer, SortableElement} from 'react-sortable-hoc';
@@ -84,7 +85,7 @@ class PreviewPanel extends Component {
         onMouseEnter={this.showUi}
         onMouseLeave={this.hideUi}
       >
-      <div className="slideFunctions-panel">
+        <div className="slideFunctions-panel">
           <div className="buttons-group">
             <div className={`button-prevSlide${currentSlideIdx === 0? ' disabled': ''}`}
               onClick={() => {
@@ -134,33 +135,40 @@ class PreviewPanel extends Component {
             </div>
           </div>
           <div className="buttons-group">
-            <select value={currentSlide}
-              onChange={e => {
-                sceneContext.selectSlide(e.currentTarget.value);
-                if (state.socket) {
-                  state.socket.emit('updateSceneStatus', {
-                    action: 'selectSlide',
-                    details: {
-                      slideId: e.currentTarget.value,
-                      autoPlay: false
+            <LanguageContextConsumer render={
+              ({ messages }) => (
+                <select value={currentSlide}
+                  onChange={e => {
+                    sceneContext.selectSlide(e.currentTarget.value);
+                    if (state.socket) {
+                      state.socket.emit('updateSceneStatus', {
+                        action: 'selectSlide',
+                        details: {
+                          slideId: e.currentTarget.value,
+                          autoPlay: false
+                        }
+                      })
                     }
-                  })
-                }
-              }}
-            >
-              {
-                slidesList.map((slide, idx) => {
-                  return <option key={slide.id} value={slide.id}>Slide {idx + 1}</option>
-                })
-              }
-            </select>
+                  }}
+                >
+                  {
+                    slidesList.map((slide, idx) => {
+                      return <option key={slide.id} value={slide.id}>{`${messages['Navigation.SlideSelect.SlideIndexPrefix']} ${idx + 1}`}</option>
+                    })
+                  }
+                </select>
+              )
+            } />            
           </div>
           <div className="buttons-group">
             {/* <Link to={routes.editorWithProjectFilePathQuery(projectFilePathToLoad)}>Exit</Link> */}
-            <a onClick={this.backButtonClick}>Back</a>
+            <LanguageContextConsumer render={
+              ({ language, messages }) => (
+                <a onClick={this.backButtonClick}>{messages['PreviewPanel.BackLabel']}</a>
+              )
+            } />            
           </div>
-        </div>
-      
+        </div>    
       </div>
     );
   }

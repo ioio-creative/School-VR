@@ -108,10 +108,14 @@ class ViewerPage extends Component {
     const sceneContext = this.props.sceneContext;
     return (
       <div id="viewer">
-        {/* <Prompt
-          when={true}
-          message='You have unsaved changes, are you sure you want to leave?'
-        /> */}
+        {/* <LanguageContextConsumer render={
+            ({ language, messages }) => (
+              <Prompt
+                when={true}
+                message={messages['Prompt.UnsavedWorkMessage']}
+              />
+            )
+          } /> */}
         {/* <SystemPanel projectName={this.projectName} /> */}
         {/* <MenuComponent 
           // projectName="Untitled_1"

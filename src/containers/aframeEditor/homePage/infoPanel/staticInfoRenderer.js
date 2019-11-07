@@ -12,6 +12,8 @@ import OpacityPicker from './opacityPicker';
 import {Rnd as ResizableAndDraggable} from 'react-rnd';
 // import ABox from 'utils/aBox';
 
+import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/languageContext';
+
 import './infoTypeBox.css';
 
 var Events = require('vendor/Events.js');
@@ -202,7 +204,9 @@ class StaticInfoRenderer extends Component {
                 }}
                 currentEntity={currentEntity}
               />
-              <div className="field-label">Color</div>
+              <div className="field-label">
+                <LanguageContextMessagesConsumer messageId="EditThingPanel.Color.ColorLabel" />
+              </div>
             </div>
           }
           {animatableAttributes.material && animatableAttributes.material.indexOf('opacity') !== -1 &&
@@ -217,7 +221,9 @@ class StaticInfoRenderer extends Component {
                 }}
                 currentEntity={currentEntity}
               />
-              <div className="field-label">Opacity</div>
+              <div className="field-label">
+                <LanguageContextMessagesConsumer messageId="EditThingPanel.Color.OpacityLabel" />
+              </div>
             </div>
           }
           {animatableAttributes.ttfFont && animatableAttributes.ttfFont.indexOf('color') !== -1 &&
@@ -232,7 +238,9 @@ class StaticInfoRenderer extends Component {
                 }}
                 currentEntity={currentEntity}
               />
-              <div className="field-label">Text Color</div>
+              <div className="field-label">
+                <LanguageContextMessagesConsumer messageId='EditThingPanel.Text.TextColorLabel' />
+              </div>
               {/* <input type="color" value={color} onInput={(event) => this.changeObjectField('material.color', event.target.value)} hidden/> */}
             </div>
           }
@@ -248,7 +256,9 @@ class StaticInfoRenderer extends Component {
                 }}
                 currentEntity={currentEntity}
               />
-              <div className="field-label">Text Opacity</div>
+              <div className="field-label">
+                <LanguageContextMessagesConsumer messageId='EditThingPanel.Text.TextOpacityLabel' />
+              </div>
             </div>
           }
           {animatableAttributes.ttfFont && animatableAttributes.ttfFont.indexOf('fontSize') !== -1 &&

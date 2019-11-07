@@ -3,6 +3,7 @@ import AEntity from "./aEntity";
 class ATetrahedron extends AEntity {
   constructor(el) {
     super(el);
+    this._messageId = 'SceneObjects.Tetrahedron.DefaultName';
     this._type = 'a-tetrahedron';
     this._animatableAttributes = {
       position: ['x', 'y', 'z'],

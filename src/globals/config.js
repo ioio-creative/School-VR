@@ -28,35 +28,6 @@ function getLanguageFromLanguageCode(languageCode) {
   return languageCodeToLanguageMap[languageCode];
 }
 
-// https://www.metamodpro.com/browser-language-codes
-const browserLangIdCodeToMyLangCodeMapper = {
-  'en': languages.english,
-  'en-au': languages.english,
-  'en-bz': languages.english,
-  'en-ca': languages.english,
-  'en-ie': languages.english,
-  'en-jm': languages.english,
-  'en-ph': languages.english,
-  'en-za': languages.english,
-  'en-tt': languages.english,
-  'en-gb': languages.english,
-  'en-us': languages.english,
-  'en-zw': languages.english,
-
-  'zh': languages.traditionalChinese,
-  'zh-hk': languages.traditionalChinese,
-  'zh-cn': languages.simplifiedChinese.isUsed ? languages.simplifiedChinese : languages.traditionalChinese,
-  'zh-sg': languages.simplifiedChinese.isUsed ? languages.simplifiedChinese : languages.traditionalChinese,
-  'zh-tw': languages.traditionalChinese,
-
-  'ja': languages.japanese.isUsed ? languages.japanese : languages.english,
-  // 'ja': languages.japanese
-};
-
-function getLanguageFromBrowserLangIdCode(browserLangIdCode) {
-  return browserLangIdCodeToMyLangCodeMapper[browserLangIdCode];
-}
-
 /* end of language specifics */
 
 
@@ -69,7 +40,7 @@ let config = {
   schoolVrProjectArchiveExtensionWithLeadingDot: schoolVrProjectArchiveExtensionWithLeadingDot,
   jsonFileExtensionWithLeadingDot: '.json',
 
-  defaultLanguage: languages.english
+  defaultLanguage: languages.traditionalChinese
 };
 let appDirectory = {};
 const setAppData = (appName, homePath, appDataPath, documentsPath, callBack = null) => {
@@ -170,7 +141,6 @@ export {
   // language specifics
   languages,
   usedLanguagesArray,
-  getLanguageFromBrowserLangIdCode,
   getLanguageFromLanguageCode,
 };
 

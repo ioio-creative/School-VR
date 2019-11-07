@@ -3,6 +3,7 @@ import AEntity from "./aEntity";
 class ACylinder extends AEntity {
   constructor(defaultAttributes) {
     super(defaultAttributes);
+    this._messageId = 'SceneObjects.Cylinder.DefaultName';
     this._animatableAttributes = {
       position: ['x', 'y', 'z'],
       scale: ['x', 'y', 'z'],

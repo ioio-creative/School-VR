@@ -78,7 +78,7 @@ Editor.prototype = {
       this.EDITOR_CAMERA = this.editorCameraEl.getObject3D('camera');
       this.initUI();
       this.initModules();
-      Events.emit('editor-load',this);
+      Events.emit('editor-load', this);
     });
     this.editorCameraEl.setAttribute('camera', {far: 10000, fov: 50, near: 0.05, active: true});
     this.editorCameraEl.setAttribute('data-aframe-editor', 'camera');

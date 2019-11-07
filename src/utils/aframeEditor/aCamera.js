@@ -5,6 +5,7 @@ var Events = require('vendor/Events.js');
 class ACamera extends AEntity {
   constructor(el) {
     super(el);
+    this._messageId = 'SceneObjects.Camera.DefaultName';
     this._type = 'a-camera';
     this._animatableAttributes = {
       position: ['x', 'y', 'z'],

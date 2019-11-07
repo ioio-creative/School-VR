@@ -9,6 +9,7 @@ const uuid = _=> 'uuid_' + uuid_v1().replace(/-/g, '_');
 class ANavigation extends AEntity {
   constructor(el) {
     super(el);
+    this._messageId = 'SceneObjects.Navigation.DefaultName';
     this._type = 'a-navigation';
     this._animatableAttributes = {
       position: ['x', 'y', 'z'],

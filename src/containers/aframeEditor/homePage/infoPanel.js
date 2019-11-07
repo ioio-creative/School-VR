@@ -24,7 +24,8 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 // import {roundTo} from 'globals/helperfunctions';
 
 import './infoPanel.css';
-import { withSceneContext } from 'globals/contexts/sceneContext';
+import {withSceneContext} from 'globals/contexts/sceneContext';
+import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/languageContext';
 
 import ABox from 'utils/aframeEditor/aBox';
 import ASphere from 'utils/aframeEditor/aSphere';
@@ -102,9 +103,15 @@ class InfoPanel extends Component {
   constructor(props) {
     super(props);
     // this.sceneContext = props.sceneContext;
-    this.addTimeline = this.addTimeline.bind(this);
-    this.selectTimelinePosition = this.selectTimelinePosition.bind(this);
-    this.deleteTimeline = this.deleteTimeline.bind(this);
+    [
+      'addTimeline',
+      'selectTimelinePosition',
+      'deleteTimeline',
+
+      'renderStaticAttribute'
+    ].forEach(methodName => {
+      this[methodName] = this[methodName].bind(this);
+    });
     // this.state = {
     //   currentEntity: props.sceneContext.getCurrentEntity(),
     //   // model: null
@@ -115,6 +122,8 @@ class InfoPanel extends Component {
     // const entity = this.props.sceneContext.getCurrentEntity();
     // if (entity)
     //   this.Model = new entityModel[entity['type']];
+  }
+  componentWillUnmount() {
   }
   // componentDidUpdate(prevProps, prevState) {
   //   const props = this.props;
@@ -148,13 +157,320 @@ class InfoPanel extends Component {
     const currentTimelineId = sceneContext.getCurrentTimelineId();
     sceneContext.deleteTimeline(currentTimelineId);
   }
-  componentWillUnmount() {
+  renderStaticAttribute(staticAttribute, selectedEntity, model, sceneContext, messages) {
+    let inputField = null;
+    let currentValue = '';
+    if (staticAttribute.attributeField) {
+      const attrsObj = selectedEntity.el.getAttribute(staticAttribute.attributeKey);
+      if (attrsObj) {
+        currentValue = attrsObj[staticAttribute.attributeField];
+      }
+    } else {
+      currentValue = selectedEntity.el.getAttribute(staticAttribute.attributeField)
+    }
+    // try to prompt an input field from electron?
+    {/* console.log(staticAttribute.type); */}
+    switch (staticAttribute.type) {
+      case 'text': {
+        inputField = 
+        <div key={staticAttribute.name} className="attribute-row">
+          <LanguageContextConsumer render={
+            ({ language, messages }) => (
+              <input type="text" className="contentTextInput" key={selectedEntity.el.id} onInput={(event) => {
+                {/* selectedEntity.el.setAttribute(staticAttribute.attributeKey,
+                {
+                  [staticAttribute.attributeField]: event.target.value
+                }); */}
+                if (staticAttribute.attributeField) {
+                  model.updateEntityAttributes({
+                    [staticAttribute.attributeKey]: {
+                      [staticAttribute.attributeField]: event.target.value
+                    }
+                  });
+                  sceneContext.updateEntity({                      
+                    [staticAttribute.attributeKey]: {
+                      [staticAttribute.attributeField]: event.target.value
+                    }
+                  }, selectedEntity['id']);
+                } else {
+                  model.updateEntityAttributes({
+                    [staticAttribute.attributeKey]: event.target.value
+                  });
+                  sceneContext.updateEntity({
+                    [staticAttribute.attributeKey]: event.target.value
+                    // [staticAttribute.attributeKey]: {
+                      // [staticAttribute.attributeField]: event.target.value
+                    // }
+                  }, selectedEntity['id']);
+                }
+              }} onBlur={(event) => {
+                {/* if (staticAttribute.attributeField) {
+                  sceneContext.updateEntity({                      
+                    [staticAttribute.attributeKey]: {
+                      [staticAttribute.attributeField]: event.target.value
+                    }
+                  }, selectedEntity['id']);
+                } else {
+                  sceneContext.updateEntity({
+                    [staticAttribute.attributeKey]: event.target.value
+                    // [staticAttribute.attributeKey]: {
+                      // [staticAttribute.attributeField]: event.target.value
+                    // }
+                  }, selectedEntity['id']);
+                } */}
+              }} value={currentValue} 
+              placeholder={messages['EditThingPanel.Text.TextPlaceholder']} />
+            )            
+          } />          
+        </div>
+        break;
+      }
+      case 'image': {
+        // use electron api to load
+        inputField = 
+        <div key={staticAttribute.name} className="attribute-button">
+          <div onClick={_=> {
+            ipcHelper.openImageDialog((err, data) => {
+              if (isNonEmptyArray(data.filePaths)) {
+                const filePath =data.filePaths[0];
+                const ext = filePath.split('.').slice(-1)[0];
+                const newAssetData = sceneContext.addAsset({
+                  filePath: filePath,
+                  type: (ext === 'gif'? 'gif': 'image')
+                });
+                sceneContext.updateEntity({
+                  material: {
+                    src: `#${newAssetData.id}`,
+                    shader: newAssetData.shader
+                  }
+                }, selectedEntity['id']);
+                selectedEntity.el.setAttribute('material', `src:#${newAssetData.id};shader:${newAssetData.shader}`);
+              } else {
+                selectedEntity.el.removeAttribute('material', 'src');
+              }
+            })
+          }}>
+            <img src={iconImage} alt={messages['EditThingPanel.AddTextureLabel']} />
+            <div>{messages['EditThingPanel.AddTextureLabel']}</div>
+          </div>
+        </div>
+        // temp use browser api to debug
+        // inputField = <input type="file" accept="image/svg+xml,image/jpeg,image/png" onChange={(event) => {
+        //   if (event.target.files && event.target.files[0]) {
+        //     {/* const FR= new FileReader();
+        //     FR.addEventListener("load", function(e) {
+        //       // console.log(e.target.result);
+        //       selectedEntity.el.setAttribute('material', `src:url(${e.target.result})`);
+        //       sceneContext.updateEntity({
+        //         material: {
+        //           src: `url(${e.target.result})`
+        //         }
+        //         // [staticAttribute.attributeKey]: {
+        //           // [staticAttribute.attributeField]: event.target.value
+        //         // }
+        //       }, selectedEntity['id']);
+        //     }); 
+        //     FR.readAsDataURL( event.target.files[0] ); */}
+        //     {/* console.log(event.target.files[0].type); */}
+        //     /**
+        //     image/svg+xml
+        //     image/jpeg
+        //     image/gif
+        //     image/png
+        //     video/mp4
+        //      */
+        //     const newAssetData = sceneContext.addAsset(event.target.files[0]);
+        //     selectedEntity.el.setAttribute('material', `src:#${newAssetData.id};shader: ${newAssetData.shader}`);
+        //     sceneContext.updateEntity({
+        //       material: {
+        //         src: `#${newAssetData.id}`,
+        //         shader: newAssetData.shader
+        //       }
+        //     }, selectedEntity['id']);
+        //    
+        //   } else { 
+        //     selectedEntity.el.removeAttribute('material', 'src');
+        //   }
+        // }} />
+        break;
+      }
+      case 'video': {
+        // use electron api to load
+        inputField = 
+        <div key={staticAttribute.name} className="attribute-button">
+          <div onClick={_=> {
+            ipcHelper.openVideoDialog((err, data) => {
+              if (err) {
+                handleErrorWithUiDefault(err);
+                return;
+              }
+
+              const filePaths = data.filePaths;
+
+              if (!isNonEmptyArray(filePaths)) {
+                selectedEntity.el.removeAttribute('material', 'src');
+              } else {
+                const newAssetData = sceneContext.addAsset({
+                  filePath: filePaths[0],
+                  type: 'video/mp4', // data.type not pass from the ipc
+                });
+                selectedEntity.el.setAttribute('material', `src:#${newAssetData.id};shader: ${newAssetData.shader}`);
+                sceneContext.updateEntity({
+                  material: {
+                    src: `#${newAssetData.id}`,
+                    shader: newAssetData.shader
+                  }
+                }, selectedEntity['id']);
+              }
+
+              {/* const mimeType = fileHelper.getMimeType(filePaths[0]); */}
+
+              {/* sceneContext.updateEntity({
+                material: {
+                  src: `url(${data.filePaths})`
+                }
+              }, selectedEntity['id']); */}
+              {/* selectedEntity.el.setAttribute('material', `src:url(${data.filePaths})`); */}
+            })
+          }}>
+            <img src={iconVideo} alt="Add Video"/>
+            <div>{messages['EditThingPanel.AddVideoLabel']}</div>
+          </div>
+        </div>
+        // temp use browser api to debug
+        {/* inputField = <input type="file" accept="video/mp4" onChange={(event) => {
+          if (event.target.files && event.target.files[0]) {
+            const newAssetData = sceneContext.addAsset(event.target.files[0]);
+            selectedEntity.el.setAttribute('material', `src:#${newAssetData.id};shader: ${newAssetData.shader}`);
+            sceneContext.updateEntity({
+              material: {
+                src: `#${newAssetData.id}`,
+                shader: newAssetData.shader
+              }
+            }, selectedEntity['id']);
+          } else {
+            selectedEntity.el.removeAttribute('material', 'src');
+          }
+        }} /> */}
+        break;
+      }
+      case 'number': {
+        inputField = 
+        <div key={staticAttribute.name} className="attribute-row">
+          <div className="numberSelector">
+            <div className={`decreaseFontSize${(!currentValue || currentValue === 1)?' disabled': ''}`} onClick={() => {
+              const newValue = Math.max(currentValue - 1, 1);
+              if (staticAttribute.attributeField) {
+                model.updateEntityAttributes({
+                  [staticAttribute.attributeKey]: {
+                    [staticAttribute.attributeField]: newValue
+                  }
+                });
+                sceneContext.updateEntity({                      
+                  [staticAttribute.attributeKey]: {
+                    [staticAttribute.attributeField]: newValue
+                  }
+                }, selectedEntity['id']);
+              } else {
+                model.updateEntityAttributes({
+                  [staticAttribute.attributeKey]: newValue
+                });
+                sceneContext.updateEntity({
+                  [staticAttribute.attributeKey]: newValue
+                }, selectedEntity['id']);
+              }
+            }}>
+              <img className="buttonImg" src={iconCircleMinus} />
+            </div>
+            <div className="currentFontSize">
+              <div className="label">
+                <LanguageContextMessagesConsumer messageId="EditThingPanel.Text.SizeLabel" />
+              </div>
+              <div className="value">{currentValue || 1}</div>
+            </div>
+            <div className={`increaseFontSize${currentValue === 20? ' disabled': ''}`} onClick={() => {
+              const newValue = Math.min(currentValue + 1, 20);
+              if (staticAttribute.attributeField) {
+                model.updateEntityAttributes({
+                  [staticAttribute.attributeKey]: {
+                    [staticAttribute.attributeField]: newValue
+                  }
+                });
+                sceneContext.updateEntity({                      
+                  [staticAttribute.attributeKey]: {
+                    [staticAttribute.attributeField]: newValue
+                  }
+                }, selectedEntity['id']);
+              } else {
+                model.updateEntityAttributes({
+                  [staticAttribute.attributeKey]: newValue
+                });
+                sceneContext.updateEntity({
+                  [staticAttribute.attributeKey]: newValue
+                }, selectedEntity['id']);
+              }
+            }}>
+              <img className="buttonImg" src={iconCirclePlus} />
+            </div>
+          </div>
+        </div>;
+          
+        break;
+      }
+      case 'slidesList': {
+        const currentSlideId = sceneContext.getCurrentSlideId();
+        const slidesList = sceneContext.getSlidesList();
+        const selected = selectedEntity[staticAttribute.attributeKey];
+        inputField = 
+          <div key={staticAttribute.name} className="attribute-row">
+            <LanguageContextConsumer render={
+              ({ language, messages }) => (
+                <select onChange={(event) => {
+                    model.updateEntityAttributes({
+                      [staticAttribute.attributeKey]: event.target.value
+                    });
+                    sceneContext.updateEntity({
+                      [staticAttribute.attributeKey]: event.target.value
+                      // [staticAttribute.attributeKey]: {
+                        // [staticAttribute.attributeField]: event.target.value
+                      // }
+                    }, selectedEntity['id']);
+                  }} 
+                  value={selected || ""}
+                >
+                  <option>{messages['EditThingPanel.Navigation.SelectSlideLabel']}</option>
+                  {slidesList.map((slide, slideIdx) => {
+                    {/* if (slide.id === currentSlideId) return null; */}
+                    return <option key={slide.id} value={slide.id}
+                      disabled={slide.id === currentSlideId}
+                    >
+                      {`${messages['Navigation.SlideSelect.SlideIndexPrefix']} ${slideIdx + 1}${slide.id === currentSlideId? ` ${messages['EditThingPanel.Navigation.CurrentSlideSuffix']}`: ''}`}
+                    </option>
+                  })}
+                </select>
+              )
+            } />            
+          </div>
+      }
+    }
+    return inputField;
+    // <div key={staticAttribute.name} className="attribute-row">
+      {/* <div className="field-label" onClick={(e) => {
+        const nextSiblingPosition = e.currentTarget.nextSibling.style.position;
+        e.currentTarget.nextSibling.style.position = (nextSiblingPosition === 'fixed'? '': 'fixed');
+      }}
+      title={currentValue}
+    >{staticAttribute.name} :</div> */}
+    //   {inputField}
+    // </div> 
   }
   render() {
     const props = this.props;
     const sceneContext = props.sceneContext;
     const selectedEntity = sceneContext.getCurrentEntity();
-    if (!selectedEntity) return null;
+    if (!selectedEntity) {
+      return null;
+    }
 
     // const selectedSlide = selectedEntity['slide'][props.selectedSlide];
     // if (!selectedSlide) return null;
@@ -177,306 +493,15 @@ class InfoPanel extends Component {
             Content - {selectedEntity['name']}
           </div> */}
           <div className={`panel-body buttons-${staticAttributes.length}`}>
-            {staticAttributes.map(staticAttribute => {
-              let inputField = null;
-              let currentValue = '';
-              if (staticAttribute.attributeField) {
-                const attrsObj = selectedEntity.el.getAttribute(staticAttribute.attributeKey);
-                if (attrsObj) {
-                  currentValue = attrsObj[staticAttribute.attributeField];
-                }
-              } else {
-                currentValue = selectedEntity.el.getAttribute(staticAttribute.attributeField)
-              }
-              // try to prompt an input field from electron?
-              {/* console.log(staticAttribute.type); */}
-              switch (staticAttribute.type) {
-                case 'text': {
-                  inputField = 
-                  <div key={staticAttribute.name} className="attribute-row">
-
-                    <input type="text" className="contentTextInput" key={selectedEntity.el.id} onInput={(event) => {
-                      {/* selectedEntity.el.setAttribute(staticAttribute.attributeKey,
-                      {
-                        [staticAttribute.attributeField]: event.target.value
-                      }); */}
-                      if (staticAttribute.attributeField) {
-                        model.updateEntityAttributes({
-                          [staticAttribute.attributeKey]: {
-                            [staticAttribute.attributeField]: event.target.value
-                          }
-                        });
-                        sceneContext.updateEntity({                      
-                          [staticAttribute.attributeKey]: {
-                            [staticAttribute.attributeField]: event.target.value
-                          }
-                        }, selectedEntity['id']);
-                      } else {
-                        model.updateEntityAttributes({
-                          [staticAttribute.attributeKey]: event.target.value
-                        });
-                        sceneContext.updateEntity({
-                          [staticAttribute.attributeKey]: event.target.value
-                          // [staticAttribute.attributeKey]: {
-                            // [staticAttribute.attributeField]: event.target.value
-                          // }
-                        }, selectedEntity['id']);
-                      }
-                    }} onBlur={(event) => {
-                      {/* if (staticAttribute.attributeField) {
-                        sceneContext.updateEntity({                      
-                          [staticAttribute.attributeKey]: {
-                            [staticAttribute.attributeField]: event.target.value
-                          }
-                        }, selectedEntity['id']);
-                      } else {
-                        sceneContext.updateEntity({
-                          [staticAttribute.attributeKey]: event.target.value
-                          // [staticAttribute.attributeKey]: {
-                            // [staticAttribute.attributeField]: event.target.value
-                          // }
-                        }, selectedEntity['id']);
-                      } */}
-                    }} value={currentValue} 
-                    placeholder="Input your text here" />
-                  </div>
-                  break;
-                }
-                case 'image': {
-                  // use electron api to load
-                  inputField = 
-                  <div key={staticAttribute.name} className="attribute-button">
-                    <div onClick={_=> {
-                      ipcHelper.openImageDialog((err, data) => {
-                        if (isNonEmptyArray(data.filePaths)) {
-                          const filePath =data.filePaths[0];
-                          const ext = filePath.split('.').slice(-1)[0];
-                          const newAssetData = sceneContext.addAsset({
-                            filePath: filePath,
-                            type: (ext === 'gif'? 'gif': 'image')
-                          });
-                          sceneContext.updateEntity({
-                            material: {
-                              src: `#${newAssetData.id}`,
-                              shader: newAssetData.shader
-                            }
-                          }, selectedEntity['id']);
-                          selectedEntity.el.setAttribute('material', `src:#${newAssetData.id};shader:${newAssetData.shader}`);
-                        } else {
-                          selectedEntity.el.removeAttribute('material', 'src');
-                        }
-                      })
-                    }}>
-                      <img src={iconImage} alt="Add Texture"/>
-                      <div>Add Texture</div>
-                    </div>
-                  </div>
-                  // temp use browser api to debug
-                  // inputField = <input type="file" accept="image/svg+xml,image/jpeg,image/png" onChange={(event) => {
-                  //   if (event.target.files && event.target.files[0]) {
-                  //     {/* const FR= new FileReader();
-                  //     FR.addEventListener("load", function(e) {
-                  //       // console.log(e.target.result);
-                  //       selectedEntity.el.setAttribute('material', `src:url(${e.target.result})`);
-                  //       sceneContext.updateEntity({
-                  //         material: {
-                  //           src: `url(${e.target.result})`
-                  //         }
-                  //         // [staticAttribute.attributeKey]: {
-                  //           // [staticAttribute.attributeField]: event.target.value
-                  //         // }
-                  //       }, selectedEntity['id']);
-                  //     }); 
-                  //     FR.readAsDataURL( event.target.files[0] ); */}
-                  //     {/* console.log(event.target.files[0].type); */}
-                  //     /**
-                  //     image/svg+xml
-                  //     image/jpeg
-                  //     image/gif
-                  //     image/png
-                  //     video/mp4
-                  //      */
-                  //     const newAssetData = sceneContext.addAsset(event.target.files[0]);
-                  //     selectedEntity.el.setAttribute('material', `src:#${newAssetData.id};shader: ${newAssetData.shader}`);
-                  //     sceneContext.updateEntity({
-                  //       material: {
-                  //         src: `#${newAssetData.id}`,
-                  //         shader: newAssetData.shader
-                  //       }
-                  //     }, selectedEntity['id']);
-                  //    
-                  //   } else { 
-                  //     selectedEntity.el.removeAttribute('material', 'src');
-                  //   }
-                  // }} />
-                  break;
-                }
-                case 'video': {
-                  // use electron api to load
-                  inputField = 
-                  <div key={staticAttribute.name} className="attribute-button">
-                    <div onClick={_=> {
-                      ipcHelper.openVideoDialog((err, data) => {
-                        if (err) {
-                          handleErrorWithUiDefault(err);
-                          return;
-                        }
-
-                        const filePaths = data.filePaths;
-
-                        if (!isNonEmptyArray(filePaths)) {
-                          selectedEntity.el.removeAttribute('material', 'src');
-                        } else {
-                          const newAssetData = sceneContext.addAsset({
-                            filePath: filePaths[0],
-                            type: 'video/mp4', // data.type not pass from the ipc
-                          });
-                          selectedEntity.el.setAttribute('material', `src:#${newAssetData.id};shader: ${newAssetData.shader}`);
-                          sceneContext.updateEntity({
-                            material: {
-                              src: `#${newAssetData.id}`,
-                              shader: newAssetData.shader
-                            }
-                          }, selectedEntity['id']);
-                        }
-
-                        {/* const mimeType = fileHelper.getMimeType(filePaths[0]); */}
-
-                        {/* sceneContext.updateEntity({
-                          material: {
-                            src: `url(${data.filePaths})`
-                          }
-                        }, selectedEntity['id']); */}
-                        {/* selectedEntity.el.setAttribute('material', `src:url(${data.filePaths})`); */}
-                      })
-                    }}>
-                      <img src={iconVideo} alt="Add Video"/>
-                      <div>Add Video</div>
-                    </div>
-                  </div>
-                  // temp use browser api to debug
-                  {/* inputField = <input type="file" accept="video/mp4" onChange={(event) => {
-                    if (event.target.files && event.target.files[0]) {
-                      const newAssetData = sceneContext.addAsset(event.target.files[0]);
-                      selectedEntity.el.setAttribute('material', `src:#${newAssetData.id};shader: ${newAssetData.shader}`);
-                      sceneContext.updateEntity({
-                        material: {
-                          src: `#${newAssetData.id}`,
-                          shader: newAssetData.shader
-                        }
-                      }, selectedEntity['id']);
-                    } else {
-                      selectedEntity.el.removeAttribute('material', 'src');
-                    }
-                  }} /> */}
-                  break;
-                }
-                case 'number': {
-                  inputField = 
-                  <div key={staticAttribute.name} className="attribute-row">
-                    <div className="numberSelector">
-                      <div className={`decreaseFontSize${(!currentValue || currentValue === 1)?' disabled': ''}`} onClick={() => {
-                        const newValue = Math.max(currentValue - 1, 1);
-                        if (staticAttribute.attributeField) {
-                          model.updateEntityAttributes({
-                            [staticAttribute.attributeKey]: {
-                              [staticAttribute.attributeField]: newValue
-                            }
-                          });
-                          sceneContext.updateEntity({                      
-                            [staticAttribute.attributeKey]: {
-                              [staticAttribute.attributeField]: newValue
-                            }
-                          }, selectedEntity['id']);
-                        } else {
-                          model.updateEntityAttributes({
-                            [staticAttribute.attributeKey]: newValue
-                          });
-                          sceneContext.updateEntity({
-                            [staticAttribute.attributeKey]: newValue
-                          }, selectedEntity['id']);
-                        }
-                      }}>
-                        <img className="buttonImg" src={iconCircleMinus} />
-                      </div>
-                      <div className="currentFontSize">
-                        <div className="label">Size:</div>
-                        <div className="value">{currentValue || 1}</div>
-                      </div>
-                      <div className={`increaseFontSize${currentValue === 20? ' disabled': ''}`} onClick={() => {
-                        const newValue = Math.min(currentValue + 1, 20);
-                        if (staticAttribute.attributeField) {
-                          model.updateEntityAttributes({
-                            [staticAttribute.attributeKey]: {
-                              [staticAttribute.attributeField]: newValue
-                            }
-                          });
-                          sceneContext.updateEntity({                      
-                            [staticAttribute.attributeKey]: {
-                              [staticAttribute.attributeField]: newValue
-                            }
-                          }, selectedEntity['id']);
-                        } else {
-                          model.updateEntityAttributes({
-                            [staticAttribute.attributeKey]: newValue
-                          });
-                          sceneContext.updateEntity({
-                            [staticAttribute.attributeKey]: newValue
-                          }, selectedEntity['id']);
-                        }
-                      }}>
-                        <img className="buttonImg" src={iconCirclePlus} />
-                      </div>
-                    </div>
-                  </div>;
-                    
-                  break;
-                }
-                case 'slidesList': {
-                  const currentSlideId = sceneContext.getCurrentSlideId();
-                  const slidesList = sceneContext.getSlidesList();
-                  const selected = selectedEntity[staticAttribute.attributeKey];
-                  inputField = 
-                    <div key={staticAttribute.name} className="attribute-row">
-
-                      <select onChange={(event) => {
-                          model.updateEntityAttributes({
-                            [staticAttribute.attributeKey]: event.target.value
-                          });
-                          sceneContext.updateEntity({
-                            [staticAttribute.attributeKey]: event.target.value
-                            // [staticAttribute.attributeKey]: {
-                              // [staticAttribute.attributeField]: event.target.value
-                            // }
-                          }, selectedEntity['id']);
-                        }} 
-                        value={selected || ""}
-                      >
-                        <option>Select Slide</option>
-                        {slidesList.map((slide, slideIdx) => {
-                          {/* if (slide.id === currentSlideId) return null; */}
-                          return <option key={slide.id} value={slide.id}
-                            disabled={slide.id === currentSlideId}
-                          >
-                            {`Slide ${slideIdx + 1}${slide.id === currentSlideId? ' (This Slide)': ''}`}
-                          </option>
-                        })}
-                      </select>
-                    </div>
-                }
-              }
-              return inputField;
-              // <div key={staticAttribute.name} className="attribute-row">
-                {/* <div className="field-label" onClick={(e) => {
-                  const nextSiblingPosition = e.currentTarget.nextSibling.style.position;
-                  e.currentTarget.nextSibling.style.position = (nextSiblingPosition === 'fixed'? '': 'fixed');
-                }}
-                title={currentValue}
-              >{staticAttribute.name} :</div> */}
-              //   {inputField}
-              // </div>
-            })}
-            
+            <LanguageContextConsumer render={
+              ({ language, messages }) => (
+                <>
+                  {
+                    staticAttributes.map(staticAttribute => this.renderStaticAttribute(staticAttribute, selectedEntity, model, sceneContext, messages))
+                  }
+                </>
+              )
+            } />            
           </div>
         </div>
       </div>
@@ -500,12 +525,12 @@ class InfoPanel extends Component {
                   <Fragment>
                     <div className="attribute-col">
                       <button className="new-timeline-btn" onClick={this.addTimeline}>
-                        Click to add animation
+                        <LanguageContextMessagesConsumer messageId="EditThingPanel.AddAnimationLabel" />
                       </button>
                     </div>
                     <EntityDetails key={selectedEntity.id} entityId={selectedEntity['id']} {...props} model={model} />
                   </Fragment>
-                :
+                  :
                   <div className="timelines-col">
                     {/* timelines exist, display timeline selecting box */}
                     {allTimelines.map(timeline => {

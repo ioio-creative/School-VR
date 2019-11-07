@@ -3,6 +3,7 @@ import AEntity from "./aEntity";
 class ABox extends AEntity {
   constructor(el) {
     super(el);
+    this._messageId = 'SceneObjects.Box.DefaultName';
     this._type = 'a-box';
     this._animatableAttributes = {
       position: ['x', 'y', 'z'],
@@ -49,4 +50,5 @@ class ABox extends AEntity {
     }
   }
 }
+
 export default ABox;

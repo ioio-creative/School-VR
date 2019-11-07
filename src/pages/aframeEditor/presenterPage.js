@@ -3,6 +3,8 @@ import React, {Component} from 'react';
 import {withRouter, Link} from 'react-router-dom';
 
 import {withSceneContext} from 'globals/contexts/sceneContext';
+import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/languageContext';
+import {languages} from 'globals/config';
 
 import MenuComponent from 'components/menuComponent';
 import Mousetrap from 'mousetrap';
@@ -40,6 +42,72 @@ const uuid = require('uuid/v1');
 // const validator = new jsonSchemaValidator();
 // const schema = require('schema/aframe_schema_20181108.json');
 
+function PresenterPageMenu(props) {
+  const {
+    messages,
+    changeLanguageFuncs,
+
+    handleHomeButtonClick,
+    handleOpenProjectButtonClick,
+    handleExitButtonClick
+  } = props;
+
+  function handleBtnEnglishClick() {
+    changeLanguageFuncs[languages.english.code]();
+  }
+
+  function handleBtnTraditionalChineseClick() {
+    changeLanguageFuncs[languages.traditionalChinese.code]();
+  }
+
+  return (
+    <MenuComponent 
+      // projectName="Untitled_1"
+      menuButtons={[
+        {
+          label: messages['Menu.FileLabel'],
+          // onClick: _=> { console.log('file') },
+          children: [
+            {
+                label: messages['Menu.File.HomeLabel'],
+                disabled: false,
+                onClick: handleHomeButtonClick                                      
+              },
+              {
+                label: '-'
+              },
+              {
+                label: messages['Menu.File.OpenLabel'],
+                disabled: false,
+                onClick: handleOpenProjectButtonClick
+              },
+              {
+                label: '-'
+              },
+              {
+                label: messages['Menu.File.ExitLabel'],
+                disabled: false,
+                onClick: handleExitButtonClick
+              }
+          ]
+        },
+        {
+          label: messages["Menu.LanguageLabel"],
+          children: [
+            {
+              label: messages["Menu.Language.English"],
+              onClick: handleBtnEnglishClick
+            },
+            {
+              label: messages["Menu.Language.TraditionalChinese"],
+              onClick: handleBtnTraditionalChineseClick
+            }
+          ]
+        }
+      ]}
+    />
+  );
+}
 
 class PresenterPage extends Component {
   constructor(props) {
@@ -303,43 +371,27 @@ class PresenterPage extends Component {
     //console.log(projectFilePathToLoad);
     return (
       <div id="presenter" className={state.showUi? 'show-ui': 'hide-ui'}>
-        {/* <Prompt
-          when={true}
-          message='You have unsaved changes, are you sure you want to leave?'
-        /> */}
+        {/* <LanguageContextConsumer render={
+            ({ language, messages }) => (
+              <Prompt
+                when={true}
+                message={messages['Prompt.UnsavedWorkMessage']}
+              />
+            )
+          } /> */}
         {/* <SystemPanel projectName={this.projectName} /> */}
-        <MenuComponent 
-          // projectName="Untitled_1"
-          menuButtons={[
-            {
-              label: 'File',
-              // onClick: _=> { console.log('file') },
-              children: [
-                {
-                    label: 'Home',
-                    disabled: false,
-                    onClick: this.handleHomeButtonClick                                      
-                  },
-                  {
-                    label: '-'
-                  },
-                  {
-                    label: 'Open',
-                    disabled: false,
-                    onClick: this.handleOpenProjectButtonClick
-                  },
-                  {
-                    label: '-'
-                  },
-                  {
-                    label: 'Exit',
-                    disabled: false,
-                    onClick: this.handleExitButtonClick
-                  }
-              ]
-            }
-          ]}
-        />
+        <LanguageContextConsumer render={
+          ({ messages, changeLanguageFuncs }) => (
+            <PresenterPageMenu
+              messages={messages}
+              changeLanguageFuncs={changeLanguageFuncs}
+
+              handleHomeButtonClick={this.handleHomeButtonClick}
+              handleOpenProjectButtonClick={this.handleOpenProjectButtonClick}
+              handleExitButtonClick={this.handleExitButtonClick}
+            />
+          )
+        } />
         {/* <ButtonsPanel /> */}
         <AFramePanel disableVR={true} socket={state.socket} user-mode="presenter" />
         <SlidesPanel isEditing={false} socket={state.socket} />
@@ -418,7 +470,7 @@ class PresenterPage extends Component {
                 }
               }}
             >
-              <FontAwesomeIcon icon="play"/>              
+              <FontAwesomeIcon icon="play"/>                           
             </div>
             <div className={`button-nextSlide${currentSlideIdx === slidesList.length - 1? ' disabled': ''}`} onClick={() => {
                 if (nextSlide) {
@@ -438,34 +490,40 @@ class PresenterPage extends Component {
             </div>
           </div>
           <div className="buttons-group">
-            <select value={currentSlide}
-              onChange={e => {
-                sceneContext.selectSlide(e.currentTarget.value);
-                if (state.socket) {
-                  state.socket.emit('updateSceneStatus', {
-                    action: 'selectSlide',
-                    details: {
-                      slideId: e.currentTarget.value,
-                      autoPlay: false
+            <LanguageContextConsumer render={
+              ({ language, messages }) => (
+                <select value={currentSlide}
+                  onChange={e => {
+                    sceneContext.selectSlide(e.currentTarget.value);
+                    if (state.socket) {
+                      state.socket.emit('updateSceneStatus', {
+                        action: 'selectSlide',
+                        details: {
+                          slideId: e.currentTarget.value,
+                          autoPlay: false
+                        }
+                      })
                     }
-                  })
-                }
-              }}
-            >
-              {
-                slidesList.map((slide, idx) => {
-                  return <option key={slide.id} value={slide.id}>Slide {idx + 1}</option>
-                })
-              }
-            </select>
+                  }}
+                >
+                  {
+                    slidesList.map((slide, idx) => {
+                      return <option key={slide.id} value={slide.id}>{`${messages['Navigation.SlideSelect.SlideIndexPrefix']} ${idx + 1}`}</option>
+                    })
+                  }
+                </select>
+              )
+            } />            
           </div>
           <div className="buttons-group">
-            <Link to={routes.editorWithProjectFilePathQuery(projectFilePathToLoad)}>Exit</Link>
+            <Link to={routes.editorWithProjectFilePathQuery(projectFilePathToLoad)}>
+              <LanguageContextMessagesConsumer messageId='PresentationPanel.ExitLabel' />
+            </Link>
           </div>
         </div>
         <div className="show-ui-hints"
           onMouseEnter={this.showUi}
-        ></div>
+        />
       </div>
     );
   }

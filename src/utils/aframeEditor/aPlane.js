@@ -3,6 +3,7 @@ import AEntity from "./aEntity";
 class APlane extends AEntity {
   constructor(el) {
     super(el);
+    this._messageId = 'SceneObjects.Plane.DefaultName';
     this._type = 'a-plane';
     this._animatableAttributes = {
       position: ['x', 'y', 'z'],

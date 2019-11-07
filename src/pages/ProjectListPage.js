@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 
-import {LanguageContext} from 'globals/contexts/languageContext';
+import {globalLanguage, LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/languageContext';
+import {languages} from 'globals/config';
 
 import MenuComponent from 'components/menuComponent';
 import CrossButton from 'components/crossButton';
@@ -75,11 +76,13 @@ class ProjectItem extends Component {
       isShowOptionOverlay: true
     });
   }
+
   handleItemOptionMouseLeave = () => {
     this.setState({
       isShowOptionOverlay: false
     });
   }
+
   handleItemRenameClick = _ => {
     ipcHelper.saveSchoolVrFileDialog((err, data) => {
       if (err) {
@@ -176,7 +179,10 @@ class ProjectItem extends Component {
             <div className="project-info-text-container">
               <div className="project-info-text">
                 <div className="project-name">{project.name}</div>
-                <div className="project-lastupdate">{`Last accessed ${project.atime ? formatDateTime(project.atime) : ""}`}</div>
+                  <div className="project-lastupdate">
+                    <LanguageContextMessagesConsumer messageId='ProjectItem.Info.LastAccessedLabel' />                    
+                    {` ${project.atime ? formatDateTime(project.atime) : ""}`}
+                  </div>
               </div>
             </div>
           </div>
@@ -185,7 +191,9 @@ class ProjectItem extends Component {
           <div className="project-handles">
             <div className="project-preview-container">
               <div className="project-preview">
-                <Link to={routes.presenterWithProjectFilePathQuery(project.path)}>Preview</Link>
+                <Link to={routes.presenterWithProjectFilePathQuery(project.path)}>
+                  <LanguageContextMessagesConsumer messageId='ProjectItem.Handles.PreviewLabel' />
+                </Link>                                
               </div>
             </div>
             <div className="project-options-overlay" />
@@ -193,28 +201,32 @@ class ProjectItem extends Component {
               onMouseEnter={this.handleItemOptionMouseEnter}
               onMouseLeave={this.handleItemOptionMouseLeave}
             >
-              <div className="project-options">Options</div>
+              <div className="project-options">
+                <LanguageContextMessagesConsumer messageId='ProjectItem.Handles.OptionsLabel' />
+              </div>
               <div className="project-options-detail">
                 <div className="project-options-detail-item"
                   onClick={this.handleItemRenameClick}
                 >
-                  Rename
+                  <LanguageContextMessagesConsumer messageId='ProjectItem.Handles.RenameLabel' />
                 </div>
                 <div className="project-options-detail-item"
                   onClick={this.handleItemCopyToNewClick}
                 >
-                  Copy to New
+                  <LanguageContextMessagesConsumer messageId='ProjectItem.Handles.CopyToNewLabel' />
                 </div>
                 <div className="project-options-detail-item"
                   onClick={this.handleItemDeleteClick}
                 >
-                  Delete
+                  <LanguageContextMessagesConsumer messageId='ProjectItem.Handles.DeleteLabel' />
                 </div>
               </div>
             </div>
             <div className="project-edit-container">
-              <div className="project-edit">
-                <Link to={routes.editorWithProjectFilePathQuery(project.path)}>Edit</Link>
+              <div className="project-edit">                
+                <Link to={routes.editorWithProjectFilePathQuery(project.path)}>
+                  <LanguageContextMessagesConsumer messageId='ProjectItem.Handles.EditLabel' />
+                </Link>
               </div>
             </div>
           </div>
@@ -321,7 +333,7 @@ class ProjectOrderSelect extends Component {
   constructor(props) {
     super(props);
 
-    // ref
+    // refs
     this.customSelectContainer = null;
     this.setCustomSelectContainerRef = element => this.customSelectContainer = element;
 
@@ -348,6 +360,13 @@ class ProjectOrderSelect extends Component {
   componentWillUnmount() {
     document.removeEventListener("click", this.closeAllSelect);
   }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (prevProps.language.code !== this.props.language.code) {
+      this.removeCustomSelectStyle();
+      this.createCustomSelectStyle();
+    }
+  }  
 
   /* end of react life-cycle */
 
@@ -420,6 +439,11 @@ class ProjectOrderSelect extends Component {
       });
   }
 
+  removeCustomSelectStyle = _ => {
+    this.customSelectContainer.removeChild(document.querySelector('.select-selected'));
+    this.customSelectContainer.removeChild(document.querySelector('.select-items'));
+  }
+
   closeAllSelect = (elmnt) => {
     /*a function that will close all select boxes in the document,
     except the current select box:*/
@@ -445,28 +469,35 @@ class ProjectOrderSelect extends Component {
 
   render() {
     //const state = this.state;
+    const {
+      messages
+    } = this.props;
     return (
       <div className="project-order-select custom-select" ref={this.setCustomSelectContainerRef}>
         <select ref={this.setCustomSelectRef}>
           {/* first option is default option */}
-          <option value="most-recent">Most recent</option>
-          <option value="most-recent">Most recent</option>
-          <option value="least-recent">Least recent</option>
-          <option value="by-name">By name</option>
-          <option value="by-name-reverse">By name reverse</option>
-        </select>
+          <option value="most-recent">{messages["ProjectOrderSelect.Options.MostRecentLabel"]}</option>
+          <option value="most-recent">{messages["ProjectOrderSelect.Options.MostRecentLabel"]}</option>
+          <option value="least-recent">{messages["ProjectOrderSelect.Options.LeastRecentLabel"]}</option>
+          <option value="by-name">{messages["ProjectOrderSelect.Options.ByNameLabel"]}</option>
+          <option value="by-name-reverse">{messages["ProjectOrderSelect.Options.ByNameReverseLabel"]}</option>
+        </select>          
       </div>
     )
   }
 }
 
 
-function Menu(props) {
+function ProjectListPageMenu(props) {
+  const {
+    messages, changeLanguageFuncs
+  } = props;
+
   /* event handlers */
 
   function handleBtnNewClick(event) {
     props.history.push(routes.editor);
-  };
+  }
 
   function handleBtnOpenClick(event) {
     ipcHelper.openSchoolVrFileDialog((err, data) => {
@@ -481,51 +512,62 @@ function Menu(props) {
       } else {
         //alert('No files are selected!');
       }
-    });
-  };
+    })
+  }
 
   function handleBtnExitClick(event) {
     ipcHelper.closeWindow();
-  };
+  }
+
+  function handleBtnEnglishClick() {
+    changeLanguageFuncs[languages.english.code]();
+  }
+
+  function handleBtnTraditionalChineseClick() {
+    changeLanguageFuncs[languages.traditionalChinese.code]();
+  }
 
   /* end of event handlers */
 
   return (
-    <LanguageContext.Consumer>
-      {
-        value => {
-          const langCode = value.language.code;
-          const messages = value.messages;
-          return (
-            <MenuComponent
-              menuButtons={[
-                {
-                  label: messages["Menu.FileLabel"],
-                  // onClick: _=> { console.log('file') },
-                  children: [
-                    {
-                      label: messages["Menu.File.NewLabel"],
-                      onClick: handleBtnNewClick
-                    },
-                    {
-                      label: messages["Menu.File.OpenLabel"],
-                      onClick: handleBtnOpenClick
-                    },
-                    {
-                      label: '-'
-                    },
-                    {
-                      label: messages["Menu.File.ExitLabel"],
-                      onClick: handleBtnExitClick
-                    }
-                  ]
-                }
-              ]}
-            />
-          );
+    <MenuComponent
+      menuButtons={[
+        {
+          label: messages["Menu.FileLabel"],
+          // onClick: _=> { console.log('file') },
+          children: [
+            {
+              label: messages["Menu.File.NewLabel"],
+              onClick: handleBtnNewClick
+            },
+            {
+              label: messages["Menu.File.OpenLabel"],
+              onClick: handleBtnOpenClick
+            },
+            {
+              label: '-'
+            },
+            {
+              label: messages["Menu.File.ExitLabel"],
+              onClick: handleBtnExitClick
+            }
+          ]
+        },
+        {
+          label: messages["Menu.LanguageLabel"],
+          children: [
+            {
+              label: messages["Menu.Language.English"],
+              onClick: handleBtnEnglishClick
+            },
+            {
+              label: messages["Menu.Language.TraditionalChinese"],
+              onClick: handleBtnTraditionalChineseClick
+            }
+          ]
         }
-      }
-    </LanguageContext.Consumer>
+      ]}
+    />      
   );
 }
 
@@ -654,21 +696,39 @@ class ProjectListPage extends Component {
       <div id="project-list-page">
         <div className="outer-container" onScroll={this.handleOuterContainerScroll}>
           <div className="inner-container">
-            <Menu
-              history={props.history}
-            />
+            <LanguageContextConsumer render={
+              ({ messages, changeLanguageFuncs }) => (
+                <ProjectListPageMenu
+                  history={props.history}
+
+                  messages={messages}
+                  changeLanguageFuncs={changeLanguageFuncs}
+                />
+              )
+            } />            
             <div className="project-top">
               <div className="project-order">
-                <ProjectOrderSelect
-                  handleSelectChangeFunc={this.handleProjectOrderSelectChange}
-                />
+                <LanguageContextConsumer render={
+                  ({ language, messages }) => (
+                    <ProjectOrderSelect
+                      language={language}
+                      messages={messages}
+
+                      handleSelectChangeFunc={this.handleProjectOrderSelectChange}
+                    />
+                  )
+                } />
               </div>
               <div className="project-search">
-                <input type="text" name="projectSearchTxt"
-                  placeholder="project name"
-                  value={state.projectSearchText}
-                  onChange={this.handleProjectSearchTxtChange}
-                />
+                <LanguageContextConsumer render={
+                  ({ language, messages }) => (
+                    <input type="text" name="projectSearchTxt"
+                      placeholder={messages["ProjectSearch.PlaceHolderLabel"]}
+                      value={state.projectSearchText}
+                      onChange={this.handleProjectSearchTxtChange}
+                    />
+                  )
+                } />                
               </div>
             </div>
             <ProjectList

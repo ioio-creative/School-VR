@@ -13,6 +13,7 @@ import AEntity from "./aEntity";
 class AText extends AEntity {
   constructor(el) {
     super(el);
+    this._messageId = 'SceneObjects.Text.DefaultName';
     this._animatableAttributes = {
       position: ['x', 'y', 'z'],
       scale: ['x', 'y', 'z'],

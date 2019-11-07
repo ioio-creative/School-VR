@@ -9,13 +9,14 @@
 import React, {Component, Fragment} from 'react';
 
 import {withSceneContext} from 'globals/contexts/sceneContext';
+import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/languageContext';
 
 import Draggable from 'react-draggable';
 // import {Resizable} from 'react-resizable';
 import {Rnd as ResizableAndDraggable} from 'react-rnd';
 // import EntitiesList from 'containers/panelItem/entitiesList';
 import {roundTo, jsonCopy} from 'globals/helperfunctions';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 import './timelinePanel.css';
 
@@ -294,7 +295,9 @@ class TimelinePanel extends Component {
         ref={(ref) =>this.timelinePanel = ref}
       >
         <div className="panel-header">
-          <div className="header-text">Timeline</div>
+          <div className="header-text">
+            <LanguageContextMessagesConsumer messageId="TimelinePanel.HeaderLabel" />
+          </div>
           <div className="timer">
             <span className="current-time">
               {
@@ -407,137 +410,141 @@ class TimelinePanel extends Component {
               })}
             </div>
           </div>
-          <div className="timeline-list" onScroll={this.handleScroll} ref={ref=> this.timelineListEl = ref}>
-            {/* slice(0) to shallow copy */}
-            {entitiesList.slice(0).reverse().map((entity) => {
-              const entityId = entity['id'];
-              {/* const selectedSlide = props.selectedSlide; */}
-              const entityTimelines = sceneContext.getTimelinesList(entityId);
-              // if (entity['slide'][selectedSlide]) {
-              //   entityTimelines = entity['slide'][selectedSlide]['timeline'];
-              // }
-              {/* console.log(state.timelineListElWidth, totalTime * state.timeScale); */}
-              this.resizableAndDraggable[entityId] = {};
-              return (
-                <div key={entityId} 
-                  className={"entity-row" + 
-                    (selectedEntityId === entityId? ' selected': '') +
-                    (" item-count-" + entityTimelines.length)
-                  }
-                  style={{
-                    width: Math.max(state.timelineListElWidth, (Math.ceil(totalTime / 5) * 5 + 1) * state.timeScale) - 10
-                  }}
-                >
-                  <div className="entity-timeline" onClick={(event) => {
-                      if (!this.dragging) {
-                        event.preventDefault();
-                        this.addTimeline(event, entityId);
+          <LanguageContextConsumer render={
+            ({ language, messages }) => (
+              <div className="timeline-list" onScroll={this.handleScroll} ref={ref=> this.timelineListEl = ref}>
+                {/* slice(0) to shallow copy */}
+                {entitiesList.slice(0).reverse().map((entity) => {
+                  const entityId = entity['id'];
+                  {/* const selectedSlide = props.selectedSlide; */}
+                  const entityTimelines = sceneContext.getTimelinesList(entityId);
+                  // if (entity['slide'][selectedSlide]) {
+                  //   entityTimelines = entity['slide'][selectedSlide]['timeline'];
+                  // }
+                  {/* console.log(state.timelineListElWidth, totalTime * state.timeScale); */}
+                  this.resizableAndDraggable[entityId] = {};
+                  return (
+                    <div key={entityId} 
+                      className={"entity-row" + 
+                        (selectedEntityId === entityId? ' selected': '') +
+                        (" item-count-" + entityTimelines.length)
                       }
-                    }}
-                    empty-text="Add animation +"
-                    style={{width: Math.max(state.timelineListElWidth, (Math.ceil(totalTime / 5) * 5 + 1) * state.timeScale) - 10}}
-                  >
-                    {entityTimelines.map((timelineData) => {
-                      const self = this;
-                      // const timelineData = selectedTimeline[timelineId];
-                      const timelineId = timelineData['id'];
-                      // this.timelineEntity[timelineId] = entityId;
-                      return (
-                        <ResizableAndDraggable
-                          ref={(ref)=>this.resizableAndDraggable[entityId][timelineId] = ref}
-                          key={timelineId + '_' + timelineData.start + '_' + timelineData.duration}
-                          className={`time-span${((selectedEntityId === entityId && selectedTimelineId === timelineId)? " selected": "")}`}
-                          default={{
-                            x: timelineData.start * state.timeScale,
-                            y: 5,
-                            height: 24,
-                            width: timelineData.duration * state.timeScale
-                          }}
-                          size={{
-                            height: 24,
-                            width: timelineData.duration * state.timeScale
-                          }}
-                          resizeGrid={[state.timeScale, 0]}
-                          dragGrid={[state.timeScale, 0]}
-                          dragAxis='x'
-                          enableResizing={{
-                            top: false, right: true, bottom: false, left: true,
-                            topRight: false, bottomRight: false, bottomLeft: false, topLeft: false
-                          }}
-                          // remove the style assigned by the js, let css handle it
-                          resizeHandleStyles={{
-                            left: {top: '',left: '',width: '',height: '',cursor: ''},
-                            right: {top: '',right: '',width: '',height: '',cursor: ''}
-                          }}
-                          resizeHandleClasses={{
-                            left: `position-select start-attribute resize-handle${(selectedEntityId === entityId && selectedTimelineId === timelineId && selectedTimelinePosition === "startAttribute")? ' selected': ''}`,
-                            right: `position-select end-attribute resize-handle${(selectedEntityId === entityId && selectedTimelineId === timelineId && selectedTimelinePosition === "endAttribute")? ' selected': ''}`
-                          }}
-                          onClick={(event) =>{
-                            if (!self.dragging) {
-                              this.selectEntityTimelinePosition(event, entityId, timelineId);
-                            }
-                          }}
-                          onDragStart={(event, data)=>{
+                      style={{
+                        width: Math.max(state.timelineListElWidth, (Math.ceil(totalTime / 5) * 5 + 1) * state.timeScale) - 10
+                      }}
+                    >                  
+                      <div className="entity-timeline" onClick={(event) => {
+                          if (!this.dragging) {
                             event.preventDefault();
-                            this.selectEntityTimelinePosition(event, entityId, timelineId);
-                            self.dragging = true;
-                            self.startChangeTimelineTime(event, entityId, timelineId);
-                          }}
-                          onDrag={(event, data) => {
-                            this.changeTimelineTime(event, entityId, timelineId, data.lastX);
-                          }}
-                          onDragStop={(event, data) => {
-                            this.changedTimelineTime(event, entityId, timelineId, data.lastX);
-                            setTimeout(function(){
-                              self.dragging = false;
-                            }, 0);
-                          }}
-                          onResizeStart={(event, dir, ref, delta, pos)=>{
-                            event.preventDefault();
-                            this.selectEntityTimelinePosition(event, entityId, timelineId, dir);
-                            this.dragging = true;
-                            {/* console.log('onResizeStart: ', event, dir, ref, delta,pos); */}
-                            this.startChangeTimelineTime(event, entityId, timelineId);
-                            ref.classList.add('resizing');
-                          }}
-                          onResize={(event, dir, ref, delta, pos)=>{
-                            {/* console.log('onResize: ', event, dir, ref, delta, pos); */}
-                            this.changeTimelineTime(event, entityId, timelineId, pos.x, delta.width);
-                            {/* !ref.classList.contains('resizing') && ref.classList.add('resizing'); */}
-                            {/* ref.style.cursor = "col-resize"; */}
-                            {/* ref.classList.add('resizing'); */}
-                          }}
-                          onResizeStop={(event, dir, ref, delta, pos)=>{
-                            {/* console.log('onResizeStop: ', event, dir, ref, delta, pos); */}
-                            event.preventDefault();
-                            ref.classList.remove('resizing');
-                            {/* ref.style.cursor = ""; */}
-                            this.changedTimelineTime(event, entityId, timelineId, pos.x, delta.width);
-                            setTimeout(function(){
-                              self.dragging = false;
-                            }, 0);
-                          }}
-                          dragHandleClassName="drag-handle"
-                          title={timelineData.start + ' - ' + (timelineData.start + timelineData.duration)}
-                        >
-                          <div className="drag-handle"></div>
-                          {/* <div 
-                            className={"position-select start-attribute" + (props.selectedTimeline === timelineId && props.selectedTimelinePosition === "startAttribute"? " selected": "")}
-                            onClick={(event) => this.selectEntityTimelinePosition(event, entityId, timelineId, "startAttribute") }
-                          />
-                          <div 
-                            className={"position-select end-attribute" + (props.selectedTimeline === timelineId && props.selectedTimelinePosition === "endAttribute"? " selected": "")}
-                            onClick={(event) => this.selectEntityTimelinePosition(event, entityId, timelineId, "endAttribute") }
-                          /> */}
-                        </ResizableAndDraggable>
-                      );
-                    })}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+                            this.addTimeline(event, entityId);
+                          }
+                        }}
+                        empty-text={messages['TimelinePanel.AddAnimationLabel']}
+                        style={{width: Math.max(state.timelineListElWidth, (Math.ceil(totalTime / 5) * 5 + 1) * state.timeScale) - 10}}
+                      >
+                        {entityTimelines.map((timelineData) => {
+                          const self = this;
+                          // const timelineData = selectedTimeline[timelineId];
+                          const timelineId = timelineData['id'];
+                          // this.timelineEntity[timelineId] = entityId;
+                          return (
+                            <ResizableAndDraggable
+                              ref={(ref)=>this.resizableAndDraggable[entityId][timelineId] = ref}
+                              key={timelineId + '_' + timelineData.start + '_' + timelineData.duration}
+                              className={`time-span${((selectedEntityId === entityId && selectedTimelineId === timelineId)? " selected": "")}`}
+                              default={{
+                                x: timelineData.start * state.timeScale,
+                                y: 5,
+                                height: 24,
+                                width: timelineData.duration * state.timeScale
+                              }}
+                              size={{
+                                height: 24,
+                                width: timelineData.duration * state.timeScale
+                              }}
+                              resizeGrid={[state.timeScale, 0]}
+                              dragGrid={[state.timeScale, 0]}
+                              dragAxis='x'
+                              enableResizing={{
+                                top: false, right: true, bottom: false, left: true,
+                                topRight: false, bottomRight: false, bottomLeft: false, topLeft: false
+                              }}
+                              // remove the style assigned by the js, let css handle it
+                              resizeHandleStyles={{
+                                left: {top: '',left: '',width: '',height: '',cursor: ''},
+                                right: {top: '',right: '',width: '',height: '',cursor: ''}
+                              }}
+                              resizeHandleClasses={{
+                                left: `position-select start-attribute resize-handle${(selectedEntityId === entityId && selectedTimelineId === timelineId && selectedTimelinePosition === "startAttribute")? ' selected': ''}`,
+                                right: `position-select end-attribute resize-handle${(selectedEntityId === entityId && selectedTimelineId === timelineId && selectedTimelinePosition === "endAttribute")? ' selected': ''}`
+                              }}
+                              onClick={(event) =>{
+                                if (!self.dragging) {
+                                  this.selectEntityTimelinePosition(event, entityId, timelineId);
+                                }
+                              }}
+                              onDragStart={(event, data)=>{
+                                event.preventDefault();
+                                this.selectEntityTimelinePosition(event, entityId, timelineId);
+                                self.dragging = true;
+                                self.startChangeTimelineTime(event, entityId, timelineId);
+                              }}
+                              onDrag={(event, data) => {
+                                this.changeTimelineTime(event, entityId, timelineId, data.lastX);
+                              }}
+                              onDragStop={(event, data) => {
+                                this.changedTimelineTime(event, entityId, timelineId, data.lastX);
+                                setTimeout(function(){
+                                  self.dragging = false;
+                                }, 0);
+                              }}
+                              onResizeStart={(event, dir, ref, delta, pos)=>{
+                                event.preventDefault();
+                                this.selectEntityTimelinePosition(event, entityId, timelineId, dir);
+                                this.dragging = true;
+                                {/* console.log('onResizeStart: ', event, dir, ref, delta,pos); */}
+                                this.startChangeTimelineTime(event, entityId, timelineId);
+                                ref.classList.add('resizing');
+                              }}
+                              onResize={(event, dir, ref, delta, pos)=>{
+                                {/* console.log('onResize: ', event, dir, ref, delta, pos); */}
+                                this.changeTimelineTime(event, entityId, timelineId, pos.x, delta.width);
+                                {/* !ref.classList.contains('resizing') && ref.classList.add('resizing'); */}
+                                {/* ref.style.cursor = "col-resize"; */}
+                                {/* ref.classList.add('resizing'); */}
+                              }}
+                              onResizeStop={(event, dir, ref, delta, pos)=>{
+                                {/* console.log('onResizeStop: ', event, dir, ref, delta, pos); */}
+                                event.preventDefault();
+                                ref.classList.remove('resizing');
+                                {/* ref.style.cursor = ""; */}
+                                this.changedTimelineTime(event, entityId, timelineId, pos.x, delta.width);
+                                setTimeout(function(){
+                                  self.dragging = false;
+                                }, 0);
+                              }}
+                              dragHandleClassName="drag-handle"
+                              title={timelineData.start + ' - ' + (timelineData.start + timelineData.duration)}
+                            >
+                              <div className="drag-handle"></div>
+                              {/* <div 
+                                className={"position-select start-attribute" + (props.selectedTimeline === timelineId && props.selectedTimelinePosition === "startAttribute"? " selected": "")}
+                                onClick={(event) => this.selectEntityTimelinePosition(event, entityId, timelineId, "startAttribute") }
+                              />
+                              <div 
+                                className={"position-select end-attribute" + (props.selectedTimeline === timelineId && props.selectedTimelinePosition === "endAttribute"? " selected": "")}
+                                onClick={(event) => this.selectEntityTimelinePosition(event, entityId, timelineId, "endAttribute") }
+                              /> */}
+                            </ResizableAndDraggable>
+                          );
+                        })}
+                      </div>                                        
+                    </div>
+                  )
+                })}
+              </div>
+            )
+          } />
           {state.showContextMenu &&
             <div className="context-menu-container" onClick={this.hideContextMenu} onContextMenu={this.hideContextMenu}>
               <div className="content-menu-overlay" />

@@ -2,6 +2,7 @@ import { jsonCopy } from "globals/helperfunctions";
 
 class AEntity {
   constructor(el) {
+    this._messageId = 'SceneObjects.Entity.DefaultName';
     this._type = 'a-entity';
     this._name = 'entity';
     this._staticAttributesValues = {};

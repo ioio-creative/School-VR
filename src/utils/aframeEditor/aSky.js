@@ -2,7 +2,8 @@ import AEntity from "./aEntity";
 
 class ASky extends AEntity {
   constructor(defaultAttributes) {
-    super(defaultAttributes);
+    super(defaultAttributes);    
+    this._messageId = 'SceneObjects.Sky.DefaultName';
     this._type = 'a-sky';
     this._animatableAttributes = {
       // position: ['x', 'y', 'z'],

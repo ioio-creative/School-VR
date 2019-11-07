@@ -3,6 +3,8 @@ import React, {Component} from 'react';
 import {withRouter, Prompt} from 'react-router-dom';
 
 import {withSceneContext, SceneContextProvider} from 'globals/contexts/sceneContext';
+import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/languageContext';
+import {languages} from 'globals/config';
 
 import MenuComponent from 'components/menuComponent';
 
@@ -44,6 +46,119 @@ const Events = require('vendor/Events.js');
 // const schema = require('schema/aframe_schema_20181108.json');
 
 
+function EditorPageMenu(props) {
+  const {
+    sceneContext,
+
+    messages,
+    changeLanguageFuncs,
+
+    handleHomeButtonClick,
+    handleNewProjectButtonClick,
+    handleOpenProjectButtonClick,
+    handleSaveProjectButtonClick,
+    handleSaveAsProjectButtonClick,
+    handleExitButtonClick,
+    handleUndoButtonClick,
+    handleRedoButtonClick
+  } = props;
+
+  function handleBtnEnglishClick() {
+    changeLanguageFuncs[languages.english.code]();
+  }
+
+  function handleBtnTraditionalChineseClick() {
+    changeLanguageFuncs[languages.traditionalChinese.code]();
+  } 
+
+  const menuButtons = [
+    {
+      label: messages["Menu.FileLabel"],
+      // onClick: _=> { console.log('file') },
+      children: [
+        {
+          label: messages["Menu.File.HomeLabel"],
+          disabled: false,
+          onClick: handleHomeButtonClick                                      
+        },
+        {
+          label: '-'
+        },
+        {
+          label: messages["Menu.File.NewLabel"],
+          disabled: false,
+          onClick: handleNewProjectButtonClick
+        },
+        {
+          label: '-'
+        },
+        {
+          label: messages["Menu.File.OpenLabel"],
+          disabled: false,
+          onClick: handleOpenProjectButtonClick
+        },
+        {
+          label: messages["Menu.File.SaveLabel"],
+          disabled: false,
+          onClick: handleSaveProjectButtonClick
+        },
+        {
+          label: messages["Menu.File.SaveAsLabel"],
+          disabled: false,
+          onClick: handleSaveAsProjectButtonClick
+        },
+        {
+          label: '-'
+        },
+        {
+          label: messages["Menu.File.ExitLabel"],
+          disabled: false,
+          onClick: handleExitButtonClick
+        }
+      ]
+    }
+  ];
+  if (sceneContext.editor && sceneContext.editor.opened) {
+    menuButtons.push({
+      label: messages["Menu.EditLabel"],
+      children: [
+        {
+          label: messages["Menu.Edit.UndoLabel"],
+          disabled: !sceneContext.getUndoQueueLength(),
+          onClick: handleUndoButtonClick
+        },
+        {
+          label: messages["Menu.Edit.RedoLabel"],
+          disabled: !sceneContext.getRedoQueueLength(),
+          onClick: handleRedoButtonClick
+        }
+      ]
+    });
+  }
+  menuButtons.push(
+    {
+      label: messages["Menu.LanguageLabel"],
+      children: [
+        {
+          label: messages["Menu.Language.English"],
+          onClick: handleBtnEnglishClick
+        },
+        {
+          label: messages["Menu.Language.TraditionalChinese"],
+          onClick: handleBtnTraditionalChineseClick
+        }
+      ]
+    }
+  );
+  return (      
+    <MenuComponent 
+      // projectName="Untitled_1"
+      menuButtons={menuButtons}
+    />
+  );
+}
+
+
 class EditorPage extends Component {
   constructor(props) {
     super(props);
@@ -82,13 +197,13 @@ class EditorPage extends Component {
   /* react lifecycles */
 
   componentDidMount() {
+    Events.on('editor-load', this.onEditorLoad);
     this.editor = new Editor();
     this.inited = true;
     // 
     // window.onbeforeunload = function() {
     //   return 'hello?';
-    // };
-    Events.on('editor-load', this.onEditorLoad);
+    // };    
   }
 
   componentWillUnmount() {
@@ -102,13 +217,13 @@ class EditorPage extends Component {
 
   
   /* methods */
-  
+
   onEditorLoad(editor) {
     // load project
     const searchObj = getSearchObjectFromHistory(this.props.history);
     const projectFilePathToLoad = getProjectFilePathFromSearchObject(searchObj);
 
-    console.log("project path to load: " + projectFilePathToLoad);
+    console.log("project path to load:", projectFilePathToLoad);
 
     if (!projectFilePathToLoad) {
       this.newProject();
@@ -273,85 +388,41 @@ class EditorPage extends Component {
 
 
   render() {
-    //const props = this.props;
+    const props = this.props;
     const state = this.state;
-    const sceneContext = this.props.sceneContext;
-    const menuButtons = [
-      {
-        label: 'File',
-        // onClick: _=> { console.log('file') },
-        children: [
-          {
-            label: 'Home',
-            disabled: false,
-            onClick: this.handleHomeButtonClick                                      
-          },
-          {
-            label: '-'
-          },
-          {
-            label: 'New',
-            disabled: false,
-            onClick: this.handleNewProjectButtonClick
-          },
-          {
-            label: '-'
-          },
-          {
-            label: 'Open',
-            disabled: false,
-            onClick: this.handleOpenProjectButtonClick
-          },
-          {
-            label: 'Save',
-            disabled: false,
-            onClick: this.handleSaveProjectButtonClick
-          },
-          {
-            label: 'Save As...',
-            disabled: false,
-            onClick: this.handleSaveAsProjectButtonClick
-          },
-          {
-            label: '-'
-          },
-          {
-            label: 'Exit',
-            disabled: false,
-            onClick: this.handleExitButtonClick
-          }
-        ]
-      }
-    ];
-    if (sceneContext.editor && sceneContext.editor.opened) {
-      menuButtons.push({
-        label: 'Edit',
-        children: [
-          {
-            label: 'Undo',
-            disabled: !sceneContext.getUndoQueueLength(),
-            onClick: this.handleUndoButtonClick
-          },
-          {
-            label: 'Redo',
-            disabled: !sceneContext.getRedoQueueLength(),
-            onClick: this.handleRedoButtonClick
-          }
-        ]
-      });
-    }
+    const sceneContext = props.sceneContext;
+    
     return (
       // <SceneContextProvider>
         <div id="editor" className={sceneContext.editor && sceneContext.editor.opened? 'editing': 'viewing'}>
-          <Prompt
-            when={true}
-            message='You have unsaved changes, are you sure you want to leave?'
-          />
+          <LanguageContextConsumer render={
+            ({ language, messages }) => (
+              <Prompt
+                when={true}
+                message={messages['Prompt.UnsavedWorkMessage']}
+              />
+            )
+          } />          
           {/* <SystemPanel projectName={this.projectName} /> */}
-          <MenuComponent 
-            // projectName="Untitled_1"
-            menuButtons={menuButtons}
-          />
+          <LanguageContextConsumer render={
+            ({ messages, changeLanguageFuncs }) => (
+               <EditorPageMenu
+                sceneContext={sceneContext}
+
+                messages={messages}
+                changeLanguageFuncs={changeLanguageFuncs}
+
+                handleHomeButtonClick={this.handleHomeButtonClick}
+                handleNewProjectButtonClick={this.handleNewProjectButtonClick}
+                handleOpenProjectButtonClick={this.handleOpenProjectButtonClick}
+                handleSaveProjectButtonClick={this.handleSaveProjectButtonClick}
+                handleSaveAsProjectButtonClick={this.handleSaveAsProjectButtonClick}
+                handleExitButtonClick={this.handleExitButtonClick}
+                handleUndoButtonClick={this.handleUndoButtonClick}
+                handleRedoButtonClick={this.handleRedoButtonClick}
+              />
+            )
+          } />         
           <ButtonsPanel currentLoadedProjectPath={state.loadedProjectFilePath} />
           <AFramePanel user-mode="editor" />
           <SlidesPanel isEditing={sceneContext.editor && sceneContext.editor.opened} />
@@ -363,5 +434,6 @@ class EditorPage extends Component {
     );
   }
 }
+
 
 export default withSceneContext(withRouter(EditorPage));

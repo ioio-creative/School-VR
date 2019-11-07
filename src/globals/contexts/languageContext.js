@@ -1,44 +1,18 @@
 import React from 'react';
 
-import config, {getLanguageFromBrowserLangIdCode, getLanguageFromLanguageCode} from 'globals/config';
+import config, {languages} from 'globals/config';
 import getSearchObjectFromLocation from 'utils/queryString/getSearchObjectFromLocation';
 /**
   Our translated strings
   !!! Important !!!
   Somehow, have to use relative path here...
  */
-import localeData from '../../locales/data.json';
+import localizedData from 'locales/data.js';
 
 
 /* language settings */
 
-function getNavigatorLanguageWithRegionCode() {
-  // Define user's language. Different browsers have the user locale defined
-  // on different fields on the `navigator` object, so we make sure to account
-  // for these different by checking all of them
-  const language = (navigator.languages && navigator.languages[0]) ||
-    navigator.language ||
-    navigator.userLanguage;
-
-  return language.toLowerCase();
-}
-
-function getNavigatorLanguageWithoutRegionCode() {
-  const language = getNavigatorLanguageWithRegionCode();
-
-  // Split locales with a region code
-  const languageWithoutRegionCode = language.split(/[_-]+/)[0];
-
-  return languageWithoutRegionCode;
-}
-
-const browserLangIdCode = getNavigatorLanguageWithRegionCode();
-// browserLangIdCode = 'asdg';
-// console.log('language: ' + getLanguageFromBrowserLangIdCode(browserLangIdCode));
-const languageCodeFromQuery = getSearchObjectFromLocation(window.location).lang;
-let globalLanguage = getLanguageFromLanguageCode(languageCodeFromQuery)
- || getLanguageFromBrowserLangIdCode(browserLangIdCode)
- || config.defaultLanguage;
+let globalLanguage = config.defaultLanguage;
 // let globalLanguage = config.defaultLanguage;
 
 // this is for setting language specific css
@@ -53,28 +27,27 @@ changeHtmlLang(globalLanguage.code);
 
 const LanguageContext = React.createContext();
 
-// To force remount of React element by setting the key prop
-// https://stackoverflow.com/questions/45332611/react-force-re-mount-component-on-route-change/45333138
-// https://stackoverflow.com/questions/28329382/understanding-unique-keys-for-array-children-in-react-js/43892905#43892905
-function passLanguageToAsyncLoadingComponentFunc(languageCode, messages, Component) {
-  return (props) => <Component key={Component.displayName + '-' + languageCode} languageCode={languageCode} 
-  messages={messages} {...props} />
-}
 
 class LanguageContextProvider extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      language: config.defaultLanguage
+      language: globalLanguage
     };
     [
-      'changeLanguageContext'
+      'changeLanguageContext',
     ].forEach(methodName => {
       this[methodName] = this[methodName].bind(this);
     });
+
+    this.changeLanguageFuncs = {};
+    [languages.english, languages.traditionalChinese].forEach(lang => {      
+      this.changeLanguageFuncs[lang.code] = _ => this.changeLanguageContext(lang);
+    });  
   }
 
   changeLanguageContext(newLanguage) {
+    console.log(newLanguage)
     if (this.state.language.code !== newLanguage.code) {
       globalLanguage = newLanguage;
       changeHtmlLang(newLanguage.code);
@@ -84,7 +57,7 @@ class LanguageContextProvider extends React.Component {
         language: globalLanguage
       });
     }
-  }
+  }  
 
   render() {
     const props = this.props;
@@ -93,8 +66,8 @@ class LanguageContextProvider extends React.Component {
       <LanguageContext.Provider
         value={{
           language: state.language,
-          messages: localeData[state.language.locale],
-          changeLanguageContextFunc: this.changeLanguageContext
+          messages: localizedData[state.language.code],
+          changeLanguageFuncs: this.changeLanguageFuncs
         }}>
         {props.children}
       </LanguageContext.Provider>
@@ -102,9 +75,48 @@ class LanguageContextProvider extends React.Component {
   }
 }
 
-export {
-  LanguageContext,
-  LanguageContextProvider,
-  passLanguageToAsyncLoadingComponentFunc
-};
+function LanguageContextConsumer(props) {
+  return (
+    <LanguageContext.Consumer>
+      {value => {
+        return props.render({
+          language: value.language,
+          messages: value.messages,
+          changeLanguageFuncs: value.changeLanguageFuncs         
+        });
+      }}
+    </LanguageContext.Consumer>
+  );
+}
 
+function LanguageContextMessagesConsumer(props) {
+  return (
+    <LanguageContextConsumer render={
+      ({ language, messages }) => (        
+        <>{messages[props.messageId]}</>
+      )
+    } />    
+  );
+}
+
+function withLanguageContext(Component) {
+  return function WrapperComponent(props) {
+    return (
+      <LanguageContextConsumer render={
+        ({ language, messages }) => (        
+          <Component language={language} messages={messages}
+            {...props}
+          />
+        )
+      } />
+    );
+  };
+}
+
+export {
+  globalLanguage,
+  LanguageContextProvider,
+  LanguageContextConsumer,
+  LanguageContextMessagesConsumer,
+  withLanguageContext
+};
