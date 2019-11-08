@@ -180,7 +180,7 @@ class ProjectItem extends Component {
               <div className="project-info-text">
                 <div className="project-name">{project.name}</div>
                   <div className="project-lastupdate">
-                    <LanguageContextMessagesConsumer messageId='ProjectItem.Info.LastAccessedLabel' />                    
+                    <LanguageContextMessagesConsumer messageId='ProjectItem.Info.LastAccessedLabel' />
                     {` ${project.atime ? formatDateTime(project.atime) : ""}`}
                   </div>
               </div>
@@ -193,7 +193,7 @@ class ProjectItem extends Component {
               <div className="project-preview">
                 <Link to={routes.presenterWithProjectFilePathQuery(project.path)}>
                   <LanguageContextMessagesConsumer messageId='ProjectItem.Handles.PreviewLabel' />
-                </Link>                                
+                </Link>
               </div>
             </div>
             <div className="project-options-overlay" />
@@ -223,7 +223,7 @@ class ProjectItem extends Component {
               </div>
             </div>
             <div className="project-edit-container">
-              <div className="project-edit">                
+              <div className="project-edit">
                 <Link to={routes.editorWithProjectFilePathQuery(project.path)}>
                   <LanguageContextMessagesConsumer messageId='ProjectItem.Handles.EditLabel' />
                 </Link>
@@ -366,7 +366,7 @@ class ProjectOrderSelect extends Component {
       this.removeCustomSelectStyle();
       this.createCustomSelectStyle();
     }
-  }  
+  }
 
   /* end of react life-cycle */
 
@@ -440,8 +440,8 @@ class ProjectOrderSelect extends Component {
   }
 
   removeCustomSelectStyle = _ => {
-    this.customSelectContainer.removeChild(document.querySelector('.select-selected'));
-    this.customSelectContainer.removeChild(document.querySelector('.select-items'));
+    this.customSelectContainer.removeChild(document.querySelector('#project-list-page .project-order-select.custom-select .select-selected'));
+    this.customSelectContainer.removeChild(document.querySelector('#project-list-page .project-order-select.custom-select .select-items'));
   }
 
   closeAllSelect = (elmnt) => {
@@ -481,7 +481,7 @@ class ProjectOrderSelect extends Component {
           <option value="least-recent">{messages["ProjectOrderSelect.Options.LeastRecentLabel"]}</option>
           <option value="by-name">{messages["ProjectOrderSelect.Options.ByNameLabel"]}</option>
           <option value="by-name-reverse">{messages["ProjectOrderSelect.Options.ByNameReverseLabel"]}</option>
-        </select>          
+        </select>
       </div>
     )
   }
@@ -567,7 +567,7 @@ function ProjectListPageMenu(props) {
           ]
         }
       ]}
-    />      
+    />
   );
 }
 
@@ -705,7 +705,7 @@ class ProjectListPage extends Component {
                   changeLanguageFuncs={changeLanguageFuncs}
                 />
               )
-            } />            
+            } />
             <div className="project-top">
               <div className="project-order">
                 <LanguageContextConsumer render={
@@ -728,7 +728,7 @@ class ProjectListPage extends Component {
                       onChange={this.handleProjectSearchTxtChange}
                     />
                   )
-                } />                
+                } />
               </div>
             </div>
             <ProjectList

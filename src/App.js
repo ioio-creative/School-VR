@@ -15,29 +15,9 @@ import asyncLoadingComponent from 'components/asyncLoadingComponent';
 // import PresenterPage from 'pages/aframeEditor/presenterPage';
 
 import {SceneContextProvider} from 'globals/contexts/sceneContext';
-import {LanguageContextProvider, passLanguageToAsyncLoadingComponentFunc} from 'globals/contexts/languageContext';
+import {LanguageContextProvider} from 'globals/contexts/languageContext';
 
 import './App.css';
-
-
-
-ipcHelper.getAppData((err, data) => {
-  if (err) {
-    handleErrorWithUiDefault(err);
-    return;
-  }
-
-  setAppData(data.appName, data.homePath, data.appDataPath, data.documentsPath);
-})
-
-ipcHelper.getParamsFromExternalConfig((err, data) => {
-  if (err) {
-    handleErrorWithUiDefault(err);
-    return;
-  }
-
-  setParamsReadFromExternalConfig(data);
-});
 
 
 const faIconsNeed = [
@@ -74,15 +54,48 @@ const AsyncProjectListPage = asyncLoadingComponent(_ => import('pages/ProjectLis
 class App extends Component {
   constructor(props) {
     super(props);
+
     // check if in electron
     this.isElectronApp = Boolean(window.require);
+    console.log('isElectronApp:', this.isElectronApp);
+
+    this.state = {
+      isGotAppData: this.isElectronApp ? false : true,
+      isGotParamsReadFromExternalConfig: this.isElectronApp ? false : true
+    };
+  }
+  componentDidMount() {
+    if (this.isElectronApp) {
+      ipcHelper.getAppData((err, data) => {
+        if (err) {
+          handleErrorWithUiDefault(err);
+          return;
+        }
+
+        setAppData(data.appName, data.homePath, data.appDataPath, data.documentsPath);
+        this.setState({
+          isGotAppData: true
+        });
+      })
+
+      ipcHelper.getParamsFromExternalConfig((err, data) => {
+        if (err) {
+          handleErrorWithUiDefault(err);
+          return;
+        }
+
+        setParamsReadFromExternalConfig(data);
+        this.setState({
+          isGotParamsReadFromExternalConfig: true
+        });
+      });
+    }
   }
   render() {
     const state = this.state;
-    console.log(`isElectronApp: ${this.isElectronApp}`);
-    return (
-      <SceneContextProvider>
-        <LanguageContextProvider>
+    return state.isGotAppData && state.isGotParamsReadFromExternalConfig && (
+      <LanguageContextProvider>
+        <SceneContextProvider>
           <div id="App">
             {
               this.isElectronApp ?
@@ -106,8 +119,8 @@ class App extends Component {
               </Switch>
             }
           </div>
-        </LanguageContextProvider>
-      </SceneContextProvider>
+        </SceneContextProvider>
+      </LanguageContextProvider>
     );
   }
 }
