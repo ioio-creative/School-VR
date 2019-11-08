@@ -3,7 +3,7 @@ import {languages} from 'globals/config';
 const localizedData = {
   [languages.english.code]: {
     /* menu */
-    
+
     "Menu.FileLabel": "File",
     "Menu.File.HomeLabel": "Home",
     "Menu.File.NewLabel": "New",
@@ -11,7 +11,7 @@ const localizedData = {
     "Menu.File.ExitLabel": "Exit",
 
     "Menu.LanguageLabel": "Language",
-    "Menu.Language.English": "English",  
+    "Menu.Language.English": "English",
     "Menu.Language.TraditionalChinese": "繁體中文",
 
     /* end of menu */
@@ -51,7 +51,7 @@ const localizedData = {
 
     "Menu.File.SaveLabel": "Save",
     "Menu.File.SaveAsLabel": "Save As...",
-    
+
     "Menu.EditLabel": "Edit",
     "Menu.Edit.UndoLabel": "Undo",
     "Menu.Edit.RedoLabel": "Redo",
@@ -83,10 +83,10 @@ const localizedData = {
     "SceneObjects.Sky.DefaultName": "sky",
     "AddThingsPanel.TwoD.AddNavigationTooltip": "Add a navigation",
     "SceneObjects.Navigation.DefaultName": "navigation",
-        
+
     "PresentationPreparationPanel.ResetViewTooltip": "Reset view",
     "PresentationPreparationPanel.PlayTimelineTooltip": "Play timeline",
-    "PresentationPreparationPanel.ShareLabel": "Share",    
+    "PresentationPreparationPanel.ShareLabel": "Share",
 
     "EditThingPanel.AddAnimationLabel": "Click to add animation",
     "EditThingPanel.TransformModes.TranslateLabel": "Position",
@@ -100,7 +100,7 @@ const localizedData = {
     "EditThingPanel.AddTextureLabel": "Add Texture",
     "EditThingPanel.AddVideoLabel": "Add Video",
     "EditThingPanel.Text.TextColorLabel": "Text Color",
-    "EditThingPanel.Text.TextOpacityLabel": "Text Opacity",    
+    "EditThingPanel.Text.TextOpacityLabel": "Text Opacity",
     "EditThingPanel.Text.TextPlaceholder": "Input your text here",
     "EditThingPanel.Text.SizeLabel": "Size:",
     "EditThingPanel.Navigation.SelectSlideLabel": "Select Slide",
@@ -115,13 +115,13 @@ const localizedData = {
 
     /* presenter page */
 
-    "PresentationPanel.ExitLabel": "Exit",    
+    "PresentationPanel.ExitLabel": "Exit",
 
     /* end of presenter page */
   },
   [languages.traditionalChinese.code]: {
     /* menu */
-    
+
     "Menu.FileLabel": "檔案",
     "Menu.File.HomeLabel": "主頁",
     "Menu.File.NewLabel": "開新専案",
@@ -129,7 +129,7 @@ const localizedData = {
     "Menu.File.ExitLabel": "關閉 School VR",
 
     "Menu.LanguageLabel": "語言",
-    "Menu.Language.English": "English",  
+    "Menu.Language.English": "English",
     "Menu.Language.TraditionalChinese": "繁體中文",
 
     /* end of menu */
@@ -142,7 +142,7 @@ const localizedData = {
 
     /* navigation */
 
-    "Navigation.SlideSelect.SlideIndexPrefix": "場境",
+    "Navigation.SlideSelect.SlideIndexPrefix": "投影片",
 
     /* end of navigation */
 
@@ -169,10 +169,10 @@ const localizedData = {
 
     "Menu.File.SaveLabel": "儲存専案",
     "Menu.File.SaveAsLabel": "另存新檔",
-    
+
     "Menu.EditLabel": "編輯",
     "Menu.Edit.UndoLabel": "上一步",
-    "Menu.Edit.RedoLabel": "下一步",    
+    "Menu.Edit.RedoLabel": "下一步",
 
     "SceneObjects.Camera.DefaultName": "相機",
     "SceneObjects.Entity.DefaultName": "物件",
@@ -199,12 +199,12 @@ const localizedData = {
     "SceneObjects.Text.DefaultName": "文字",
     "AddThingsPanel.TwoD.AddSkyTooltip": "加天幕",
     "SceneObjects.Sky.DefaultName": "天幕",
-    "AddThingsPanel.TwoD.AddNavigationTooltip": "加隋意門",
-    "SceneObjects.Navigation.DefaultName": "隋意門",
-        
+    "AddThingsPanel.TwoD.AddNavigationTooltip": "加隨意門",
+    "SceneObjects.Navigation.DefaultName": "隨意門",
+
     "PresentationPreparationPanel.ResetViewTooltip": "重置視角",
     "PresentationPreparationPanel.PlayTimelineTooltip": "播放時間線",
-    "PresentationPreparationPanel.ShareLabel": "簡報",    
+    "PresentationPreparationPanel.ShareLabel": "分享",
 
     "EditThingPanel.AddAnimationLabel": "點擊添加動畫",
     "EditThingPanel.TransformModes.TranslateLabel": "移位",
@@ -218,11 +218,11 @@ const localizedData = {
     "EditThingPanel.AddTextureLabel": "加質地圖片",
     "EditThingPanel.AddVideoLabel": "加影片",
     "EditThingPanel.Text.TextColorLabel": "文字顏色",
-    "EditThingPanel.Text.TextOpacityLabel": "文字不透明度",    
+    "EditThingPanel.Text.TextOpacityLabel": "文字不透明度",
     "EditThingPanel.Text.TextPlaceholder": "在這裡輸入文字",
     "EditThingPanel.Text.SizeLabel": "文字大小:",
-    "EditThingPanel.Navigation.SelectSlideLabel": "選擇場境",    
-    "EditThingPanel.Navigation.CurrentSlideSuffix": "(編輯中的場境)",
+    "EditThingPanel.Navigation.SelectSlideLabel": "選擇投影片",
+    "EditThingPanel.Navigation.CurrentSlideSuffix": "(編輯中的投影片)",
 
     "TimelinePanel.HeaderLabel": "時間線",
     "TimelinePanel.AddAnimationLabel": "添加動畫 +",
@@ -233,7 +233,7 @@ const localizedData = {
 
     /* presenter page */
 
-    "PresentationPanel.ExitLabel": "離開簡報模式",    
+    "PresentationPanel.ExitLabel": "離開簡報模式",
 
     /* end of presenter page */
   }
