@@ -17,6 +17,7 @@
     "gsap": "^2.0.2",
     "jsonc-parser": "^2.1.0",
     "jsonschema": "^1.2.4",
+    "macaddress": "^0.2.9",
     "moment": "^2.24.0",
     "mousetrap": "^1.6.3",
     "ncp": "^2.0.0",

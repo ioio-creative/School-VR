@@ -36,6 +36,8 @@ const schoolVrProjectArchiveExtensionWithLeadingDot = '.ivr';
 
 
 let config = {
+  isElectronApp: Boolean(window.require),
+
   webServerStaticFilesPathPrefix: 'files',
   schoolVrProjectArchiveExtensionWithLeadingDot: schoolVrProjectArchiveExtensionWithLeadingDot,
   jsonFileExtensionWithLeadingDot: '.json',
@@ -43,7 +45,11 @@ let config = {
   defaultLanguage: languages.traditionalChinese
 };
 let appDirectory = {};
-const setAppData = (appName, homePath, appDataPath, documentsPath, callBack = null) => {
+const setAppData = (appData, callBack = null) => {
+  const {
+    appName, homePath, appDataPath, documentsPath
+  } = appData;
+
   // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname
   appDirectory.homeDirectory = homePath;
 

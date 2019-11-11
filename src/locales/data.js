@@ -19,6 +19,7 @@ const localizedData = {
     /* prompt */
 
     "Prompt.UnsavedWorkMessage": "You have unsaved changes, are you sure you want to leave?",
+    "Prompt.AutenticationFailMessage": "Authentication fails. Please contact IOIO Creative.",
 
     /* end of prompt */
 
@@ -137,6 +138,7 @@ const localizedData = {
     /* prompt */
 
     "Prompt.UnsavedWorkMessage": "您有未保存的更改，確定要離開嗎？",
+    "Prompt.AutenticationFailMessage": "身份驗證失敗。請聯繫IOIO Creative。",
 
     /* end of prompt */
 

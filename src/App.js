@@ -1,11 +1,14 @@
 import React, {Component} from 'react';
 import {Switch, Route, Redirect} from 'react-router-dom';
 
+import PrivateRoute from 'components/router/privateRoute';
+import {authenticate} from 'utils/authentication/auth';
+
 import routes from 'globals/routes';
 import {library} from '@fortawesome/fontawesome-svg-core'
 // import {faArrowsAlt, faArrowsAlt} from '@fortawesome/free-solid-svg-icons'
 
-import {setAppData, setParamsReadFromExternalConfig} from 'globals/config';
+import config, {setAppData, setParamsReadFromExternalConfig} from 'globals/config';
 import ipcHelper from 'utils/ipc/ipcHelper';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 
@@ -55,13 +58,13 @@ class App extends Component {
   constructor(props) {
     super(props);
 
-    // check if in electron
-    this.isElectronApp = Boolean(window.require);
+    this.isElectronApp = config.isElectronApp;
     console.log('isElectronApp:', this.isElectronApp);
 
     this.state = {
       isGotAppData: this.isElectronApp ? false : true,
-      isGotParamsReadFromExternalConfig: this.isElectronApp ? false : true
+      isGotParamsReadFromExternalConfig: this.isElectronApp ? false : true,
+      isAuthenticationDone: false
     };
   }
   componentDidMount() {
@@ -72,7 +75,7 @@ class App extends Component {
           return;
         }
 
-        setAppData(data.appName, data.homePath, data.appDataPath, data.documentsPath);
+        setAppData(data);
         this.setState({
           isGotAppData: true
         });
@@ -89,11 +92,17 @@ class App extends Component {
           isGotParamsReadFromExternalConfig: true
         });
       });
+
+      authenticate((isAuthenticated) => {
+        this.setState({
+          isAuthenticationDone: true
+        });
+      });
     }
   }
   render() {
     const state = this.state;
-    return state.isGotAppData && state.isGotParamsReadFromExternalConfig && (
+    return state.isGotAppData && state.isGotParamsReadFromExternalConfig && state.isAuthenticationDone && (
       <LanguageContextProvider>
         <SceneContextProvider>
           <div id="App">
@@ -102,11 +111,11 @@ class App extends Component {
 
               <Switch>
                 {/* maybe add some checking here, if !electron, return viewer page only */}
-                <Route exact path="/file-explorer" component={AsyncTestFileExplorer} />
-                <Route exact path={routes.editor} component={AsyncEditorPage} />
-                <Route exact path={routes.presenter} component={AsyncPresenterPage} />
-                <Route exact path={routes.viewer} component={ViewerPage} />
-                <Route exact path={routes.projectList} component={AsyncProjectListPage} />
+                <PrivateRoute exact path="/file-explorer" component={AsyncTestFileExplorer} fallBackRedirectPath={routes.home} fallBackRedirectPath={routes.home} />
+                <PrivateRoute exact path={routes.editor} component={AsyncEditorPage} fallBackRedirectPath={routes.home} />
+                <PrivateRoute exact path={routes.presenter} component={AsyncPresenterPage} fallBackRedirectPath={routes.home} />
+                <PrivateRoute exact path={routes.viewer} component={ViewerPage} fallBackRedirectPath={routes.home} />
+                <PrivateRoute exact path={routes.projectList} component={AsyncProjectListPage} />
                 <Route exact path={routes.home} component={AsyncProjectListPage} />
                 <Redirect to={routes.home} />
               </Switch>

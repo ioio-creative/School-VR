@@ -80,9 +80,13 @@ function generalIpcCall(channelName, callBack = null, objToSend = null) {
 }
 
 
+/* config */
+
 function getParamsFromExternalConfig(callBack) {
   generalIpcCall('getParamsFromExternalConfig', callBack);
 };
+
+/* end of config */
 
 
 /* app */
@@ -92,6 +96,15 @@ function getAppData(callBack) {
 };
 
 /* end of app */
+
+
+/* network interfaces */
+
+function getMacAddress(callBack) {
+  generalIpcCall('getMacAddress', callBack);
+}
+
+/* end of network interfaces */
 
 
 /* shell */
@@ -320,10 +333,14 @@ export default {
   addListener,
   removeListener,
 
+  // config
   getParamsFromExternalConfig,
 
   // app
   getAppData,
+
+  // network interfaces
+  getMacAddress,
 
   // shell
   shellOpenItem,

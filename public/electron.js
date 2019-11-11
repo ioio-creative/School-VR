@@ -24,7 +24,8 @@ const { openImageDialog, openGifDialog, openVideoDialog, openSchoolVrFileDialog,
   require('./utils/aframeEditor/openFileDialog');
 const { showYesNoQuestionMessageBox, showYesNoWarningMessageBox } = require('./utils/aframeEditor/showMessageBox');
 const { parseDataToSaveFormat } = require('./utils/saveLoadProject/parseDataToSaveFormat');
-const getIp = require("./utils/getIp");
+const getIpAddress = require('./utils/network/getIpAddress');
+const getMacAddress = require('./utils/network/getMacAddress');
 
 
 /* constants */
@@ -287,6 +288,8 @@ function getSenderWindowFromEvent(ipcEvent) {
 //   event.sender.send('actionReply', result);
 // });
 
+// config
+
 ipcMain.on('getParamsFromExternalConfig', (event, arg) => {
   event.sender.send('getParamsFromExternalConfigResponse', {
     err: null,
@@ -307,6 +310,29 @@ ipcMain.on('getAppData', (event, arg) => {
   event.sender.send('getAppDataResponse', {
     err: null,
     data: data
+  });
+});
+
+// network interfaces
+
+ipcMain.on('getMacAddress', (event, arg) => {
+  getMacAddress.one(function (err, mac) {
+    if (err) {
+      console.error(err);
+      event.sender.send('getMacAddressResponse', {
+        err: err.toString(),
+        data: null
+      });
+      return;
+    }
+
+    console.log("Mac address for this host: %s", mac);
+    event.sender.send('getMacAddressResponse', {
+      err: null,
+      data: {
+        mac: mac
+      }
+    });
   });
 });
 
@@ -751,7 +777,7 @@ ipcMain.on('showYesNoWarningMessageBox', (event, arg) => {
 // for presentation
 
 ipcMain.on('getPresentationServerInfo', (event, arg) => {
-  const interfaceIpMap = getIp.getAllIps();
+  const interfaceIpMap = getIpAddress.getAllIps();
   event.sender.send('getPresentationServerInfoResponse', {
     data: {
       interfaceIpMap: interfaceIpMap,
