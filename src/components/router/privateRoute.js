@@ -1,7 +1,7 @@
 import React from 'react';
 import {Route, Redirect} from 'react-router-dom';
 
-import {getIsAuthenticated} from 'utils/authentication/auth';
+import {getIsAuthenticated, getCurrentMacAddress} from 'utils/authentication/auth';
 
 import {LanguageContextConsumer} from 'globals/contexts/languageContext';
 
@@ -11,7 +11,8 @@ const PrivateRoute = ({ component: Component, fallBackRedirectPath, ...rest }) =
       <Route {...rest} render={(props) => {
         const isAuthenticated = getIsAuthenticated();
         if (!isAuthenticated) {
-          alert(messages['Prompt.AutenticationFailMessage']);
+          const currentMacAddress = getCurrentMacAddress();
+          alert(`${messages['Prompt.AutenticationFailMessage']}\nMAC: ${currentMacAddress}`);
         }
         return (
           isAuthenticated === true

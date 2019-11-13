@@ -3,6 +3,7 @@ import ipcHelper from 'utils/ipc/ipcHelper';
 
 // https://tylermcginnis.com/react-router-protected-routes-authentication/
 let isAuthenticated = false;
+let currentMacAddress;
 
 const checkMacAddress = mac => {
   return ['f8:28:19:ef:23:c3'].includes(mac);
@@ -23,6 +24,7 @@ const checkIdentity = callBack => {
       return;
     }
 
+    currentMacAddress = data.mac;
     isIdentityValid = checkMacAddress(data.mac);
     callBack(isIdentityValid);
   })
@@ -44,8 +46,13 @@ const getIsAuthenticated = _ => {
   return isAuthenticated;
 }
 
+const getCurrentMacAddress = _ => {
+  return currentMacAddress;
+}
+
 export {
   authenticate,
   signout,
-  getIsAuthenticated
+  getIsAuthenticated,
+  getCurrentMacAddress
 };
