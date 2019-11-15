@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {Switch, Route, Redirect} from 'react-router-dom';
 
 import PrivateRoute from 'components/router/privateRoute';
-import {authenticate} from 'utils/authentication/auth';
+import {authenticatePromise} from 'utils/authentication/auth';
 
 import routes from 'globals/routes';
 import {library} from '@fortawesome/fontawesome-svg-core'
@@ -93,44 +93,51 @@ class App extends Component {
         });
       });
 
-      authenticate((isAuthenticated) => {
-        this.setState({
-          isAuthenticationDone: true
+      authenticatePromise()
+        .then((isAuthenticated) => {
+          this.setState({
+            isAuthenticationDone: true
+          });
+        })
+        .catch((err) => {
+          handleErrorWithUiDefault(err);
         });
-      });
     }
   }
   render() {
     const state = this.state;
-    return state.isGotAppData && state.isGotParamsReadFromExternalConfig && state.isAuthenticationDone && (
-      <LanguageContextProvider>
-        <SceneContextProvider>
-          <div id="App">
-            {
-              this.isElectronApp ?
+    return !(state.isGotAppData && state.isGotParamsReadFromExternalConfig && state.isAuthenticationDone) ?
+      <div>Loading...</div>
+      :
+      (
+        <LanguageContextProvider>
+          <SceneContextProvider>
+            <div id="App">
+              {
+                this.isElectronApp ?
 
-              <Switch>
-                {/* maybe add some checking here, if !electron, return viewer page only */}
-                <PrivateRoute exact path="/file-explorer" component={AsyncTestFileExplorer} fallBackRedirectPath={routes.home} fallBackRedirectPath={routes.home} />
-                <PrivateRoute exact path={routes.editor} component={AsyncEditorPage} fallBackRedirectPath={routes.home} />
-                <PrivateRoute exact path={routes.presenter} component={AsyncPresenterPage} fallBackRedirectPath={routes.home} />
-                <PrivateRoute exact path={routes.viewer} component={ViewerPage} fallBackRedirectPath={routes.home} />
-                <PrivateRoute exact path={routes.projectList} component={AsyncProjectListPage} />
-                <Route exact path={routes.home} component={AsyncProjectListPage} />
-                <Redirect to={routes.home} />
-              </Switch>
+                <Switch>
+                  {/* maybe add some checking here, if !electron, return viewer page only */}
+                  <PrivateRoute exact path="/file-explorer" component={AsyncTestFileExplorer} fallBackRedirectPath={routes.home} fallBackRedirectPath={routes.home} />
+                  <PrivateRoute exact path={routes.editor} component={AsyncEditorPage} fallBackRedirectPath={routes.home} />
+                  <PrivateRoute exact path={routes.presenter} component={AsyncPresenterPage} fallBackRedirectPath={routes.home} />
+                  <PrivateRoute exact path={routes.viewer} component={ViewerPage} fallBackRedirectPath={routes.home} />
+                  <PrivateRoute exact path={routes.projectList} component={AsyncProjectListPage} />
+                  <Route exact path={routes.home} component={AsyncProjectListPage} />
+                  <Redirect to={routes.home} />
+                </Switch>
 
-              :
+                :
 
-              <Switch>
-                <Route exact path={routes.home} component={ViewerPage} />
-                <Redirect to={routes.home} />
-              </Switch>
-            }
-          </div>
-        </SceneContextProvider>
-      </LanguageContextProvider>
-    );
+                <Switch>
+                  <Route exact path={routes.home} component={ViewerPage} />
+                  <Redirect to={routes.home} />
+                </Switch>
+              }
+            </div>
+          </SceneContextProvider>
+        </LanguageContextProvider>
+      );
   }
 }
 

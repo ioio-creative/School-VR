@@ -328,6 +328,21 @@ function closeWebServer(callBack) {
 /* end of for presentation */
 
 
+/* app data */
+
+function getCustomizedAppData(callBack) {
+  generalIpcCall('getCustomizedAppData', callBack);
+}
+
+function setCustomizedAppData(stringifiedAppDataObj, callBack) {
+  generalIpcCall('setCustomizedAppData', callBack, {
+    stringifiedAppDataObj: stringifiedAppDataObj
+  });
+}
+
+/* end of app data */
+
+
 export default {
   // listeners
   addListener,
@@ -393,4 +408,8 @@ export default {
   getPresentationServerInfo,
   openWebServerAndLoadProject,
   closeWebServer,
+
+  // customized app data
+  getCustomizedAppData,
+  setCustomizedAppData
 };

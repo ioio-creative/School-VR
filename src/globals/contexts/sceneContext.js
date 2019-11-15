@@ -41,7 +41,7 @@ const entityModel = {
   'a-sky': ASky,
   'a-navigation': ANavigation,
 }
-// 
+//
 const SceneContext = React.createContext();
 // const jsonCopy = (json) => JSON.parse(JSON.stringify(json));
 /** seems all SceneData class data will be duplicate once in the contextProvider
@@ -76,7 +76,7 @@ class SceneContextProvider extends Component {
       slideId: undefined,
       entityId: undefined,
       timelineId: undefined,
-      
+
       timelinePosition: undefined,
 
       currentTime: 0,
@@ -103,7 +103,7 @@ class SceneContextProvider extends Component {
     this.getSlidesList = this.getSlidesList.bind(this);
     this.getCurrentSlide = this.getCurrentSlide.bind(this);
     this.getCurrentSlideId = this.getCurrentSlideId.bind(this);
-    
+
     this.addSlide = this.addSlide.bind(this);
     this.deleteSlide = this.deleteSlide.bind(this);
     this.selectSlide = this.selectSlide.bind(this);
@@ -143,7 +143,7 @@ class SceneContextProvider extends Component {
 
     this.undo = this.undo.bind(this);
     this.redo = this.redo.bind(this);
-    
+
     this.getUndoQueueLength = this.getUndoQueueLength.bind(this);
     this.getRedoQueueLength = this.getRedoQueueLength.bind(this);
 
@@ -212,7 +212,7 @@ class SceneContextProvider extends Component {
     //   });
     // }, 200);
     // the event emits when click on canvas
-    
+
   }
   startEventListener(eventName) {
     Events.on(eventName, this.events[eventName])
@@ -363,7 +363,7 @@ class SceneContextProvider extends Component {
       const oldIdx = this.state.sceneData.slides.findIndex(slide=>slide.id===copyFromSlideId);
       const newSlide = jsonCopy(this.state.sceneData.slides.find(slide=>slide.id===copyFromSlideId));
       newSlide.id = uuid();
-      // idx field is for debug only 
+      // idx field is for debug only
       // newSlide.idx = (newSlide.idx.toString().split('>').slice(-1)[0]) + '>' + this.state.sceneData.slides.length;
       newSlide.entities.forEach(el => {
         el.id = uuid();
@@ -518,7 +518,7 @@ class SceneContextProvider extends Component {
   getCurrentSlideId() {
     return this.state.slideId;
   }
-  
+
   selectSlide(slideId, autoPlay) {
     const editor = this.editor;
     this.setState((prevState) => {
@@ -646,7 +646,7 @@ class SceneContextProvider extends Component {
     const currentSlide = slides.find(el => el.id === state.slideId);
     if (!currentSlide) return null;
     const selectedEntity = currentSlide.entities.find(el => el.id === entityId);
-    
+
     this.editor.selectEntity(selectedEntity.el);
     // after editor select, an event will be emit and state will update there
     // this.setState({
@@ -768,7 +768,7 @@ class SceneContextProvider extends Component {
     })
   }
 
-  
+
   getTimelinesList(entityId) {
     const state = this.state;
     const sceneData = state.sceneData;
@@ -968,7 +968,7 @@ class SceneContextProvider extends Component {
     const slides = sceneData.slides;
     const currentSlide = slides.find(el => el.id === state.slideId);
     const selectedEntity = currentSlide.entities.find(el => el.id === entityId);
-    
+
     this.editor.selectEntity(selectedEntity.el);
     this.editor.enableControls(!!newPosition);
     // const currentEntity = this.getCurrentEntity();
@@ -1060,7 +1060,7 @@ class SceneContextProvider extends Component {
       const currentSlide = slides.find(el => el.id === prevState.slideId);
       const selectedEntity = currentSlide.entities.find(el => el.id === prevState.entityId);
       const entityComponent = selectedEntity['components'];
-      const newUndoQueue = jsonCopy(prevState.undoQueue);      
+      const newUndoQueue = jsonCopy(prevState.undoQueue);
       if (entityComponent) {
         for (let k in newAttrs) {
           if (entityComponent.hasOwnProperty(k)) {
@@ -1234,7 +1234,7 @@ class SceneContextProvider extends Component {
         // this.startEventListener('objectselected');
         this.rebuildTimeline().then(tl => {
           tl.seek(this.state.currentTime + 0.01).seek(this.state.currentTime, false);
-          this.startEventListener('objectselected');          
+          this.startEventListener('objectselected');
         });
       })
     }
@@ -1279,12 +1279,12 @@ class SceneContextProvider extends Component {
             entity.el.setAttribute('material', {
               src: entity.material.src
             })
-          }          
+          }
         })
         this.rebuildTimeline().then(tl => {
           // console.log(tl);
           tl.seek(this.state.currentTime + 0.01).seek(this.state.currentTime, false);
-          this.startEventListener('objectselected');          
+          this.startEventListener('objectselected');
         });
       })
     }
@@ -1327,7 +1327,7 @@ class SceneContextProvider extends Component {
           nested[key] = {};
         }
         nested[key] = mergeJSON(
-          nested[key], 
+          nested[key],
           this.deFlattenJSON(tmp)
         );
       } else {
@@ -1426,7 +1426,7 @@ class SceneContextProvider extends Component {
                 }
               }, firstTimeline.start + deltaOffset);
 
-              
+
               tl.add(() => {
                 entityMedia['mediaEl'].pause();
               }, lastTimeline.start + lastTimeline.duration);
@@ -1511,7 +1511,7 @@ class SceneContextProvider extends Component {
         this.rebuildTimeline().then(tl => tl.stop().seek(0.001).seek(0, false));
       }
     })
-    
+
   }
 
   takeSnapshot() {
@@ -1533,7 +1533,7 @@ class SceneContextProvider extends Component {
     for (let i = 0; i < editor.sceneHelpers.children.length; i++){
       editor.sceneHelpers.children[i].visible = helper_status[i];
     }
-    
+
     // canvas.width = width;
     // canvas.height = height;
     // if (camera.aspect > 1) {
@@ -1567,7 +1567,7 @@ class SceneContextProvider extends Component {
       }
     })
   }
-  
+
   seekSlide(timeInSec) {
     if (this.state.animationTimeline) {
       this.state.animationTimeline.seek(timeInSec, false);
@@ -1598,7 +1598,7 @@ class SceneContextProvider extends Component {
     let newEl = null;
     const newId = newFile.id || uuid();
     const newFileUrl = (
-      Object.prototype.toString.call(newFile) === '[object File]' ? 
+      Object.prototype.toString.call(newFile) === '[object File]' ?
       URL.createObjectURL(newFile) :
       (newFile.src?
         newFile.src :
@@ -1660,7 +1660,7 @@ class SceneContextProvider extends Component {
       for (let i = 0; i < assetsData.length; i++) {
         if (assetsData[i].id === newFile.id) {
           needInsert = false;
-          break;   
+          break;
         }
       }
       if (needInsert) {
@@ -1700,7 +1700,7 @@ class SceneContextProvider extends Component {
     // console.log(state.sceneData);
     // if (!this.editor) return null;
     return (
-      <SceneContext.Provider 
+      <SceneContext.Provider
         value={{
           // functions
           setAppName: this.setAppName,
@@ -1714,7 +1714,7 @@ class SceneContextProvider extends Component {
           getSlidesList: this.getSlidesList,
           getCurrentSlide: this.getCurrentSlide,
           getCurrentSlideId: this.getCurrentSlideId,
-          
+
           addSlide: this.addSlide,
           deleteSlide: this.deleteSlide,
           selectSlide: this.selectSlide,
@@ -1725,7 +1725,7 @@ class SceneContextProvider extends Component {
           getCurrentEntity: this.getCurrentEntity,
           getCurrentEntityId: this.getCurrentEntityId,
           copyEntity: this.copyEntity,
-    
+
           addEntity: this.addEntity,
           deleteEntity: this.deleteEntity,
           selectEntity: this.selectEntity,
@@ -1775,7 +1775,7 @@ class SceneContextProvider extends Component {
           // projectName: this.state.projectName,
         }}>
         {props.children}
-      </SceneContext.Provider>          
+      </SceneContext.Provider>
     );
   }
 }

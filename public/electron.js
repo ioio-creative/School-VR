@@ -125,6 +125,7 @@ function createWindow() {
       // create App Data directories if they do not exist
       const appDirectoryKeys = Object.keys(appDirectory).filter((appDirectoryKey) => {
         return !([
+          'customizedAppDataFile',
           'appAsarInstallationPath',
           'webServerRootDirectory',
           'webServerFilesDirectory'
@@ -132,7 +133,7 @@ function createWindow() {
       });
       await forEach(appDirectoryKeys, async (appDirectoryKey) => {
         const directoryPath = appDirectory[appDirectoryKey];
-        console.log(`${appDirectoryKey}: ${directoryPath}`);
+        console.log('appDirectoryKey:', directoryPath);
         await fileSystem.createDirectoryIfNotExistsPromise(directoryPath);
       });
       console.log('App directories created.');
@@ -245,6 +246,7 @@ app.on('ready', async _ => {
   try {
     await readConfigFileAsync(configFilePath);
   } catch (err) {
+    console.error('ready Error:');
     console.error(err);
   }
 
@@ -318,6 +320,7 @@ ipcMain.on('getAppData', (event, arg) => {
 ipcMain.on('getMacAddress', (event, arg) => {
   getMacAddress.one(function (err, mac) {
     if (err) {
+      console.error('getMacAddress Error:');
       console.error(err);
       event.sender.send('getMacAddressResponse', {
         err: err.toString(),
@@ -399,6 +402,7 @@ ipcMain.on('mimeStat', (event, arg) => {
       }
     });
   } catch (err) {
+    console.error('mimeStat error');
     console.error(err);
     event.sender.send('mimeStatResponse', {
       err: err.toString(),
@@ -418,6 +422,7 @@ ipcMain.on('mimeStats', (event, arg) => {
       }
     });
   } catch (err) {
+    console.error('mimeStats error');
     console.error(err);
     event.sender.send('mimeStatsResponse', {
       err: err.toString(),
@@ -437,6 +442,7 @@ ipcMain.on('base64Encode', async (event, arg) => {
       }
     });
   } catch (err) {
+    console.error('base64Encode Error:');
     console.error(err);
     event.sender.send('base64EncodeResponse', {
       err: err.toString(),
@@ -452,6 +458,7 @@ ipcMain.on('base64Decode', async (event, arg) => {
       err: null,
     });
   } catch (err) {
+    console.error('base64Decode Error:');
     console.error(err);
     event.sender.send('base64DecodeResponse', {
       err: err.toString(),
@@ -466,6 +473,7 @@ ipcMain.on('createPackage', async (event, arg) => {
       err: null,
     });
   } catch (err) {
+    console.error('createPackage Error:');
     console.error(err);
     event.sender.send('createPackageResponse', {
       err: err.toString(),
@@ -480,6 +488,7 @@ ipcMain.on('extractAll', (event, arg) => {
       err: null,
     });
   } catch (err) {
+    console.error('extractAll Error:');
     console.error(err);
     event.sender.send('extractAllResponse', {
       err: err.toString(),
@@ -498,6 +507,7 @@ ipcMain.on('readdir', async (event, arg) => {
       }
     });
   } catch (err) {
+    console.error('readdir Error:');
     console.error(err);
     event.sender.send('readdirResponse', {
       err: err.toString(),
@@ -517,6 +527,7 @@ ipcMain.on('readFile', async (event, arg) => {
       }
     });
   } catch (err) {
+    console.error('readFile Error:');
     console.error(err);
     event.sender.send('readFileResponse', {
       err: err.toString(),
@@ -532,6 +543,7 @@ ipcMain.on('writeFile', async (event, arg) => {
       err: null
     });
   } catch (err) {
+    console.error('writeFile Error:');
     console.error(err);
     event.sender.send('writeFileResponse', {
       err: err.toString()
@@ -547,6 +559,7 @@ ipcMain.on('deleteFile', async (event, arg) => {
       err: null
     });
   } catch (err) {
+    console.error('deleteFile Error:');
     console.error(err);
     event.sender.send('deleteFileResponse', {
       err: err.toString()
@@ -561,6 +574,7 @@ ipcMain.on('renameFile', async (event, arg) => {
       err: null
     });
   } catch (err) {
+    console.error('renameFile Error:');
     console.error(err);
     event.sender.send('renameFileResponse', {
       err: err.toString()
@@ -575,6 +589,7 @@ ipcMain.on('copyFile', async (event, arg) => {
       err: null
     });
   } catch (err) {
+    console.error('copyFile Error:');
     console.error(err);
     event.sender.send('copyFileResponse', {
       err: err.toString()
@@ -597,6 +612,7 @@ ipcMain.on('listProjects', async (event, arg) => {
       });
     })
     .catch(err => {
+      console.error('listProjects Error:');
       console.error(err);
       event.sender.send('listProjectsResponse', {
         err: err.toString(),
@@ -616,6 +632,7 @@ ipcMain.on('saveProject', (event, arg) => {
       });
     })
     .catch(err => {
+      console.error('saveProject Error:');
       console.error(err);
       event.sender.send('saveProjectResponse', {
         err: err.toString(),
@@ -635,6 +652,7 @@ ipcMain.on('parseDataToSaveFormat', (event, arg) => {
       });
     })
     .catch(err => {
+      console.error('parseDataToSaveFormat Error:');
       console.error(err);
       event.sender.send('parseDataToSaveFormatResponse', {
         err: err.toString(),
@@ -655,6 +673,7 @@ ipcMain.on('loadProjectByProjectFilePath', (event, arg) => {
       });
     })
     .catch(err => {
+      console.error('loadProjectByProjectFilePath Error:');
       console.error(err);
       event.sender.send('loadProjectByProjectFilePathResponse', {
         err: err.toString(),
@@ -823,6 +842,7 @@ ipcMain.on('openWebServerAndLoadProject', async (event, arg) => {
       }
     });
   } catch (err) {
+    console.error('openWebServerAndLoadProject Error:')
     console.error(err);
     event.sender.send('openWebServerAndLoadProjectResponse', {
       err: err.toString(),
@@ -836,6 +856,45 @@ ipcMain.on('closeWebServer', (event, arg) => {
   event.sender.send('closeWebServerResponse', {
     err: null
   });
+});
+
+// customized app data
+
+ipcMain.on('getCustomizedAppData', async (event, arg) => {
+  try {
+    const appDataFileContent = await fileSystem.readFilePromise(appDirectory.customizedAppDataFile);
+    // JSON.parse() is to ensure that appDataFileContent string is really a JSON
+    const appDataObj = JSON.parse(appDataFileContent);
+    const stringifiedAppDataObj = JSON.stringify(appDataObj);
+    event.sender.send('getCustomizedAppDataResponse', {
+      err: null,
+      data: {
+        stringifiedAppDataObj: stringifiedAppDataObj
+      }
+    });
+  } catch (err) {
+    console.error('getCustomizedAppData Error:');
+    console.error(err);
+    event.sender.send('getCustomizedAppDataResponse', {
+      err: err.toString(),
+      data: null
+    });
+  }
+});
+
+ipcMain.on('setCustomizedAppData', async (event, arg) => {
+  try {
+    await fileSystem.writeFilePromise(appDirectory.customizedAppDataFile, arg.stringifiedAppDataObj);
+    event.sender.send('setCustomizedAppDataResponse', {
+      err: null
+    });
+  } catch (err) {
+    console.error('setCustomizedAppData Error:');
+    console.error(err);
+    event.sender.send('setCustomizedAppDataResponse', {
+      err: err.toString()
+    });
+  }
 });
 
 /* end of ipc main event listeners */

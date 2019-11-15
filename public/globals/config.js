@@ -12,11 +12,14 @@ appDirectory.appProjectsDirectory = myPath.join(app.getPath('documents'), `${app
 
 appDirectory.appDataDirectory = myPath.join(app.getPath('appData'), `${appName}-Data`);
 
+/* customized app data */
+appDirectory.customizedAppDataFile = myPath.join(appDirectory.appDataDirectory, 'customizedAppData.json');
+
 appDirectory.appTempDirectory = myPath.join(app.getPath('appData'), `${appName}-Temp`);
 appDirectory.appTempProjectsDirectory = myPath.join(appDirectory.appTempDirectory, `${appName}-Projects`);
 appDirectory.appTempAppWorkingDirectory = myPath.join(appDirectory.appTempDirectory, `${appName}-App-Working`);
 appDirectory.appTempWebContainerDirectory = myPath.join(appDirectory.appTempAppWorkingDirectory, 'web');
- 
+
 //appDirectory.appAsarInstallationPath = myPath.join(app.getAppPath(), 'resources', 'app.asar');
 appDirectory.appAsarInstallationPath = myPath.join(app.getPath('appData'), '..', 'Local', 'Programs', app.getName(), 'resources', 'app.asar');
 appDirectory.webServerRootDirectory = myPath.join(appDirectory.appAsarInstallationPath, 'build');  // directly serves within app.asar (which acts as a directory)
@@ -59,10 +62,10 @@ let mediaType = {},
 
 for (let key of Object.keys(Media)) {
   const MediumTypeObj = Media[key];
-  
+
   mediaType[key] = MediumTypeObj.typeName;
   projectDirectoryStructure[key] = MediumTypeObj.directoryUnderProjectDirectory;
-  
+
   // https://electronjs.org/docs/api/dialog
   openFileDialogFilter[key] = MediumTypeObj.openFileDialogFilter;
 }
@@ -77,7 +80,7 @@ let paramsReadFromExternalConfig = {
   something: 1,
 };
 let setParamsReadFromExternalConfig = (configObj) => {
-  paramsReadFromExternalConfig = {...paramsReadFromExternalConfig, ...configObj};  
+  paramsReadFromExternalConfig = {...paramsReadFromExternalConfig, ...configObj};
 };
 
 

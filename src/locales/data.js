@@ -19,7 +19,10 @@ const localizedData = {
     /* prompt */
 
     "Prompt.UnsavedWorkMessage": "You have unsaved changes, are you sure you want to leave?",
-    "Prompt.AutenticationFailMessage": "Authentication fails. Please contact IOIO Creative.",
+    "Prompt.AutenticationFailTitle": "Authentication",
+    "Prompt.AutenticationFailMessage": "Authentication failed. Please contact IOIO Creative or enter your license key.",
+    "Alert.AutenticationFailMessage": "Authenication failed.",
+    "Alert.AutenticationSuccessMessage": "Authentication succeeded.",
 
     /* end of prompt */
 
@@ -138,7 +141,10 @@ const localizedData = {
     /* prompt */
 
     "Prompt.UnsavedWorkMessage": "您有未保存的更改，確定要離開嗎？",
-    "Prompt.AutenticationFailMessage": "身份驗證失敗。請聯繫IOIO Creative。",
+    "Prompt.AutenticationFailTitle": "身份驗證",
+    "Prompt.AutenticationFailMessage": "身份驗證失敗。請聯繫IOIO Creative或輸入您的許可證密鑰。",
+    "Alert.AutenticationFailMessage": "身份驗證失敗。",
+    "Alert.AutenticationSuccessMessage": "身份驗證成功。",
 
     /* end of prompt */
 

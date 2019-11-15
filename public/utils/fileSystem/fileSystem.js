@@ -80,7 +80,7 @@ const handleGeneralErr = (callBack, err) => {
 };
 
 const handleGeneralErrAndData = (callBack, err, data) => {
-  //console.log("fileSystem - handleGeneralErrAndData");  
+  //console.log("fileSystem - handleGeneralErrAndData");
   const callBackCall = (newErr, theData) => {
     invokeIfIsFunction(callBack, newErr, theData);
   };
@@ -88,7 +88,7 @@ const handleGeneralErrAndData = (callBack, err, data) => {
     console.error(err.stack);
     callBackCall(err, null);
   } else {
-    callBackCall(null, data);    
+    callBackCall(null, data);
   }
 };
 
@@ -105,7 +105,7 @@ const handleGeneralErrAndData = (callBack, err, data) => {
  * It returns callBack(err, data).
  * err is always null, so that promisifying exists() would not have the reject case.
  * data is included such that promisified exists() will always be resolved.
- * data is a Boolean indicating if the file exists. 
+ * data is a Boolean indicating if the file exists.
  */
 // https://nodejs.org/api/fs.html#fs_fs_access_path_mode_callback
 const exists = (filePath, callBack) => {
@@ -148,14 +148,14 @@ const writeFile = (filePath, content, callBack) => {
     });
   };
   exists(directoriesStr, (_, isExists) => {
-    if (!isExists) {  // directory does not exist      
-      createDirectoryIfNotExists(directoriesStr, (err) => {    
+    if (!isExists) {  // directory does not exist
+      createDirectoryIfNotExists(directoriesStr, (err) => {
         if (err) {
           handleGeneralErr(callBack, err);
           return;
-        }    
+        }
         writeFileCallBack();
-      });      
+      });
     } else {  // directory exists
       writeFileCallBack();
     }
@@ -184,14 +184,14 @@ const appendFile = (filePath, content, callBack) => {
     });
   };
   exists(directoriesStr, (_, isExists) => {
-    if (!isExists) {  // directory does not exist      
-      createDirectoryIfNotExists(directoriesStr, (err) => {    
+    if (!isExists) {  // directory does not exist
+      createDirectoryIfNotExists(directoriesStr, (err) => {
         if (err) {
           handleGeneralErr(callBack, err);
           return;
-        }    
+        }
         appendFileCallBack();
-      });      
+      });
     } else {  // directory exists
       appendFileCallBack();
     }
@@ -259,7 +259,7 @@ const copyFileAssumingDestDirExists = (src, dest, callBack) => {
 
 // for performance reasons
 const copyFileAssumingDestDirExistsSync = (src, dest) => {
-  if (src === dest) {    
+  if (src === dest) {
     return;
   }
 
@@ -288,11 +288,11 @@ const copyFile = (src, dest, callBack) => {
   exists(destDirectoriesStr, (_, isExists) => {
     if (!isExists) {  // directory does not exist
       createDirectoryIfNotExists(destDirectoriesStr, (err) => {
-        if (err) {          
+        if (err) {
           handleGeneralErr(callBack, err);
           return;
-        }        
-        copyFileCallBack();        
+        }
+        copyFileCallBack();
       });
     } else {  // directory exists
       copyFileCallBack();
@@ -301,7 +301,7 @@ const copyFile = (src, dest, callBack) => {
 };
 
 const copyFileSync = (src, dest) => {
-  if (src === dest) {   
+  if (src === dest) {
     return;
   }
 
@@ -309,7 +309,7 @@ const copyFileSync = (src, dest) => {
   if (!existsSync(destDirectoriesStr)) {
     createDirectoryIfNotExistsSync(destDirectoriesStr);
   }
-  fs.copyFileSync(src, dest);  
+  fs.copyFileSync(src, dest);
 };
 
 const copyFilePromise = promisify(copyFile);
@@ -325,8 +325,8 @@ const copyPromise = promisify(copy);
 
 
 /**
- * Note: 
- * the return CustomedFileStats object has an additional 'path' property 
+ * Note:
+ * the return CustomedFileStats object has an additional 'path' property
  * compared to the default fs.Stats object
  * https://stackoverflow.com/questions/11659054/how-to-access-name-of-file-within-fs-callback-methods
  * https://nodejs.org/dist/latest-v10.x/docs/api/fs.html#fs_class_fs_stats
@@ -379,13 +379,13 @@ const base64EncodeSync = (filePath) => {
 const base64EncodePromise = promisify(base64Encode);
 
 const base64Decode = (locationToSaveFile, encodedStr, callBack) => {
-  writeFile(locationToSaveFile, 
+  writeFile(locationToSaveFile,
     fromBase64Str(encodedStr),
     (err) => { handleGeneralErr(callBack, err); });
 };
 
 const base64DecodeSync = (locationToSaveFile, encodedStr) => {
-  writeFileSync(locationToSaveFile, 
+  writeFileSync(locationToSaveFile,
     fromBase64Str(encodedStr));
 };
 
@@ -400,7 +400,7 @@ const createPackage = (src, dest, callBack) => {
   // https://github.com/electron/asar#transform
   // passing null as 3rd argument won't work
   // should pass {} (empty value) or _ => null (a function which returns nothing) or anything other than null or undefined
-  createPackageWithOptions(src, dest, {}, callBack);  
+  createPackageWithOptions(src, dest, {}, callBack);
 };
 
 const createPackagePromise = promisify(createPackage);
@@ -413,15 +413,15 @@ const createPackageWithTransformOptionPromise = promisify(createPackageWithTrans
 
 // overwrite existing dest
 const createPackageWithOptions = (src, dest, options, callBack) => {
-  //console.log(asar);  
+  //console.log(asar);
   asar.createPackageWithOptions(src, dest, options, (err) => {
     const isSuccess = !err;
 
-    if (isSuccess) {            
-      console.log(`fileSystem - createPackageWithOptions: ${src} packaged to ${dest}`);  
+    if (isSuccess) {
+      console.log(`fileSystem - createPackageWithOptions: ${src} packaged to ${dest}`);
     }
 
-    handleGeneralErr(callBack, err);      
+    handleGeneralErr(callBack, err);
   });
 };
 
@@ -437,15 +437,15 @@ const extractFile = (archive, fileName) => {
 };
 
 const extractAll = (archive, dest) => {
-  try {    
+  try {
     // asar would cache previous result!
     asar.uncache(archive);
     //asar.uncacheAll();
-    // overwrite existing dest!    
-    asar.extractAll(archive, dest);    
+    // overwrite existing dest!
+    asar.extractAll(archive, dest);
   } catch (err) {
     console.log(err);
-  }  
+  }
 };
 
 /* end of asar - Electron Archive */
@@ -479,9 +479,9 @@ const mkdirSync = (dirPath) => {
   fx.mkdirSync(fs, myPath.path, dirPath);
 }
 
-const createDirectoryIfNotExists = (dirPath, callBack) => {  
-  exists(dirPath, (_, isExists) => {    
-    if (!isExists) {  // directory does not exist      
+const createDirectoryIfNotExists = (dirPath, callBack) => {
+  exists(dirPath, (_, isExists) => {
+    if (!isExists) {  // directory does not exist
       mkdir(dirPath, (mkDirErr) => {
         handleGeneralErr(callBack, mkDirErr);
       });
@@ -492,7 +492,7 @@ const createDirectoryIfNotExists = (dirPath, callBack) => {
 };
 
 // https://stackoverflow.com/questions/21194934/node-how-to-create-a-directory-if-doesnt-exist
-const createDirectoryIfNotExistsSync = (dirPath) => {  
+const createDirectoryIfNotExistsSync = (dirPath) => {
   if (!existsSync(dirPath)) {
     mkdirSync(dirPath);
   }
@@ -524,8 +524,8 @@ const createAndOverwriteDirectoryIfExistsPromise = promisify(createAndOverwriteD
 /**
  *  Note:
  *  files returned by fs.readdir is an array of file name strings
- */ 
-const readdir = (dirPath, callBack) => {  
+ */
+const readdir = (dirPath, callBack) => {
   fs.readdir(dirPath, (err, fileNames) => {
     handleGeneralErrAndData(callBack, err, fileNames);
   });
@@ -538,7 +538,7 @@ const readdirSync = (dirPath) => {
 const readdirPromise = promisify(readdir);
 
 /**
- * Note: 
+ * Note:
  * the returned files is an array of CustomedStats objects
  * instead of the default array of file name strings
  * https://stackoverflow.com/questions/11659054/how-to-access-name-of-file-within-fs-callback-methods
@@ -550,7 +550,7 @@ const readdirWithStatPromise = async (dirPath) => {
     return [];
   }
 
-  const absolutePaths = fileNames.map(fileName => myPath.join(dirPath, fileName)); 
+  const absolutePaths = fileNames.map(fileName => myPath.join(dirPath, fileName));
   const fileStatObjs = await map(absolutePaths, async (fileAbsolutePath) => {
     return await statPromise(fileAbsolutePath);
   });
@@ -563,7 +563,7 @@ const readdirWithStatPromise = async (dirPath) => {
 
 /**
  * rimraf api
- * work for both file and directory 
+ * work for both file and directory
  * https://github.com/isaacs/rimraf
  */
 
@@ -571,11 +571,11 @@ const defaultMyDeleteOptions = Object.assign({
   maxBusyTries: 15
 } , fs);
 
-const myDelete = (filePath, callBack) => {  
+const myDelete = (filePath, callBack) => {
   rimraf(filePath, defaultMyDeleteOptions, (err) => {
-    //console.log('file to delete: ' + filePath); 
-    handleGeneralErr(callBack, err);    
-  });  
+    //console.log('file to delete: ' + filePath);
+    handleGeneralErr(callBack, err);
+  });
 };
 
 const myDeleteSync = (filePath) => {
@@ -600,7 +600,7 @@ module.exports = {
   writeFileAssumingDestDirExists,
   writeFileAssumingDestDirExistsSync,
   writeFileAssumingDestDirExistsPromise,
-  writeFile,  
+  writeFile,
   writeFileSync,
   writeFilePromise,
   createWriteStream,
@@ -617,13 +617,13 @@ module.exports = {
   copyFileAssumingDestDirExists,
   copyFileAssumingDestDirExistsSync,
   copyFileAssumingDestDirExistsPromise,
-  copyFile,  
+  copyFile,
   copyFileSync,
   copyFilePromise,
   copy,  // most powerful
   copyPromise,
   //deleteFileSafe,
-  //deleteFileSafeSync,  
+  //deleteFileSafeSync,
   stat,
   statSync,
   statPromise,
@@ -639,8 +639,8 @@ module.exports = {
 
   // asar - Electron Archive
   createPackage,
-  createPackagePromise,  
-  createPackageWithTransformOption, 
+  createPackagePromise,
+  createPackageWithTransformOption,
   createPackageWithTransformOptionPromise,
   createPackageWithOptions,
   createPackageWithOptionsPromise,
