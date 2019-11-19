@@ -1,4 +1,4 @@
-electron = require('electron');
+const electron = require('electron');
 const app = electron.app;
 const ipcMain = electron.ipcMain;
 const BrowserWindow = electron.BrowserWindow;
@@ -25,7 +25,10 @@ const { openImageDialog, openGifDialog, openVideoDialog, openSchoolVrFileDialog,
 const { showYesNoQuestionMessageBox, showYesNoWarningMessageBox } = require('./utils/aframeEditor/showMessageBox');
 const { parseDataToSaveFormat } = require('./utils/saveLoadProject/parseDataToSaveFormat');
 const getIpAddress = require('./utils/network/getIpAddress');
-const getMacAddress = require('./utils/network/getMacAddress');
+const { getMacAddressHelper, getMacAddressPromiseHelper } = require('./utils/network/getMacAddress');
+const shallowMergeObjects = require('./utils/js/shallowMergeObjects');
+const { hashForUniqueId } = require('./utils/crypto');
+const jsonStringifyFormatted = require('./utils/json/jsonStringifyFormatted');
 
 
 /* constants */
@@ -318,7 +321,7 @@ ipcMain.on('getAppData', (event, arg) => {
 // network interfaces
 
 ipcMain.on('getMacAddress', (event, arg) => {
-  getMacAddress.one(function (err, mac) {
+  getMacAddressHelper.one(function (err, mac) {
     if (err) {
       console.error('getMacAddress Error:');
       console.error(err);
@@ -860,16 +863,33 @@ ipcMain.on('closeWebServer', (event, arg) => {
 
 // customized app data
 
+const getCustomizedAppDataObjFromFilePromise = async _ => {
+  const appDataFileContent = await fileSystem.readFilePromise(appDirectory.customizedAppDataFile);
+  return JSON.parse(appDataFileContent);
+};
+
+const mergeAndSetCustomizedAppDataObjToFilePromise = async (objToMerge) => {
+  let existingObj = {};
+  try {
+    existingObj = await getCustomizedAppDataObjFromFilePromise();
+  } catch (err) {
+    console.error('mergeAndSetCustomizedAppDataObjToFilePromise Error:');
+    console.error(err);
+    // silense customize app data file not existing error
+  }
+  const mergedObj = shallowMergeObjects(existingObj, objToMerge);
+  const mergedObjStr = jsonStringifyFormatted(mergedObj);
+  await fileSystem.writeFilePromise(appDirectory.customizedAppDataFile, mergedObjStr);
+}
+
 ipcMain.on('getCustomizedAppData', async (event, arg) => {
   try {
-    const appDataFileContent = await fileSystem.readFilePromise(appDirectory.customizedAppDataFile);
-    // JSON.parse() is to ensure that appDataFileContent string is really a JSON
-    const appDataObj = JSON.parse(appDataFileContent);
-    const stringifiedAppDataObj = JSON.stringify(appDataObj);
+    const appDataObj = await getCustomizedAppDataObjFromFilePromise();
+    const appDataObjStr = jsonStringifyFormatted(appDataObj);
     event.sender.send('getCustomizedAppDataResponse', {
       err: null,
       data: {
-        stringifiedAppDataObj: stringifiedAppDataObj
+        appDataObjStr: appDataObjStr
       }
     });
   } catch (err) {
@@ -884,7 +904,7 @@ ipcMain.on('getCustomizedAppData', async (event, arg) => {
 
 ipcMain.on('setCustomizedAppData', async (event, arg) => {
   try {
-    await fileSystem.writeFilePromise(appDirectory.customizedAppDataFile, arg.stringifiedAppDataObj);
+    await fileSystem.writeFilePromise(appDirectory.customizedAppDataFile, arg.appDataObjStr);
     event.sender.send('setCustomizedAppDataResponse', {
       err: null
     });
@@ -892,6 +912,82 @@ ipcMain.on('setCustomizedAppData', async (event, arg) => {
     console.error('setCustomizedAppData Error:');
     console.error(err);
     event.sender.send('setCustomizedAppDataResponse', {
+      err: err.toString()
+    });
+  }
+});
+
+function getEvenIdxOfStr(str) {
+  if (!str) {
+    return '';
+  }
+  const chars = str.split('');
+  const evenChars = chars.filter((_, idx) => idx % 2 === 0);
+  return evenChars.join();
+}
+
+const identityKeySpecialDelimiter = ':::::'
+
+const encodeIdentityKeyPromise = async (licenseKey) => {
+  const macAddress = await getMacAddressPromiseHelper.one();
+  return licenseKey + identityKeySpecialDelimiter
+    + hashForUniqueId(licenseKey + getEvenIdxOfStr(macAddress));
+};
+
+const decodeIdentityKeyPromise = async _ => {
+  const appDataObj = await getCustomizedAppDataObjFromFilePromise();
+  const identityKey = appDataObj.identityKey;
+
+  if (!identityKey) {
+    return null;
+  }
+
+  const identityKeySplitted = identityKey.split(identityKeySpecialDelimiter);
+
+  if (identityKeySplitted.length !== 2) {
+    return null;
+  }
+
+  const licenseKey = identityKeySplitted[0];
+  return { identityKey, licenseKey };
+};
+
+ipcMain.on('checkIdentity', async (event, arg) => {
+  let isIdentityValid = false;
+  try {
+    const decodeIdentityKeyObj = await decodeIdentityKeyPromise();
+    if (decodeIdentityKeyObj) {
+      const { identityKey, licenseKey } = decodeIdentityKeyObj;
+      const supposedIdentityKey = await encodeIdentityKeyPromise(licenseKey);
+      isIdentityValid = supposedIdentityKey === identityKey;
+    }
+  } catch (err) {
+    console.error('checkIdentity Error:');
+    console.error(err);
+    // silense error
+  }
+  event.sender.send('checkIdentityResponse', {
+    err: null,
+    data: {
+      isIdentityValid: isIdentityValid
+    }
+  });
+});
+
+ipcMain.on('setLicenseKey', async (event, arg) => {
+  try {
+    const licenseKeyInput = arg.licenseKey;
+    const identityKey = licenseKeyInput ? (await encodeIdentityKeyPromise(licenseKeyInput)) : '';
+    await mergeAndSetCustomizedAppDataObjToFilePromise({
+      identityKey: identityKey
+    });
+    event.sender.send('setLicenseKeyResponse', {
+      err: null
+    });
+  } catch (err) {
+    console.error('setLicenseKey Error:');
+    console.error(err);
+    event.sender.send('setLicenseKeyResponse', {
       err: err.toString()
     });
   }

@@ -3,16 +3,16 @@
 */
 import React, {Component} from 'react';
 import {roundTo, addToAsset, rgba2hex} from 'globals/helperfunctions';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+// import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 // import {SketchPicker} from 'react-color';
 import TransformMode from './transformMode';
 import ColorPicker from './colorPicker';
 import OpacityPicker from './opacityPicker';
 
-import {Rnd as ResizableAndDraggable} from 'react-rnd';
+// import {Rnd as ResizableAndDraggable} from 'react-rnd';
 // import ABox from 'utils/aBox';
 
-import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/languageContext';
+import {LanguageContextMessagesConsumer} from 'globals/contexts/locale/languageContext';
 
 import './infoTypeBox.css';
 

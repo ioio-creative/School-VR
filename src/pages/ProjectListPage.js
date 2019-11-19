@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 
-import {globalLanguage, LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/languageContext';
+import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/locale/languageContext';
 import {languages} from 'globals/config';
 
 import MenuComponent from 'components/menuComponent';

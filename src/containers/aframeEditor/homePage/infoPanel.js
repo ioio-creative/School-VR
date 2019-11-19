@@ -25,7 +25,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 
 import './infoPanel.css';
 import {withSceneContext} from 'globals/contexts/sceneContext';
-import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/languageContext';
+import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/locale/languageContext';
 
 import ABox from 'utils/aframeEditor/aBox';
 import ASphere from 'utils/aframeEditor/aSphere';

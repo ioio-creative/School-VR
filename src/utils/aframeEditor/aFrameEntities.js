@@ -351,6 +351,7 @@ function addNewTriangle(elementId, entityParent) {
   );
 }
 
+// Obsolete
 function addNewText(elementId, entityParent, additionSettings) {
 
   if (!elementId) {

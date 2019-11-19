@@ -2,10 +2,9 @@ import React from 'react';
 import {Route, Redirect} from 'react-router-dom';
 import smalltalk from 'smalltalk';
 
-import localizedData from 'locales/data';
-import {globalLanguage} from 'globals/contexts/languageContext';
+import {getLocalizedDataSet} from 'globals/contexts/locale/languageContext';
 
-import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
+//import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 import {authenticateWithLicenseKeyPromise, getIsAuthenticated} from 'utils/authentication/auth';
 
 
@@ -33,7 +32,7 @@ class PrivateRoute extends React.Component {
       isAuthenticated, isLicenseKeyInputPrompted
     } = this.state;
     if (!isAuthenticated && !isLicenseKeyInputPrompted) {
-      const localizedDataSet = localizedData[globalLanguage.code];
+      const localizedDataSet = getLocalizedDataSet();
       const throwAuthenticationError = _ => { throw new Error('Authentication failed.'); };
       try {
         /**
@@ -89,7 +88,7 @@ class PrivateRoute extends React.Component {
 
   // This allows time for prompting for license key input in componentDidMount().
   // Using routeRenderFunctionWithRedirectFactory on 1st render may result in <Redirect />,
-  // which triggers PrivateRoute component to unmount straight away.
+  // which triggers route change, and hence PrivateRoute component to br unmounted straight away.
   routeRenderFunctionWithLoadingFactory() {
     const {
       component: Component

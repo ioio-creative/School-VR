@@ -1,10 +1,12 @@
+// const jsonStringifyFormatted = ('../json/jsonStringifyFormatted');
+
 const parseDataToSaveFormat = (projectName, entitiesList, assetsList) => {
   const resultJson = {
     projectName: projectName,
     entitiesList: entitiesList,
     assetsList: assetsList
   };
-  //console.log(JSON.stringify(resultJson));
+  //console.log(jsonStringifyFormatted(resultJson));
   return resultJson;
 };
 

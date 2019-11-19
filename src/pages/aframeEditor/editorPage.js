@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 import {withRouter, Prompt} from 'react-router-dom';
 
 import {withSceneContext, SceneContextProvider} from 'globals/contexts/sceneContext';
-import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/languageContext';
+import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/locale/languageContext';
 import {languages} from 'globals/config';
 
 import MenuComponent from 'components/menuComponent';

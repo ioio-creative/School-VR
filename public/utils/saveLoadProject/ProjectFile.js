@@ -6,6 +6,7 @@ const CustomedFileStats = require('../fileSystem/CustomedFileStats');
 const isNonEmptyArray = require('../variableType/isNonEmptyArray');
 const parseDataToSaveFormat = require('./parseDataToSaveFormat');
 const {hashForUniqueId} = require('../crypto');
+const jsonStringifyFormatted = ('../json/jsonStringifyFormatted');
 
 
 /* current loaded project (singleton) */
@@ -423,7 +424,7 @@ class ProjectFile {
     });
 
     // write project json file
-    const jsonForSaveStr = JSON.stringify(jsonForSave);
+    const jsonForSaveStr = jsonStringifyFormatted(jsonForSave);
     const tempJsonPath = this.tempProjectJsonFilePath;
     await fileSystem.writeFilePromise(tempJsonPath, jsonForSaveStr);
     console.log(`saveProjectToLocal - saveProjectToLocalDetail: JSON file saved in ${tempJsonPath}`);

@@ -1,11 +1,11 @@
-import React, {Component, Fragment} from 'react';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import React, {Component} from 'react';
+// import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
-import iconTranslate from 'media/icons/translate.svg';
-import iconRotate from 'media/icons/rotate.svg';
-import iconScale from 'media/icons/scale.svg';
+// import iconTranslate from 'media/icons/translate.svg';
+// import iconRotate from 'media/icons/rotate.svg';
+// import iconScale from 'media/icons/scale.svg';
 
-import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/languageContext';
+import {LanguageContextConsumer} from 'globals/contexts/locale/languageContext';
 
 import './transformMode.css';
 

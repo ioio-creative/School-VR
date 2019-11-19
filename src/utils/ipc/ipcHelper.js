@@ -1,4 +1,5 @@
 import isFunction from 'utils/variableType/isFunction';
+import promisify from 'utils/js/myPromisify';
 
 
 const electron = window.require ? window.require('electron') : null;
@@ -103,6 +104,8 @@ function getAppData(callBack) {
 function getMacAddress(callBack) {
   generalIpcCall('getMacAddress', callBack);
 }
+
+const getMacAddressPromise = promisify(getMacAddress);
 
 /* end of network interfaces */
 
@@ -334,11 +337,25 @@ function getCustomizedAppData(callBack) {
   generalIpcCall('getCustomizedAppData', callBack);
 }
 
-function setCustomizedAppData(stringifiedAppDataObj, callBack) {
+function setCustomizedAppData(appDataObjStr, callBack) {
   generalIpcCall('setCustomizedAppData', callBack, {
-    stringifiedAppDataObj: stringifiedAppDataObj
+    appDataObjStr: appDataObjStr
   });
 }
+
+function checkIdentity(callBack) {
+  generalIpcCall('checkIdentity', callBack);
+}
+
+const checkIdentityPromise = promisify(checkIdentity);
+
+function setLicenseKey(licenseKey, callBack) {
+  generalIpcCall('setLicenseKey', callBack, {
+    licenseKey: licenseKey
+  });
+}
+
+const setLicenseKeyPromise = promisify(setLicenseKey);
 
 /* end of app data */
 
@@ -356,6 +373,7 @@ export default {
 
   // network interfaces
   getMacAddress,
+  getMacAddressPromise,
 
   // shell
   shellOpenItem,
@@ -411,5 +429,9 @@ export default {
 
   // customized app data
   getCustomizedAppData,
-  setCustomizedAppData
+  setCustomizedAppData,
+  checkIdentity,
+  checkIdentityPromise,
+  setLicenseKey,
+  setLicenseKeyPromise
 };

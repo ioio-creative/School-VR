@@ -18,7 +18,7 @@ import asyncLoadingComponent from 'components/asyncLoadingComponent';
 // import PresenterPage from 'pages/aframeEditor/presenterPage';
 
 import {SceneContextProvider} from 'globals/contexts/sceneContext';
-import {LanguageContextProvider} from 'globals/contexts/languageContext';
+import {LanguageContextProvider} from 'globals/contexts/locale/languageContext';
 
 import './App.css';
 
@@ -95,6 +95,7 @@ class App extends Component {
 
       authenticatePromise()
         .then((isAuthenticated) => {
+          console.log('isAuthenticated:', isAuthenticated);
           this.setState({
             isAuthenticationDone: true
           });

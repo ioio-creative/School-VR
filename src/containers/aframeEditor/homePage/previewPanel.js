@@ -10,7 +10,7 @@ import React, {Component, Fragment} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 import {withSceneContext} from 'globals/contexts/sceneContext';
-import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/languageContext';
+import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/locale/languageContext';
 
 import {TweenMax} from 'gsap';
 // import {SortableContainer, SortableElement} from 'react-sortable-hoc';

@@ -16,8 +16,7 @@ import ACamera from 'utils/aframeEditor/aCamera';
 import {TimelineMax, TweenMax, Power0} from 'gsap';
 
 import {mediaType} from 'globals/config';
-import localizedData from 'locales/data';
-import {globalLanguage} from 'globals/contexts/languageContext';
+import {getLocalizedDataSet} from 'globals/contexts/locale/languageContext';
 
 const mergeJSON = require('deepmerge').default;
 const Events = require('vendor/Events.js');
@@ -264,7 +263,7 @@ class SceneContextProvider extends Component {
               type: "a-camera",
               id: cameraId,
               el: cameraEl,
-              name: localizedData[globalLanguage.code][cameraModel._messageId],  //"Camera",
+              name: getLocalizedDataSet()[cameraModel._messageId],  //"Camera",
               timelines: [],
               components: {
                 id: cameraId,
@@ -1103,13 +1102,13 @@ class SceneContextProvider extends Component {
   }
 
   addNewEntity(type) {
-    const state = this.state;
+    //const state = this.state;
     const objectModel = new entityModel[type];
     const elementId = uuid();
     const newElement = {
       type: type,
       id: elementId,
-      name: localizedData[globalLanguage.code][objectModel._messageId],  //type.split('-')[1],
+      name: getLocalizedDataSet()[objectModel._messageId],  //type.split('-')[1],
       element: 'a-entity',
       // components: {
       //   id: elementId,

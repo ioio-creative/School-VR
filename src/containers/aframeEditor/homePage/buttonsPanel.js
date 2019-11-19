@@ -9,7 +9,7 @@ import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 
 import {withSceneContext} from 'globals/contexts/sceneContext';
-import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/languageContext';
+import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/locale/languageContext';
 
 // import * as btns from 'containers/panelItem/editorFunctions';
 // import * as entityFunction from 'utils/deleted-aFrameEntities';

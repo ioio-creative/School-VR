@@ -1,5 +1,6 @@
 // https://www.npmjs.com/package/macaddress
 const macaddress = require('macaddress');
+const {promisify} = require('util');
 
 const getMacAddressHelper = {
   one: macaddress.one,
@@ -7,4 +8,12 @@ const getMacAddressHelper = {
   networkInterfaces: macaddress.networkInterfaces
 };
 
-module.exports = getMacAddressHelper;
+const getMacAddressPromiseHelper = {};
+Object.keys(getMacAddressHelper).forEach((key) => {
+  getMacAddressPromiseHelper[key] = promisify(getMacAddressHelper[key]);
+});
+
+module.exports = {
+  getMacAddressHelper,
+  getMacAddressPromiseHelper
+};

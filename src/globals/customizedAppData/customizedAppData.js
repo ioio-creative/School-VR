@@ -1,5 +1,6 @@
 import ipcHelper from 'utils/ipc/ipcHelper';
 import shallowMergeObjects from 'utils/js/shallowMergeObjects';
+import promisify from 'utils/js/myPromisify';
 
 let customizedAppDataObj;
 
@@ -20,6 +21,8 @@ const getCustomizedAppDataAsync = callBack => {
   });
 };
 
+const getCustomizedAppDataPromise = promisify(getCustomizedAppDataAsync);
+
 const setCustomizedAppDataAsync = (dataObj, callBack) => {
   if (!customizedAppDataObj) {
     customizedAppDataObj = dataObj;
@@ -27,8 +30,8 @@ const setCustomizedAppDataAsync = (dataObj, callBack) => {
     customizedAppDataObj = shallowMergeObjects(customizedAppDataObj, dataObj);
   }
 
-  const stringifiedAppDataObj = JSON.stringify(customizedAppDataObj);
-  ipcHelper.setCustomizedAppData(stringifiedAppDataObj, (err) => {
+  const appDataObjStr = JSON.stringify(customizedAppDataObj);
+  ipcHelper.setCustomizedAppData(appDataObjStr, (err) => {
     if (err) {
       callBack(err);
       return;
@@ -38,34 +41,12 @@ const setCustomizedAppDataAsync = (dataObj, callBack) => {
   });
 };
 
+const setCustomizedAppDataPromise = promisify(setCustomizedAppDataAsync);
 
-const getLicenseKeyAsync = callBack => {
-  getCustomizedAppDataAsync((err, data) => {
-    if (err || !data) {
-      // silence error
-      callBack(null, null);
-      return;
-    }
-
-    callBack(null, data.licenseKey);
-  })
-}
-
-const setLicenseKeyAsync = (licenseKey, callBack) => {
-  setCustomizedAppDataAsync({ licenseKey }, (err) => {
-    if (err) {
-      callBack(err, null);
-      return;
-    }
-
-    callBack(null);
-  })
-}
 
 export {
   getCustomizedAppDataAsync,
+  getCustomizedAppDataPromise,
   setCustomizedAppDataAsync,
-
-  getLicenseKeyAsync,
-  setLicenseKeyAsync,
+  setCustomizedAppDataPromise
 }

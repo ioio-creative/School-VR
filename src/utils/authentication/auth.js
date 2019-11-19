@@ -1,32 +1,18 @@
 import config from 'globals/config';
-import {getLicenseKeyAsync} from 'globals/customizedAppData/customizedAppData';
 import ipcHelper from 'utils/ipc/ipcHelper';
-import {promisifyForFuncThatOnlyHasCallBackAsArgument} from 'utils/js/myPromisify';
 
 // https://tylermcginnis.com/react-router-protected-routes-authentication/
 let isAuthenticated = false;
 let currentMacAddress;
-let currentLicenseKey;
-
-const ipcHelperGetMacAddressPromise = promisifyForFuncThatOnlyHasCallBackAsArgument(ipcHelper.getMacAddress);
 
 const getMacAddressPromise = async _ => {
   if (!currentMacAddress) {
-    currentMacAddress = await ipcHelperGetMacAddressPromise();
+    currentMacAddress = await ipcHelper.getMacAddressPromise();
   }
   return currentMacAddress;
 };
 
-const getLicenseKeyFromCustomizedAppDataPromise = promisifyForFuncThatOnlyHasCallBackAsArgument(getLicenseKeyAsync);
-
-const getLicenseKeyPromise = async _ => {
-  if (!currentLicenseKey) {
-    currentLicenseKey = await getLicenseKeyFromCustomizedAppDataPromise();
-  }
-  return currentLicenseKey;
-}
-
-const checkMacAddressAndLicenseKeyPromise = (mac, licenseKey) => {
+const checkMacAddressAndLicenseKeyOnCloudPromise = (mac, licenseKey) => {
   return new Promise((resolve, reject) => {
     setTimeout(_ => {
       const isIdentityValid = ['f8:28:19:ef:23:c3', '18:a6:f7:0d:fc:89'].includes(mac) && licenseKey === 'askmeioio';
@@ -35,22 +21,39 @@ const checkMacAddressAndLicenseKeyPromise = (mac, licenseKey) => {
   });
 }
 
+// return boolean indicating isIdentityValid
 const checkIdentityPromise = async (licenseKeyEntered) => {
-  let isIdentityValid = false;
-
+  // if it's electron app, return true
   if (!config.isElectronApp) {
-    isIdentityValid = true;
-    return isIdentityValid;
+    return true;
   }
 
-  const macAddressPromise = getMacAddressPromise();
-  const licenseKeyPromise = licenseKeyEntered ?
-    new Promise((resolve, reject) => { resolve(licenseKeyEntered); }) : getLicenseKeyPromise();
+  // check identity by checking local files
+  const { isIdentityValid: isIdentityValidCheckResultFromLocalFiles } = await ipcHelper.checkIdentityPromise();
 
-  const [macAddressData, licenseKey] = await Promise.all([macAddressPromise, licenseKeyPromise]);
-  const macAddress = macAddressData.mac;
+  // if local file check is positive, return true
+  if (isIdentityValidCheckResultFromLocalFiles) {
+    return true;
+  }
 
-  return await checkMacAddressAndLicenseKeyPromise(macAddress, licenseKey);
+  // if local file check is negative, have to check on cloud
+  // by sending licenseKeyEntered and macAddress to cloud api
+
+  // if no license key is input, return false
+  if (!licenseKeyEntered) {
+    return false;
+  }
+
+  const { mac: macAddress } = await getMacAddressPromise();
+
+  const isIdentityValidCheckResultFromCloud = await checkMacAddressAndLicenseKeyOnCloudPromise(macAddress, licenseKeyEntered);
+
+  // save license key to local files,
+  // set empty string meaning erasing license key record in local files
+  let licenseKeyToSetToLocalFile = isIdentityValidCheckResultFromCloud ? licenseKeyEntered : '';
+  ipcHelper.setLicenseKeyPromise(licenseKeyToSetToLocalFile);
+
+  return isIdentityValidCheckResultFromCloud;
 }
 
 const authenticatePromise = async _ => {
