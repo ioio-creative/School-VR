@@ -54,10 +54,6 @@ class ProjectItem extends Component {
     }
   }
 
-  saveProject = _ => {
-
-  }
-
   /* end of methods */
 
 

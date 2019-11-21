@@ -1,5 +1,6 @@
 import config from 'globals/config';
 import ipcHelper from 'utils/ipc/ipcHelper';
+import {postAuthenticateLicensePromise} from 'utils/apis/authApi';
 
 // https://tylermcginnis.com/react-router-protected-routes-authentication/
 let isAuthenticated = false;
@@ -12,13 +13,17 @@ const getMacAddressPromise = async _ => {
   return currentMacAddress;
 };
 
-const checkMacAddressAndLicenseKeyOnCloudPromise = (mac, licenseKey) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(_ => {
-      const isIdentityValid = ['f8:28:19:ef:23:c3', '18:a6:f7:0d:fc:89'].includes(mac) && licenseKey === 'askmeioio';
-      resolve(isIdentityValid);
-    }, 1000);  // fake async
-  });
+const checkLicenseKeyAndMacAddressOnCloudPromise = async (licenseKey, mac) => {
+  try {
+    const { isAuthenticated: isIdentityValid } = await postAuthenticateLicensePromise(licenseKey, mac);
+    return isIdentityValid;
+  } catch (err) {
+    console.error('checkLicenseKeyAndMacAddressOnCloudPromise Error:');
+    console.error(err);
+    // silence error
+    // reject
+    return false;
+  }
 }
 
 // return boolean indicating isIdentityValid
@@ -46,7 +51,7 @@ const checkIdentityPromise = async (licenseKeyEntered) => {
 
   const { mac: macAddress } = await getMacAddressPromise();
 
-  const isIdentityValidCheckResultFromCloud = await checkMacAddressAndLicenseKeyOnCloudPromise(macAddress, licenseKeyEntered);
+  const isIdentityValidCheckResultFromCloud = await checkLicenseKeyAndMacAddressOnCloudPromise(licenseKeyEntered, macAddress);
 
   // save license key to local files,
   // set empty string meaning erasing license key record in local files
@@ -66,6 +71,7 @@ const authenticateWithLicenseKeyPromise = async (licenseKeyEntered) => {
   return isAuthenticated;
 };
 
+// no use currently
 const signoutPromise = new Promise((resolve, reject) => {
   isAuthenticated = false;
   setTimeout(_ => {
@@ -80,6 +86,6 @@ const getIsAuthenticated = _ => {
 export {
   authenticatePromise,
   authenticateWithLicenseKeyPromise,
-  signoutPromise,
+  signoutPromise,  // no use currently
   getIsAuthenticated
 };
