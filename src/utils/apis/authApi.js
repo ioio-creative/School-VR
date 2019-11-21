@@ -1,7 +1,7 @@
 import promisify from 'utils/js/myPromisify';
 
-
-const authUrlRoot = 'http://localhost:59825';
+//const authUrlRoot = 'http://localhost:59825';
+const authUrlRoot = 'https://605wk4ih1m.execute-api.ap-east-1.amazonaws.com/Prod/';
 const authUrl = `${authUrlRoot}/api/auth/authenticatelicense`;
 const authUrlAuthCode = 'ZpQrkvmSH5jgfpqPM3F9MCTc';
 
