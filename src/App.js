@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
 import {Switch, Route, Redirect} from 'react-router-dom';
 
+import DefaultLoading from 'components/loading/defaultLoading';
+
 import PrivateRoute from 'components/router/privateRoute';
 import {authenticatePromise} from 'utils/authentication/auth';
 
@@ -12,7 +14,7 @@ import config, {setAppData, setParamsReadFromExternalConfig} from 'globals/confi
 import ipcHelper from 'utils/ipc/ipcHelper';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 
-import asyncLoadingComponent from 'components/asyncLoadingComponent';
+import asyncLoadingComponent from 'components/loading/asyncLoadingComponent';
 
 // import EditorPage from 'pages/aframeEditor/editorPage';
 // import PresenterPage from 'pages/aframeEditor/presenterPage';
@@ -108,7 +110,7 @@ class App extends Component {
   render() {
     const state = this.state;
     return !(state.isGotAppData && state.isGotParamsReadFromExternalConfig && state.isAuthenticationDone) ?
-      <div>Loading...</div>
+      <DefaultLoading />
       :
       (
         <LanguageContextProvider>

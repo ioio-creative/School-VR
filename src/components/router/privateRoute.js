@@ -2,6 +2,8 @@ import React from 'react';
 import {Route, Redirect} from 'react-router-dom';
 import smalltalk from 'smalltalk';
 
+import DefaultLoading from 'components/loading/defaultLoading';
+
 import {getLocalizedDataSet} from 'globals/contexts/locale/languageContext';
 
 //import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
@@ -100,7 +102,7 @@ class PrivateRoute extends React.Component {
     if (isAuthenticated === true) {
       return (someProps) => <Component {...someProps} />;
     } else {
-      return (someProps) => <div>Loading...</div>;
+      return (someProps) => <DefaultLoading />;
     }
   }
 
