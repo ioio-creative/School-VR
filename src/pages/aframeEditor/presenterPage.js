@@ -45,23 +45,23 @@ const uuid = require('uuid/v1');
 function PresenterPageMenu(props) {
   const {
     messages,
-    changeLanguageFuncs,
+    changeLanguagePromises,
 
     handleHomeButtonClick,
     handleOpenProjectButtonClick,
     handleExitButtonClick
   } = props;
 
-  function handleBtnEnglishClick() {
-    changeLanguageFuncs[languages.english.code]();
+  async function handleBtnEnglishClickPromise() {
+    await changeLanguagePromises[languages.english.code]();
   }
 
-  function handleBtnTraditionalChineseClick() {
-    changeLanguageFuncs[languages.traditionalChinese.code]();
+  async function handleBtnTraditionalChineseClickPromise() {
+    await changeLanguagePromises[languages.traditionalChinese.code]();
   }
 
   return (
-    <MenuComponent 
+    <MenuComponent
       // projectName="Untitled_1"
       menuButtons={[
         {
@@ -71,7 +71,7 @@ function PresenterPageMenu(props) {
             {
                 label: messages['Menu.File.HomeLabel'],
                 disabled: false,
-                onClick: handleHomeButtonClick                                      
+                onClick: handleHomeButtonClick
               },
               {
                 label: '-'
@@ -96,11 +96,11 @@ function PresenterPageMenu(props) {
           children: [
             {
               label: messages["Menu.Language.English"],
-              onClick: handleBtnEnglishClick
+              onClick: handleBtnEnglishClickPromise
             },
             {
               label: messages["Menu.Language.TraditionalChinese"],
-              onClick: handleBtnTraditionalChineseClick
+              onClick: handleBtnTraditionalChineseClickPromise
             }
           ]
         }
@@ -112,7 +112,7 @@ function PresenterPageMenu(props) {
 class PresenterPage extends Component {
   constructor(props) {
     super(props);
-    
+
     this.state = {
       socket: null,
       localIps: [],
@@ -120,7 +120,7 @@ class PresenterPage extends Component {
       loadedProjectFilePath: '',
       showUi: true
     };
-    
+
     [
       'onEditorLoad',
       'handleHomeButtonClick',
@@ -145,8 +145,8 @@ class PresenterPage extends Component {
     const sceneContext = props.sceneContext;
     this.editor = new Editor();
     Events.on('editor-load', this.onEditorLoad)
-    sceneContext.updateEditor(this.editor);    
-    
+    sceneContext.updateEditor(this.editor);
+
     ipcHelper.getPresentationServerInfo((err, data) => {
       if (err) {
         handleErrorWithUiDefault(err);
@@ -177,14 +177,14 @@ class PresenterPage extends Component {
           interface: interfaceName,
           ip: data.interfaceIpMap[interfaceName]
         }
-      });      
+      });
       this.setState({
         localIps: interfaceIpArr,
         port: presentationServerPort,
         socket: socket
       });
     });
-    
+
     Mousetrap.bind('left', (e) => {
       e.preventDefault();
       // get current slide
@@ -232,13 +232,13 @@ class PresenterPage extends Component {
 
   componentWillUnmount() {
     this.editor = null;
-    // ipcHelper.closeWebServer((err) => {    
+    // ipcHelper.closeWebServer((err) => {
     //   if (err) {
     //     handleErrorWithUiDefault(err);
     //     return;
-    //   }      
+    //   }
     // });
-    
+
     const sceneContext = this.props.sceneContext;
     sceneContext.setProjectName('');
     Events.removeListener('editor-load', this.onEditorLoad)
@@ -284,7 +284,7 @@ class PresenterPage extends Component {
       this.loadProject(filePaths[0]);
     });
   }
-  
+
   handleExitButtonClick(event) {
     ipcHelper.closeWindow();
   }
@@ -296,36 +296,36 @@ class PresenterPage extends Component {
 
   loadProject(projectFilePath) {
     const state = this.state;
-    const sceneContext = this.props.sceneContext;    
-  
+    const sceneContext = this.props.sceneContext;
+
     this.setState({
       loadedProjectFilePath: projectFilePath
     });
-    
+
     ipcHelper.openWebServerAndLoadProject(projectFilePath, (err, data) => {
       // ipcHelper.loadProjectByProjectFilePath(projectFilePath, (err, data) => {
       if (err) {
         handleErrorWithUiDefault(err);
-        return;                         
-      }      
-      
-      const projectJsonData = data.projectJson;      
+        return;
+      }
+
+      const projectJsonData = data.projectJson;
       //console.log(projectJsonData);
 
       // send a copy to server
       if (state.socket) {
         // for the following projectJsonData, the assetsList's paths all are changed to web server relative path
-        const newProjectJsonData = this.getNewSceneDataWithAssetsListChangedToUsingRelativePaths(projectJsonData);        
+        const newProjectJsonData = this.getNewSceneDataWithAssetsListChangedToUsingRelativePaths(projectJsonData);
         state.socket.emit('useSceneData', newProjectJsonData);
       }
-      sceneContext.loadProject(projectJsonData);   
+      sceneContext.loadProject(projectJsonData);
     });
   }
 
   // TODO: poorly written (too many cross-references to ProjectFile class)
   // for web server presentation, use asset's relativeSrc to replace src
   getNewSceneDataWithAssetsListChangedToUsingRelativePaths(sceneData) {
-    const projectJson = jsonCopy(sceneData);           
+    const projectJson = jsonCopy(sceneData);
     const assetsList = projectJson.assetsList;
     assetsList.forEach(asset => {
       asset.src = asset.relativeSrc;
@@ -381,10 +381,10 @@ class PresenterPage extends Component {
           } /> */}
         {/* <SystemPanel projectName={this.projectName} /> */}
         <LanguageContextConsumer render={
-          ({ messages, changeLanguageFuncs }) => (
+          ({ messages, changeLanguagePromises }) => (
             <PresenterPageMenu
               messages={messages}
-              changeLanguageFuncs={changeLanguageFuncs}
+              changeLanguagePromises={changeLanguagePromises}
 
               handleHomeButtonClick={this.handleHomeButtonClick}
               handleOpenProjectButtonClick={this.handleOpenProjectButtonClick}
@@ -470,7 +470,7 @@ class PresenterPage extends Component {
                 }
               }}
             >
-              <FontAwesomeIcon icon="play"/>                           
+              <FontAwesomeIcon icon="play"/>
             </div>
             <div className={`button-nextSlide${currentSlideIdx === slidesList.length - 1? ' disabled': ''}`} onClick={() => {
                 if (nextSlide) {
@@ -486,7 +486,7 @@ class PresenterPage extends Component {
                   }
                 }
               }}>
-              <FontAwesomeIcon icon="angle-right"/>            
+              <FontAwesomeIcon icon="angle-right"/>
             </div>
           </div>
           <div className="buttons-group">
@@ -513,7 +513,7 @@ class PresenterPage extends Component {
                   }
                 </select>
               )
-            } />            
+            } />
           </div>
           <div className="buttons-group">
             <Link to={routes.editorWithProjectFilePathQuery(projectFilePathToLoad)}>

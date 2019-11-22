@@ -1,5 +1,5 @@
-import queryString from 'query-string';
+import getSearchObjectFromQueryString from './getSearchObjectFromQueryString';
 
 export default function getSearchObjectFromLocation(location) {
-  return queryString.parse(location.search);
+  return getSearchObjectFromQueryString(location.search);
 };

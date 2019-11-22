@@ -2,8 +2,8 @@ import React, {Component} from 'react';
 // import SystemPanel from 'containers/aframeEditor/homePage/systemPanel';
 import {withRouter, Prompt} from 'react-router-dom';
 
-import {withSceneContext, SceneContextProvider} from 'globals/contexts/sceneContext';
-import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/locale/languageContext';
+import {withSceneContext} from 'globals/contexts/sceneContext';
+import {LanguageContextConsumer} from 'globals/contexts/locale/languageContext';
 import {languages} from 'globals/config';
 
 import MenuComponent from 'components/menuComponent';
@@ -19,12 +19,10 @@ import Editor from 'vendor/editor.js';
 // import {addEntityAutoType} from 'utils/aFrameEntities';
 // import {roundTo, jsonCopy} from 'globals/helperfunctions';
 // import {TweenMax, TimelineMax, Linear} from 'gsap';
-import {addEntityAutoType} from 'utils/aframeEditor/aFrameEntities';
-import {roundTo, jsonCopy} from 'utils/aframeEditor/helperfunctions';
-import {TweenMax, TimelineMax, Linear} from 'gsap';
+// import {addEntityAutoType} from 'utils/aframeEditor/aFrameEntities';
+// import {roundTo, jsonCopy} from 'utils/aframeEditor/helperfunctions';
+// import {TweenMax, TimelineMax, Linear} from 'gsap';
 
-import isStrAnInt from 'utils/number/isStrAnInt';
-import stricterParseInt from 'utils/number/stricterParseInt';
 import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
@@ -51,7 +49,7 @@ function EditorPageMenu(props) {
     sceneContext,
 
     messages,
-    changeLanguageFuncs,
+    changeLanguagePromises,
 
     handleHomeButtonClick,
     handleNewProjectButtonClick,
@@ -63,13 +61,13 @@ function EditorPageMenu(props) {
     handleRedoButtonClick
   } = props;
 
-  function handleBtnEnglishClick() {
-    changeLanguageFuncs[languages.english.code]();
+  async function handleBtnEnglishClickPromise() {
+    await changeLanguagePromises[languages.english.code]();
   }
 
-  function handleBtnTraditionalChineseClick() {
-    changeLanguageFuncs[languages.traditionalChinese.code]();
-  } 
+  async function handleBtnTraditionalChineseClickPromise() {
+    await changeLanguagePromises[languages.traditionalChinese.code]();
+  }
 
   const menuButtons = [
     {
@@ -79,7 +77,7 @@ function EditorPageMenu(props) {
         {
           label: messages["Menu.File.HomeLabel"],
           disabled: false,
-          onClick: handleHomeButtonClick                                      
+          onClick: handleHomeButtonClick
         },
         {
           label: '-'
@@ -141,17 +139,17 @@ function EditorPageMenu(props) {
       children: [
         {
           label: messages["Menu.Language.English"],
-          onClick: handleBtnEnglishClick
+          onClick: handleBtnEnglishClickPromise
         },
         {
           label: messages["Menu.Language.TraditionalChinese"],
-          onClick: handleBtnTraditionalChineseClick
+          onClick: handleBtnTraditionalChineseClickPromise
         }
       ]
     }
   );
-  return (      
-    <MenuComponent 
+  return (
+    <MenuComponent
       // projectName="Untitled_1"
       menuButtons={menuButtons}
     />
@@ -164,7 +162,7 @@ class EditorPage extends Component {
     super(props);
 
     // variables
-    this.inited = false;    
+    this.inited = false;
 
     // state
     this.state = {
@@ -172,7 +170,7 @@ class EditorPage extends Component {
       loadedProjectFilePath: ''
     };
 
-    // bind methods    
+    // bind methods
     [
       'newProject',
       'loadProject',
@@ -200,10 +198,10 @@ class EditorPage extends Component {
     Events.on('editor-load', this.onEditorLoad);
     this.editor = new Editor();
     this.inited = true;
-    // 
+    //
     // window.onbeforeunload = function() {
     //   return 'hello?';
-    // };    
+    // };
   }
 
   componentWillUnmount() {
@@ -215,7 +213,7 @@ class EditorPage extends Component {
 
   /* end of react lifecycles */
 
-  
+
   /* methods */
 
   onEditorLoad(editor) {
@@ -228,20 +226,20 @@ class EditorPage extends Component {
     if (!projectFilePathToLoad) {
       this.newProject();
     } else {
-      this.loadProject(projectFilePathToLoad);      
-    }    
+      this.loadProject(projectFilePathToLoad);
+    }
   }
 
   newProject() {
     //console.log('new');
-                    
+
     // test open file with user defined extension
     // const fileDialog = document.createElement('input');
     // fileDialog.type = 'file';
     // fileDialog.multiple = true;
     // fileDialog.accept = ['image/x-png','image/gif'];
     // fileDialog.click();
-    
+
     this.setState({
       loadedProjectFilePath: ''
     });
@@ -249,18 +247,18 @@ class EditorPage extends Component {
     this.props.sceneContext.newProject();
   }
 
-  loadProject(projectFilePath) {    
+  loadProject(projectFilePath) {
     ipcHelper.loadProjectByProjectFilePath(projectFilePath, (err, data) => {
       if (err) {
         handleErrorWithUiDefault(err);
-        return;                         
-      }      
+        return;
+      }
       this.setState({
         loadedProjectFilePath: projectFilePath
       });
       const projectJsonData = data.projectJson;
       //console.log(projectJsonData);
-      this.props.sceneContext.loadProject(projectJsonData);   
+      this.props.sceneContext.loadProject(projectJsonData);
     });
   }
 
@@ -270,11 +268,11 @@ class EditorPage extends Component {
     }
 
     const sceneContext = this.props.sceneContext;
-    let {entitiesList, assetsList} = sceneContext.saveProject();    
+    let {entitiesList, assetsList} = sceneContext.saveProject();
     //const projectName = fileHelper.getFileNameWithoutExtension(projectFilePath);
     //console.log(projectName, entitiesList, assetsList);
     // TODO:
-    //entitiesList.projectName = projectName;    
+    //entitiesList.projectName = projectName;
     ipcHelper.saveProject(projectFilePath, entitiesList, assetsList, (err) => {
       if (err) {
         handleErrorWithUiDefault(err);
@@ -287,10 +285,10 @@ class EditorPage extends Component {
         // TODO: is the following good enough?
 
         /**
-         * !!!Important!!!: 
+         * !!!Important!!!:
          * we run setState({loadedProjectFilePath}) and sceneContext.setProjectName()
          * instead of loadProject() because loadProject takes time
-         * 
+         *
          * also using loadProject() would produce errors in sceneContext's addAsset() method,
          * which would not update assetsList items (src, etc.) if asset has same id
          */
@@ -304,7 +302,7 @@ class EditorPage extends Component {
         const projectName = fileHelper.getFileNameWithoutExtension(projectFilePath);
         sceneContext.setProjectName(projectName);
       }
-      
+
       const projectName = fileHelper.getFileNameWithoutExtension(projectFilePath);
       alert(`Project ${projectName} saved!`);
     });
@@ -347,12 +345,12 @@ class EditorPage extends Component {
       if (!isNonEmptyArray(filePaths)) {
         return;
       }
-      
+
       this.loadProject(filePaths[0]);
     });
   }
 
-  handleSaveProjectButtonClick(event) {    
+  handleSaveProjectButtonClick(event) {
     ipcHelper.isCurrentLoadedProject(this.state.loadedProjectFilePath, (err, data) => {
       if (err) {
         handleErrorWithUiDefault(err);
@@ -365,9 +363,9 @@ class EditorPage extends Component {
       } else {
         this.saveProjectAs();
       }
-    });    
+    });
   }
-  
+
   handleSaveAsProjectButtonClick(event) {
     this.saveProjectAs();
   }
@@ -391,7 +389,7 @@ class EditorPage extends Component {
     const props = this.props;
     const state = this.state;
     const sceneContext = props.sceneContext;
-    
+
     return (
       // <SceneContextProvider>
         <div id="editor" className={sceneContext.editor && sceneContext.editor.opened? 'editing': 'viewing'}>
@@ -402,15 +400,15 @@ class EditorPage extends Component {
                 message={messages['Prompt.UnsavedWorkMessage']}
               />
             )
-          } />          
+          } />
           {/* <SystemPanel projectName={this.projectName} /> */}
           <LanguageContextConsumer render={
-            ({ messages, changeLanguageFuncs }) => (
-               <EditorPageMenu
+            ({ messages, changeLanguagePromises }) => (
+              <EditorPageMenu
                 sceneContext={sceneContext}
 
                 messages={messages}
-                changeLanguageFuncs={changeLanguageFuncs}
+                changeLanguagePromises={changeLanguagePromises}
 
                 handleHomeButtonClick={this.handleHomeButtonClick}
                 handleNewProjectButtonClick={this.handleNewProjectButtonClick}
@@ -422,7 +420,7 @@ class EditorPage extends Component {
                 handleRedoButtonClick={this.handleRedoButtonClick}
               />
             )
-          } />         
+          } />
           <ButtonsPanel currentLoadedProjectPath={state.loadedProjectFilePath} />
           <AFramePanel user-mode="editor" />
           <SlidesPanel isEditing={sceneContext.editor && sceneContext.editor.opened} />

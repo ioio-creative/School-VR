@@ -1,5 +1,5 @@
-import queryString from 'query-string';
+import getSearchObjectFromLocation from './getSearchObjectFromLocation';
 
 export default function getSearchObjectFromHistory(history) {
-  return queryString.parse(history.location.search);
+  return getSearchObjectFromLocation(history.location);
 };

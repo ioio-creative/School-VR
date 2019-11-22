@@ -1,6 +1,7 @@
 import React from 'react';
 
-import config, {languages} from 'globals/config';
+import {languages, getLanguageFromLanguageCode} from 'globals/config';
+import {setCustomizedAppDataLangCodePromise} from 'globals/customizedAppData/customizedAppData';
 /**
   Our translated strings
   !!! Important !!!
@@ -19,12 +20,17 @@ const changeHtmlLang = (newCode) => {
   htmlElement.setAttribute('lang', newCode);
 }
 
-const changeGloballanguage = (newLanguage) => {
+const changeGlobalLanguagePromise = async (newLanguage, isRequireSaveLanguageToLocalFile = true) => {
   globalLanguage = newLanguage;
   changeHtmlLang(newLanguage.code);
-}
+  if (isRequireSaveLanguageToLocalFile) {
+    await setCustomizedAppDataLangCodePromise(newLanguage.code);
+  }
+};
 
-changeGloballanguage(config.defaultLanguage);
+const changeGlobalLanguageByCodePromise = async (newLanguageCode, isRequireSaveLanguageToLocalFile = true) => {
+  await changeGlobalLanguagePromise(getLanguageFromLanguageCode(newLanguageCode), isRequireSaveLanguageToLocalFile);
+};
 
 const getLocalizedDataSet = _ => {
   return localizedData[globalLanguage.code];
@@ -42,22 +48,20 @@ class LanguageContextProvider extends React.Component {
     this.state = {
       language: globalLanguage
     };
-    [
-      'changeLanguageContext',
-    ].forEach(methodName => {
-      this[methodName] = this[methodName].bind(this);
-    });
 
-    this.changeLanguageFuncs = {};
+    this.changeLanguagePromises = {};
     [languages.english, languages.traditionalChinese].forEach(lang => {
-      this.changeLanguageFuncs[lang.code] = _ => this.changeLanguageContext(lang);
+      this.changeLanguagePromises[lang.code] = async _ => await this.changeLanguageContextPromise(lang, true);
     });
   }
 
-  changeLanguageContext(newLanguage) {
+  changeLanguageContextPromise = async (newLanguage, isRequireSaveLanguageToLocalFile = true) => {
     if (this.state.language.code !== newLanguage.code) {
-      changeGloballanguage(newLanguage);
       //loadGlobalLanugageFont();
+
+      if (isRequireSaveLanguageToLocalFile) {
+        await changeGlobalLanguagePromise(newLanguage);
+      }
 
       this.setState({
         language: globalLanguage
@@ -66,16 +70,20 @@ class LanguageContextProvider extends React.Component {
   }
 
   render() {
-    const props = this.props;
-    const state = this.state;
+    const {
+      children
+    } = this.props;
+    const {
+      language
+    } = this.state;   
     return (
       <LanguageContext.Provider
         value={{
-          language: state.language,
-          messages: localizedData[state.language.code],
-          changeLanguageFuncs: this.changeLanguageFuncs
+          language: language,
+          messages: localizedData[language.code],
+          changeLanguagePromises: this.changeLanguagePromises
         }}>
-        {props.children}
+        {children}
       </LanguageContext.Provider>
     );
   }
@@ -88,7 +96,7 @@ function LanguageContextConsumer(props) {
         return props.render({
           language: value.language,
           messages: value.messages,
-          changeLanguageFuncs: value.changeLanguageFuncs
+          changeLanguagePromises: value.changeLanguagePromises
         });
       }}
     </LanguageContext.Consumer>
@@ -120,6 +128,8 @@ function withLanguageContext(Component) {
 }
 
 export {
+  changeGlobalLanguagePromise,
+  changeGlobalLanguageByCodePromise,
   getLocalizedDataSet,
   LanguageContextProvider,
   LanguageContextConsumer,

@@ -334,12 +334,14 @@ function closeWebServer(callBack) {
 /* app data */
 
 function getCustomizedAppData(callBack) {
-  generalIpcCall('getCustomizedAppData', callBack);
+  generalIpcCall('getCustomizedAppData', (err, data) => {
+    callBack(err, data && data.appDataObjStr && JSON.parse(data.appDataObjStr));
+  });
 }
 
-function setCustomizedAppData(appDataObjStr, callBack) {
+function setCustomizedAppData(appDataObj, callBack) {
   generalIpcCall('setCustomizedAppData', callBack, {
-    appDataObjStr: appDataObjStr
+    appDataObjStr: JSON.stringify(appDataObj)
   });
 }
 

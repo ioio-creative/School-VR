@@ -24,7 +24,6 @@
     "opentype.js": "^1.1.0",
     "p-iteration": "^1.1.7",
     "path": "^0.12.7",
-    "query-string": "^6.4.2",
     "react": "^16.5.2",
     "react-color": "^2.17.3",
     "react-dom": "^16.5.2",

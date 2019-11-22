@@ -2,36 +2,24 @@ import ipcHelper from 'utils/ipc/ipcHelper';
 import shallowMergeObjects from 'utils/js/shallowMergeObjects';
 import promisify from 'utils/js/myPromisify';
 
-let customizedAppDataObj;
 
 const getCustomizedAppDataAsync = callBack => {
-  if (customizedAppDataObj) {
-    callBack(null, customizedAppDataObj);
-    return;
-  }
-
-  ipcHelper.getCustomizedAppData((err, data) => {
+  ipcHelper.getCustomizedAppData((err, appDataObj) => {
     if (err) {
       // silence error
       callBack(null, null);
       return;
     }
 
-    callBack(null, data);
+    callBack(null, appDataObj || {});
   });
 };
 
 const getCustomizedAppDataPromise = promisify(getCustomizedAppDataAsync);
 
-const setCustomizedAppDataAsync = (dataObj, callBack) => {
-  if (!customizedAppDataObj) {
-    customizedAppDataObj = dataObj;
-  } else {
-    customizedAppDataObj = shallowMergeObjects(customizedAppDataObj, dataObj);
-  }
 
-  const appDataObjStr = JSON.stringify(customizedAppDataObj);
-  ipcHelper.setCustomizedAppData(appDataObjStr, (err) => {
+const setCustomizedAppDataAsync = (dataObj, callBack) => {
+  ipcHelper.setCustomizedAppData(dataObj, (err) => {
     if (err) {
       callBack(err);
       return;
@@ -43,10 +31,19 @@ const setCustomizedAppDataAsync = (dataObj, callBack) => {
 
 const setCustomizedAppDataPromise = promisify(setCustomizedAppDataAsync);
 
+const setCustomizedAppDataLangCodeAsync = (langCode, callBack) => {
+  setCustomizedAppDataAsync({ langCode }, callBack);
+};
+
+const setCustomizedAppDataLangCodePromise = promisify(setCustomizedAppDataLangCodeAsync);
+
 
 export {
   getCustomizedAppDataAsync,
   getCustomizedAppDataPromise,
+
   setCustomizedAppDataAsync,
-  setCustomizedAppDataPromise
+  setCustomizedAppDataPromise,
+  setCustomizedAppDataLangCodeAsync,
+  setCustomizedAppDataLangCodePromise
 }

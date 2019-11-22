@@ -13,6 +13,7 @@ import {library} from '@fortawesome/fontawesome-svg-core'
 import config, {setAppData, setParamsReadFromExternalConfig} from 'globals/config';
 import ipcHelper from 'utils/ipc/ipcHelper';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
+import {getCustomizedAppDataPromise} from 'globals/customizedAppData/customizedAppData';
 
 import asyncLoadingComponent from 'components/loading/asyncLoadingComponent';
 
@@ -20,7 +21,7 @@ import asyncLoadingComponent from 'components/loading/asyncLoadingComponent';
 // import PresenterPage from 'pages/aframeEditor/presenterPage';
 
 import {SceneContextProvider} from 'globals/contexts/sceneContext';
-import {LanguageContextProvider} from 'globals/contexts/locale/languageContext';
+import {changeGlobalLanguageByCodePromise, LanguageContextProvider} from 'globals/contexts/locale/languageContext';
 
 import './App.css';
 
@@ -66,6 +67,7 @@ class App extends Component {
     this.state = {
       isGotAppData: this.isElectronApp ? false : true,
       isGotParamsReadFromExternalConfig: this.isElectronApp ? false : true,
+      isGotCustomizedAppData: this.isElectronApp ? false : true,
       isAuthenticationDone: false
     };
   }
@@ -73,6 +75,9 @@ class App extends Component {
     if (this.isElectronApp) {
       ipcHelper.getAppData((err, data) => {
         if (err) {
+          this.setState({
+            isGotAppData: true
+          });
           handleErrorWithUiDefault(err);
           return;
         }
@@ -85,6 +90,9 @@ class App extends Component {
 
       ipcHelper.getParamsFromExternalConfig((err, data) => {
         if (err) {
+          this.setState({
+            isGotParamsReadFromExternalConfig: true
+          });
           handleErrorWithUiDefault(err);
           return;
         }
@@ -95,21 +103,39 @@ class App extends Component {
         });
       });
 
+      getCustomizedAppDataPromise()
+        .then(async customizedAppData => {
+          const langCodeToUse = (customizedAppData && customizedAppData.langCode) || config.defaultLanguage.code;
+          console.log('langCodeToUse:', langCodeToUse);
+          await changeGlobalLanguageByCodePromise(langCodeToUse, false);
+        })
+        .catch(handleErrorWithUiDefault)
+        .finally(_ => {
+          this.setState({
+            isGotCustomizedAppData: true
+          });
+        })
+
       authenticatePromise()
         .then((isAuthenticated) => {
           console.log('isAuthenticated:', isAuthenticated);
+        })
+        .catch(handleErrorWithUiDefault)
+        .finally(_ => {
           this.setState({
             isAuthenticationDone: true
           });
-        })
-        .catch((err) => {
-          handleErrorWithUiDefault(err);
         });
     }
   }
   render() {
-    const state = this.state;
-    return !(state.isGotAppData && state.isGotParamsReadFromExternalConfig && state.isAuthenticationDone) ?
+    const {
+      isGotAppData,
+      isGotParamsReadFromExternalConfig,
+      isGotCustomizedAppData,
+      isAuthenticationDone
+    } = this.state;
+    return !(isGotAppData && isGotParamsReadFromExternalConfig && isGotCustomizedAppData && isAuthenticationDone) ?
       <DefaultLoading />
       :
       (

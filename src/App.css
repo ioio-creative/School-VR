@@ -3,7 +3,7 @@
 }
 html, body {
   /*
-  * display a transparent border when in electron 
+  * display a transparent border when in electron
   * the border is use for window resize
   * https://stackoverflow.com/questions/32894925/electron-resizing-a-frameless-window
   */
@@ -56,7 +56,7 @@ html, body {
   width: 100%;
   height: 2px;
   cursor: ns-resize;
-}  
+}
 #root .window-resizer.border-left {
   left: 0;
 }
@@ -99,4 +99,11 @@ html, body {
 #root .window-resizer.corner-bottom-right {
   right: 0;
   bottom: 0;
+}
+
+
+/* global constants */
+:root {
+  /* colors */
+  --appBgColor: #042635;
 }

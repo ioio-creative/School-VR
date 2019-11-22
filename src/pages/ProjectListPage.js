@@ -486,7 +486,7 @@ class ProjectOrderSelect extends Component {
 
 function ProjectListPageMenu(props) {
   const {
-    messages, changeLanguageFuncs
+    messages, changeLanguagePromises
   } = props;
 
   /* event handlers */
@@ -515,12 +515,12 @@ function ProjectListPageMenu(props) {
     ipcHelper.closeWindow();
   }
 
-  function handleBtnEnglishClick() {
-    changeLanguageFuncs[languages.english.code]();
+  async function handleBtnEnglishClickPromise() {
+    await changeLanguagePromises[languages.english.code]();
   }
 
-  function handleBtnTraditionalChineseClick() {
-    changeLanguageFuncs[languages.traditionalChinese.code]();
+  async function handleBtnTraditionalChineseClickPromise() {
+    await changeLanguagePromises[languages.traditionalChinese.code]();
   }
 
   /* end of event handlers */
@@ -554,11 +554,11 @@ function ProjectListPageMenu(props) {
           children: [
             {
               label: messages["Menu.Language.English"],
-              onClick: handleBtnEnglishClick
+              onClick: handleBtnEnglishClickPromise
             },
             {
               label: messages["Menu.Language.TraditionalChinese"],
-              onClick: handleBtnTraditionalChineseClick
+              onClick: handleBtnTraditionalChineseClickPromise
             }
           ]
         }
@@ -693,12 +693,12 @@ class ProjectListPage extends Component {
         <div className="outer-container" onScroll={this.handleOuterContainerScroll}>
           <div className="inner-container">
             <LanguageContextConsumer render={
-              ({ messages, changeLanguageFuncs }) => (
+              ({ messages, changeLanguagePromises }) => (
                 <ProjectListPageMenu
                   history={props.history}
 
                   messages={messages}
-                  changeLanguageFuncs={changeLanguageFuncs}
+                  changeLanguagePromises={changeLanguagePromises}
                 />
               )
             } />

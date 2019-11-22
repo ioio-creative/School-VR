@@ -885,7 +885,7 @@ const mergeAndSetCustomizedAppDataObjToFilePromise = async (objToMerge) => {
 ipcMain.on('getCustomizedAppData', async (event, arg) => {
   try {
     const appDataObj = await getCustomizedAppDataObjFromFilePromise();
-    const appDataObjStr = jsonStringifyFormatted(appDataObj);
+    const appDataObjStr = JSON.stringify(appDataObj);
     event.sender.send('getCustomizedAppDataResponse', {
       err: null,
       data: {
@@ -904,7 +904,7 @@ ipcMain.on('getCustomizedAppData', async (event, arg) => {
 
 ipcMain.on('setCustomizedAppData', async (event, arg) => {
   try {
-    await fileSystem.writeFilePromise(appDirectory.customizedAppDataFile, arg.appDataObjStr);
+    await mergeAndSetCustomizedAppDataObjToFilePromise(JSON.parse(arg.appDataObjStr));
     event.sender.send('setCustomizedAppDataResponse', {
       err: null
     });
