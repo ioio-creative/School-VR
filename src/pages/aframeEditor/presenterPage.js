@@ -28,7 +28,7 @@ import ipcHelper from 'utils/ipc/ipcHelper';
 import {jsonCopy} from "globals/helperfunctions";
 import routes from 'globals/routes';
 
-import getSearchObjectFromHistory from 'utils/queryString/getSearchObjectFromHistory';
+import {getSearchObjectFromHistory} from 'utils/queryString/getSearchObject';
 import getProjectFilePathFromSearchObject from 'utils/queryString/getProjectFilePathFromSearchObject';
 
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';

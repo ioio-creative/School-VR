@@ -30,7 +30,7 @@ import ipcHelper from 'utils/ipc/ipcHelper';
 
 import routes from 'globals/routes';
 
-import getSearchObjectFromHistory from 'utils/queryString/getSearchObjectFromHistory';
+import {getSearchObjectFromHistory} from 'utils/queryString/getSearchObject';
 import getProjectFilePathFromSearchObject from 'utils/queryString/getProjectFilePathFromSearchObject';
 
 import './editorPage.css';
