@@ -1,5 +1,4 @@
 import ipcHelper from 'utils/ipc/ipcHelper';
-import shallowMergeObjects from 'utils/js/shallowMergeObjects';
 import promisify from 'utils/js/myPromisify';
 
 
