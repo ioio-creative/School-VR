@@ -45,6 +45,7 @@ class ButtonsPanel extends Component {
     this.toggleEditor = this.toggleEditor.bind(this);
     this.addNewEntity = this.addNewEntity.bind(this);
     this.resetView = this.resetView.bind(this);
+    this.captureEquirectangularImage = this.captureEquirectangularImage.bind(this);
   }
   componentDidMount() {
   }
@@ -62,6 +63,11 @@ class ButtonsPanel extends Component {
     const props = this.props;
     const sceneContext = props.sceneContext;
     sceneContext.resetView();
+  }
+  captureEquirectangularImage() {
+    const props = this.props;
+    const sceneContext = props.sceneContext;
+    console.log(sceneContext.captureEquirectangularImage());
   }
   render() {
     const props = this.props;
@@ -159,6 +165,9 @@ class ButtonsPanel extends Component {
                 >
                   <img src={iconPreview} alt={messages['PresentationPreparationPanel.PlayTimelineTooltip']} />
                 </button>
+
+                <button onClick={this.captureEquirectangularImage}>wow</button>
+
                 <Link className="button-present" to={routes.presenterWithProjectFilePathQuery(props.currentLoadedProjectPath)}>
                   <svg viewBox="0 0 107.87 42.65" xmlSpace="preserve">
                     <g>

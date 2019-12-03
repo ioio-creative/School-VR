@@ -14,13 +14,18 @@ import ASky from 'utils/aframeEditor/aSky';
 import AVideo from 'utils/aframeEditor/aVideo';
 import ACamera from 'utils/aframeEditor/aCamera';
 import {TimelineMax, TweenMax, Power0} from 'gsap';
+import { saveAs } from 'file-saver';
 
 import {mediaType} from 'globals/config';
 import {getLocalizedDataSet} from 'globals/contexts/locale/languageContext';
 
+import bytesToBase64 from 'utils/js/uint8ToBase64';
+
+const CubemapToEquirectangular = require('three.cubemap-to-equirectangular');
 const mergeJSON = require('deepmerge').default;
 const Events = require('vendor/Events.js');
 const uuid_v1 = require('uuid/v1');
+const JSZip = require("jszip");
 const uuid = _=> 'uuid_' + uuid_v1().replace(/-/g, '_');
 
 const entityModel = {
@@ -157,6 +162,8 @@ class SceneContextProvider extends Component {
     this.toggleEditor = this.toggleEditor.bind(this);
 
     this.takeSnapshot = this.takeSnapshot.bind(this);
+
+    this.captureEquirectangularImage = this.captureEquirectangularImage.bind(this);
 
     this.events = {
       'editor-load': obj => {
@@ -1567,6 +1574,128 @@ class SceneContextProvider extends Component {
     })
   }
 
+  captureEquirectangularImage() {
+    const editor = this.editor;
+    const timeline = this.state.animationTimeline;
+    const renderer = editor.sceneEl.renderer;
+    const scene = editor.sceneEl.object3D;
+    const camera = editor.currentCameraEl.getObject3D('camera');
+    const width = renderer.domElement.width;
+    const height = renderer.domElement.height;
+    const equiUnmanaged = new CubemapToEquirectangular( renderer, false );
+
+    const helper_status = [];
+    for (let i = 0; i < editor.sceneHelpers.children.length; i++){
+      helper_status[i] = editor.sceneHelpers.children[i].visible;
+      editor.sceneHelpers.children[i].visible = false;
+    }
+    [...editor.currentCameraEl.children].forEach(el => el.setAttribute('visible', false))
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.render(scene, camera);
+    
+    // console.log(this.editor);
+    // console.log(window.AFRAME);
+    // console.log(window.AFRAME.THREE);
+    // debugger;
+    const THREE = window.AFRAME.THREE;
+    const cubeCamera = new THREE.CubeCamera( .005, 10000, 2048 );
+    // equi.convert ( camera, scene );
+    // const snapshot = [];
+    const zip = new JSZip();
+    // let snapshot;
+    if (timeline) {
+      // debugger;
+      const totalTime = Math.round(timeline.duration() * 100) / 100;
+      const fps = 30;
+      const totalFrame = Math.floor(totalTime * fps);
+      let currentFrame = 0;
+      console.log(totalFrame);
+
+      ////// testing use //////
+      // timeline.seek(totalTime, false);
+      // cubeCamera.position.copy(editor.currentCameraEl.getAttribute('position'));
+      // cubeCamera.updateCubeMap( renderer, scene );
+      // const imgData = equiUnmanaged.convert( cubeCamera, false );
+
+      // const canvas = document.createElement("canvas");
+      // canvas.width = imgData.width;
+      // canvas.height = imgData.height;
+      // const context = canvas.getContext("2d");
+      // context.putImageData(imgData, 0, 0);
+
+      // const snapshot = canvas.toDataURL();
+      // const base64Str = snapshot.split(',')[1];
+      // zip.file(`test.png`, base64Str, {base64: true});
+      ////// testing use end //////
+      // debugger;
+      ////// real capture //////
+      timeline.pause();
+      while (currentFrame <= totalFrame) {
+        const currentTime = currentFrame / fps;
+        timeline.seek(currentTime, false);
+        camera.updateProjectionMatrix();
+        renderer.render(scene, camera);
+        // cubeCamera.position.copy(editor.currentCameraEl.getAttribute('position'));
+        cubeCamera.position.copy(camera.getWorldPosition());
+        cubeCamera.updateCubeMap( renderer, scene );
+        // equiUnmanaged.convert( cubeCamera, false );
+        const imgData = equiUnmanaged.convert( cubeCamera, false );
+
+        const canvas = document.createElement("canvas");
+        canvas.width = imgData.width;
+        canvas.height = imgData.height;
+        const context = canvas.getContext("2d");
+        context.putImageData(imgData, 0, 0);
+
+        const snapshot = canvas.toDataURL();
+        const base64Str = snapshot.split(',')[1];
+        // debugger;
+        zip.file(`${currentFrame.toString().padStart(4, "0")}.png`, base64Str, {base64: true});
+        currentFrame += 1;
+      };
+      // add last frame if need, maybe skip at the moment?
+      // if (totalFrame * fps < totalTime) {
+      //   currentFrame++;
+      //   timeline.seek(totalTime, false);
+      //   cubeCamera.position.copy(editor.currentCameraEl.getAttribute('position'));
+      //   cubeCamera.updateCubeMap( renderer, scene );
+      //   const snapshot = equiUnmanaged.convert( cubeCamera, false );
+      //   // const b64encoded = btoa(String.fromCharCode.apply(null, snapshot.data));
+      //   const b64encoded = bytesToBase64(snapshot.data);
+
+      //   zip.file(`${currentFrame.toString().padStart(4, "0")}.png`, b64encoded, {base64: true});
+      //   // debugger;
+      // }
+      ////// real capture end //////
+    } else {
+      // should be no ways to enter this condition since timeline must be existed
+      cubeCamera.position.copy(editor.currentCameraEl.getAttribute('position'));
+      cubeCamera.updateCubeMap( renderer, scene );
+      equiUnmanaged.convert( cubeCamera, false );
+      const snapshot = equiUnmanaged.canvas.toDataURL();
+      const base64Str = snapshot.split(',')[1];
+      zip.file("only_one.png", base64Str, {base64: true});
+    }
+    // debugger;
+
+    for (let i = 0; i < editor.sceneHelpers.children.length; i++){
+      editor.sceneHelpers.children[i].visible = helper_status[i];
+    }
+    [...editor.currentCameraEl.children].forEach(el => el.setAttribute('visible', true))
+    if (editor.opened) {
+      const editorCamera = editor.editorCameraEl.getObject3D('camera');
+      renderer.render(scene, editorCamera);
+    }
+    // debugger;
+    // output to download, should be somethings send to electron here
+    zip.generateAsync({type:"blob"}).then(function (blob) { // 1) generate the zip file
+      saveAs(blob, "hello.zip");                          // 2) trigger the download
+    }, function (err) {
+      console.log(err);
+    });
+    // return snapshot;
+  }
   seekSlide(timeInSec) {
     if (this.state.animationTimeline) {
       this.state.animationTimeline.seek(timeInSec, false);
@@ -1769,6 +1898,8 @@ class SceneContextProvider extends Component {
           editor: this.editor,
           updateEditor: this.updateEditor,
           toggleEditor: this.toggleEditor,
+
+          captureEquirectangularImage: this.captureEquirectangularImage,
           // variables, should use functions to return?
           // appName: this.state.appName,
           // projectName: this.state.projectName,

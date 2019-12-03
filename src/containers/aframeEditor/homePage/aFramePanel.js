@@ -340,6 +340,7 @@ class AFramePanel extends Component {
       socket: props.socket,      
       sceneContext: sceneContext
     }
+    
   }
   componentDidUpdate(prevProps, prevState) {
     if (this.props.socket !== prevProps.socket) {
