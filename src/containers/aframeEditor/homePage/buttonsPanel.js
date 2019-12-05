@@ -30,11 +30,13 @@ import iconUndo from 'media/icons/undo.svg';
 import iconRedo from 'media/icons/redo.svg';
 import iconResetView from 'media/icons/resetview.svg';
 import iconPreview from 'media/icons/preview.svg';
-import iconShare from 'media/icons/share.svg';
-import './buttonsPanel.css';
-import config from 'globals/config';
+//import iconShare from 'media/icons/share.svg';
 
-const Events = require('vendor/Events.js');
+//import config from 'globals/config';
+
+import './buttonsPanel.css';
+
+//const Events = require('vendor/Events.js');
 
 class ButtonsPanel extends Component {
   constructor(props) {
@@ -42,32 +44,61 @@ class ButtonsPanel extends Component {
     this.state = {
       editor_open: false
     };
-    this.toggleEditor = this.toggleEditor.bind(this);
-    this.addNewEntity = this.addNewEntity.bind(this);
-    this.resetView = this.resetView.bind(this);
-    this.captureEquirectangularImage = this.captureEquirectangularImage.bind(this);
-  }
-  componentDidMount() {
-  }
-  componentWillUnmount() {
-  }
-  addNewEntity(type) {
-    const props = this.props;
-    const sceneContext = props.sceneContext;
-    sceneContext.addNewEntity(type);
+    [
+      'toggleEditor',
+      'addNewEntity',
+      'resetView',
+      'captureEquirectangularImage'
+    ].forEach(methodName => {
+      this[methodName] = this[methodName].bind(this);
+    });
+
+    this.addNewEntityFuncs = {};
+    [
+      'a-box',
+      'a-sphere',
+      'a-tetrahedron',
+      'a-pyramid',
+      'a-cylinder',
+      'a-cone',
+
+      'a-image',
+      'a-video',
+      'a-text',
+      'a-triangle',
+      'a-sky',
+      'a-videoShpere',
+      'a-navigation'
+    ].forEach(entityTypeName => {
+      this.addNewEntityFuncs[entityTypeName] =
+        (_ => {
+          this.addNewEntity(entityTypeName);
+        });
+    });
   }
   toggleEditor() {
-    this.props.sceneContext.toggleEditor();
+    const {
+      sceneContext
+    } = this.props;
+    sceneContext.toggleEditor();
+  }
+  addNewEntity(type) {
+    const {
+      sceneContext
+    } = this.props;
+    sceneContext.addNewEntity(type);
   }
   resetView() {
-    const props = this.props;
-    const sceneContext = props.sceneContext;
+    const {
+      sceneContext
+    } = this.props;
     sceneContext.resetView();
   }
   captureEquirectangularImage() {
-    const props = this.props;
-    const sceneContext = props.sceneContext;
-    console.log(sceneContext.captureEquirectangularImage());
+    const {
+      sceneContext
+    } = this.props;    
+    sceneContext.captureEquirectangularImage();
   }
   render() {
     const props = this.props;
@@ -76,71 +107,71 @@ class ButtonsPanel extends Component {
       <div id="buttons-panel">
         <div className="buttons-list buttons-3d">
           <LanguageContextConsumer render={
-            ({ language, messages }) => (
-              <div className="buttons-list-wrapper">                
-                <button onClick={()=>this.addNewEntity('a-box')} title={messages['AddThingsPanel.ThreeD.AddBoxTooltip']}>
+            ({ messages }) => (
+              <div className="buttons-list-wrapper">
+                <button onClick={this.addNewEntityFuncs['a-box']} title={messages['AddThingsPanel.ThreeD.AddBoxTooltip']}>
                   <img src={iconCube} alt=""/>
                 </button>
-                <button onClick={()=>this.addNewEntity('a-sphere')} title={messages['AddThingsPanel.ThreeD.AddSphereTooltip']}>
+                <button onClick={this.addNewEntityFuncs['a-sphere']} title={messages['AddThingsPanel.ThreeD.AddSphereTooltip']}>
                   <img src={iconSphere} alt=""/>
                 </button>
-                {/* <button onClick={()=>this.addNewEntity('a-tetrahedron')} title={messages['AddThingsPanel.ThreeD.AddTetrahedronTooltip']}>
+                {/* <button onClick={this.addNewEntityFuncs['a-tetrahedron']} title={messages['AddThingsPanel.ThreeD.AddTetrahedronTooltip']}>
                   <img src={iconPyramid} alt=""/>
                 </button> */}
-                <button onClick={()=>this.addNewEntity('a-pyramid')} title={messages['AddThingsPanel.ThreeD.AddPyramidTooltip']}>
+                <button onClick={this.addNewEntityFuncs['a-pyramid']} title={messages['AddThingsPanel.ThreeD.AddPyramidTooltip']}>
                   <img src={iconPyramid} alt=""/>
                 </button>
-                <button onClick={()=>this.addNewEntity('a-cylinder')} title={messages['AddThingsPanel.ThreeD.AddCylinderTooltip']}>
+                <button onClick={this.addNewEntityFuncs['a-cylinder']} title={messages['AddThingsPanel.ThreeD.AddCylinderTooltip']}>
                   <img src={iconCylinder} alt=""/>
                 </button>
-                <button onClick={()=>this.addNewEntity('a-cone')} title={messages['AddThingsPanel.ThreeD.AddConeTooltip']}>
+                <button onClick={this.addNewEntityFuncs['a-cone']} title={messages['AddThingsPanel.ThreeD.AddConeTooltip']}>
                   <img src={iconCone} alt=""/>
                 </button>
               </div>
             )
-          } />          
+          } />
         </div>
         <div className="seperator"></div>
         <div className="buttons-list buttons-2d">
           <LanguageContextConsumer render={
             ({ language, messages }) => (
               <div className="buttons-list-wrapper">
-                <button onClick={()=>this.addNewEntity('a-image')} title={messages['AddThingsPanel.TwoD.AddImageTooltip']}>
+                <button onClick={this.addNewEntityFuncs['a-image']} title={messages['AddThingsPanel.TwoD.AddImageTooltip']}>
                   <img src={iconImage} alt=""/>
                 </button>
-                <button onClick={()=>this.addNewEntity('a-video')} title={messages['AddThingsPanel.TwoD.AddVideoTooltip']}>
+                <button onClick={this.addNewEntityFuncs['a-video']} title={messages['AddThingsPanel.TwoD.AddVideoTooltip']}>
                   <img src={iconVideo} alt=""/>
                 </button>
-                <button onClick={()=>this.addNewEntity('a-text')} className="addText" title={messages['AddThingsPanel.TwoD.AddTextTooltip']}>
+                <button onClick={this.addNewEntityFuncs['a-text']} className="addText" title={messages['AddThingsPanel.TwoD.AddTextTooltip']}>
                   <img src={iconText} alt=""/>
                 </button>
-                {/* <button onClick={()=>this.addNewEntity('a-triangle')}>
+                {/* <button onClick={this.addNewEntityFuncs['a-triangle']}>
                   addNewTriangle
                 </button> */}
-                {/* <button onClick={() => entityFunction.addNewVideo()}>
+                {/* <button onClick={_ => entityFunction.addNewVideo()}>
                   addNewVideo
                 </button> */}
                 {/* {btns.addNewVideo()} */}
                 {/* {btns.addNewImageSphere()} */}
-                <button onClick={()=>this.addNewEntity('a-sky')} title={messages['AddThingsPanel.TwoD.AddSkyTooltip']}>
+                <button onClick={this.addNewEntityFuncs['a-sky']} title={messages['AddThingsPanel.TwoD.AddSkyTooltip']}>
                   <img src={iconSky} alt=""/>
                 </button>
-                {/* <button onClick={()=>this.addNewEntity('a-videoShpere')}>
+                {/* <button onClick={this.addNewEntityFuncs['a-videoShpere']}>
                   addNew360Video
                 </button> */}
-                {/* <button onClick={()=>this.addNewEntity('a-sky')}>
+                {/* <button onClick={this.addNewEntityFuncs['a-sky']}>
                   rotate
                 </button>
-                <button onClick={()=>this.addNewEntity('a-sky')}>
+                <button onClick={this.addNewEntityFuncs['a-sky']}>
                   scale
                 </button> */}
-                
-                <button onClick={()=>this.addNewEntity('a-navigation')} title={messages['AddThingsPanel.TwoD.AddNavigationTooltip']}>
+
+                <button onClick={this.addNewEntityFuncs['a-navigation']} title={messages['AddThingsPanel.TwoD.AddNavigationTooltip']}>
                   <img src={iconNavigation} alt=""/>
                 </button>
               </div>
             )
-          } />          
+          } />
         </div>
         <div className="buttons-list buttons-presentation">
           <LanguageContextConsumer render={
@@ -181,7 +212,7 @@ class ButtonsPanel extends Component {
                         c-0.78,0-1.41-0.63-1.41-1.41C29.46,14.91,30.09,14.28,30.87,14.28z M21.35,24.5c-1.75,0-3.17-1.42-3.17-3.17s1.42-3.17,3.17-3.17
                         c1.75,0,3.17,1.42,3.17,3.17S23.1,24.5,21.35,24.5z M30.87,28.37c-0.78,0-1.41-0.63-1.41-1.41c0-0.78,0.63-1.41,1.41-1.41
                         c0.78,0,1.41,0.63,1.41,1.41C32.28,27.74,31.65,28.37,30.87,28.37z"/>
-                      
+
                       <text x="45" y="27" style={{fill: 'white', fontSize: '18px'}}>
                         <LanguageContextMessagesConsumer messageId="PresentationPreparationPanel.ShareLabel" />
                       </text>
@@ -190,7 +221,7 @@ class ButtonsPanel extends Component {
                 </Link>
               </div>
             )
-          } />          
+          } />
         </div>
       </div>
     );

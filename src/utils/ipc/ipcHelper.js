@@ -163,14 +163,14 @@ function mimeStats(filePaths, callBack) {
 
 function base64Encode(filePath, callBack) {
   generalIpcCall('base64Encode', callBack, filePath);
-};
+}
 
 function base64Decode(locationToSaveFile, encodedStr, callBack) {
   generalIpcCall('base64Decode', callBack, {
     locationToSaveFile: locationToSaveFile,
     encodedStr: encodedStr
   });
-};
+}
 
 function createPackage(src, dest, callBack) {
   generalIpcCall('createPackage', callBack, {
@@ -362,6 +362,17 @@ const setLicenseKeyPromise = promisify(setLicenseKey);
 /* end of app data */
 
 
+/* 360 capture */
+
+function saveRaw360Capture(imgData, callBack) {
+  generalIpcCall('saveRaw360Capture', callBack, {
+    imgData: imgData
+  });
+}
+
+/* end of 360 capture */
+
+
 export default {
   // listeners
   addListener,
@@ -435,5 +446,8 @@ export default {
   checkIdentity,
   checkIdentityPromise,
   setLicenseKey,
-  setLicenseKeyPromise
+  setLicenseKeyPromise,
+
+  // 360 capture
+  saveRaw360Capture,
 };

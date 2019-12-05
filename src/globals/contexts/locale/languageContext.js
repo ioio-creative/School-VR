@@ -75,7 +75,7 @@ class LanguageContextProvider extends React.Component {
     } = this.props;
     const {
       language
-    } = this.state;   
+    } = this.state;
     return (
       <LanguageContext.Provider
         value={{

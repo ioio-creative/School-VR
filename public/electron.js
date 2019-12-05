@@ -30,6 +30,7 @@ const shallowMergeObjects = require('./utils/js/shallowMergeObjects');
 const { hashForUniqueId } = require('./utils/crypto');
 const jsonStringifyFormatted = require('./utils/json/jsonStringifyFormatted');
 
+console.log('node version:', process.version);
 
 /* constants */
 
@@ -988,6 +989,27 @@ ipcMain.on('setLicenseKey', async (event, arg) => {
     console.error('setLicenseKey Error:');
     console.error(err);
     event.sender.send('setLicenseKeyResponse', {
+      err: err.toString()
+    });
+  }
+});
+
+// 360 capture
+
+ipcMain.on('saveRaw360Capture', async (event, arg) => {
+  try {
+    const licenseKeyInput = arg.licenseKey;
+    const identityKey = licenseKeyInput ? (await encodeIdentityKeyPromise(licenseKeyInput)) : '';
+    await mergeAndSetCustomizedAppDataObjToFilePromise({
+      identityKey: identityKey
+    });
+    event.sender.send('saveRaw360CaptureResponse', {
+      err: null
+    });
+  } catch (err) {
+    console.error('saveRaw360Capture Error:');
+    console.error(err);
+    event.sender.send('saveRaw360CaptureResponse', {
       err: err.toString()
     });
   }
