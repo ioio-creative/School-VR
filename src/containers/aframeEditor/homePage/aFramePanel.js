@@ -410,7 +410,7 @@ class AFramePanel extends Component {
           {/* <a-sky el-name="sky" el-isSystem={true} color="#FF0000"></a-sky> */}
           <a-entity position="0 0 0">
             {/* test */}
-            <a-camera el-isSystem={false} position="0 2 5" el-defaultCamera="true" look-controls ref={(ref)=>this.cameraEl=ref}>
+            <a-camera el-isSystem={false} position="0 0 0" el-defaultCamera="true" look-controls ref={(ref)=>this.cameraEl=ref}>
               {/* camera model */}
               <a-cone position="0 0 0.5" rotation="90 0 0" geometry="radius-top: 0.15;radius-bottom: 0.5" material="color:#333"></a-cone>
               <a-box position="0 0 1" scale="0.8 0.8 1.2" material="color:#222"></a-box>

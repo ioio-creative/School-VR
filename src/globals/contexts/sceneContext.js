@@ -14,12 +14,12 @@ import ASky from 'utils/aframeEditor/aSky';
 import AVideo from 'utils/aframeEditor/aVideo';
 import ACamera from 'utils/aframeEditor/aCamera';
 import {TimelineMax, TweenMax, Power0} from 'gsap';
-import { saveAs } from 'file-saver';
+import {saveAs} from 'file-saver';
 
 import {mediaType} from 'globals/config';
 import {getLocalizedDataSet} from 'globals/contexts/locale/languageContext';
 
-import bytesToBase64 from 'utils/js/uint8ToBase64';
+//import bytesToBase64 from 'utils/js/uint8ToBase64';
 
 const CubemapToEquirectangular = require('three.cubemap-to-equirectangular');
 const mergeJSON = require('deepmerge').default;
@@ -96,78 +96,88 @@ class SceneContextProvider extends Component {
     }
     this.editor = null;
 
-    this.setAppName = this.setAppName.bind(this);
-    this.getAppName = this.getAppName.bind(this);
-    this.setProjectName = this.setProjectName.bind(this);
-    this.getProjectName = this.getProjectName.bind(this);
-    this.newProject = this.newProject.bind(this);
-    this.saveProject = this.saveProject.bind(this);
-    this.loadProject = this.loadProject.bind(this);
+    [
+      'setAppName',
+      'getAppName',
+      'setProjectName',
+      'getProjectName',
+      'newProject',
+      'saveProject',
+      'loadProject',
 
-    this.getSlidesList = this.getSlidesList.bind(this);
-    this.getCurrentSlide = this.getCurrentSlide.bind(this);
-    this.getCurrentSlideId = this.getCurrentSlideId.bind(this);
+      'getSlidesList',
+      'getCurrentSlide',
+      'getCurrentSlideId',
 
-    this.addSlide = this.addSlide.bind(this);
-    this.deleteSlide = this.deleteSlide.bind(this);
-    this.selectSlide = this.selectSlide.bind(this);
-    this.sortSlide = this.sortSlide.bind(this);
-    this.getSlideTotalTime = this.getSlideTotalTime.bind(this);
+      'addSlide',
+      'deleteSlide',
+      'selectSlide',
+      'sortSlide',
+      'getSlideTotalTime',
 
-    this.getEntitiesList = this.getEntitiesList.bind(this);
-    this.getCurrentEntity = this.getCurrentEntity.bind(this);
-    this.getCurrentEntityId = this.getCurrentEntityId.bind(this);
-    this.copyEntity = this.copyEntity.bind(this);
+      'getEntitiesList',
+      'getCurrentEntity',
+      'getCurrentEntityId',
+      'copyEntity',
 
-    this.addEntity = this.addEntity.bind(this);
-    this.deleteEntity = this.deleteEntity.bind(this);
-    this.selectEntity = this.selectEntity.bind(this);
-    this.updateEntity = this.updateEntity.bind(this);
+      'addEntity',
+      'deleteEntity',
+      'selectEntity',
+      'updateEntity',
 
-    this.getTimelinesList = this.getTimelinesList.bind(this);
-    this.getCurrentTimeline = this.getCurrentTimeline.bind(this);
-    this.getCurrentTimelineId = this.getCurrentTimelineId.bind(this);
+      'getTimelinesList',
+      'getCurrentTimeline',
+      'getCurrentTimelineId',
 
-    this.addTimeline = this.addTimeline.bind(this);
-    this.deleteTimeline = this.deleteTimeline.bind(this);
-    this.selectTimeline = this.selectTimeline.bind(this);
-    this.updateTimeline = this.updateTimeline.bind(this);
+      'addTimeline',
+      'deleteTimeline',
+      'selectTimeline',
+      'updateTimeline',
 
-    this.selectTimelinePosition = this.selectTimelinePosition.bind(this);
-    this.getCurrentTimelinePosition = this.getCurrentTimelinePosition.bind(this);
+      'selectTimelinePosition',
+      'getCurrentTimelinePosition',
 
-    this.updateTimelinePositionAttributes = this.updateTimelinePositionAttributes.bind(this);
+      'updateTimelinePositionAttributes',
 
-    this.updateDefaultAttributes = this.updateDefaultAttributes.bind(this);
+      'updateDefaultAttributes',
 
-    this.getCurrentTime = this.getCurrentTime.bind(this);
-    this.updateCurrentTime = this.updateCurrentTime.bind(this);
+      'getCurrentTime',
+      'updateCurrentTime',
 
-    this.addNewEntity = this.addNewEntity.bind(this);
+      'addNewEntity',
 
-    this.undo = this.undo.bind(this);
-    this.redo = this.redo.bind(this);
+      'undo',
+      'redo',
 
-    this.getUndoQueueLength = this.getUndoQueueLength.bind(this);
-    this.getRedoQueueLength = this.getRedoQueueLength.bind(this);
+      'getUndoQueueLength',
+      'getRedoQueueLength',
 
-    this.playSlide = this.playSlide.bind(this);
-    this.seekSlide = this.seekSlide.bind(this);
-    this.stopSlide = this.stopSlide.bind(this);
+      'playSlide',
+      'seekSlide',
+      'stopSlide',
 
-    this.addAsset = this.addAsset.bind(this);
+      'addAsset',
 
-    this.resetView = this.resetView.bind(this);
+      'resetView',
 
-    this.toggleEditor = this.toggleEditor.bind(this);
+      'toggleEditor',
 
-    this.takeSnapshot = this.takeSnapshot.bind(this);
+      'takeSnapshot',
 
-    this.captureEquirectangularImage = this.captureEquirectangularImage.bind(this);
+      'renderByEditorCamera',
+      'hideEditorCameraModel',
+      'showEditorCameraModel',
+      'hideEditorHelpers',
+      'setEditorHelpersVisible',
+      'captureEquirectangularImage',
+      'captureEquirectangularVideo'
+    ].forEach(methodName => {
+      this[methodName] = this[methodName].bind(this);
+    });
 
     this.events = {
       'editor-load': obj => {
-        console.log('editor-load')
+        //console.log('editor-load');
         this.editor = obj;
         // try add an id to the scene
         const sceneId = uuid();
@@ -203,7 +213,7 @@ class SceneContextProvider extends Component {
     }
   }
   componentDidMount() {
-    const self = this;
+    //const self = this;
     // init the data
     this.startEventListener('editor-load');
     this.startEventListener('objectselected');
@@ -218,10 +228,9 @@ class SceneContextProvider extends Component {
     //   });
     // }, 200);
     // the event emits when click on canvas
-
   }
   startEventListener(eventName) {
-    Events.on(eventName, this.events[eventName])
+    Events.on(eventName, this.events[eventName]);
   }
   stopEventListener(eventName) {
     Events.removeListener(eventName, this.events[eventName]);
@@ -229,7 +238,7 @@ class SceneContextProvider extends Component {
   setAppName(newAppName) {
     this.setState({
       appName: newAppName
-    })
+    });
   }
   getAppName() {
     return this.state.appName;
@@ -1529,13 +1538,19 @@ class SceneContextProvider extends Component {
     const height = renderer.domElement.height;
 
     const helper_status = [];
+
+    // hide and store original editor helpers visibility
     for (let i = 0; i < editor.sceneHelpers.children.length; i++){
       helper_status[i] = editor.sceneHelpers.children[i].visible;
       editor.sceneHelpers.children[i].visible = false;
     }
+
+    // render with editor helpers hidden
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.render(scene, camera);
+
+    // restore original editor helpers visibility
     for (let i = 0; i < editor.sceneHelpers.children.length; i++){
       editor.sceneHelpers.children[i].visible = helper_status[i];
     }
@@ -1574,14 +1589,99 @@ class SceneContextProvider extends Component {
     })
   }
 
+  renderByEditorCamera() {
+    const editor = this.editor;
+    if (editor.opened) {
+      const renderer = editor.sceneEl.renderer;
+      const scene = editor.sceneEl.object3D;
+      const editorCamera = editor.editorCameraEl.getObject3D('camera');
+      renderer.render(scene, editorCamera);
+    }
+  }
+  hideEditorCameraModel() {
+    this.setCurrentCameraModelVisibility(false);
+  }
+  showEditorCameraModel(){
+    this.setCurrentCameraModelVisibility(true);
+  }
+  setCurrentCameraModelVisibility(isVisible) {
+    [...this.editor.currentCameraEl.children].forEach(el => el.setAttribute('visible', isVisible));
+  }
+  hideEditorHelpers() {
+    const isVisible = false;
+    const helper_visibility_array = new Array(this.editor.sceneHelpers.children.length).fill(isVisible);
+    return this.setEditorHelpersVisible(helper_visibility_array);
+  }
+  setEditorHelpersVisible(helper_visibility_array) {
+    const editor = this.editor;
+    const original_helper_status = [];
+    for (let i = 0; i < editor.sceneHelpers.children.length; i++){
+      original_helper_status[i] = editor.sceneHelpers.children[i].visible;
+      editor.sceneHelpers.children[i].visible = helper_visibility_array[i];
+    }
+    return original_helper_status;
+  }
   captureEquirectangularImage() {
     const editor = this.editor;
-    const timeline = this.state.animationTimeline;
     const renderer = editor.sceneEl.renderer;
     const scene = editor.sceneEl.object3D;
     const camera = editor.currentCameraEl.getObject3D('camera');
     const width = renderer.domElement.width;
     const height = renderer.domElement.height;
+
+    const original_helper_visibility_array = this.hideEditorHelpers();
+
+    this.hideEditorCameraModel();
+
+
+
+
+
+
+    const THREE = window.AFRAME.THREE;
+    const cubeCamera = new THREE.CubeCamera( .005, 10000, 2048 );
+    const equiUnmanaged = new CubemapToEquirectangular( renderer, false );
+
+
+
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.render(scene, camera);
+
+    cubeCamera.position.copy(camera.getWorldPosition());
+    cubeCamera.updateCubeMap( renderer, scene );
+
+    const imgData = equiUnmanaged.convert( cubeCamera, true );
+
+    // const canvas = document.createElement("canvas");
+    // canvas.width = imgData.width;
+    // canvas.height = imgData.height;
+    // const context = canvas.getContext("2d");
+    // context.putImageData(imgData, 0, 0);
+
+    // const snapshot = canvas.toDataURL();
+    // const base64Str = snapshot.split(',')[1];
+
+
+
+    this.showEditorCameraModel();
+    this.setEditorHelpersVisible(original_helper_visibility_array);
+
+
+    this.renderByEditorCamera();
+  }
+  captureEquirectangularVideo() {
+    const editor = this.editor;
+    const renderer = editor.sceneEl.renderer;
+    const scene = editor.sceneEl.object3D;
+    const camera = editor.currentCameraEl.getObject3D('camera');
+    const width = renderer.domElement.width;
+    const height = renderer.domElement.height;
+
+
+    const timeline = this.state.animationTimeline;
+
+
     const equiUnmanaged = new CubemapToEquirectangular( renderer, false );
 
     const helper_status = [];
@@ -1589,11 +1689,11 @@ class SceneContextProvider extends Component {
       helper_status[i] = editor.sceneHelpers.children[i].visible;
       editor.sceneHelpers.children[i].visible = false;
     }
-    [...editor.currentCameraEl.children].forEach(el => el.setAttribute('visible', false))
+    [...editor.currentCameraEl.children].forEach(el => el.setAttribute('visible', false));
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.render(scene, camera);
-    
+
     // console.log(this.editor);
     // console.log(window.AFRAME);
     // console.log(window.AFRAME.THREE);
@@ -1603,6 +1703,14 @@ class SceneContextProvider extends Component {
     // equi.convert ( camera, scene );
     // const snapshot = [];
     const zip = new JSZip();
+
+
+
+    
+
+
+
+
     // let snapshot;
     if (timeline) {
       // debugger;
@@ -1610,7 +1718,7 @@ class SceneContextProvider extends Component {
       const fps = 30;
       const totalFrame = Math.floor(totalTime * fps);
       let currentFrame = 0;
-      console.log(totalFrame);
+      console.log('totalFrame:', totalFrame);
 
       ////// testing use //////
       // timeline.seek(totalTime, false);
@@ -1679,10 +1787,16 @@ class SceneContextProvider extends Component {
     }
     // debugger;
 
+
+
+
+
+
+
     for (let i = 0; i < editor.sceneHelpers.children.length; i++){
       editor.sceneHelpers.children[i].visible = helper_status[i];
     }
-    [...editor.currentCameraEl.children].forEach(el => el.setAttribute('visible', true))
+    [...editor.currentCameraEl.children].forEach(el => el.setAttribute('visible', true));
     if (editor.opened) {
       const editorCamera = editor.editorCameraEl.getObject3D('camera');
       renderer.render(scene, editorCamera);
@@ -1692,9 +1806,8 @@ class SceneContextProvider extends Component {
     zip.generateAsync({type:"blob"}).then(function (blob) { // 1) generate the zip file
       saveAs(blob, "hello.zip");                          // 2) trigger the download
     }, function (err) {
-      console.log(err);
+      console.error(err);
     });
-    // return snapshot;
   }
   seekSlide(timeInSec) {
     if (this.state.animationTimeline) {
@@ -1727,11 +1840,11 @@ class SceneContextProvider extends Component {
     const newId = newFile.id || uuid();
     const newFileUrl = (
       Object.prototype.toString.call(newFile) === '[object File]' ?
-      URL.createObjectURL(newFile) :
-      (newFile.src?
-        newFile.src :
-        newFile.filePath
-      )
+        URL.createObjectURL(newFile) :
+        (newFile.src?
+          newFile.src :
+          newFile.filePath
+        )
     );
     const newAssetData = {
       id: newId,
