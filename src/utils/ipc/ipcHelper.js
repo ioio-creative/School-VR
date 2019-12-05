@@ -364,9 +364,9 @@ const setLicenseKeyPromise = promisify(setLicenseKey);
 
 /* 360 capture */
 
-function saveRaw360Capture(imgData, callBack) {
+function saveRaw360Capture(imgBase64Str, callBack) {
   generalIpcCall('saveRaw360Capture', callBack, {
-    imgData: imgData
+    imgBase64Str: imgBase64Str
   });
 }
 

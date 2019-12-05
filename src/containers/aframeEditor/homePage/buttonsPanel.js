@@ -5,6 +5,8 @@
   │ AFRAME │
   └────────◲
 */
+import './buttonsPanel.css';
+
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 
@@ -14,6 +16,9 @@ import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/
 // import * as btns from 'containers/panelItem/editorFunctions';
 // import * as entityFunction from 'utils/deleted-aFrameEntities';
 import routes from 'globals/routes';
+//import config from 'globals/config';
+
+import ipcHelper from 'utils/ipc/ipcHelper';
 
 import iconCone from 'media/icons/cone.svg';
 import iconCube from 'media/icons/cube.svg';
@@ -32,9 +37,7 @@ import iconResetView from 'media/icons/resetview.svg';
 import iconPreview from 'media/icons/preview.svg';
 //import iconShare from 'media/icons/share.svg';
 
-//import config from 'globals/config';
-
-import './buttonsPanel.css';
+import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 
 //const Events = require('vendor/Events.js');
 
@@ -76,6 +79,9 @@ class ButtonsPanel extends Component {
         });
     });
   }
+
+  /* button click handlers */
+
   toggleEditor() {
     const {
       sceneContext
@@ -98,9 +104,19 @@ class ButtonsPanel extends Component {
     const {
       sceneContext
     } = this.props;
-    // console.log makes it blocking?
-    console.log(sceneContext.captureEquirectangularImage());
+    const imgBase64Str = sceneContext.captureEquirectangularImage();    
+
+    ipcHelper.saveRaw360Capture(imgBase64Str, (err, data) => {
+      if (err) {
+        handleErrorWithUiDefault(err);
+        return;
+      }
+      alert('yea');
+    });
   }
+
+  /* end of button click handlers */
+
   render() {
     const props = this.props;
     const sceneContext = props.sceneContext;

@@ -394,7 +394,7 @@ class EditorPage extends Component {
       // <SceneContextProvider>
         <div id="editor" className={sceneContext.editor && sceneContext.editor.opened? 'editing': 'viewing'}>
           <LanguageContextConsumer render={
-            ({ language, messages }) => (
+            ({ messages }) => (
               <Prompt
                 when={true}
                 message={messages['Prompt.UnsavedWorkMessage']}

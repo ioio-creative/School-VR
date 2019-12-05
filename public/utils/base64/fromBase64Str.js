@@ -1,3 +1,3 @@
-module.exports.fromBase64Str = function (base64EncodedStr) {
-  return new Buffer(base64EncodedStr, 'base64');
+module.exports = function fromBase64Str(base64EncodedStr) {
+  return Buffer.from(base64EncodedStr, 'base64');
 };

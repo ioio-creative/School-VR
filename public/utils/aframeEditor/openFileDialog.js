@@ -44,18 +44,18 @@ function showDialogCommon(fileFilters, dialogMessage, callBack, defaultPath, dia
 
 function openImageDialog(callBack) {  
   showDialogCommon([openFileDialogFilter.image],
-    "Please select an image file.", callBack, DialogType.Open);  
+    "Please select an image file.", callBack, null, DialogType.Open);  
 }
 
 // probably not used in future as now openImageDialog() includes open gif files
 function openGifDialog(callBack) {
   showDialogCommon([openFileDialogFilter.gif],
-    "Please select a gif file.", callBack);  
+    "Please select a gif file.", callBack, null, DialogType.Open);  
 }
 
 function openVideoDialog(callBack) {  
   showDialogCommon([openFileDialogFilter.video],
-    "Please select a video file.", callBack, DialogType.Open);
+    "Please select a video file.", callBack, null, DialogType.Open);
 }
 
 function openSchoolVrFileDialog(callBack) {  
@@ -70,10 +70,16 @@ function saveSchoolVrFileDialog(callBack) {
     appDirectory.appProjectsDirectory, DialogType.Save);
 }
 
+function save360ImageDialog(callBack) {
+  showDialogCommon([openFileDialogFilter.image],
+    "Please select an image file.", callBack, null, DialogType.Save);
+}
+
 module.exports = {
   openImageDialog,
   openGifDialog,
   openVideoDialog,
   openSchoolVrFileDialog,
-  saveSchoolVrFileDialog
+  saveSchoolVrFileDialog,
+  save360ImageDialog
 };

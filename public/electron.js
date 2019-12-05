@@ -20,7 +20,7 @@ const fileSystem = require('./utils/fileSystem/fileSystem');
 const ProjectFile = require('./utils/saveLoadProject/ProjectFile');
 const { saveProjectToLocalAsync } = require('./utils/saveLoadProject/saveProject');
 const { loadProjectByProjectFilePathAsync, copyTempProjectDirectoryToExternalDirectoryAsync } = require('./utils/saveLoadProject/loadProject');
-const { openImageDialog, openGifDialog, openVideoDialog, openSchoolVrFileDialog, saveSchoolVrFileDialog } =
+const { openImageDialog, openGifDialog, openVideoDialog, openSchoolVrFileDialog, saveSchoolVrFileDialog, save360ImageDialog } =
   require('./utils/aframeEditor/openFileDialog');
 const { showYesNoQuestionMessageBox, showYesNoWarningMessageBox } = require('./utils/aframeEditor/showMessageBox');
 const { parseDataToSaveFormat } = require('./utils/saveLoadProject/parseDataToSaveFormat');
@@ -996,23 +996,28 @@ ipcMain.on('setLicenseKey', async (event, arg) => {
 
 // 360 capture
 
-ipcMain.on('saveRaw360Capture', async (event, arg) => {
-  try {
-    const licenseKeyInput = arg.licenseKey;
-    const identityKey = licenseKeyInput ? (await encodeIdentityKeyPromise(licenseKeyInput)) : '';
-    await mergeAndSetCustomizedAppDataObjToFilePromise({
-      identityKey: identityKey
-    });
-    event.sender.send('saveRaw360CaptureResponse', {
-      err: null
-    });
-  } catch (err) {
-    console.error('saveRaw360Capture Error:');
-    console.error(err);
-    event.sender.send('saveRaw360CaptureResponse', {
-      err: err.toString()
-    });
-  }
+ipcMain.on('saveRaw360Capture', (event, arg) => {
+  save360ImageDialog(async (filePath) => {
+    if (!filePath) {
+      event.sender.send('saveRaw360CaptureResponse', {
+        err: null
+      });
+      return;
+    }
+    try {
+      const imgBase64Str = arg.imgBase64Str;    
+      await fileSystem.base64DecodePromise(filePath, imgBase64Str);
+      event.sender.send('saveRaw360CaptureResponse', {
+        err: null
+      });
+    } catch (err) {
+      console.error('saveRaw360Capture Error:');
+      console.error(err);
+      event.sender.send('saveRaw360CaptureResponse', {
+        err: err.toString()
+      });
+    }
+  });  
 });
 
 /* end of ipc main event listeners */

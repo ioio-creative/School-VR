@@ -169,6 +169,7 @@ class SceneContextProvider extends Component {
       'showEditorCameraModel',
       'hideEditorHelpers',
       'setEditorHelpersVisible',
+      'convertEquirectangularImageDataToBase64Str',
       'captureEquirectangularImage',
       'captureEquirectangularVideo'
     ].forEach(methodName => {
@@ -1535,15 +1536,10 @@ class SceneContextProvider extends Component {
     const scene = editor.sceneEl.object3D;
     const camera = editor.currentCameraEl.getObject3D('camera');
     const width = renderer.domElement.width;
-    const height = renderer.domElement.height;
-
-    const helper_status = [];
+    const height = renderer.domElement.height;    
 
     // hide and store original editor helpers visibility
-    for (let i = 0; i < editor.sceneHelpers.children.length; i++){
-      helper_status[i] = editor.sceneHelpers.children[i].visible;
-      editor.sceneHelpers.children[i].visible = false;
-    }
+    const original_helper_visibility_array = this.hideEditorHelpers();
 
     // render with editor helpers hidden
     camera.aspect = width / height;
@@ -1551,9 +1547,7 @@ class SceneContextProvider extends Component {
     renderer.render(scene, camera);
 
     // restore original editor helpers visibility
-    for (let i = 0; i < editor.sceneHelpers.children.length; i++){
-      editor.sceneHelpers.children[i].visible = helper_status[i];
-    }
+    this.setEditorHelpersVisible(original_helper_visibility_array);
 
     // canvas.width = width;
     // canvas.height = height;
@@ -1565,10 +1559,7 @@ class SceneContextProvider extends Component {
     //   this.cameraPreviewScreenEl.setAttribute( 'height', canvas.height / newHeight * 0.6 );
     // }
     const snapshot = renderer.domElement.toDataURL();
-    if (editor.opened) {
-      const editorCamera = editor.editorCameraEl.getObject3D('camera');
-      renderer.render(scene, editorCamera);
-    }
+    this.renderByEditorCamera();
     return snapshot;
   }
   stopSlide() {
@@ -1621,13 +1612,22 @@ class SceneContextProvider extends Component {
     }
     return original_helper_status;
   }
-  captureEquirectangularVideo() {
+  convertEquirectangularImageDataToBase64Str(imgData) {
+    const canvas = document.createElement("canvas");
+    canvas.width = imgData.width;
+    canvas.height = imgData.height;
+    const context = canvas.getContext("2d");
+    context.putImageData(imgData, 0, 0);
+
+    const snapshot = canvas.toDataURL();
+    const base64Str = snapshot.split(',')[1];
+    return base64Str;    
+  }
+  captureEquirectangularImage() {
     const editor = this.editor;
     const renderer = editor.sceneEl.renderer;
     const scene = editor.sceneEl.object3D;
     const camera = editor.currentCameraEl.getObject3D('camera');
-    const width = renderer.domElement.width;
-    const height = renderer.domElement.height;
 
     const original_helper_visibility_array = this.hideEditorHelpers();
 
@@ -1643,25 +1643,19 @@ class SceneContextProvider extends Component {
     const equiUnmanaged = new CubemapToEquirectangular( renderer, false );
 
 
-
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
-    renderer.render(scene, camera);
+    // set output size
+    equiUnmanaged.setSize(2048, 1024);
+    
 
     cubeCamera.position.copy(camera.getWorldPosition());
     cubeCamera.updateCubeMap( renderer, scene );
 
-    const imgData = equiUnmanaged.convert( cubeCamera, true );
+    //const isDownloadImgFromFrontEnd = true;
+    const isDownloadImgFromFrontEnd = false;
+    const imgData = equiUnmanaged.convert( cubeCamera, isDownloadImgFromFrontEnd );
 
-    // const canvas = document.createElement("canvas");
-    // canvas.width = imgData.width;
-    // canvas.height = imgData.height;
-    // const context = canvas.getContext("2d");
-    // context.putImageData(imgData, 0, 0);
-
-    // const snapshot = canvas.toDataURL();
-    // const base64Str = snapshot.split(',')[1];
-
+    
+    const imgBase64Str = this.convertEquirectangularImageDataToBase64Str(imgData);
 
 
     this.showEditorCameraModel();
@@ -1669,8 +1663,12 @@ class SceneContextProvider extends Component {
 
 
     this.renderByEditorCamera();
+
+
+
+    return imgBase64Str;
   }
-  captureEquirectangularImage() {
+  captureEquirectangularVideo() {
     const editor = this.editor;
     const renderer = editor.sceneEl.renderer;
     const scene = editor.sceneEl.object3D;
@@ -1683,6 +1681,7 @@ class SceneContextProvider extends Component {
 
 
     const equiUnmanaged = new CubemapToEquirectangular( renderer, false );
+    equiUnmanaged.setSize(2048, 1024);
 
     const original_helper_visibility_array = this.hideEditorHelpers();
 
