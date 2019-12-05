@@ -97,8 +97,9 @@ class ButtonsPanel extends Component {
   captureEquirectangularImage() {
     const {
       sceneContext
-    } = this.props;    
-    sceneContext.captureEquirectangularImage();
+    } = this.props;
+    // console.log makes it blocking?
+    console.log(sceneContext.captureEquirectangularImage());
   }
   render() {
     const props = this.props;

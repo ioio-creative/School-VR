@@ -1621,7 +1621,7 @@ class SceneContextProvider extends Component {
     }
     return original_helper_status;
   }
-  captureEquirectangularImage() {
+  captureEquirectangularVideo() {
     const editor = this.editor;
     const renderer = editor.sceneEl.renderer;
     const scene = editor.sceneEl.object3D;
@@ -1670,7 +1670,7 @@ class SceneContextProvider extends Component {
 
     this.renderByEditorCamera();
   }
-  captureEquirectangularVideo() {
+  captureEquirectangularImage() {
     const editor = this.editor;
     const renderer = editor.sceneEl.renderer;
     const scene = editor.sceneEl.object3D;
@@ -1684,12 +1684,13 @@ class SceneContextProvider extends Component {
 
     const equiUnmanaged = new CubemapToEquirectangular( renderer, false );
 
-    const helper_status = [];
-    for (let i = 0; i < editor.sceneHelpers.children.length; i++){
-      helper_status[i] = editor.sceneHelpers.children[i].visible;
-      editor.sceneHelpers.children[i].visible = false;
-    }
-    [...editor.currentCameraEl.children].forEach(el => el.setAttribute('visible', false));
+    const original_helper_visibility_array = this.hideEditorHelpers();
+
+    this.hideEditorCameraModel();
+
+
+
+
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.render(scene, camera);
@@ -1784,8 +1785,7 @@ class SceneContextProvider extends Component {
       const snapshot = equiUnmanaged.canvas.toDataURL();
       const base64Str = snapshot.split(',')[1];
       zip.file("only_one.png", base64Str, {base64: true});
-    }
-    // debugger;
+    }    
 
 
 
@@ -1793,15 +1793,14 @@ class SceneContextProvider extends Component {
 
 
 
-    for (let i = 0; i < editor.sceneHelpers.children.length; i++){
-      editor.sceneHelpers.children[i].visible = helper_status[i];
-    }
-    [...editor.currentCameraEl.children].forEach(el => el.setAttribute('visible', true));
-    if (editor.opened) {
-      const editorCamera = editor.editorCameraEl.getObject3D('camera');
-      renderer.render(scene, editorCamera);
-    }
-    // debugger;
+    this.showEditorCameraModel();
+    this.setEditorHelpersVisible(original_helper_visibility_array);
+
+
+    this.renderByEditorCamera();
+
+
+    
     // output to download, should be somethings send to electron here
     zip.generateAsync({type:"blob"}).then(function (blob) { // 1) generate the zip file
       saveAs(blob, "hello.zip");                          // 2) trigger the download
