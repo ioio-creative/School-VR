@@ -14,6 +14,11 @@ const localizedData = {
     "Menu.Language.English": "English",
     "Menu.Language.TraditionalChinese": "繁體中文",
 
+    "Menu.CaptureImageLabel": "Capture Image",
+    "Menu.CaptureImage.Normal": "Normal",
+    "Menu.CaptureImage.360_2k": "360 (2K)",
+    "Menu.CaptureImage.360_4k": "360 (4K)",
+
     /* end of menu */
 
     /* prompt */
@@ -23,6 +28,8 @@ const localizedData = {
     "Prompt.AutenticationFailMessage": "Authentication failed. Please contact IOIO Creative or enter your license key.",
     "Alert.AutenticationFailMessage": "Authenication failed.",
     "Alert.AutenticationSuccessMessage": "Authentication succeeded.",
+    "Alert.CaptureSavedMessage": "Capture saved.",
+    "Alert.ProjectSavedMessage": "Project saved.",
 
     /* end of prompt */
 
@@ -136,15 +143,22 @@ const localizedData = {
     "Menu.Language.English": "English",
     "Menu.Language.TraditionalChinese": "繁體中文",
 
+    "Menu.CaptureImageLabel": "拍攝影像",
+    "Menu.CaptureImage.Normal": "長方",
+    "Menu.CaptureImage.360_2k": "360 (2K)",
+    "Menu.CaptureImage.360_4k": "360 (4K)",
+
     /* end of menu */
 
     /* prompt */
 
-    "Prompt.UnsavedWorkMessage": "您有未保存的更改，確定要離開嗎？",
+    "Prompt.UnsavedWorkMessage": "您有未儲存的更改，確定要離開嗎？",
     "Prompt.AutenticationFailTitle": "身份驗證",
     "Prompt.AutenticationFailMessage": "身份驗證失敗。請聯繫IOIO Creative或輸入您的許可證密鑰。",
     "Alert.AutenticationFailMessage": "身份驗證失敗。",
     "Alert.AutenticationSuccessMessage": "身份驗證成功。",
+    "Alert.CaptureSavedMessage": "拍攝儲存成功",
+    "Alert.ProjectSavedMessage": "専案儲存成功",
 
     /* end of prompt */
 

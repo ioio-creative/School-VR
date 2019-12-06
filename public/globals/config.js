@@ -19,6 +19,7 @@ appDirectory.appTempDirectory = myPath.join(app.getPath('appData'), `${appName}-
 appDirectory.appTempProjectsDirectory = myPath.join(appDirectory.appTempDirectory, `${appName}-Projects`);
 appDirectory.appTempAppWorkingDirectory = myPath.join(appDirectory.appTempDirectory, `${appName}-App-Working`);
 appDirectory.appTempWebContainerDirectory = myPath.join(appDirectory.appTempAppWorkingDirectory, 'web');
+appDirectory.appTempCapturesContainerDirectory = myPath.join(appDirectory.appTempAppWorkingDirectory, 'captures');
 
 //appDirectory.appAsarInstallationPath = myPath.join(app.getAppPath(), 'resources', 'app.asar');
 appDirectory.appAsarInstallationPath = myPath.join(app.getPath('appData'), '..', 'Local', 'Programs', app.getName(), 'resources', 'app.asar');
@@ -26,12 +27,33 @@ appDirectory.webServerRootDirectory = myPath.join(appDirectory.appAsarInstallati
 appDirectory.webServerFilesDirectory = myPath.join(appDirectory.appTempWebContainerDirectory, 'files');
 
 
+/* !!! Important !!! Directories to be created on app start-up */
+appDirectory.createOnStartUpDirectories = [
+  appDirectory.appProjectsDirectory,
+  appDirectory.appDataDirectory,
+  
+  appDirectory.appTempDirectory,
+  appDirectory.appTempProjectsDirectory,
+  appDirectory.appTempAppWorkingDirectory,
+  appDirectory.appTempWebContainerDirectory,
+  appDirectory.appTempCapturesContainerDirectory
+];
+
+/* !!! Important !!! Directories to be deleted on app close-down */
+appDirectory.deleteOnCloseDownDirectories = [
+  appDirectory.webServerFilesDirectory,
+  appDirectory.appTempCapturesContainerDirectory
+];
+
+
 const config = {
   appName: appName,
   appDirectory: appDirectory,
   webServerStaticFilesPathPrefix: 'files',
   schoolVrProjectArchiveExtensionWithLeadingDot: '.ivr',
-  jsonFileExtensionWithLeadingDot: '.json'
+  jsonFileExtensionWithLeadingDot: '.json',
+  captured360ImageExtendsion: '.png',
+  captured360VideoExtendsion: '.mp4',
 };
 
 // https://electronjs.org/docs/api/dialog

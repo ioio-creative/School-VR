@@ -4,7 +4,7 @@ import smalltalk from 'smalltalk';
 
 import DefaultLoading from 'components/loading/defaultLoading';
 
-import {getLocalizedDataSet} from 'globals/contexts/locale/languageContext';
+import {getLocalizedMessage} from 'globals/contexts/locale/languageContext';
 
 //import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 import {authenticateWithLicenseKeyPromise, getIsAuthenticated} from 'utils/authentication/auth';
@@ -34,19 +34,18 @@ class PrivateRoute extends React.Component {
       isAuthenticated, isLicenseKeyInputPrompted
     } = this.state;
     if (!isAuthenticated && !isLicenseKeyInputPrompted) {
-      const localizedDataSet = getLocalizedDataSet();
       const throwAuthenticationError = _ => { throw new Error('Authentication failed.'); };
       try {
         /**
          * Important:
          * if 'cancel' button is pressed, an error will be thrown ?
          */
-        const newLicenseKeyEntered = await smalltalk.prompt(localizedDataSet['Prompt.AutenticationFailTitle'], localizedDataSet['Prompt.AutenticationFailMessage'], '');
+        const newLicenseKeyEntered = await smalltalk.prompt(getLocalizedMessage('Prompt.AutenticationFailTitle'), getLocalizedMessage('Prompt.AutenticationFailMessage'), '');
         if (newLicenseKeyEntered) {
           const newIsAuthenticated = await authenticateWithLicenseKeyPromise(newLicenseKeyEntered);
 
           if (newIsAuthenticated) {
-            alert(localizedDataSet['Alert.AutenticationSuccessMessage']);
+            alert(getLocalizedMessage('Alert.AutenticationSuccessMessage'));
             this.setState({
               isAuthenticated: newIsAuthenticated,
               isLicenseKeyInputPrompted: true
@@ -58,7 +57,7 @@ class PrivateRoute extends React.Component {
           throwAuthenticationError();
         }
       } catch (err) {
-        alert(localizedDataSet['Alert.AutenticationFailMessage']);
+        alert(getLocalizedMessage('Alert.AutenticationFailMessage'));
         this.setState({
           isLicenseKeyInputPrompted: true
         });

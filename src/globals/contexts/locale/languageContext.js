@@ -32,8 +32,8 @@ const changeGlobalLanguageByCodePromise = async (newLanguageCode, isRequireSaveL
   await changeGlobalLanguagePromise(getLanguageFromLanguageCode(newLanguageCode), isRequireSaveLanguageToLocalFile);
 };
 
-const getLocalizedDataSet = _ => {
-  return localizedData[globalLanguage.code];
+const getLocalizedMessage = messageId => {
+  return localizedData[globalLanguage.code][messageId];
 };
 
 /* end of language settings */
@@ -130,7 +130,7 @@ function withLanguageContext(Component) {
 export {
   changeGlobalLanguagePromise,
   changeGlobalLanguageByCodePromise,
-  getLocalizedDataSet,
+  getLocalizedMessage,
   LanguageContextProvider,
   LanguageContextConsumer,
   LanguageContextMessagesConsumer,

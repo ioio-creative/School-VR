@@ -17,10 +17,11 @@ const jsoncParser = require('jsonc-parser');
 
 const mime = require('./utils/fileSystem/mime');
 const fileSystem = require('./utils/fileSystem/fileSystem');
+const { write360ImageToTempPromise } = require('./utils/captures/captures');
 const ProjectFile = require('./utils/saveLoadProject/ProjectFile');
 const { saveProjectToLocalAsync } = require('./utils/saveLoadProject/saveProject');
 const { loadProjectByProjectFilePathAsync, copyTempProjectDirectoryToExternalDirectoryAsync } = require('./utils/saveLoadProject/loadProject');
-const { openImageDialog, openGifDialog, openVideoDialog, openSchoolVrFileDialog, saveSchoolVrFileDialog, save360ImageDialog } =
+const { openImageDialog, openGifDialog, openVideoDialog, openSchoolVrFileDialog, saveSchoolVrFileDialog, save360ImageDialogPromise } =
   require('./utils/aframeEditor/openFileDialog');
 const { showYesNoQuestionMessageBox, showYesNoWarningMessageBox } = require('./utils/aframeEditor/showMessageBox');
 const { parseDataToSaveFormat } = require('./utils/saveLoadProject/parseDataToSaveFormat');
@@ -127,17 +128,8 @@ function createWindow() {
       await ProjectFile.deleteAllTempProjectDirectoriesAsync();
 
       // create App Data directories if they do not exist
-      const appDirectoryKeys = Object.keys(appDirectory).filter((appDirectoryKey) => {
-        return !([
-          'customizedAppDataFile',
-          'appAsarInstallationPath',
-          'webServerRootDirectory',
-          'webServerFilesDirectory'
-        ].includes(appDirectoryKey));
-      });
-      await forEach(appDirectoryKeys, async (appDirectoryKey) => {
-        const directoryPath = appDirectory[appDirectoryKey];
-        console.log('appDirectoryKey:', directoryPath);
+      await forEach(appDirectory.createOnStartUpDirectories, async (directoryPath) => {       
+        console.log('Directory created:', directoryPath);
         await fileSystem.createDirectoryIfNotExistsPromise(directoryPath);
       });
       console.log('App directories created.');
@@ -262,7 +254,11 @@ app.on('window-all-closed', async _ => {
 
   // delete any cached temp project files
   await ProjectFile.deleteAllTempProjectDirectoriesAsync();
-  await fileSystem.myDeletePromise(webServerFilesDirectory);
+  await forEach(appDirectory.deleteOnCloseDownDirectories, async (directoryPath) => {  
+    console.log('Directory deleted:', directoryPath);
+    await fileSystem.myDeletePromise(directoryPath);
+  });
+  console.log('App directories deleted.');
 
   const platform = process.platform.toLowerCase();
   if (platform !== 'darwin') {
@@ -698,9 +694,10 @@ ipcMain.on('isCurrentLoadedProject', (event, arg) => {
 });
 
 // window dialog
+// call back arguments (_, filePaths) "faking" error first approach, for easy promisification
 
 ipcMain.on('openImageDialog', (event, arg) => {
-  openImageDialog((filePaths) => {
+  openImageDialog((_, filePaths) => {
     event.sender.send('openImageDialogResponse', {
       data: {
         filePaths: filePaths
@@ -710,7 +707,7 @@ ipcMain.on('openImageDialog', (event, arg) => {
 });
 
 ipcMain.on('openGifDialog', (event, arg) => {
-  openGifDialog((filePaths) => {
+  openGifDialog((_, filePaths) => {
     event.sender.send('openGifDialogResponse', {
       data: {
         filePaths: filePaths
@@ -720,7 +717,7 @@ ipcMain.on('openGifDialog', (event, arg) => {
 });
 
 ipcMain.on('openVideoDialog', (event, arg) => {
-  openVideoDialog((filePaths) => {
+  openVideoDialog((_, filePaths) => {
     event.sender.send('openVideoDialogResponse', {
       data: {
         filePaths: filePaths
@@ -730,7 +727,7 @@ ipcMain.on('openVideoDialog', (event, arg) => {
 });
 
 ipcMain.on('openSchoolVrFileDialog', (event, arg) => {
-  openSchoolVrFileDialog((filePaths) => {
+  openSchoolVrFileDialog((_, filePaths) => {
     event.sender.send('openSchoolVrFileDialogResponse', {
       data: {
         filePaths: filePaths
@@ -740,7 +737,7 @@ ipcMain.on('openSchoolVrFileDialog', (event, arg) => {
 });
 
 ipcMain.on('saveSchoolVrFileDialog', (event, arg) => {
-  saveSchoolVrFileDialog((filePath) => {
+  saveSchoolVrFileDialog((_, filePath) => {
     event.sender.send('saveSchoolVrFileDialogResponse', {
       data: {
         filePath: filePath
@@ -996,28 +993,50 @@ ipcMain.on('setLicenseKey', async (event, arg) => {
 
 // 360 capture
 
-ipcMain.on('saveRaw360Capture', (event, arg) => {
-  save360ImageDialog(async (filePath) => {
-    if (!filePath) {
+ipcMain.on('saveRaw360Capture', async (event, arg) => {
+  // use let because I will have to use tmpImg in finally block
+  let tmpImgFilePath;  
+  const imgBase64Str = arg.imgBase64Str;
+
+  try {
+    tmpImgFilePath = await write360ImageToTempPromise(imgBase64Str);
+    const filePathToSave = await save360ImageDialogPromise();
+
+    console.log('tmpImgFilePath:', tmpImgFilePath);
+
+    if (!filePathToSave) {
       event.sender.send('saveRaw360CaptureResponse', {
-        err: null
+        err: null,
+        data: null
       });
       return;
     }
-    try {
-      const imgBase64Str = arg.imgBase64Str;    
-      await fileSystem.base64DecodePromise(filePath, imgBase64Str);
-      event.sender.send('saveRaw360CaptureResponse', {
-        err: null
-      });
-    } catch (err) {
-      console.error('saveRaw360Capture Error:');
-      console.error(err);
-      event.sender.send('saveRaw360CaptureResponse', {
-        err: err.toString()
+
+    await fileSystem.renamePromise(tmpImgFilePath, filePathToSave);
+    event.sender.send('saveRaw360CaptureResponse', {
+      err: null,
+      data: {
+        filePath: filePathToSave
+      }
+    });
+  } catch (err) {
+    console.error('saveRaw360Capture Error:');
+    console.error(err);
+    event.sender.send('saveRaw360CaptureResponse', {
+      err: err.toString()
+    });
+  } finally {
+    if (tmpImgFilePath) {
+      const tmpImgDirPath = myPath.dirname(tmpImgFilePath);
+      fileSystem.myDelete(tmpImgDirPath, (err) => {
+        if (err) { 
+          // silence error
+          console.error('saveRaw360Capture deleting temp image Error:');
+          console.error(err);
+        }
       });
     }
-  });  
+  }
 });
 
 /* end of ipc main event listeners */

@@ -17,7 +17,7 @@ import {TimelineMax, TweenMax, Power0} from 'gsap';
 import {saveAs} from 'file-saver';
 
 import {mediaType} from 'globals/config';
-import {getLocalizedDataSet} from 'globals/contexts/locale/languageContext';
+import {getLocalizedMessage} from 'globals/contexts/locale/languageContext';
 
 //import bytesToBase64 from 'utils/js/uint8ToBase64';
 
@@ -44,7 +44,18 @@ const entityModel = {
   'a-camera': ACamera,
   'a-sky': ASky,
   'a-navigation': ANavigation,
-}
+};
+
+const capture360OutputResolutionTypeToWidthMap = {
+  '2k': 2048,
+  '4k': 4096
+};
+
+const capture360OutputResolutionTypes = {};
+Object.keys(capture360OutputResolutionTypeToWidthMap).forEach(type => {
+  capture360OutputResolutionTypes[type] = type;
+});
+
 //
 const SceneContext = React.createContext();
 // const jsonCopy = (json) => JSON.parse(JSON.stringify(json));
@@ -280,7 +291,7 @@ class SceneContextProvider extends Component {
               type: "a-camera",
               id: cameraId,
               el: cameraEl,
-              name: getLocalizedDataSet()[cameraModel._messageId],  //"Camera",
+              name: getLocalizedMessage(cameraModel._messageId),  //"Camera",
               timelines: [],
               components: {
                 id: cameraId,
@@ -1125,7 +1136,7 @@ class SceneContextProvider extends Component {
     const newElement = {
       type: type,
       id: elementId,
-      name: getLocalizedDataSet()[objectModel._messageId],  //type.split('-')[1],
+      name: getLocalizedMessage(objectModel._messageId),  //type.split('-')[1],
       element: 'a-entity',
       // components: {
       //   id: elementId,
@@ -1530,37 +1541,48 @@ class SceneContextProvider extends Component {
 
   }
 
-  takeSnapshot() {
-    const editor = this.editor;
-    const renderer = editor.sceneEl.renderer;
-    const scene = editor.sceneEl.object3D;
-    const camera = editor.currentCameraEl.getObject3D('camera');
-    const width = renderer.domElement.width;
-    const height = renderer.domElement.height;    
-
+  doSomethingBetweenHideShowOfEditorHelpers(functionToCall) {
     // hide and store original editor helpers visibility
     const original_helper_visibility_array = this.hideEditorHelpers();
+    this.hideEditorCameraModel();
 
-    // render with editor helpers hidden
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
-    renderer.render(scene, camera);
+    const returnedResult = functionToCall();
 
     // restore original editor helpers visibility
+    this.showEditorCameraModel();
     this.setEditorHelpersVisible(original_helper_visibility_array);
 
-    // canvas.width = width;
-    // canvas.height = height;
-    // if (camera.aspect > 1) {
-    //   this.cameraPreviewScreenEl.setAttribute( 'width', canvas.width / 270 * 0.6 );
-    //   this.cameraPreviewScreenEl.setAttribute( 'height', canvas.height / 270 * 0.6 );
-    // } else {
-    //   this.cameraPreviewScreenEl.setAttribute( 'width', canvas.width / newHeight * 0.6 );
-    //   this.cameraPreviewScreenEl.setAttribute( 'height', canvas.height / newHeight * 0.6 );
-    // }
-    const snapshot = renderer.domElement.toDataURL();
     this.renderByEditorCamera();
-    return snapshot;
+
+    return returnedResult;
+  }
+  takeSnapshot() {
+    return this.doSomethingBetweenHideShowOfEditorHelpers(_ => {
+      const editor = this.editor;
+      const renderer = editor.sceneEl.renderer;
+      const scene = editor.sceneEl.object3D;
+      const camera = editor.currentCameraEl.getObject3D('camera');
+      const width = renderer.domElement.width;
+      const height = renderer.domElement.height;
+
+      // render with editor helpers hidden
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.render(scene, camera);
+
+      // canvas.width = width;
+      // canvas.height = height;
+      // if (camera.aspect > 1) {
+      //   this.cameraPreviewScreenEl.setAttribute( 'width', canvas.width / 270 * 0.6 );
+      //   this.cameraPreviewScreenEl.setAttribute( 'height', canvas.height / 270 * 0.6 );
+      // } else {
+      //   this.cameraPreviewScreenEl.setAttribute( 'width', canvas.width / newHeight * 0.6 );
+      //   this.cameraPreviewScreenEl.setAttribute( 'height', canvas.height / newHeight * 0.6 );
+      // }
+
+      const snapshotUrl = renderer.domElement.toDataURL();
+      return snapshotUrl;
+    });
   }
   stopSlide() {
     this.setState((prevState) => {
@@ -1623,50 +1645,32 @@ class SceneContextProvider extends Component {
     const base64Str = snapshot.split(',')[1];
     return base64Str;    
   }
-  captureEquirectangularImage() {
-    const editor = this.editor;
-    const renderer = editor.sceneEl.renderer;
-    const scene = editor.sceneEl.object3D;
-    const camera = editor.currentCameraEl.getObject3D('camera');
+  captureEquirectangularImage(resolutionType) {
+    return this.doSomethingBetweenHideShowOfEditorHelpers(_ => {
+      const resolutionWidth = capture360OutputResolutionTypeToWidthMap[resolutionType];
 
-    const original_helper_visibility_array = this.hideEditorHelpers();
+      const editor = this.editor;
+      const renderer = editor.sceneEl.renderer;
+      const scene = editor.sceneEl.object3D;
+      const camera = editor.currentCameraEl.getObject3D('camera');
 
-    this.hideEditorCameraModel();
+      const THREE = window.AFRAME.THREE;
+      const cubeCamera = new THREE.CubeCamera( .005, 10000, resolutionWidth );
+      const equiUnmanaged = new CubemapToEquirectangular( renderer, false );
 
+      // set output size
+      equiUnmanaged.setSize(resolutionWidth, resolutionWidth / 2);
+      
+      cubeCamera.position.copy(camera.getWorldPosition());
+      cubeCamera.updateCubeMap( renderer, scene );
 
+      //const isDownloadImgFromFrontEnd = true;
+      const isDownloadImgFromFrontEnd = false;
+      const imgData = equiUnmanaged.convert( cubeCamera, isDownloadImgFromFrontEnd );
 
-
-
-
-    const THREE = window.AFRAME.THREE;
-    const cubeCamera = new THREE.CubeCamera( .005, 10000, 2048 );
-    const equiUnmanaged = new CubemapToEquirectangular( renderer, false );
-
-
-    // set output size
-    equiUnmanaged.setSize(2048, 1024);
-    
-
-    cubeCamera.position.copy(camera.getWorldPosition());
-    cubeCamera.updateCubeMap( renderer, scene );
-
-    //const isDownloadImgFromFrontEnd = true;
-    const isDownloadImgFromFrontEnd = false;
-    const imgData = equiUnmanaged.convert( cubeCamera, isDownloadImgFromFrontEnd );
-
-    
-    const imgBase64Str = this.convertEquirectangularImageDataToBase64Str(imgData);
-
-
-    this.showEditorCameraModel();
-    this.setEditorHelpersVisible(original_helper_visibility_array);
-
-
-    this.renderByEditorCamera();
-
-
-
-    return imgBase64Str;
+      const imgBase64Str = this.convertEquirectangularImageDataToBase64Str(imgData);
+      return imgBase64Str;
+    });    
   }
   captureEquirectangularVideo() {
     const editor = this.editor;
@@ -2010,7 +2014,9 @@ class SceneContextProvider extends Component {
           updateEditor: this.updateEditor,
           toggleEditor: this.toggleEditor,
 
+          takeSnapshot: this.takeSnapshot, 
           captureEquirectangularImage: this.captureEquirectangularImage,
+          captureEquirectangularVideo: this.captureEquirectangularVideo,
           // variables, should use functions to return?
           // appName: this.state.appName,
           // projectName: this.state.projectName,
@@ -2032,5 +2038,7 @@ function withSceneContext(Component) {
 export {
   SceneContext,
   SceneContextProvider,
-  withSceneContext
+  withSceneContext,
+
+  capture360OutputResolutionTypes,
 };

@@ -42,7 +42,10 @@ let config = {
   schoolVrProjectArchiveExtensionWithLeadingDot: schoolVrProjectArchiveExtensionWithLeadingDot,
   jsonFileExtensionWithLeadingDot: '.json',
 
-  defaultLanguage: languages.traditionalChinese
+  defaultLanguage: languages.traditionalChinese,
+
+  captured360ImageExtendsion: '.png',
+  captured360VideoExtendsion: '.mp4'
 };
 let appDirectory = {};
 const setAppData = (appData, callBack = null) => {

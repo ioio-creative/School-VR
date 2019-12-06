@@ -18,8 +18,6 @@ import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/
 import routes from 'globals/routes';
 //import config from 'globals/config';
 
-import ipcHelper from 'utils/ipc/ipcHelper';
-
 import iconCone from 'media/icons/cone.svg';
 import iconCube from 'media/icons/cube.svg';
 import iconCylinder from 'media/icons/cylinder.svg';
@@ -37,8 +35,6 @@ import iconResetView from 'media/icons/resetview.svg';
 import iconPreview from 'media/icons/preview.svg';
 //import iconShare from 'media/icons/share.svg';
 
-import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
-
 //const Events = require('vendor/Events.js');
 
 class ButtonsPanel extends Component {
@@ -50,8 +46,7 @@ class ButtonsPanel extends Component {
     [
       'toggleEditor',
       'addNewEntity',
-      'resetView',
-      'captureEquirectangularImage'
+      'resetView'      
     ].forEach(methodName => {
       this[methodName] = this[methodName].bind(this);
     });
@@ -99,20 +94,6 @@ class ButtonsPanel extends Component {
       sceneContext
     } = this.props;
     sceneContext.resetView();
-  }
-  captureEquirectangularImage() {
-    const {
-      sceneContext
-    } = this.props;
-    const imgBase64Str = sceneContext.captureEquirectangularImage();    
-
-    ipcHelper.saveRaw360Capture(imgBase64Str, (err, data) => {
-      if (err) {
-        handleErrorWithUiDefault(err);
-        return;
-      }
-      alert('yea');
-    });
   }
 
   /* end of button click handlers */
@@ -212,9 +193,7 @@ class ButtonsPanel extends Component {
                   title={messages['PresentationPreparationPanel.PlayTimelineTooltip']}
                 >
                   <img src={iconPreview} alt={messages['PresentationPreparationPanel.PlayTimelineTooltip']} />
-                </button>
-
-                <button onClick={this.captureEquirectangularImage}>wow</button>
+                </button>                
 
                 <Link className="button-present" to={routes.presenterWithProjectFilePathQuery(props.currentLoadedProjectPath)}>
                   <svg viewBox="0 0 107.87 42.65" xmlSpace="preserve">

@@ -14,7 +14,7 @@ function jsonCopy(src) {
   return JSON.parse(JSON.stringify(src));
 }
 
-function rgba2hex(rgb){
+function rgba2hex(rgb) {
   if (!rgb) return '#FFFFFF';
   const parsedrgb = rgb.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
   return (parsedrgb && parsedrgb.length === 4) ? "#" +
@@ -26,15 +26,15 @@ function rgba2hex(rgb){
 function isClockwise(vertices=[]) {
   const len = vertices.length;
   let sum = vertices.map(({x, y}, index) => {
-      let nextIndex = index + 1;
-      if (nextIndex === len) nextIndex = 0;
+    let nextIndex = index + 1;
+    if (nextIndex === len) nextIndex = 0;
 
-      return {
-          x1: x,
-          x2: vertices[nextIndex].x,
-          y1: x,
-          y2: vertices[nextIndex].x
-      }
+    return {
+      x1: x,
+      x2: vertices[nextIndex].x,
+      y1: x,
+      y2: vertices[nextIndex].x
+    };
   });
   console.log(sum);
   sum = sum.map(({ x1, x2, y1, y2}) => ((x2 - x1) * (y1 + y2)));

@@ -2,9 +2,9 @@ import React, {Component} from 'react';
 // import SystemPanel from 'containers/aframeEditor/homePage/systemPanel';
 import {withRouter, Prompt} from 'react-router-dom';
 
-import {withSceneContext} from 'globals/contexts/sceneContext';
-import {LanguageContextConsumer} from 'globals/contexts/locale/languageContext';
-import {languages} from 'globals/config';
+import {withSceneContext, capture360OutputResolutionTypes} from 'globals/contexts/sceneContext';
+import {LanguageContextConsumer, getLocalizedMessage} from 'globals/contexts/locale/languageContext';
+import config, {languages} from 'globals/config';
 
 import MenuComponent from 'components/menuComponent';
 
@@ -24,6 +24,7 @@ import Editor from 'vendor/editor.js';
 // import {TweenMax, TimelineMax, Linear} from 'gsap';
 
 import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
+import downloadUrl from 'utils/downloadUrl';
 
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 import ipcHelper from 'utils/ipc/ipcHelper';
@@ -58,7 +59,11 @@ function EditorPageMenu(props) {
     handleSaveAsProjectButtonClick,
     handleExitButtonClick,
     handleUndoButtonClick,
-    handleRedoButtonClick
+    handleRedoButtonClick,
+
+    handleCaptureNormalImageClick,
+    handleCapture360_2kImageClick,
+    handleCapture360_4kImageClick,
   } = props;
 
   async function handleBtnEnglishClickPromise() {
@@ -68,6 +73,8 @@ function EditorPageMenu(props) {
   async function handleBtnTraditionalChineseClickPromise() {
     await changeLanguagePromises[languages.traditionalChinese.code]();
   }
+
+  const isEditorOpened = sceneContext.editor && sceneContext.editor.opened;
 
   const menuButtons = [
     {
@@ -116,7 +123,7 @@ function EditorPageMenu(props) {
       ]
     }
   ];
-  if (sceneContext.editor && sceneContext.editor.opened) {
+  if (isEditorOpened) {
     menuButtons.push({
       label: messages["Menu.EditLabel"],
       children: [
@@ -148,6 +155,25 @@ function EditorPageMenu(props) {
       ]
     }
   );
+  if (isEditorOpened) {
+    menuButtons.push({
+      label: messages["Menu.CaptureImageLabel"],
+      children: [
+        {
+          label: messages["Menu.CaptureImage.Normal"],          
+          onClick: handleCaptureNormalImageClick          
+        },
+        {
+          label: messages["Menu.CaptureImage.360_2k"],          
+          onClick: handleCapture360_2kImageClick
+        },
+        {
+          label: messages["Menu.CaptureImage.360_4k"],          
+          onClick: handleCapture360_4kImageClick
+        }
+      ]
+    });
+  }
   return (
     <MenuComponent
       // projectName="Untitled_1"
@@ -176,6 +202,7 @@ class EditorPage extends Component {
       'loadProject',
       'saveProject',
       'saveProjectAs',
+      'capture360Image',
 
       'handleHomeButtonClick',
       'handleNewProjectButtonClick',
@@ -185,6 +212,11 @@ class EditorPage extends Component {
       'handleExitButtonClick',
       'handleUndoButtonClick',
       'handleRedoButtonClick',
+      
+      'handleCaptureNormalImageClick',
+      'handleCapture360_2kImageClick',
+      'handleCapture360_4kImageClick',
+      
       'onEditorLoad'
     ].forEach(methodName => {
       this[methodName] = this[methodName].bind(this);
@@ -304,7 +336,7 @@ class EditorPage extends Component {
       }
 
       const projectName = fileHelper.getFileNameWithoutExtension(projectFilePath);
-      alert(`Project ${projectName} saved!`);
+      alert(`${getLocalizedMessage('Alert.ProjectSavedMessage')}\n${projectName}`);
     });
   }
 
@@ -317,6 +349,19 @@ class EditorPage extends Component {
 
       const filePath = data.filePath;
       this.saveProject(filePath);
+    });
+  }
+
+  capture360Image(resolutionType) {
+    const imgBase64Str = this.props.sceneContext.captureEquirectangularImage(resolutionType);        
+    ipcHelper.saveRaw360Capture(imgBase64Str, (err, data) => {
+      if (err) {
+        handleErrorWithUiDefault(err);
+        return;
+      }
+      if (data && data.filePath) {
+        alert(`${getLocalizedMessage('Alert.CaptureSavedMessage')}\n${data.filePath}`);
+      }      
     });
   }
 
@@ -382,6 +427,19 @@ class EditorPage extends Component {
     this.props.sceneContext.redo();
   }
 
+  handleCaptureNormalImageClick(event) {
+    const snapShotUrl = this.props.sceneContext.takeSnapshot();    
+    downloadUrl(snapShotUrl, `snapShot-${Date.now()}${config.captured360ImageExtendsion}`);
+  }
+
+  handleCapture360_2kImageClick(event) {    
+    this.capture360Image(capture360OutputResolutionTypes['2k']);
+  }
+  
+  handleCapture360_4kImageClick(event) {
+    this.capture360Image(capture360OutputResolutionTypes['4k']);
+  }
+
   /* end of event handlers */
 
 
@@ -418,6 +476,10 @@ class EditorPage extends Component {
                 handleExitButtonClick={this.handleExitButtonClick}
                 handleUndoButtonClick={this.handleUndoButtonClick}
                 handleRedoButtonClick={this.handleRedoButtonClick}
+
+                handleCaptureNormalImageClick={this.handleCaptureNormalImageClick}
+                handleCapture360_2kImageClick={this.handleCapture360_2kImageClick}
+                handleCapture360_4kImageClick={this.handleCapture360_4kImageClick}
               />
             )
           } />
