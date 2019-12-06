@@ -1580,8 +1580,8 @@ class SceneContextProvider extends Component {
       //   this.cameraPreviewScreenEl.setAttribute( 'height', canvas.height / newHeight * 0.6 );
       // }
 
-      const snapshotUrl = renderer.domElement.toDataURL();
-      return snapshotUrl;
+      const snapshotDataUrl = renderer.domElement.toDataURL();
+      return snapshotDataUrl;
     });
   }
   stopSlide() {
@@ -1806,7 +1806,7 @@ class SceneContextProvider extends Component {
     
     // output to download, should be somethings send to electron here
     zip.generateAsync({type:"blob"}).then(function (blob) { // 1) generate the zip file
-      saveAs(blob, "hello.zip");                          // 2) trigger the download
+      saveAs(blob, "hello.zip");                         // 2) trigger the download
     }, function (err) {
       console.error(err);
     });

@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 // import SystemPanel from 'containers/aframeEditor/homePage/systemPanel';
 import {withRouter, Prompt} from 'react-router-dom';
+import {saveAs} from 'file-saver';
 
 import {withSceneContext, capture360OutputResolutionTypes} from 'globals/contexts/sceneContext';
 import {LanguageContextConsumer, getLocalizedMessage} from 'globals/contexts/locale/languageContext';
@@ -24,7 +25,7 @@ import Editor from 'vendor/editor.js';
 // import {TweenMax, TimelineMax, Linear} from 'gsap';
 
 import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
-import downloadUrl from 'utils/downloadUrl';
+import dataUrlToBlob from 'utils/blobs/dataUrlToBlob';
 
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 import ipcHelper from 'utils/ipc/ipcHelper';
@@ -428,8 +429,9 @@ class EditorPage extends Component {
   }
 
   handleCaptureNormalImageClick(event) {
-    const snapShotUrl = this.props.sceneContext.takeSnapshot();    
-    downloadUrl(snapShotUrl, `snapShot-${Date.now()}${config.captured360ImageExtendsion}`);
+    const snapshotDataUrl = this.props.sceneContext.takeSnapshot();
+    const snapshotBlob = dataUrlToBlob(snapshotDataUrl);  
+    saveAs(snapshotBlob, `snapShot-${Date.now()}${config.captured360ImageExtendsion}`);
   }
 
   handleCapture360_2kImageClick(event) {    
