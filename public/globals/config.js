@@ -52,8 +52,8 @@ const config = {
   webServerStaticFilesPathPrefix: 'files',
   schoolVrProjectArchiveExtensionWithLeadingDot: '.ivr',
   jsonFileExtensionWithLeadingDot: '.json',
-  captured360ImageExtendsion: '.png',
-  captured360VideoExtendsion: '.mp4',
+  captured360ImageExtension: '.png',
+  captured360VideoExtension: '.mp4',
 };
 
 // https://electronjs.org/docs/api/dialog

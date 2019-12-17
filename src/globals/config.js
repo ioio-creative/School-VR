@@ -44,8 +44,9 @@ let config = {
 
   defaultLanguage: languages.traditionalChinese,
 
-  captured360ImageExtendsion: '.png',
-  captured360VideoExtendsion: '.mp4'
+  captured360ImageExtension: '.png',
+  captured360VideoExtension: '.mp4',
+  captured360VideoFps: 30
 };
 let appDirectory = {};
 const setAppData = (appData, callBack = null) => {

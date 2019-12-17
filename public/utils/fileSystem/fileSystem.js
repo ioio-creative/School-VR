@@ -527,12 +527,18 @@ const createAndOverwriteDirectoryIfExistsPromise = promisify(createAndOverwriteD
  */
 const readdir = (dirPath, callBack) => {
   fs.readdir(dirPath, (err, fileNames) => {
-    handleGeneralErrAndData(callBack, err, fileNames);
+    if (err) {
+      handleGeneralErr(callBack, err);
+      return;
+    }
+
+    const absolutePaths = fileNames.map(fileName => myPath.join(dirPath, fileName));
+    handleGeneralErrAndData(callBack, null, absolutePaths);
   });
 };
 
 const readdirSync = (dirPath) => {
-  return fs.readdirSync(dirPath);
+  return fs.readdirSync(dirPath).map(fileName => myPath.join(dirPath, fileName));
 }
 
 const readdirPromise = promisify(readdir);
@@ -545,18 +551,33 @@ const readdirPromise = promisify(readdir);
  * https://nodejs.org/dist/latest-v10.x/docs/api/fs.html#fs_class_fs_stats
  */
 const readdirWithStatPromise = async (dirPath) => {
-  const fileNames = await readdirPromise(dirPath);
+  const absolutePaths = await readdirPromise(dirPath);
   if (!Array.isArray(fileNames) || fileNames.length === 0) {
     return [];
   }
-
-  const absolutePaths = fileNames.map(fileName => myPath.join(dirPath, fileName));
+  
   const fileStatObjs = await map(absolutePaths, async (fileAbsolutePath) => {
     return await statPromise(fileAbsolutePath);
   });
 
   return fileStatObjs;
 }
+
+// https://stackoverflow.com/questions/44199883/how-do-i-get-a-list-of-files-with-specific-file-extension-using-node-js
+const readdirWithExtensionFilter = (dirPath, extensionWithDot, callBack) => {
+  fs.readdir(dirPath, (err, fileNames) => {
+    if (err) {
+      handleGeneralErr(callBack, err);
+      return;
+    }
+
+    const extensionWithDotLowerCase = extensionWithDot.toLowerCase();
+    const absolutePathsFiltered = fileNames.map(fileName => myPath.getFileExtensionWithLeadingDot(fileName).toLowerCase() === extensionWithDotLowerCase);
+    handleGeneralErrAndData(callBack, null, absolutePathsFiltered);
+  });
+}
+
+const readdirWithExtensionFilterPromise = promisify(readdirWithExtensionFilter);
 
 /* end of directory api */
 
@@ -660,6 +681,8 @@ module.exports = {
   readdirSync,
   readdirPromise,
   readdirWithStatPromise,
+  readdirWithExtensionFilter,
+  readdirWithExtensionFilterPromise,
   //deleteDirectorySafe,
   //deleteDirectorySafeSync,
 

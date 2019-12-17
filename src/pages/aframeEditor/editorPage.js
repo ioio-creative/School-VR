@@ -39,7 +39,7 @@ import './editorPage.css';
 import fileHelper from 'utils/fileHelper/fileHelper';
 import PreviewPanel from 'containers/aframeEditor/homePage/previewPanel';
 const Events = require('vendor/Events.js');
-//const uuid = require('uuid/v1');
+const uuid = require('uuid/v1');
 
 // const jsonSchemaValidator = require('jsonschema').Validator;
 // const validator = new jsonSchemaValidator();
@@ -65,6 +65,8 @@ function EditorPageMenu(props) {
     handleCaptureNormalImageClick,
     handleCapture360_2kImageClick,
     handleCapture360_4kImageClick,
+    handleCapture360_2kVideoClick,
+    handleCapture360_4kVideoClick,
   } = props;
 
   async function handleBtnEnglishClickPromise() {
@@ -174,6 +176,20 @@ function EditorPageMenu(props) {
         }
       ]
     });
+
+    menuButtons.push({
+      label: messages["Menu.CaptureVideoLabel"],
+      children: [
+        {
+          label: messages["Menu.CaptureVideo.360_2k"],          
+          onClick: handleCapture360_2kVideoClick
+        },
+        {
+          label: messages["Menu.CaptureVideo.360_4k"],          
+          onClick: handleCapture360_4kVideoClick
+        }
+      ]
+    });
   }
   return (
     <MenuComponent
@@ -204,6 +220,7 @@ class EditorPage extends Component {
       'saveProject',
       'saveProjectAs',
       'capture360Image',
+      'capture360Video',
 
       'handleHomeButtonClick',
       'handleNewProjectButtonClick',
@@ -217,6 +234,8 @@ class EditorPage extends Component {
       'handleCaptureNormalImageClick',
       'handleCapture360_2kImageClick',
       'handleCapture360_4kImageClick',
+      'handleCapture360_2kVideoClick',
+      'handleCapture360_4kVideoClick',
       
       'onEditorLoad'
     ].forEach(methodName => {
@@ -366,6 +385,18 @@ class EditorPage extends Component {
     });
   }
 
+  capture360Video(resolutionType, fps) {
+    const vidoeUuid = uuid();
+    this.props.sceneContext.captureEquirectangularVideo(resolutionType, fps, (currentFrame, totalFrame, imgBase64Str) => {
+      ipcHelper.saveRaw360CaptureForVideo(vidoeUuid, fps, currentFrame, totalFrame, imgBase64Str, (err, data) => {
+        if (err) {
+          handleErrorWithUiDefault(err);
+          return;
+        }
+      });
+    });
+  }
+
   /* end of methods */
 
 
@@ -431,7 +462,7 @@ class EditorPage extends Component {
   handleCaptureNormalImageClick(event) {
     const snapshotDataUrl = this.props.sceneContext.takeSnapshot();
     const snapshotBlob = dataUrlToBlob(snapshotDataUrl);  
-    saveAs(snapshotBlob, `snapShot-${Date.now()}${config.captured360ImageExtendsion}`);
+    saveAs(snapshotBlob, `snapShot-${Date.now()}${config.captured360ImageExtension}`);
   }
 
   handleCapture360_2kImageClick(event) {    
@@ -440,6 +471,14 @@ class EditorPage extends Component {
   
   handleCapture360_4kImageClick(event) {
     this.capture360Image(capture360OutputResolutionTypes['4k']);
+  }
+
+  handleCapture360_2kVideoClick(event) {    
+    this.capture360Video(capture360OutputResolutionTypes['2k'], config.captured360VideoFps);
+  }
+  
+  handleCapture360_4kVideoClick(event) {
+    this.capture360Video(capture360OutputResolutionTypes['4k'], config.captured360VideoFps);
   }
 
   /* end of event handlers */
@@ -482,6 +521,8 @@ class EditorPage extends Component {
                 handleCaptureNormalImageClick={this.handleCaptureNormalImageClick}
                 handleCapture360_2kImageClick={this.handleCapture360_2kImageClick}
                 handleCapture360_4kImageClick={this.handleCapture360_4kImageClick}
+                handleCapture360_2kVideoClick={this.handleCapture360_2kVideoClick}
+                handleCapture360_4kVideoClick={this.handleCapture360_4kVideoClick}
               />
             )
           } />

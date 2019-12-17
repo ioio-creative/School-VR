@@ -370,6 +370,16 @@ function saveRaw360Capture(imgBase64Str, callBack) {
   });
 }
 
+function saveRaw360CaptureForVideo(videoUuid, fps, currentFrame, totalFrame, imgBase64Str, callBack) {
+  generalIpcCall('saveRaw360CaptureForVideo', callBack, {
+    videoUuid: videoUuid,
+    fps: fps,
+    currentFrame: currentFrame,
+    totalFrame: totalFrame,
+    imgBase64Str: imgBase64Str    
+  });
+}
+
 /* end of 360 capture */
 
 
@@ -450,4 +460,5 @@ export default {
 
   // 360 capture
   saveRaw360Capture,
+  saveRaw360CaptureForVideo,
 };

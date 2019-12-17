@@ -18,6 +18,10 @@ const localizedData = {
     "Menu.CaptureImage.Normal": "Normal",
     "Menu.CaptureImage.360_2k": "360 (2K)",
     "Menu.CaptureImage.360_4k": "360 (4K)",
+    
+    "Menu.CaptureVideoLabel": "Capture Video",
+    "Menu.CaptureVideo.360_2k": "360 (2K)",
+    "Menu.CaptureVideo.360_4k": "360 (4K)",
 
     /* end of menu */
 
@@ -143,10 +147,14 @@ const localizedData = {
     "Menu.Language.English": "English",
     "Menu.Language.TraditionalChinese": "繁體中文",
 
-    "Menu.CaptureImageLabel": "拍攝影像",
+    "Menu.CaptureImageLabel": "拍攝圖片",
     "Menu.CaptureImage.Normal": "長方",
     "Menu.CaptureImage.360_2k": "360 (2K)",
     "Menu.CaptureImage.360_4k": "360 (4K)",
+
+    "Menu.CaptureVideoLabel": "拍攝視頻",
+    "Menu.CaptureVideo.360_2k": "360 (2K)",
+    "Menu.CaptureVideo.360_4k": "360 (4K)",
 
     /* end of menu */
 

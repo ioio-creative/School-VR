@@ -14,18 +14,17 @@ import ASky from 'utils/aframeEditor/aSky';
 import AVideo from 'utils/aframeEditor/aVideo';
 import ACamera from 'utils/aframeEditor/aCamera';
 import {TimelineMax, TweenMax, Power0} from 'gsap';
-import {saveAs} from 'file-saver';
 
 import {mediaType} from 'globals/config';
 import {getLocalizedMessage} from 'globals/contexts/locale/languageContext';
 
 //import bytesToBase64 from 'utils/js/uint8ToBase64';
+// This pixel-wise implementation is not as efficient as SceneContextProvider.convertEquirectangularImageDataToBase64Str
 
 const CubemapToEquirectangular = require('three.cubemap-to-equirectangular');
 const mergeJSON = require('deepmerge').default;
 const Events = require('vendor/Events.js');
 const uuid_v1 = require('uuid/v1');
-const JSZip = require("jszip");
 const uuid = _=> 'uuid_' + uuid_v1().replace(/-/g, '_');
 
 const entityModel = {
@@ -181,6 +180,7 @@ class SceneContextProvider extends Component {
       'hideEditorHelpers',
       'setEditorHelpersVisible',
       'convertEquirectangularImageDataToBase64Str',
+      'captureEquirectangularImageInternal',
       'captureEquirectangularImage',
       'captureEquirectangularVideo'
     ].forEach(methodName => {
@@ -1645,171 +1645,74 @@ class SceneContextProvider extends Component {
     const base64Str = snapshot.split(',')[1];
     return base64Str;    
   }
-  captureEquirectangularImage(resolutionType) {
-    return this.doSomethingBetweenHideShowOfEditorHelpers(_ => {
-      const resolutionWidth = capture360OutputResolutionTypeToWidthMap[resolutionType];
+  captureEquirectangularImageInternal(resolutionType) {
+    const resolutionWidth = capture360OutputResolutionTypeToWidthMap[resolutionType];
 
-      const editor = this.editor;
-      const renderer = editor.sceneEl.renderer;
-      const scene = editor.sceneEl.object3D;
-      const camera = editor.currentCameraEl.getObject3D('camera');
-
-      const THREE = window.AFRAME.THREE;
-      const cubeCamera = new THREE.CubeCamera( .005, 10000, resolutionWidth );
-      const equiUnmanaged = new CubemapToEquirectangular( renderer, false );
-
-      // set output size
-      equiUnmanaged.setSize(resolutionWidth, resolutionWidth / 2);
-      
-      cubeCamera.position.copy(camera.getWorldPosition());
-      cubeCamera.updateCubeMap( renderer, scene );
-
-      //const isDownloadImgFromFrontEnd = true;
-      const isDownloadImgFromFrontEnd = false;
-      const imgData = equiUnmanaged.convert( cubeCamera, isDownloadImgFromFrontEnd );
-
-      const imgBase64Str = this.convertEquirectangularImageDataToBase64Str(imgData);
-      return imgBase64Str;
-    });    
-  }
-  captureEquirectangularVideo() {
     const editor = this.editor;
     const renderer = editor.sceneEl.renderer;
     const scene = editor.sceneEl.object3D;
     const camera = editor.currentCameraEl.getObject3D('camera');
-    const width = renderer.domElement.width;
-    const height = renderer.domElement.height;
 
-
-    const timeline = this.state.animationTimeline;
-
-
-    const equiUnmanaged = new CubemapToEquirectangular( renderer, false );
-    equiUnmanaged.setSize(2048, 1024);
-
-    const original_helper_visibility_array = this.hideEditorHelpers();
-
-    this.hideEditorCameraModel();
-
-
-
-
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
-    renderer.render(scene, camera);
-
-    // console.log(this.editor);
-    // console.log(window.AFRAME);
-    // console.log(window.AFRAME.THREE);
-    // debugger;
     const THREE = window.AFRAME.THREE;
-    const cubeCamera = new THREE.CubeCamera( .005, 10000, 2048 );
-    // equi.convert ( camera, scene );
-    // const snapshot = [];
-    const zip = new JSZip();
-
-
-
+    const cubeCamera = new THREE.CubeCamera( .005, 10000, resolutionWidth );
+    const equiUnmanaged = new CubemapToEquirectangular( renderer, false );
     
-
-
-
-
-    // let snapshot;
-    if (timeline) {
-      // debugger;
-      const totalTime = Math.round(timeline.duration() * 100) / 100;
-      const fps = 30;
-      const totalFrame = Math.floor(totalTime * fps);
-      let currentFrame = 0;
-      console.log('totalFrame:', totalFrame);
-
-      ////// testing use //////
-      // timeline.seek(totalTime, false);
-      // cubeCamera.position.copy(editor.currentCameraEl.getAttribute('position'));
-      // cubeCamera.updateCubeMap( renderer, scene );
-      // const imgData = equiUnmanaged.convert( cubeCamera, false );
-
-      // const canvas = document.createElement("canvas");
-      // canvas.width = imgData.width;
-      // canvas.height = imgData.height;
-      // const context = canvas.getContext("2d");
-      // context.putImageData(imgData, 0, 0);
-
-      // const snapshot = canvas.toDataURL();
-      // const base64Str = snapshot.split(',')[1];
-      // zip.file(`test.png`, base64Str, {base64: true});
-      ////// testing use end //////
-      // debugger;
-      ////// real capture //////
-      timeline.pause();
-      while (currentFrame <= totalFrame) {
-        const currentTime = currentFrame / fps;
-        timeline.seek(currentTime, false);
-        camera.updateProjectionMatrix();
-        renderer.render(scene, camera);
-        // cubeCamera.position.copy(editor.currentCameraEl.getAttribute('position'));
-        cubeCamera.position.copy(camera.getWorldPosition());
-        cubeCamera.updateCubeMap( renderer, scene );
-        // equiUnmanaged.convert( cubeCamera, false );
-        const imgData = equiUnmanaged.convert( cubeCamera, false );
-
-        const canvas = document.createElement("canvas");
-        canvas.width = imgData.width;
-        canvas.height = imgData.height;
-        const context = canvas.getContext("2d");
-        context.putImageData(imgData, 0, 0);
-
-        const snapshot = canvas.toDataURL();
-        const base64Str = snapshot.split(',')[1];
-        // debugger;
-        zip.file(`${currentFrame.toString().padStart(4, "0")}.png`, base64Str, {base64: true});
-        currentFrame += 1;
-      };
-      // add last frame if need, maybe skip at the moment?
-      // if (totalFrame * fps < totalTime) {
-      //   currentFrame++;
-      //   timeline.seek(totalTime, false);
-      //   cubeCamera.position.copy(editor.currentCameraEl.getAttribute('position'));
-      //   cubeCamera.updateCubeMap( renderer, scene );
-      //   const snapshot = equiUnmanaged.convert( cubeCamera, false );
-      //   // const b64encoded = btoa(String.fromCharCode.apply(null, snapshot.data));
-      //   const b64encoded = bytesToBase64(snapshot.data);
-
-      //   zip.file(`${currentFrame.toString().padStart(4, "0")}.png`, b64encoded, {base64: true});
-      //   // debugger;
-      // }
-      ////// real capture end //////
-    } else {
-      // should be no ways to enter this condition since timeline must be existed
-      cubeCamera.position.copy(editor.currentCameraEl.getAttribute('position'));
-      cubeCamera.updateCubeMap( renderer, scene );
-      equiUnmanaged.convert( cubeCamera, false );
-      const snapshot = equiUnmanaged.canvas.toDataURL();
-      const base64Str = snapshot.split(',')[1];
-      zip.file("only_one.png", base64Str, {base64: true});
-    }    
-
-
-
-
-
-
-
-    this.showEditorCameraModel();
-    this.setEditorHelpersVisible(original_helper_visibility_array);
-
-
-    this.renderByEditorCamera();
-
-
+    // set output size
+    equiUnmanaged.setSize(resolutionWidth, resolutionWidth / 2);
     
-    // output to download, should be somethings send to electron here
-    zip.generateAsync({type:"blob"}).then(function (blob) { // 1) generate the zip file
-      saveAs(blob, "hello.zip");                         // 2) trigger the download
-    }, function (err) {
-      console.error(err);
-    });
+    cubeCamera.position.copy(camera.getWorldPosition());
+    cubeCamera.updateCubeMap( renderer, scene );
+
+    //const isDownloadImgFromFrontEnd = true;
+    const isDownloadImgFromFrontEnd = false;
+
+    const imgData = equiUnmanaged.convert( cubeCamera, isDownloadImgFromFrontEnd );
+
+    const imgBase64Str = this.convertEquirectangularImageDataToBase64Str(imgData);
+    return imgBase64Str;
+  }
+  captureEquirectangularImage(resolutionType) {
+    return this.doSomethingBetweenHideShowOfEditorHelpers(_ => {
+      return this.captureEquirectangularImageInternal(resolutionType);
+    });    
+  }
+  captureEquirectangularVideo(resolutionType, fps, onFrameArrived) {
+    this.doSomethingBetweenHideShowOfEditorHelpers(_ => {
+      const timeline = this.state.animationTimeline;
+
+      if (timeline) {        
+        const totalTime = Math.round(timeline.duration() * 100) / 100;
+        const totalFrame = Math.floor(totalTime * fps) + 1;
+        let currentFrame = 0;
+        console.log('totalFrame:', totalFrame);
+        
+        timeline.pause();
+        while (currentFrame <= totalFrame) {
+          const currentTime = currentFrame / fps;
+          timeline.seek(currentTime, false);
+  
+          const imgBase64Str = this.captureEquirectangularImageInternal(resolutionType);
+          
+          onFrameArrived(currentFrame, totalFrame, imgBase64Str);
+          
+          currentFrame += 1;
+        };
+        // add last frame if need, maybe skip at the moment?
+        // if (totalFrame * fps < totalTime) {
+        //   currentFrame++;
+        //   timeline.seek(totalTime, false);
+        //   cubeCamera.position.copy(editor.currentCameraEl.getAttribute('position'));
+        //   cubeCamera.updateCubeMap( renderer, scene );
+        //   const snapshot = equiUnmanaged.convert( cubeCamera, false );
+        //   // const b64encoded = btoa(String.fromCharCode.apply(null, snapshot.data));
+        //   const b64encoded = bytesToBase64(snapshot.data);
+      } else {
+        // should be no ways to enter this condition since timeline must be existed
+        const imgBase64Str = this.captureEquirectangularImageInternal(resolutionType);
+        
+        onFrameArrived(1, 1, imgBase64Str);
+      }
+    });   
   }
   seekSlide(timeInSec) {
     if (this.state.animationTimeline) {

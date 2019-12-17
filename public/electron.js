@@ -17,7 +17,7 @@ const jsoncParser = require('jsonc-parser');
 
 const mime = require('./utils/fileSystem/mime');
 const fileSystem = require('./utils/fileSystem/fileSystem');
-const { write360ImageToTempPromise } = require('./utils/captures/captures');
+const { write360ImageToTempPromise, write360ImageAsPartOfVideoToTempPromise, convertImageSequencesToVideoPromise } = require('./utils/captures/captures');
 const ProjectFile = require('./utils/saveLoadProject/ProjectFile');
 const { saveProjectToLocalAsync } = require('./utils/saveLoadProject/saveProject');
 const { loadProjectByProjectFilePathAsync, copyTempProjectDirectoryToExternalDirectoryAsync } = require('./utils/saveLoadProject/loadProject');
@@ -1026,16 +1026,79 @@ ipcMain.on('saveRaw360Capture', async (event, arg) => {
       err: err.toString()
     });
   } finally {
-    if (tmpImgFilePath) {
-      const tmpImgDirPath = myPath.dirname(tmpImgFilePath);
-      fileSystem.myDelete(tmpImgDirPath, (err) => {
-        if (err) { 
-          // silence error
-          console.error('saveRaw360Capture deleting temp image Error:');
-          console.error(err);
-        }
-      });
+  //   if (tmpImgFilePath) {
+  //     const tmpImgDirPath = myPath.dirname(tmpImgFilePath);
+  //     fileSystem.myDelete(tmpImgDirPath, (err) => {
+  //       if (err) { 
+  //         // silence error
+  //         console.error('saveRaw360Capture deleting temp image Error:');
+  //         console.error(err);
+  //       }
+  //     });
+  //   }
+  }
+});
+
+ipcMain.on('saveRaw360CaptureForVideo', async (event, arg) => {
+  // use let because I will have to use tmpImg in finally block
+  let tmpImgFilePath;
+  const videoUuid = arg.videoUuid;
+  const fps = arg.fps;
+  const currentFrame = arg.currentFrame;
+  const totalFrame = arg.totalFrame;
+  const imgBase64Str = arg.imgBase64Str;
+
+  /**
+   * if totalFrame is 30,
+   * then currentFrame ranges from 0 to 30.
+   * i.e. total number of frames is 30
+   */
+
+  const isLastFrame = currentFrame === totalFrame;
+
+  try {
+    tmpImgFilePath = await write360ImageAsPartOfVideoToTempPromise(videoUuid, currentFrame, imgBase64Str);
+
+    if (isLastFrame) {
+      //await convertImageSequencesToVideoPromise
     }
+
+    // const filePathToSave = await save360ImageDialogPromise();
+
+    // console.log('tmpImgFilePath:', tmpImgFilePath);
+
+    // if (!filePathToSave) {
+    //   event.sender.send('saveRaw360CaptureForVideoResponse', {
+    //     err: null,
+    //     data: null
+    //   });
+    //   return;
+    // }
+
+    // await fileSystem.renamePromise(tmpImgFilePath, filePathToSave);
+    // event.sender.send('saveRaw360CaptureForVideoResponse', {
+    //   err: null,
+    //   data: {
+    //     filePath: filePathToSave
+    //   }
+    // });
+  } catch (err) {
+    console.error('saveRaw360CaptureForVideo Error:');
+    console.error(err);
+    event.sender.send('saveRaw360CaptureForVideoResponse', {
+      err: err.toString()
+    });
+  } finally {
+    // if (tmpImgFilePath) {
+    //   const tmpImgDirPath = myPath.dirname(tmpImgFilePath);
+    //   fileSystem.myDelete(tmpImgDirPath, (err) => {
+    //     if (err) { 
+    //       // silence error
+    //       console.error('saveRaw360Capture deleting temp image Error:');
+    //       console.error(err);
+    //     }
+    //   });
+    // }
   }
 });
 

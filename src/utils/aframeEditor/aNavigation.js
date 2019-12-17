@@ -4,7 +4,7 @@ import ACone from "./aCone";
 
 
 const uuid_v1 = require('uuid/v1');
-const uuid = _=> 'uuid_' + uuid_v1().replace(/-/g, '_');
+//const uuid = _=> 'uuid_' + uuid_v1().replace(/-/g, '_');
 
 class ANavigation extends AEntity {
   constructor(el) {

@@ -6,6 +6,8 @@ const ExifTool = require("exiftool-vendored").ExifTool;
 const myPath = require('../fileSystem/myPath');
 const fileSystem = require('../fileSystem/fileSystem');
 
+const FfmpegCommand = require('../ffmpeg/ffmpegCommand');
+
 
 const writeMetaDataTo360ImageTimeoutInMillis = 5000;
 
@@ -18,16 +20,33 @@ const writeMetaDataTo360ImagePromise = async (imgPath) => {
   });
 };
 
+const write360ImageToPath = async (path, imgBase64Str) => {
+  await fileSystem.base64DecodePromise(path, imgBase64Str);
+  await writeMetaDataTo360ImagePromise(path);
+}
+
 const write360ImageToTempPromise = async (imgBase64Str) => {
   const tmpImgId = uuid();
   const tmpImgDirectoryName = tmpImgId;
-  const tmpImgFilePath = myPath.join(appDirectory.appTempCapturesContainerDirectory, tmpImgDirectoryName, tmpImgId) + config.captured360ImageExtendsion;
-  await fileSystem.base64DecodePromise(tmpImgFilePath, imgBase64Str);
-  await writeMetaDataTo360ImagePromise(tmpImgFilePath);
+  const tmpImgFilePath = myPath.join(appDirectory.appTempCapturesContainerDirectory, tmpImgDirectoryName, tmpImgId) + config.captured360ImageExtension;
+  await write360ImageToPath(tmpImgFilePath, imgBase64Str);
   return tmpImgFilePath;
 };
 
+const write360ImageAsPartOfVideoToTempPromise = async (videoUuid, currentFrame, imgBase64Str) => {
+  const tmpImgFilePath = myPath.join(appDirectory.appTempCapturesContainerDirectory, videoUuid, String(currentFrame).padStart(5, '0')) + config.captured360ImageExtension;
+  console.log(tmpImgFilePath);
+  await write360ImageToPath(tmpImgFilePath, imgBase64Str);
+  return tmpImgFilePath;
+};
+
+const convertImageSequencesToVideoPromise = async (imgSeqDir, outVideoPath, fps) => {
+  FfmpegCommand
+  
+};
 
 module.exports = {
-  write360ImageToTempPromise
+  write360ImageToTempPromise,
+  write360ImageAsPartOfVideoToTempPromise,
+  convertImageSequencesToVideoPromise
 };
