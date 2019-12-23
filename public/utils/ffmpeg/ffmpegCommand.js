@@ -25,20 +25,22 @@ command
 */
 
 FfmpegCommand.prototype.imageSequenceToVideo = 
-  function(inputImgFileSelector, inputFps, outputVideoPath, outputFps, onEnd = handleEnd, onProgress = handleProgress, onError = handleError) {
+  function(inputImgFileSelector, inputFps, outputVideoPath, outputFps, onEnd, onProgress, onError) {
     // Use FFMpeg to create a video.
     // 8 consecutive frames, held for 5 seconds each, 30fps output, no audio
     return command
-      .on('end', onEnd )
-      .on('progress', onProgress)
-      .on('error', onError)
+      .on('end', onEnd || handleEnd)
+      .on('progress', onProgress || handleProgress)
+      .on('error', onError || handleError)
       .input(inputImgFileSelector)
       .inputFPS(inputFps)
       .output(outputVideoPath)
       .outputFPS(outputFps)
       .noAudio()
       .run();
-  }
+  };
+
+let timemark;
 
 function handleProgress(progress){
   if (progress.timemark != timemark) {

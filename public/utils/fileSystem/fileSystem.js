@@ -551,10 +551,12 @@ const readdirPromise = promisify(readdir);
  * https://nodejs.org/dist/latest-v10.x/docs/api/fs.html#fs_class_fs_stats
  */
 const readdirWithStatPromise = async (dirPath) => {
-  const absolutePaths = await readdirPromise(dirPath);
+  const fileNames = await readdirPromise(dirPath);
   if (!Array.isArray(fileNames) || fileNames.length === 0) {
     return [];
   }
+
+  const absolutePaths = await readdirPromise(dirPath);
   
   const fileStatObjs = await map(absolutePaths, async (fileAbsolutePath) => {
     return await statPromise(fileAbsolutePath);

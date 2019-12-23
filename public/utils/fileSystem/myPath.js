@@ -23,6 +23,14 @@ const getFileNameWithoutExtension = (filePath) => {
   return path.basename(filePath).split('.').slice(0, -1).join('.');
 };
 
+const getFileNameWithDirectoryAndExtension = (filePath)  => {
+  join(dirname(filePath), getFileNameWithExtension(filePath));
+};
+
+const getFileNameWithDirectoryWithoutExtension = (filePath)  => {
+  join(dirname(filePath), getFileNameWithoutExtension(filePath));
+};
+
 const join = (...paths) => {  
   return path.join(...paths);
 };
@@ -62,6 +70,8 @@ module.exports = {
   getFileExtensionWithoutLeadingDot,
   getFileNameWithExtension,
   getFileNameWithoutExtension,
+  getFileNameWithDirectoryAndExtension,
+  getFileNameWithDirectoryWithoutExtension,
   join,
   resolve,
   normalize,

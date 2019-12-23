@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@bubltechnology/spherical-metadata": "^1.0.1",
     "@ffmpeg-installer/ffmpeg": "^1.0.20",
     "@fortawesome/fontawesome-svg-core": "^1.2.8",
     "@fortawesome/free-solid-svg-icons": "^5.5.0",

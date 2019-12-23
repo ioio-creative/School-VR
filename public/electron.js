@@ -17,7 +17,7 @@ const jsoncParser = require('jsonc-parser');
 
 const mime = require('./utils/fileSystem/mime');
 const fileSystem = require('./utils/fileSystem/fileSystem');
-const { write360ImageToTempPromise, write360ImageAsPartOfVideoToTempPromise, convertImageSequencesToVideoPromise } = require('./utils/captures/captures');
+const { write360ImageToTempPromise, write360ImageAsPartOfVideoToTempPromise, convertTempImageSequenceToVideoPromise } = require('./utils/captures/captures');
 const ProjectFile = require('./utils/saveLoadProject/ProjectFile');
 const { saveProjectToLocalAsync } = require('./utils/saveLoadProject/saveProject');
 const { loadProjectByProjectFilePathAsync, copyTempProjectDirectoryToExternalDirectoryAsync } = require('./utils/saveLoadProject/loadProject');
@@ -1060,7 +1060,7 @@ ipcMain.on('saveRaw360CaptureForVideo', async (event, arg) => {
     tmpImgFilePath = await write360ImageAsPartOfVideoToTempPromise(videoUuid, currentFrame, imgBase64Str);
 
     if (isLastFrame) {
-      //await convertImageSequencesToVideoPromise
+      await convertTempImageSequenceToVideoPromise(videoUuid, fps);
     }
 
     // const filePathToSave = await save360ImageDialogPromise();
