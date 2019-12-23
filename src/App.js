@@ -37,6 +37,8 @@ const faIconsNeed = [
   "faEyeSlash",
   "faAngleLeft",
   "faAngleRight",
+  "faVideo",
+  "faVideoSlash"
 ];
 
 faIconsNeed.forEach(iconName => {

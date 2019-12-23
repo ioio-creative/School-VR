@@ -362,6 +362,7 @@ class PresenterPage extends Component {
     const viewerCount = state.viewerCount;
     const slidesList = sceneContext.getSlidesList();
     const currentSlide = sceneContext.getCurrentSlideId();
+    const isRecording = sceneContext.getIsRecording();
     const currentSlideIdx = slidesList.findIndex(slide => slide.id === currentSlide);
     const prevSlide = (currentSlideIdx < 1? null: slidesList[currentSlideIdx - 1]['id']);
     const nextSlide = (currentSlideIdx > slidesList.length - 2? null: slidesList[currentSlideIdx + 1]['id']);
@@ -487,6 +488,15 @@ class PresenterPage extends Component {
                 }
               }}>
               <FontAwesomeIcon icon="angle-right"/>
+            </div>
+          </div>
+          <div className="buttons-group">
+            <div className={`button-recordSlide`} onClick={sceneContext.toggleRecording}>
+              {isRecording?
+                <FontAwesomeIcon icon="video-slash"/>
+                :
+                <FontAwesomeIcon icon="video"/>
+              }
             </div>
           </div>
           <div className="buttons-group">

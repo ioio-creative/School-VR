@@ -92,7 +92,14 @@
 #presenter .slideFunctions-panel .buttons-group .button-playSlide:hover {
   color: #72d6ff;
 }
-
+#presenter .slideFunctions-panel .buttons-group .button-recordSlide {
+  color: #F00;
+  cursor: pointer;
+}
+#presenter .slideFunctions-panel .buttons-group .button-recordSlide {
+  color: #F00;
+  cursor: pointer;
+}
 #presenter .slideFunctions-panel .buttons-group select {
   background-color: #2b3337;
   color: #8597ad;

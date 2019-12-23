@@ -182,7 +182,9 @@ class SceneContextProvider extends Component {
       'convertEquirectangularImageDataToBase64Str',
       'captureEquirectangularImageInternal',
       'captureEquirectangularImage',
-      'captureEquirectangularVideo'
+      'captureEquirectangularVideo',
+      'getIsRecording',
+      'toggleRecording',
     ].forEach(methodName => {
       this[methodName] = this[methodName].bind(this);
     });
@@ -1714,6 +1716,68 @@ class SceneContextProvider extends Component {
       }
     });   
   }
+
+  getIsRecording() {
+    return this.state.isRecording;
+  }
+  toggleRecording() {
+    
+    this.setState(prevState => {
+      const editor = this.editor;
+      const canvas = editor.container;
+      const stream = canvas.captureStream(60);
+      const options = { mimeType: "video/webm; codecs=vp9" };
+      const mediaRecorder = prevState.mediaRecorder || new MediaRecorder(stream, options);
+      // mediaRecorder.ondataavailable = this.handleStreamRecording;
+      // mediaRecorder.start();
+      return {
+        isRecording: !prevState.isRecording,
+        mediaRecorder: mediaRecorder,
+        recordChunks: []
+      };
+    }, _ => {
+      if (this.state.isRecording) {
+        // start recording
+        const mediaRecorder = this.state.mediaRecorder;
+        mediaRecorder.start();
+        console.log(mediaRecorder);
+      } else {
+        // stop recording
+        const mediaRecorder = this.state.mediaRecorder;
+        const recordedChunks = [];
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            recordedChunks.push(event.data);
+            // console.log(recordedChunks);
+            // download();
+            const blob = new Blob(recordedChunks, {
+              type: "video/mp4"
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            document.body.appendChild(a);
+            a.style = "display: none";
+            a.href = url;
+            console.log(url);
+            a.download = "test.mp4";
+            a.click();
+            window.URL.revokeObjectURL(url);
+          }
+        }
+        mediaRecorder.stop();
+      }
+    });
+  }
+
+  // handleStreamRecording(event) {
+  //   if (event.data.size > 0) {
+  //     recordedChunks.push(event.data);
+  //     console.log(recordedChunks);
+  //     download();
+  //   } else {
+  //     // ...
+  //   }
+  // }
   seekSlide(timeInSec) {
     if (this.state.animationTimeline) {
       this.state.animationTimeline.seek(timeInSec, false);
@@ -1920,6 +1984,9 @@ class SceneContextProvider extends Component {
           takeSnapshot: this.takeSnapshot, 
           captureEquirectangularImage: this.captureEquirectangularImage,
           captureEquirectangularVideo: this.captureEquirectangularVideo,
+
+          getIsRecording: this.getIsRecording,
+          toggleRecording: this.toggleRecording,
           // variables, should use functions to return?
           // appName: this.state.appName,
           // projectName: this.state.projectName,
