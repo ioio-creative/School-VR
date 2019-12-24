@@ -38,6 +38,8 @@ import getProjectFilePathFromSearchObject from 'utils/queryString/getProjectFile
 import './editorPage.css';
 import fileHelper from 'utils/fileHelper/fileHelper';
 import PreviewPanel from 'containers/aframeEditor/homePage/previewPanel';
+
+
 const Events = require('vendor/Events.js');
 const uuid = require('uuid/v1');
 

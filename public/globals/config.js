@@ -54,6 +54,7 @@ const config = {
   jsonFileExtensionWithLeadingDot: '.json',
   captured360ImageExtension: '.png',
   captured360VideoExtension: '.mp4',
+  saveFileTempName: 'untitled',
 };
 
 // https://electronjs.org/docs/api/dialog

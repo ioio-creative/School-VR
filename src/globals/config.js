@@ -46,7 +46,12 @@ let config = {
 
   captured360ImageExtension: '.png',
   captured360VideoExtension: '.mp4',
-  captured360VideoFps: 30
+  captured360VideoFps: 30,
+
+  presentationRecordingVideoExtension: '.mp4',
+  presentationRecordingVideoFps: 60,
+
+  saveFileTempName: 'untitled',
 };
 let appDirectory = {};
 const setAppData = (appData, callBack = null) => {

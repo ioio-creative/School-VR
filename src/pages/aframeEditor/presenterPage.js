@@ -9,11 +9,11 @@ import {languages} from 'globals/config';
 import MenuComponent from 'components/menuComponent';
 import Mousetrap from 'mousetrap';
 
-import ButtonsPanel from 'containers/aframeEditor/homePage/buttonsPanel';
+//import ButtonsPanel from 'containers/aframeEditor/homePage/buttonsPanel';
 import AFramePanel from 'containers/aframeEditor/homePage/aFramePanel';
-import InfoPanel from 'containers/aframeEditor/homePage/infoPanel';
+//import InfoPanel from 'containers/aframeEditor/homePage/infoPanel';
 import SlidesPanel from 'containers/aframeEditor/homePage/slidesPanel';
-import TimelinePanel from 'containers/aframeEditor/homePage/timelinePanel';
+//import TimelinePanel from 'containers/aframeEditor/homePage/timelinePanel';
 // import AssetsPanel from 'containers/aframeEditor/homePage/assetsPanel';
 
 import Editor from 'vendor/editor.js';
@@ -25,18 +25,23 @@ import io from 'socket.io-client';
 import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 import ipcHelper from 'utils/ipc/ipcHelper';
+
 import {jsonCopy} from "globals/helperfunctions";
+
 import routes from 'globals/routes';
+import config from 'globals/config';
 
 import {getSearchObjectFromHistory} from 'utils/queryString/getSearchObject';
 import getProjectFilePathFromSearchObject from 'utils/queryString/getProjectFilePathFromSearchObject';
 
+import saveAs from 'utils/fileSaver/saveAs';
+
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import iconViewer from 'media/icons/viewer.svg';
+//import iconViewer from 'media/icons/viewer.svg';
 
 import './presenterPage.css';
 const Events = require('vendor/Events.js');
-const uuid = require('uuid/v1');
+//const uuid = require('uuid/v1');
 
 // const jsonSchemaValidator = require('jsonschema').Validator;
 // const validator = new jsonSchemaValidator();
@@ -69,26 +74,26 @@ function PresenterPageMenu(props) {
           // onClick: _=> { console.log('file') },
           children: [
             {
-                label: messages['Menu.File.HomeLabel'],
-                disabled: false,
-                onClick: handleHomeButtonClick
-              },
-              {
-                label: '-'
-              },
-              {
-                label: messages['Menu.File.OpenLabel'],
-                disabled: false,
-                onClick: handleOpenProjectButtonClick
-              },
-              {
-                label: '-'
-              },
-              {
-                label: messages['Menu.File.ExitLabel'],
-                disabled: false,
-                onClick: handleExitButtonClick
-              }
+              label: messages['Menu.File.HomeLabel'],
+              disabled: false,
+              onClick: handleHomeButtonClick
+            },
+            {
+              label: '-'
+            },
+            {
+              label: messages['Menu.File.OpenLabel'],
+              disabled: false,
+              onClick: handleOpenProjectButtonClick
+            },
+            {
+              label: '-'
+            },
+            {
+              label: messages['Menu.File.ExitLabel'],
+              disabled: false,
+              onClick: handleExitButtonClick
+            }
           ]
         },
         {
@@ -122,15 +127,21 @@ class PresenterPage extends Component {
     };
 
     [
+      // event handlers
       'onEditorLoad',
+      'handleButtonRecordSlideClick',
+
+      // menu buttons
       'handleHomeButtonClick',
       'handleOpenProjectButtonClick',
-      'handleExitButtonClick',
+      'handleExitButtonClick',      
 
+      // methods
       'loadProject',
       'getNewSceneDataWithAssetsListChangedToUsingRelativePaths',
       'showUi',
       'hideUi',
+      'saveRecording', 
     ].forEach(methodName => {
       this[methodName] = this[methodName].bind(this);
     });
@@ -249,6 +260,8 @@ class PresenterPage extends Component {
 
   /* event handlers */
 
+  // event handlers
+
   onEditorLoad(editor) {
     const props = this.props;
 
@@ -264,6 +277,16 @@ class PresenterPage extends Component {
       this.loadProject(projectFilePathToLoad);
     }
   }
+
+  handleButtonRecordSlideClick(event) {
+    const { sceneContext } = this.props;
+    const videoOutputExtensionWithDot = config.presentationRecordingVideoExtension;
+    const fps = config.presentationRecordingVideoFps;  
+    const handleRecordingAvailableCallback = sceneContext.getIsRecording() ? this.saveRecording : null;    
+    sceneContext.toggleRecording(videoOutputExtensionWithDot, fps, handleRecordingAvailableCallback);
+  }
+
+  // menu buttons
 
   handleHomeButtonClick(event) {
     this.props.history.push(routes.home);
@@ -341,6 +364,7 @@ class PresenterPage extends Component {
       showUi: true
     })
   }
+
   hideUi() {
     if (this.hideUiTimer) {
       clearTimeout(this.hideUiTimer);
@@ -351,6 +375,12 @@ class PresenterPage extends Component {
       })
     }, 2500);
   }
+
+  saveRecording(mediaObjToSave) {
+    const tempMediaFileName = `${config.saveFileTempName}${config.captured360VideoExtension}`;
+    saveAs(mediaObjToSave, tempMediaFileName);
+  }
+
   /* end of methods */
 
 
@@ -491,7 +521,7 @@ class PresenterPage extends Component {
             </div>
           </div>
           <div className="buttons-group">
-            <div className={`button-recordSlide`} onClick={sceneContext.toggleRecording}>
+            <div className={`button-recordSlide`} onClick={this.handleButtonRecordSlideClick}>
               {isRecording?
                 <FontAwesomeIcon icon="video-slash"/>
                 :
@@ -501,7 +531,7 @@ class PresenterPage extends Component {
           </div>
           <div className="buttons-group">
             <LanguageContextConsumer render={
-              ({ language, messages }) => (
+              ({ messages }) => (
                 <select value={currentSlide}
                   onChange={e => {
                     sceneContext.selectSlide(e.currentTarget.value);

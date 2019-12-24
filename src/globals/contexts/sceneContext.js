@@ -50,6 +50,11 @@ const capture360OutputResolutionTypeToWidthMap = {
   '4k': 4096
 };
 
+const recordingVideoOutputExtensionWithDotToMimeMap = {
+  '.mp4': 'video/mp4',
+  '.webm': 'video/webm'
+};
+
 const capture360OutputResolutionTypes = {};
 Object.keys(capture360OutputResolutionTypeToWidthMap).forEach(type => {
   capture360OutputResolutionTypes[type] = type;
@@ -102,7 +107,9 @@ class SceneContextProvider extends Component {
       projectName: '',
       undoQueue: [],
       redoQueue: [],
-      editor: null
+      editor: null,
+
+      isRecording: false
     }
     this.editor = null;
 
@@ -183,6 +190,7 @@ class SceneContextProvider extends Component {
       'captureEquirectangularImageInternal',
       'captureEquirectangularImage',
       'captureEquirectangularVideo',
+      
       'getIsRecording',
       'toggleRecording',
     ].forEach(methodName => {
@@ -982,8 +990,8 @@ class SceneContextProvider extends Component {
           redoQueue: [],
         }
       }
-    }, _=> {
-      this.rebuildTimeline()
+    }, _ => {
+      this.rebuildTimeline();
     })
   }
 
@@ -1720,13 +1728,17 @@ class SceneContextProvider extends Component {
   getIsRecording() {
     return this.state.isRecording;
   }
-  toggleRecording() {
-    
+
+  // https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_Recording_API
+  toggleRecording(videoOutputExtensionWithDot, fps, onRecordingAvailableCallback) {    
+    const videoOutputMimeType = recordingVideoOutputExtensionWithDotToMimeMap[videoOutputExtensionWithDot];    
+
     this.setState(prevState => {
       const editor = this.editor;
       const canvas = editor.container;
-      const stream = canvas.captureStream(60);
-      const options = { mimeType: "video/webm; codecs=vp9" };
+      const stream = canvas.captureStream(fps);
+      /* !!!Important!!! Don't change mimeType to 'video/mp4'. It won't work. */
+      const options = { mimeType: 'video/webm; codecs=vp9' };
       const mediaRecorder = prevState.mediaRecorder || new MediaRecorder(stream, options);
       // mediaRecorder.ondataavailable = this.handleStreamRecording;
       // mediaRecorder.start();
@@ -1740,7 +1752,7 @@ class SceneContextProvider extends Component {
         // start recording
         const mediaRecorder = this.state.mediaRecorder;
         mediaRecorder.start();
-        console.log(mediaRecorder);
+        console.log('mediaRecorder:', mediaRecorder);
       } else {
         // stop recording
         const mediaRecorder = this.state.mediaRecorder;
@@ -1751,17 +1763,10 @@ class SceneContextProvider extends Component {
             // console.log(recordedChunks);
             // download();
             const blob = new Blob(recordedChunks, {
-              type: "video/mp4"
+              type: videoOutputMimeType
             });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            document.body.appendChild(a);
-            a.style = "display: none";
-            a.href = url;
-            console.log(url);
-            a.download = "test.mp4";
-            a.click();
-            window.URL.revokeObjectURL(url);
+
+            onRecordingAvailableCallback(blob);
           }
         }
         mediaRecorder.stop();
