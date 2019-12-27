@@ -41,6 +41,7 @@
     "smalltalk": "^3.2.2",
     "socket.io": "^2.2.0",
     "three.cubemap-to-equirectangular": "^1.1.2",
+    "ts-ebml": "^2.0.2",
     "typescript": "^3.5.1"
   },
   "eslintConfig": {

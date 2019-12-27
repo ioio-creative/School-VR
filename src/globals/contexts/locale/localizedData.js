@@ -34,6 +34,7 @@ const localizedData = {
     "Alert.AutenticationSuccessMessage": "Authentication succeeded.",
     "Alert.CaptureSavedMessage": "Capture saved.",
     "Alert.ProjectSavedMessage": "Project saved.",
+    "Alert.RecordingStoppedMessage": "Recording stopped.",
 
     /* end of prompt */
 
@@ -167,6 +168,7 @@ const localizedData = {
     "Alert.AutenticationSuccessMessage": "身份驗證成功。",
     "Alert.CaptureSavedMessage": "拍攝儲存成功",
     "Alert.ProjectSavedMessage": "専案儲存成功",
+    "Alert.RecordingStoppedMessage": "錄製停止",
 
     /* end of prompt */
 

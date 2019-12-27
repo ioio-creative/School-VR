@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 import {withRouter, Link} from 'react-router-dom';
 
 import {withSceneContext} from 'globals/contexts/sceneContext';
-import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/locale/languageContext';
+import {LanguageContextConsumer, LanguageContextMessagesConsumer, getLocalizedMessage} from 'globals/contexts/locale/languageContext';
 import {languages} from 'globals/config';
 
 import MenuComponent from 'components/menuComponent';
@@ -123,13 +123,18 @@ class PresenterPage extends Component {
       localIps: [],
       viewerCount: 0,
       loadedProjectFilePath: '',
-      showUi: true
+      showUi: true,
+
+      isInRecording: false,
     };
 
     [
       // event handlers
       'onEditorLoad',
       'handleButtonRecordSlideClick',
+      'handleButtonPrevSlideClick',
+      'handleButtonPlaySlideClick',
+      'handleButtonNextSlideClick',
 
       // menu buttons
       'handleHomeButtonClick',
@@ -141,7 +146,9 @@ class PresenterPage extends Component {
       'getNewSceneDataWithAssetsListChangedToUsingRelativePaths',
       'showUi',
       'hideUi',
-      'saveRecording', 
+      'saveRecording',
+      'startRecording',
+      'stopRecording',
     ].forEach(methodName => {
       this[methodName] = this[methodName].bind(this);
     });
@@ -203,7 +210,7 @@ class PresenterPage extends Component {
       const currentSlide = sceneContext.getCurrentSlideId();
       const currentSlideIdx = slidesList.findIndex(slide => slide.id === currentSlide);
       const prevSlide = (currentSlideIdx < 1? null: slidesList[currentSlideIdx - 1]['id']);
-      const socket = this.state.socket;
+      const { socket } = this.state;
       if (prevSlide) {
         sceneContext.selectSlide(prevSlide);
         if (socket) {
@@ -223,7 +230,7 @@ class PresenterPage extends Component {
       const currentSlide = sceneContext.getCurrentSlideId();
       const currentSlideIdx = slidesList.findIndex(slide => slide.id === currentSlide);
       const nextSlide = (currentSlideIdx > slidesList.length - 2? null: slidesList[currentSlideIdx + 1]['id']);
-      const socket = this.state.socket;
+      const { socket } = this.state;
       if (nextSlide) {
         sceneContext.selectSlide(nextSlide);
         if (socket) {
@@ -250,9 +257,15 @@ class PresenterPage extends Component {
     //   }
     // });
 
-    const sceneContext = this.props.sceneContext;
-    sceneContext.setProjectName('');
-    Events.removeListener('editor-load', this.onEditorLoad)
+    const { sceneContext } = this.props;
+    sceneContext.setProjectName('Alert.RecordingStoppedMessage');
+    Events.removeListener('editor-load', this.onEditorLoad);
+
+    const { isInRecording } = this.state;
+    if (isInRecording) {
+      alert(getLocalizedMessage('Alert.RecordingStoppedMessage'));
+      this.stopRecording();
+    }
   }
 
   /* end of react lifecycles */
@@ -279,11 +292,66 @@ class PresenterPage extends Component {
   }
 
   handleButtonRecordSlideClick(event) {
+    const { isInRecording } = this.state;
+
+    if (!isInRecording) {
+      this.startRecording();
+    } else {
+      this.stopRecording();
+    }    
+  }
+
+  handleButtonPrevSlideClick(event) {   
     const { sceneContext } = this.props;
-    const videoOutputExtensionWithDot = config.presentationRecordingVideoExtension;
-    const fps = config.presentationRecordingVideoFps;  
-    const handleRecordingAvailableCallback = sceneContext.getIsRecording() ? this.saveRecording : null;    
-    sceneContext.toggleRecording(videoOutputExtensionWithDot, fps, handleRecordingAvailableCallback);
+    const { socket } = this.state;
+    const slidesList = sceneContext.getSlidesList();
+    const currentSlide = sceneContext.getCurrentSlideId();    
+    const currentSlideIdx = slidesList.findIndex(slide => slide.id === currentSlide);
+    const prevSlide = (currentSlideIdx < 1? null: slidesList[currentSlideIdx - 1]['id']);
+    if (prevSlide) {
+      sceneContext.selectSlide(prevSlide);
+      if (socket) {
+        socket.emit('updateSceneStatus', {
+          action: 'selectSlide',
+          details: {
+            slideId: prevSlide,
+            autoPlay: false
+          }
+        })
+      }
+    }
+  }
+
+  handleButtonPlaySlideClick(event) {
+    const { sceneContext } = this.props;
+    const { socket } = this.state;
+    sceneContext.playSlide();
+    if (socket) {
+      socket.emit('updateSceneStatus', {
+        action: 'playSlide'
+      });
+    }
+  }
+
+  handleButtonNextSlideClick(event) {
+    const { sceneContext } = this.props;
+    const { socket } = this.state;
+    const slidesList = sceneContext.getSlidesList();
+    const currentSlide = sceneContext.getCurrentSlideId();    
+    const currentSlideIdx = slidesList.findIndex(slide => slide.id === currentSlide);    
+    const nextSlide = (currentSlideIdx > slidesList.length - 2? null: slidesList[currentSlideIdx + 1]['id']);
+    if (nextSlide) {
+      sceneContext.selectSlide(nextSlide);
+      if (socket) {
+        socket.emit('updateSceneStatus', {
+          action: 'selectSlide',
+          details: {
+            slideId: nextSlide,
+            autoPlay: false
+          }
+        })
+      }
+    }
   }
 
   // menu buttons
@@ -318,7 +386,7 @@ class PresenterPage extends Component {
   /* methods */
 
   loadProject(projectFilePath) {
-    const state = this.state;
+    const { socket } = this.state;
     const sceneContext = this.props.sceneContext;
 
     this.setState({
@@ -336,10 +404,10 @@ class PresenterPage extends Component {
       //console.log(projectJsonData);
 
       // send a copy to server
-      if (state.socket) {
+      if (socket) {
         // for the following projectJsonData, the assetsList's paths all are changed to web server relative path
         const newProjectJsonData = this.getNewSceneDataWithAssetsListChangedToUsingRelativePaths(projectJsonData);
-        state.socket.emit('useSceneData', newProjectJsonData);
+        socket.emit('useSceneData', newProjectJsonData);
       }
       sceneContext.loadProject(projectJsonData);
     });
@@ -381,27 +449,54 @@ class PresenterPage extends Component {
     saveAs(mediaObjToSave, tempMediaFileName);
   }
 
+  startRecording() {
+    const { isInRecording } = this.state;
+    if (!isInRecording) {
+      const { sceneContext } = this.props;    
+      const fps = config.presentationRecordingVideoFps;
+      const handleRecordingErrorCallback = err => {
+        console.error('mediaRecorder.onerror', err);
+        alert('mediaRecorder.onerror', err);
+      };
+      sceneContext.startRecording(fps, handleRecordingErrorCallback);
+      this.setState({
+        isInRecording: true
+      });
+    }
+  }
+
+  stopRecording() {
+    const { isInRecording } = this.state;
+    if (isInRecording) {
+      const { sceneContext } = this.props;
+      const videoOutputExtensionWithDot = config.presentationRecordingVideoExtension;    
+      const handleRecordingAvailableCallback = this.saveRecording;  
+      sceneContext.stopRecording(videoOutputExtensionWithDot, handleRecordingAvailableCallback);
+      this.setState({
+        isInRecording: false
+      })
+    }    
+  }
+
   /* end of methods */
 
 
-  render() {
-    const state = this.state;
-    const sceneContext = this.props.sceneContext;
-    const localIps = state.localIps;
-    const port = state.port;
-    const viewerCount = state.viewerCount;
+  render() {    
+    const { sceneContext } = this.props;
+    const {
+      localIps, port, viewerCount, loadedProjectFilePath: projectFilePathToLoad, showUi, socket, isInRecording
+    } = this.state;
+    
     const slidesList = sceneContext.getSlidesList();
-    const currentSlide = sceneContext.getCurrentSlideId();
-    const isRecording = sceneContext.getIsRecording();
-    const currentSlideIdx = slidesList.findIndex(slide => slide.id === currentSlide);
-    const prevSlide = (currentSlideIdx < 1? null: slidesList[currentSlideIdx - 1]['id']);
-    const nextSlide = (currentSlideIdx > slidesList.length - 2? null: slidesList[currentSlideIdx + 1]['id']);
+    const currentSlide = sceneContext.getCurrentSlideId();    
+    const currentSlideIdx = slidesList.findIndex(slide => slide.id === currentSlide);    
+    
     // for exit button
-    // const searchObj = getSearchObjectFromHistory(this.props.history);
-    const projectFilePathToLoad = state.loadedProjectFilePath;
-    //console.log(projectFilePathToLoad);
+    // const searchObj = getSearchObjectFromHistory(this.props.history);    
+    //console.log(loadedProjectFilePath);
+
     return (
-      <div id="presenter" className={state.showUi? 'show-ui': 'hide-ui'}>
+      <div id="presenter" className={showUi? 'show-ui': 'hide-ui'}>
         {/* <LanguageContextConsumer render={
             ({ language, messages }) => (
               <Prompt
@@ -424,8 +519,8 @@ class PresenterPage extends Component {
           )
         } />
         {/* <ButtonsPanel /> */}
-        <AFramePanel disableVR={true} socket={state.socket} user-mode="presenter" />
-        <SlidesPanel isEditing={false} socket={state.socket} />
+        <AFramePanel disableVR={true} socket={socket} user-mode="presenter" />
+        <SlidesPanel isEditing={false} socket={socket} />
         {/* <TimelinePanel /> */}
         {/* <InfoPanel /> */}
         <div className="interfaceIp-panel"
@@ -473,56 +568,24 @@ class PresenterPage extends Component {
           onMouseLeave={this.hideUi}
         >
           <div className="buttons-group">
-            <div className={`button-prevSlide${currentSlideIdx === 0? ' disabled': ''}`}
-              onClick={() => {
-                if (prevSlide) {
-                  sceneContext.selectSlide(prevSlide);
-                  if (state.socket) {
-                    state.socket.emit('updateSceneStatus', {
-                      action: 'selectSlide',
-                      details: {
-                        slideId: prevSlide,
-                        autoPlay: false
-                      }
-                    })
-                  }
-                }
-              }}
+            <div className={`button-prevSlide${currentSlideIdx === 0 ? ' disabled' : ''}`}
+              onClick={this.handleButtonPrevSlideClick}
             >
               <FontAwesomeIcon icon="angle-left"/>
             </div>
             <div className="button-playSlide"
-              onClick={() => {
-                sceneContext.playSlide();
-                if (state.socket) {
-                  state.socket.emit('updateSceneStatus', {
-                    action: 'playSlide'
-                  })
-                }
-              }}
+              onClick={this.handleButtonPlaySlideClick}
             >
               <FontAwesomeIcon icon="play"/>
             </div>
-            <div className={`button-nextSlide${currentSlideIdx === slidesList.length - 1? ' disabled': ''}`} onClick={() => {
-                if (nextSlide) {
-                  sceneContext.selectSlide(nextSlide);
-                  if (state.socket) {
-                    state.socket.emit('updateSceneStatus', {
-                      action: 'selectSlide',
-                      details: {
-                        slideId: nextSlide,
-                        autoPlay: false
-                      }
-                    })
-                  }
-                }
-              }}>
+            <div className={`button-nextSlide${currentSlideIdx === slidesList.length - 1? ' disabled': ''}`} onClick={this.handleButtonNextSlideClick}
+            >
               <FontAwesomeIcon icon="angle-right"/>
             </div>
           </div>
           <div className="buttons-group">
             <div className={`button-recordSlide`} onClick={this.handleButtonRecordSlideClick}>
-              {isRecording?
+              {isInRecording?
                 <FontAwesomeIcon icon="video-slash"/>
                 :
                 <FontAwesomeIcon icon="video"/>
@@ -535,8 +598,8 @@ class PresenterPage extends Component {
                 <select value={currentSlide}
                   onChange={e => {
                     sceneContext.selectSlide(e.currentTarget.value);
-                    if (state.socket) {
-                      state.socket.emit('updateSceneStatus', {
+                    if (socket) {
+                      socket.emit('updateSceneStatus', {
                         action: 'selectSlide',
                         details: {
                           slideId: e.currentTarget.value,

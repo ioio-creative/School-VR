@@ -48,7 +48,7 @@ let config = {
   captured360VideoExtension: '.mp4',
   captured360VideoFps: 30,
 
-  presentationRecordingVideoExtension: '.mp4',
+  presentationRecordingVideoExtension: '.webm',
   presentationRecordingVideoFps: 60,
 };
 let appDirectory = {};

@@ -18,6 +18,9 @@ import {TimelineMax, TweenMax, Power0} from 'gsap';
 import {mediaType} from 'globals/config';
 import {getLocalizedMessage} from 'globals/contexts/locale/languageContext';
 
+import isFunction, {invokeIfIsFunction} from 'utils/variableType/isFunction';
+import {makeVideoSeekableByInjectingMetadataPromise} from 'utils/videos/injectMetaData';
+
 //import bytesToBase64 from 'utils/js/uint8ToBase64';
 // This pixel-wise implementation is not as efficient as SceneContextProvider.convertEquirectangularImageDataToBase64Str
 
@@ -51,7 +54,7 @@ const capture360OutputResolutionTypeToWidthMap = {
 };
 
 const recordingVideoOutputExtensionWithDotToMimeMap = {
-  '.mp4': 'video/mp4',
+  '.mp4': 'video/mpeg',
   '.webm': 'video/webm'
 };
 
@@ -88,6 +91,7 @@ class SceneContextProvider extends Component {
     window.jsonCopy = jsonCopy;
 
     super(props);
+    
     this.state = {
       loaded: false,
       sceneData: [],
@@ -108,11 +112,11 @@ class SceneContextProvider extends Component {
       undoQueue: [],
       redoQueue: [],
       editor: null,
+    };
 
-      isRecording: false
-    }
     this.editor = null;
-
+    this.mediaRecorder = null;
+    
     [
       'setAppName',
       'getAppName',
@@ -190,9 +194,9 @@ class SceneContextProvider extends Component {
       'captureEquirectangularImageInternal',
       'captureEquirectangularImage',
       'captureEquirectangularVideo',
-      
-      'getIsRecording',
-      'toggleRecording',
+            
+      'startRecording',
+      'stopRecording',      
     ].forEach(methodName => {
       this[methodName] = this[methodName].bind(this);
     });
@@ -1725,64 +1729,61 @@ class SceneContextProvider extends Component {
     });   
   }
 
-  getIsRecording() {
-    return this.state.isRecording;
-  }
-
   // https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_Recording_API
-  toggleRecording(videoOutputExtensionWithDot, fps, onRecordingAvailableCallback) {    
-    const videoOutputMimeType = recordingVideoOutputExtensionWithDotToMimeMap[videoOutputExtensionWithDot];
-
-    this.setState(prevState => {
+  startRecording(fps, onErrorCallback) {
+    if (!this.mediaRecorder) {
       const editor = this.editor;
       const canvas = editor.container;
       const stream = canvas.captureStream(fps);
-      /* !!!Important!!! Don't change mimeType to 'video/mp4'. It won't work. */
-      const options = { mimeType: 'video/webm; codecs=vp9' };
-      const mediaRecorder = prevState.mediaRecorder || new MediaRecorder(stream, options);
-      // mediaRecorder.ondataavailable = this.handleStreamRecording;
-      // mediaRecorder.start();
-      return {
-        isRecording: !prevState.isRecording,
-        mediaRecorder: mediaRecorder,
-        recordChunks: []
+      /* 
+        !!!Important!!!
+        Don't change mimeType to 'video/mp4'. It won't work.
+        https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/isTypeSupported
+      */
+      const options = { 
+        mimeType: 'video/webm; codecs=vp9',
       };
-    }, _ => {
-      if (this.state.isRecording) {
-        // start recording
-        const mediaRecorder = this.state.mediaRecorder;
-        mediaRecorder.start();
-        console.log('mediaRecorder:', mediaRecorder);
-      } else {
-        // stop recording
-        const mediaRecorder = this.state.mediaRecorder;
-        const recordedChunks = [];
-        mediaRecorder.ondataavailable = (event) => {
-          if (event.data.size > 0) {
-            recordedChunks.push(event.data);
-            // console.log(recordedChunks);
-            // download();
-            const blob = new Blob(recordedChunks, {
-              type: videoOutputMimeType
-            });
-
-            onRecordingAvailableCallback(blob);
-          }
+      const mediaRecorder = this.mediaRecorder = new MediaRecorder(stream, options);
+      mediaRecorder.onerror = (event) => {
+        if (isFunction(onErrorCallback)) {
+          onErrorCallback(event.error);
+        } else {
+          console.error('mediaRecorder.onerror', event.error);
         }
-        mediaRecorder.stop();
       }
-    });
+      mediaRecorder.start();
+      console.log('mediaRecorder:', mediaRecorder);
+    }
+  }  
+
+  // https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_Recording_API
+  stopRecording(videoOutputExtensionWithDot, onRecordingAvailableCallback) {
+    if (this.mediaRecorder) {
+      const videoOutputMimeType = recordingVideoOutputExtensionWithDotToMimeMap[videoOutputExtensionWithDot];
+
+      const mediaRecorder = this.mediaRecorder;
+      const recordedChunks = [];
+      mediaRecorder.ondataavailable = async (event) => {
+        if (event.data.size > 0) {
+          recordedChunks.push(event.data);
+          // console.log(recordedChunks);
+          // download();
+          const blob = new Blob(recordedChunks, {
+            type: videoOutputMimeType
+          });
+
+          // https://github.com/collab-project/videojs-record/issues/317
+          const seekableVideoBlob = await makeVideoSeekableByInjectingMetadataPromise(blob);
+
+          invokeIfIsFunction(onRecordingAvailableCallback, seekableVideoBlob);
+        }
+      }
+      mediaRecorder.stop();
+    }
+    
+    this.mediaRecorder = null;
   }
 
-  // handleStreamRecording(event) {
-  //   if (event.data.size > 0) {
-  //     recordedChunks.push(event.data);
-  //     console.log(recordedChunks);
-  //     download();
-  //   } else {
-  //     // ...
-  //   }
-  // }
   seekSlide(timeInSec) {
     if (this.state.animationTimeline) {
       this.state.animationTimeline.seek(timeInSec, false);
@@ -1906,6 +1907,7 @@ class SceneContextProvider extends Component {
     this.editor.toggle();
     // this.forceUpdate();
   }
+
   render() {
     // console.log('context render');
     const props = this.props;
@@ -1989,9 +1991,9 @@ class SceneContextProvider extends Component {
           takeSnapshot: this.takeSnapshot, 
           captureEquirectangularImage: this.captureEquirectangularImage,
           captureEquirectangularVideo: this.captureEquirectangularVideo,
-
-          getIsRecording: this.getIsRecording,
-          toggleRecording: this.toggleRecording,
+          
+          startRecording: this.startRecording,
+          stopRecording: this.stopRecording,
           // variables, should use functions to return?
           // appName: this.state.appName,
           // projectName: this.state.projectName,
