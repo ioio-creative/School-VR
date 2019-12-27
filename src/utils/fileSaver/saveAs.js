@@ -1,6 +1,7 @@
 /**
  * https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_Recording_API
  * https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL
+ * https://www.npmjs.com/package/file-saver
  * @param {Object} obj - A File, Blob or MediaSource object to create an object URL for.
  * @param {string} fileName - The placeholder name of the file to be saved, appearing in the Save Dialog.
  */
