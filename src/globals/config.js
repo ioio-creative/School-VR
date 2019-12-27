@@ -50,8 +50,6 @@ let config = {
 
   presentationRecordingVideoExtension: '.mp4',
   presentationRecordingVideoFps: 60,
-
-  saveFileTempName: 'untitled',
 };
 let appDirectory = {};
 const setAppData = (appData, callBack = null) => {

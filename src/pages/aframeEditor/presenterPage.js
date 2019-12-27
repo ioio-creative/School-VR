@@ -377,7 +377,7 @@ class PresenterPage extends Component {
   }
 
   saveRecording(mediaObjToSave) {
-    const tempMediaFileName = `${config.saveFileTempName}${config.captured360VideoExtension}`;
+    const tempMediaFileName = `sharingRecording-${Date.now()}${config.presentationRecordingVideoExtension}`;
     saveAs(mediaObjToSave, tempMediaFileName);
   }
 

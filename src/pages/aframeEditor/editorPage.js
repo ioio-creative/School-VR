@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 // import SystemPanel from 'containers/aframeEditor/homePage/systemPanel';
 import {withRouter, Prompt} from 'react-router-dom';
-import {saveAs} from 'file-saver';
+import saveAs from 'utils/fileSaver/saveAs';
 
 import {withSceneContext, capture360OutputResolutionTypes} from 'globals/contexts/sceneContext';
 import {LanguageContextConsumer, getLocalizedMessage} from 'globals/contexts/locale/languageContext';

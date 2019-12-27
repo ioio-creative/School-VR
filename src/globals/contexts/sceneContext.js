@@ -1731,7 +1731,7 @@ class SceneContextProvider extends Component {
 
   // https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_Recording_API
   toggleRecording(videoOutputExtensionWithDot, fps, onRecordingAvailableCallback) {    
-    const videoOutputMimeType = recordingVideoOutputExtensionWithDotToMimeMap[videoOutputExtensionWithDot];    
+    const videoOutputMimeType = recordingVideoOutputExtensionWithDotToMimeMap[videoOutputExtensionWithDot];
 
     this.setState(prevState => {
       const editor = this.editor;
