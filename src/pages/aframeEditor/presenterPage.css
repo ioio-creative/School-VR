@@ -147,3 +147,28 @@
 #presenter.hide-ui .show-ui-hints {
   bottom: 15px;
 }
+
+
+
+#presenter .recordingInfo-panel {
+  position: absolute;
+  top: 100px;
+  left: 25px;
+  background-color: rgba(0,0,0,0.3);
+  padding: 10px 20px;
+  border-radius: 50px;
+  color: #FFFFFF;
+  display: flex;
+  align-items:  center;
+  transition: all 0.4s;
+}
+#presenter .recordingInfo-panel .is-recording-hint {
+  
+}
+#presenter .recordingInfo-panel .is-recording-timer {
+  background-color: #03141c;
+  text-align: center;
+  padding: 10px 25px;
+  border-radius: 50px;
+  margin: 5px 0 15px;
+}

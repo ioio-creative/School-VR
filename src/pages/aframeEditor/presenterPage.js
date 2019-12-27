@@ -562,7 +562,7 @@ class PresenterPage extends Component {
             </g>
           </svg>
           <div className="viewCount-text">{viewerCount}</div>
-        </div>
+        </div>                  
         <div className="slideFunctions-panel"
           onMouseEnter={this.showUi}
           onMouseLeave={this.hideUi}
@@ -627,6 +627,10 @@ class PresenterPage extends Component {
         <div className="show-ui-hints"
           onMouseEnter={this.showUi}
         />
+        <div className="recordingInfo-panel">
+          <div className="is-recording-hint"><FontAwesomeIcon icon="video"/></div>
+          <div className="is-recording-timer">Is Recording</div>          
+        </div>
       </div>
     );
   }

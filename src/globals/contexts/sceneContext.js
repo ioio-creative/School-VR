@@ -116,6 +116,8 @@ class SceneContextProvider extends Component {
 
     this.editor = null;
     this.mediaRecorder = null;
+    this.recordingStartDT = null;
+    this.recordingEndDT = null;
     
     [
       'setAppName',
