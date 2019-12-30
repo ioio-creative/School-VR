@@ -28,13 +28,13 @@ const localizedData = {
     /* prompt */
 
     "Prompt.UnsavedWorkMessage": "You have unsaved changes, are you sure you want to leave?",
+    "Prompt.IncompleteRecordingMessage": "Your recording is incomplete, are you sure you want to leave?",
     "Prompt.AutenticationFailTitle": "Authentication",
     "Prompt.AutenticationFailMessage": "Authentication failed. Please contact IOIO Creative or enter your license key.",
     "Alert.AutenticationFailMessage": "Authenication failed.",
     "Alert.AutenticationSuccessMessage": "Authentication succeeded.",
     "Alert.CaptureSavedMessage": "Capture saved.",
-    "Alert.ProjectSavedMessage": "Project saved.",
-    "Alert.RecordingStoppedMessage": "Recording stopped.",
+    "Alert.ProjectSavedMessage": "Project saved.",    
 
     /* end of prompt */
 
@@ -162,13 +162,13 @@ const localizedData = {
     /* prompt */
 
     "Prompt.UnsavedWorkMessage": "您有未儲存的更改，確定要離開嗎？",
+    "Prompt.IncompleteRecordingMessage": "您有未完成的錄影，確定要離開嗎？",
     "Prompt.AutenticationFailTitle": "身份驗證",
     "Prompt.AutenticationFailMessage": "身份驗證失敗。請聯繫IOIO Creative或輸入您的許可證密鑰。",
     "Alert.AutenticationFailMessage": "身份驗證失敗。",
     "Alert.AutenticationSuccessMessage": "身份驗證成功。",
     "Alert.CaptureSavedMessage": "拍攝儲存成功",
-    "Alert.ProjectSavedMessage": "専案儲存成功",
-    "Alert.RecordingStoppedMessage": "錄製停止",
+    "Alert.ProjectSavedMessage": "専案儲存成功",      
 
     /* end of prompt */
 

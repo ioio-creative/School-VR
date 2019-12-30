@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 // import SystemPanel from 'containers/aframeEditor/homePage/systemPanel';
-import {withRouter, Link} from 'react-router-dom';
+import {withRouter, Link, Prompt} from 'react-router-dom';
 
 import {withSceneContext} from 'globals/contexts/sceneContext';
 import {LanguageContextConsumer, LanguageContextMessagesConsumer, getLocalizedMessage} from 'globals/contexts/locale/languageContext';
@@ -15,6 +15,9 @@ import AFramePanel from 'containers/aframeEditor/homePage/aFramePanel';
 import SlidesPanel from 'containers/aframeEditor/homePage/slidesPanel';
 //import TimelinePanel from 'containers/aframeEditor/homePage/timelinePanel';
 // import AssetsPanel from 'containers/aframeEditor/homePage/assetsPanel';
+
+import TwinklingContainer from 'components/twinklingContainer';
+import PulsatingContainer from 'components/pulsatingContainer';
 
 import Editor from 'vendor/editor.js';
 // import {addEntityAutoType} from 'utils/aFrameEntities';
@@ -118,6 +121,9 @@ class PresenterPage extends Component {
   constructor(props) {
     super(props);
 
+    // constants
+    this.recordingTimerIntervalInMillis = 1000;
+
     this.state = {
       socket: null,
       localIps: [],
@@ -126,11 +132,14 @@ class PresenterPage extends Component {
       showUi: true,
 
       isInRecording: false,
+
+      recordingTimerInfo: null
     };
 
     [
       // event handlers
       'onEditorLoad',
+      'handleRecordingTimerEvent',
       'handleButtonRecordSlideClick',
       'handleButtonPrevSlideClick',
       'handleButtonPlaySlideClick',
@@ -219,11 +228,12 @@ class PresenterPage extends Component {
             details: {
               slideId: prevSlide
             }
-          })
+          });
         }
       }
       return false;
-    })
+    });
+
     Mousetrap.bind('right', (e) => {
       e.preventDefault();
       const slidesList = sceneContext.getSlidesList();
@@ -243,7 +253,7 @@ class PresenterPage extends Component {
         }
       }
       return false;
-    })
+    });
 
     this.hideUi();
   }
@@ -258,14 +268,10 @@ class PresenterPage extends Component {
     // });
 
     const { sceneContext } = this.props;
-    sceneContext.setProjectName('Alert.RecordingStoppedMessage');
+    sceneContext.setProjectName('');
     Events.removeListener('editor-load', this.onEditorLoad);
 
-    const { isInRecording } = this.state;
-    if (isInRecording) {
-      alert(getLocalizedMessage('Alert.RecordingStoppedMessage'));
-      this.stopRecording();
-    }
+    this.stopRecording(false);
   }
 
   /* end of react lifecycles */
@@ -291,13 +297,18 @@ class PresenterPage extends Component {
     }
   }
 
+  handleRecordingTimerEvent(recordingTimerInfo) {
+    this.setState({
+      recordingTimerInfo: recordingTimerInfo
+    });
+  }
   handleButtonRecordSlideClick(event) {
     const { isInRecording } = this.state;
 
     if (!isInRecording) {
       this.startRecording();
     } else {
-      this.stopRecording();
+      this.stopRecording(true);
     }    
   }
 
@@ -458,23 +469,24 @@ class PresenterPage extends Component {
         console.error('mediaRecorder.onerror', err);
         alert('mediaRecorder.onerror', err);
       };
-      sceneContext.startRecording(fps, handleRecordingErrorCallback);
+      sceneContext.startRecording(fps, this.recordingTimerIntervalInMillis, this.handleRecordingTimerEvent, handleRecordingErrorCallback);
       this.setState({
         isInRecording: true
       });
     }
   }
 
-  stopRecording() {
+  stopRecording(isDownloadVideo) {
     const { isInRecording } = this.state;
     if (isInRecording) {
       const { sceneContext } = this.props;
       const videoOutputExtensionWithDot = config.presentationRecordingVideoExtension;    
-      const handleRecordingAvailableCallback = this.saveRecording;  
+      const handleRecordingAvailableCallback = isDownloadVideo ? this.saveRecording : null;  
       sceneContext.stopRecording(videoOutputExtensionWithDot, handleRecordingAvailableCallback);
       this.setState({
-        isInRecording: false
-      })
+        isInRecording: false,
+        recordingTimerInfo: null
+      });
     }    
   }
 
@@ -484,7 +496,7 @@ class PresenterPage extends Component {
   render() {    
     const { sceneContext } = this.props;
     const {
-      localIps, port, viewerCount, loadedProjectFilePath: projectFilePathToLoad, showUi, socket, isInRecording
+      localIps, port, viewerCount, loadedProjectFilePath: projectFilePathToLoad, showUi, socket, isInRecording, recordingTimerInfo
     } = this.state;
     
     const slidesList = sceneContext.getSlidesList();
@@ -497,14 +509,15 @@ class PresenterPage extends Component {
 
     return (
       <div id="presenter" className={showUi? 'show-ui': 'hide-ui'}>
-        {/* <LanguageContextConsumer render={
-            ({ language, messages }) => (
+        <LanguageContextConsumer render={
+            ({ messages }) => (
               <Prompt
-                when={true}
-                message={messages['Prompt.UnsavedWorkMessage']}
+                when={isInRecording}
+                message={messages['Prompt.IncompleteRecordingMessage']}
               />
             )
-          } /> */}
+          }
+        />
         {/* <SystemPanel projectName={this.projectName} /> */}
         <LanguageContextConsumer render={
           ({ messages, changeLanguagePromises }) => (
@@ -627,10 +640,41 @@ class PresenterPage extends Component {
         <div className="show-ui-hints"
           onMouseEnter={this.showUi}
         />
-        <div className="recordingInfo-panel">
-          <div className="is-recording-hint"><FontAwesomeIcon icon="video"/></div>
-          <div className="is-recording-timer">Is Recording</div>          
-        </div>
+        {
+          isInRecording &&
+          <div className="recordingInfo-panel">
+            <TwinklingContainer
+              animationDurationInSecs={1}
+              minOpacity={0.2}
+              maxOpacity={1}
+            >
+              <PulsatingContainer
+                animationDurationInSecs={1}
+                minScale={0.95}
+                maxScale={1.05}
+              >
+                <div className="is-recording-hint"><FontAwesomeIcon icon="video"/></div>
+              </PulsatingContainer>
+            </TwinklingContainer>
+            {
+              <div className="is-recording-timer">
+              {
+                (
+                  recordingTimerInfo ?  
+                  [
+                    recordingTimerInfo.hours,
+                    recordingTimerInfo.minutes,
+                    recordingTimerInfo.seconds
+                  ]
+                  :
+                  [0, 0, 0]
+                )
+                  .map(num => String(num).padStart(2, '0')).join(':')                
+              }
+            </div>
+            }            
+          </div>
+        }
       </div>
     );
   }

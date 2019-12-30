@@ -1,0 +1,9 @@
+.pulsating-image {
+  /* center image */
+  margin: 0 auto;
+}
+
+.pulsating-image img {
+  width: 100%;
+  height: 100%;  
+}

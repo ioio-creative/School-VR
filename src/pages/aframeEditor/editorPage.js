@@ -168,30 +168,30 @@ function EditorPageMenu(props) {
           label: messages["Menu.CaptureImage.Normal"],          
           onClick: handleCaptureNormalImageClick          
         },
-        {
-          label: messages["Menu.CaptureImage.360_2k"],          
-          onClick: handleCapture360_2kImageClick
-        },
-        {
-          label: messages["Menu.CaptureImage.360_4k"],          
-          onClick: handleCapture360_4kImageClick
-        }
+        // {
+        //   label: messages["Menu.CaptureImage.360_2k"],          
+        //   onClick: handleCapture360_2kImageClick
+        // },
+        // {
+        //   label: messages["Menu.CaptureImage.360_4k"],          
+        //   onClick: handleCapture360_4kImageClick
+        // }
       ]
     });
 
-    menuButtons.push({
-      label: messages["Menu.CaptureVideoLabel"],
-      children: [
-        {
-          label: messages["Menu.CaptureVideo.360_2k"],          
-          onClick: handleCapture360_2kVideoClick
-        },
-        {
-          label: messages["Menu.CaptureVideo.360_4k"],          
-          onClick: handleCapture360_4kVideoClick
-        }
-      ]
-    });
+    // menuButtons.push({
+    //   label: messages["Menu.CaptureVideoLabel"],
+    //   children: [
+    //     {
+    //       label: messages["Menu.CaptureVideo.360_2k"],          
+    //       onClick: handleCapture360_2kVideoClick
+    //     },
+    //     {
+    //       label: messages["Menu.CaptureVideo.360_4k"],          
+    //       onClick: handleCapture360_4kVideoClick
+    //     }
+    //   ]
+    // });
   }
   return (
     <MenuComponent
@@ -491,13 +491,15 @@ class EditorPage extends Component {
     const state = this.state;
     const sceneContext = props.sceneContext;
 
+    console.log('sceneContext.isProjectSaved:', sceneContext.isProjectSaved);
+
     return (
       // <SceneContextProvider>
         <div id="editor" className={sceneContext.editor && sceneContext.editor.opened? 'editing': 'viewing'}>
           <LanguageContextConsumer render={
             ({ messages }) => (
               <Prompt
-                when={true}
+                when={!sceneContext.isProjectSaved}
                 message={messages['Prompt.UnsavedWorkMessage']}
               />
             )

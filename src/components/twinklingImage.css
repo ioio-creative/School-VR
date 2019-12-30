@@ -1,0 +1,9 @@
+.twinkling-image {
+  /* center image */
+  margin: 0 auto;
+}
+
+.twinkling-image img {
+  width: 100%;
+  height: 100%;  
+}

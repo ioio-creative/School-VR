@@ -1,15 +1,23 @@
+#presenter {
+  --defaultTransition: all 0.4s;
+  
+  --panelTop: 50px;
+}
+
+
 #presenter #slides-panel {
-  transition: all 0.4s;
+  transition: var(--defaultTransition);
 }
 #presenter .interfaceIp-panel {
   position: absolute;
   right: 25px;
-  top: 50px;
+  top: var(--panelTop);
   background-color: rgba(0,0,0,0.6);
   padding: 15px;
   border-radius: 15px;
-  color: #FFFFFF;
-  transition: all 0.4s;
+  /* color: rgb(112, 68, 68); */
+  color: white;
+  transition: var(--defaultTransition);
 }
 #presenter .interfaceIp-panel .ip {
   background-color: #03141c;
@@ -20,7 +28,7 @@
 }
 #presenter .viewerCount-panel {
   position: absolute;
-  top: 50px;
+  top: var(--panelTop);
   left: 25px;
   background-color: rgba(0,0,0,0.3);
   padding: 10px 20px;
@@ -28,7 +36,7 @@
   color: #FFFFFF;
   display: flex;
   align-items:  center;
-  transition: all 0.4s;
+  transition: var(--defaultTransition);
 }
 /* #presenter .viewerCount-panel:hover {
   color: #FFFFFF;
@@ -45,7 +53,7 @@
   display: flex;
   background-color: rgba(13, 12, 30, 0.8);
   border-radius: 50px;
-  transition: all 0.4s;
+  transition: var(--defaultTransition);
 }
 
 #presenter .slideFunctions-panel .buttons-group {
@@ -120,17 +128,12 @@
   color: #ffffff;
 }
 
-#presenter.hide-ui .interfaceIp-panel {
-  opacity: 0;
-}
-#presenter.hide-ui .viewerCount-panel {
-  opacity: 0;
-}
-#presenter.hide-ui .slideFunctions-panel {
-  opacity: 0;
-}
-#presenter.hide-ui #slides-panel {
-  opacity: 0;
+#presenter.hide-ui .interfaceIp-panel,
+#presenter.hide-ui .viewerCount-panel,
+#presenter.hide-ui .slideFunctions-panel,
+#presenter.hide-ui #slides-panel
+{
+  opacity: 0;  
 }
 #presenter .show-ui-hints {
   position: absolute;
@@ -141,7 +144,7 @@
   background-color: rgba(0,0,0,0.3);
   border-radius: 30px;
   transform: translate(-50%);
-  transition: all 0.4s;
+  transition: var(--defaultTransition);
   z-index: 2;
 }
 #presenter.hide-ui .show-ui-hints {
@@ -149,26 +152,40 @@
 }
 
 
-
 #presenter .recordingInfo-panel {
   position: absolute;
-  top: 100px;
-  left: 25px;
+  top: var(--panelTop);
+  left: 50%;
+  transform: translateX(-50%);
   background-color: rgba(0,0,0,0.3);
-  padding: 10px 20px;
+  /* padding: 10px 20px; */
+  padding: 5px 15px;
   border-radius: 50px;
   color: #FFFFFF;
   display: flex;
-  align-items:  center;
-  transition: all 0.4s;
+  align-items: baseline;
+  justify-content: space-between;
+  width: 150px;
+  transition: var(--defaultTransition);
+}
+#presenter .recordingInfo-panel .show {
+  opacity: 1;
+  visibility: visible;
+}
+#presenter .recordingInfo-panel .hide {
+  opacity: 0;
+  visibility: hidden;
 }
 #presenter .recordingInfo-panel .is-recording-hint {
-  
+  margin: 5px;
+  color: red;
 }
 #presenter .recordingInfo-panel .is-recording-timer {
   background-color: #03141c;
   text-align: center;
-  padding: 10px 25px;
+  /* padding: 10px 25px; */
+  padding: 5px 15px;
   border-radius: 50px;
-  margin: 5px 0 15px;
+  /* margin: 5px 0 15px; */
+  margin: 5px;
 }

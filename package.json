@@ -40,6 +40,7 @@
     "rimraf": "^2.6.3",
     "smalltalk": "^3.2.2",
     "socket.io": "^2.2.0",
+    "styled-components": "^4.4.1",
     "three.cubemap-to-equirectangular": "^1.1.2",
     "ts-ebml": "^2.0.2",
     "typescript": "^3.5.1"

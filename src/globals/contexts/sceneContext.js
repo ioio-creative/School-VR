@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import moment from 'moment';
 
 import {jsonCopy} from 'globals/helperfunctions'
 import ABox from 'utils/aframeEditor/aBox';
@@ -28,7 +29,7 @@ const CubemapToEquirectangular = require('three.cubemap-to-equirectangular');
 const mergeJSON = require('deepmerge').default;
 const Events = require('vendor/Events.js');
 const uuid_v1 = require('uuid/v1');
-const uuid = _=> 'uuid_' + uuid_v1().replace(/-/g, '_');
+const uuid = _ => 'uuid_' + uuid_v1().replace(/-/g, '_');
 
 const entityModel = {
   'a-box': ABox,
@@ -54,7 +55,7 @@ const capture360OutputResolutionTypeToWidthMap = {
 };
 
 const recordingVideoOutputExtensionWithDotToMimeMap = {
-  '.mp4': 'video/mpeg',
+  '.mp4': 'video/mp4',
   '.webm': 'video/webm'
 };
 
@@ -112,12 +113,17 @@ class SceneContextProvider extends Component {
       undoQueue: [],
       redoQueue: [],
       editor: null,
+
+      // track isProjectSaved
+      isProjectSaved: false,
     };
 
     this.editor = null;
+
+    // mediaRecorder
     this.mediaRecorder = null;
     this.recordingStartDT = null;
-    this.recordingEndDT = null;
+    this.recordingTimerHandle = null;
     
     [
       'setAppName',
@@ -197,8 +203,9 @@ class SceneContextProvider extends Component {
       'captureEquirectangularImage',
       'captureEquirectangularVideo',
             
+      'handleRecordingTimerEvent',
       'startRecording',
-      'stopRecording',      
+      'stopRecording',   
     ].forEach(methodName => {
       this[methodName] = this[methodName].bind(this);
     });
@@ -257,6 +264,28 @@ class SceneContextProvider extends Component {
     // }, 200);
     // the event emits when click on canvas
   }
+  componentDidUpdate(prevProps, prevState) {
+    const {
+      sceneData, assetsData
+    } = this.state;
+    
+    const isSceneDataChanged = prevState.sceneData !== sceneData;
+    const isAssetsDataChanged = prevState.assetsData !== assetsData;
+    
+    // if (isSceneDataChanged) {
+    //   console.log('scene data changed');
+    // }
+    
+    // if (isAssetsDataChanged) {
+    //   console.log('assets data changed');
+    // }
+
+    if (isSceneDataChanged || isAssetsDataChanged) {      
+      this.setState({
+        isProjectSaved: false
+      });
+    }
+  }
   startEventListener(eventName) {
     Events.on(eventName, this.events[eventName]);
   }
@@ -289,8 +318,8 @@ class SceneContextProvider extends Component {
     // this.updateCameraEl(obj.currentCameraEl);
     const slideId = uuid();
     const cameraId = uuid();
-    const entityId = uuid();
-    const timelineId = uuid();
+    // const entityId = uuid();
+    // const timelineId = uuid();
     const projectName = `untitled_${newProjectIdx}`;
     const cameraEl = document.querySelector('a-camera[el-defaultCamera="true"]');
     if (cameraEl) {
@@ -350,12 +379,16 @@ class SceneContextProvider extends Component {
       });
     });
     assetsData = assetsData.filter(assetData => assetsList[assetData['id']]);
-    // debugger;
+        
+    this.setState({
+      isProjectSaved: true
+    });
+    
     return {
       projectName: sceneData.projectName,
       entitiesList: sceneData,
       assetsList: assetsData
-    }
+    };
   }
   loadProject(projectData) {
     // empty current scene
@@ -379,11 +412,15 @@ class SceneContextProvider extends Component {
     this.setState({
       sceneData: sceneData,
       slideId: undefined,
-    }, _=> {
+    }, _ => {
       const cameraEl = document.querySelector('a-camera[el-defaultCamera="true"]');
       this.updateCameraEl(cameraEl);
       this.selectSlide(sceneData.slides[0].id);
-    })
+
+      this.setState({
+        isProjectSaved: true
+      });
+    });
   }
   updateCameraEl(cameraEl) {
     this.setState((prevState) => {
@@ -1050,7 +1087,7 @@ class SceneContextProvider extends Component {
       entityId: entityId,
       timelinePosition: newPosition,
       currentTime: currentTime
-    })
+    });
   }
   getCurrentTimelinePosition() {
     return this.state.timelinePosition;
@@ -1539,7 +1576,7 @@ class SceneContextProvider extends Component {
         return {
           animationTimeline: tl,
           sceneData: newSceneData
-        }
+        };
       })
     });
   }
@@ -1731,8 +1768,17 @@ class SceneContextProvider extends Component {
     });   
   }
 
+  handleRecordingTimerEvent(onTimerCallback) {    
+    const duration = moment.duration(new moment().diff(this.recordingStartDT));    
+    onTimerCallback({
+      hours: duration.hours(),
+      minutes: duration.minutes(),
+      seconds: duration.seconds()
+    });
+  }
+
   // https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_Recording_API
-  startRecording(fps, onErrorCallback) {
+  startRecording(fps, timerIntervalInMillis, onTimerCallback, onErrorCallback) {
     if (!this.mediaRecorder) {
       const editor = this.editor;
       const canvas = editor.container;
@@ -1750,10 +1796,16 @@ class SceneContextProvider extends Component {
         if (isFunction(onErrorCallback)) {
           onErrorCallback(event.error);
         } else {
-          console.error('mediaRecorder.onerror', event.error);
+          console.error('mediaRecorder.onerror:', event.error);
         }
       }
+
+      this.recordingStartDT = new moment();
+
       mediaRecorder.start();
+
+      this.recordingTimerHandle = setInterval(_ => this.handleRecordingTimerEvent(onTimerCallback), timerIntervalInMillis);
+
       console.log('mediaRecorder:', mediaRecorder);
     }
   }  
@@ -1780,6 +1832,10 @@ class SceneContextProvider extends Component {
           invokeIfIsFunction(onRecordingAvailableCallback, seekableVideoBlob);
         }
       }
+
+      clearInterval(this.recordingTimerHandle);
+      this.recordingTimerHandle = null;
+
       mediaRecorder.stop();
     }
     
@@ -1997,8 +2053,10 @@ class SceneContextProvider extends Component {
           startRecording: this.startRecording,
           stopRecording: this.stopRecording,
           // variables, should use functions to return?
-          // appName: this.state.appName,
-          // projectName: this.state.projectName,
+          // appName: state.appName,
+          // projectName: state.projectName,
+
+          isProjectSaved: state.isProjectSaved,
         }}>
         {props.children}
       </SceneContext.Provider>
