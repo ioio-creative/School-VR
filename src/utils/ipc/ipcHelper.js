@@ -64,7 +64,7 @@ function removeListener(channel, listener) {
 
 function generalIpcCall(channelName, callBack = null, objToSend = null) {
   if (isFunction(callBack)) {
-    ipc.once(`${channelName}Response`, (event, arg) => {
+    ipc.once(`${channelName}Response`, (event, arg) => {      
       if (arg.err) {
         callBack(`${channelName}: ${arg.err}`, arg.data);
       } else {
@@ -140,8 +140,8 @@ function minimizeWindow() {
   generalIpcCall('minimize');
 };
 
-function toggleMaximizeWindow() {
-  generalIpcCall('toggleMaximize');
+function toggleMaximizeWindow(callBack) {
+  generalIpcCall('toggleMaximize', callBack);
 };
 
 function toggleDevTools() {

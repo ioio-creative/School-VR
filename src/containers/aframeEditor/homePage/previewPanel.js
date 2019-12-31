@@ -5,14 +5,14 @@
   ▭ │AFRAME│
   ▭ └──────◲
 */
-import React, {Component, Fragment} from 'react';
+import React, {Component} from 'react';
 
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 import {withSceneContext} from 'globals/contexts/sceneContext';
-import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/locale/languageContext';
+import {LanguageContextConsumer} from 'globals/contexts/locale/languageContext';
 
-import {TweenMax} from 'gsap';
+//import {TweenMax} from 'gsap';
 // import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 // import EntitiesList from 'containers/panelItem/entitiesList';
 
@@ -103,7 +103,7 @@ class PreviewPanel extends Component {
                 }
               }}
             >
-              <FontAwesomeIcon icon="angle-left"/>
+              <FontAwesomeIcon icon="angle-left" />
             </div>
             <div className="button-playSlide"
               onClick={() => {
@@ -115,7 +115,7 @@ class PreviewPanel extends Component {
                 }
               }}
             >
-              <FontAwesomeIcon icon="play"/>              
+              <FontAwesomeIcon icon="play" />              
             </div>
             <div className={`button-nextSlide${currentSlideIdx === slidesList.length - 1? ' disabled': ''}`} onClick={() => {
                 if (nextSlide) {

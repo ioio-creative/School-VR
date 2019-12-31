@@ -87,11 +87,12 @@
 }
 #app-buttons button.hover,
 #app-buttons .hover button,
-#system-buttons button:hover {
+#system-buttons button:hover,
+.menu-group.hover {
   background-color: #505050;
-  color: #FFFFFF;
+  color: #FFFFFF;  
 }
-#system-buttons button#btn-min-app:before {
+/* #system-buttons button#btn-min-app:before {
   content: '';
   display: block;
   border-bottom: 1px solid #CCCCCC;
@@ -134,14 +135,14 @@ body.maximized #system-buttons button#btn-max-app:after {
 #system-buttons button#btn-max-app:hover:after {
   border-color: #FFFFFF;
   background-color: #505050;
-}
+} */
 #system-buttons button#btn-close-app {
   /* font-size: 20px; */
 }
 #system-buttons button#btn-close-app:hover {
   background-color: #D10F20;
 }
-#system-buttons button#btn-close-app:hover:before,
+/* #system-buttons button#btn-close-app:hover:before,
 #system-buttons button#btn-close-app:hover:after {
   background-color: #FFFFFF;
 }
@@ -161,7 +162,7 @@ body.maximized #system-buttons button#btn-max-app:after {
 }
 #system-buttons button#btn-close-app:after {
   transform: translate(-50%, -50%) rotate(-45DEG);
-}
+} */
 
 #system-panel .menu-list {
   position: absolute;

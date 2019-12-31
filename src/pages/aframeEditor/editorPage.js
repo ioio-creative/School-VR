@@ -333,9 +333,11 @@ class EditorPage extends Component {
         return;
       }
 
-      const state = this.state;
+      const {
+        loadedProjectFilePath
+      } = this.state;
 
-      if (state.loadedProjectFilePath !== projectFilePath) {  // save as case
+      if (loadedProjectFilePath !== projectFilePath) {  // save as case
         // TODO: is the following good enough?
 
         /**
@@ -453,7 +455,7 @@ class EditorPage extends Component {
     ipcHelper.closeWindow();
   }
 
-  handleUndoButtonClick(event) {
+  handleUndoButtonClick(event) {    
     this.props.sceneContext.undo();
   }
 
@@ -487,11 +489,14 @@ class EditorPage extends Component {
 
 
   render() {
-    const props = this.props;
-    const state = this.state;
-    const sceneContext = props.sceneContext;
+    const {
+      sceneContext
+    } = this.props;
+    const {
+      loadedProjectFilePath
+    } = this.state;
 
-    console.log('sceneContext.isProjectSaved:', sceneContext.isProjectSaved);
+    //console.log('sceneContext.isProjectSaved:', sceneContext.isProjectSaved);
 
     return (
       // <SceneContextProvider>
@@ -530,7 +535,7 @@ class EditorPage extends Component {
               />
             )
           } />
-          <ButtonsPanel currentLoadedProjectPath={state.loadedProjectFilePath} />
+          <ButtonsPanel currentLoadedProjectPath={loadedProjectFilePath} />
           <AFramePanel user-mode="editor" />
           <SlidesPanel isEditing={sceneContext.editor && sceneContext.editor.opened} />
           <TimelinePanel />

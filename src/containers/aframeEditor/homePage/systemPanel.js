@@ -43,9 +43,9 @@ class SystemPanel extends Component {
           <div className="menu-group">
           <button
             onMouseEnter={()=> {
-             this.setState({
-               'hoverItem': 'file'
-             })
+              this.setState({
+                'hoverItem': 'file'
+              });
             }}
             onClick={() => this.setState((currentState) => {
               return {menuOpen: !currentState.menuOpen}
@@ -97,7 +97,7 @@ class SystemPanel extends Component {
             Edit
           </button>
           {this.state.hoverItem === 'edit' && this.state.menuOpen &&
-           <div className="menu-list list-edit">
+            <div className="menu-list list-edit">
               <div className="menu-item" onClick={() => {
                 alert('developing')
               }}>Undo</div>

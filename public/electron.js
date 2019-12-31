@@ -378,11 +378,18 @@ ipcMain.on('minimize', (event, arg) => {
 
 ipcMain.on('toggleMaximize', (event, arg) => {
   const senderWindow = getSenderWindowFromEvent(event);
-  if (senderWindow.isMaximized()) {
+  const isMaximizedOld = senderWindow.isMaximized();
+  if (isMaximizedOld) {
     senderWindow.unmaximize();
   } else {
     senderWindow.maximize();
   }
+  event.sender.send('toggleMaximizeResponse', {
+    err: null,
+    data: {
+      isMaximized: !isMaximizedOld
+    }
+  });
 });
 
 ipcMain.on('toggleDevTools', (event, arg) => {

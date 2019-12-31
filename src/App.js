@@ -38,7 +38,11 @@ const faIconsNeed = [
   "faAngleLeft",
   "faAngleRight",
   "faVideo",
-  "faVideoSlash",  
+  "faVideoSlash",
+  "faWindowMinimize",
+  "faWindowMaximize",
+  "faWindowRestore",
+  "faWindowClose",
 ];
 
 faIconsNeed.forEach(iconName => {

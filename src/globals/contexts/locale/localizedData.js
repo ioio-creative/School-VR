@@ -27,7 +27,7 @@ const localizedData = {
 
     /* prompt */
 
-    "Prompt.UnsavedWorkMessage": "You have unsaved changes, are you sure you want to leave?",
+    "Prompt.UnsavedWorkMessage": "Please make sure you save your work before leaving, are you sure you want to leave?",
     "Prompt.IncompleteRecordingMessage": "Your recording is incomplete, are you sure you want to leave?",
     "Prompt.AutenticationFailTitle": "Authentication",
     "Prompt.AutenticationFailMessage": "Authentication failed. Please contact IOIO Creative or enter your license key.",
@@ -161,7 +161,7 @@ const localizedData = {
 
     /* prompt */
 
-    "Prompt.UnsavedWorkMessage": "您有未儲存的更改，確定要離開嗎？",
+    "Prompt.UnsavedWorkMessage": "離開前請儲存您的専案，確定要離開嗎？",
     "Prompt.IncompleteRecordingMessage": "您有未完成的錄影，確定要離開嗎？",
     "Prompt.AutenticationFailTitle": "身份驗證",
     "Prompt.AutenticationFailMessage": "身份驗證失敗。請聯繫IOIO Creative或輸入您的許可證密鑰。",

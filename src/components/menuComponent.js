@@ -4,6 +4,8 @@
 */
 import React, {Component} from 'react';
 
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+
 import {withSceneContext} from 'globals/contexts/sceneContext';
 import Mousetrap from 'mousetrap';
 
@@ -23,14 +25,19 @@ class MenuComponent extends Component {
     this.state = {
       menuOpen: false,
       hoverItem: null,
+      isWindowMaximized: false
     };
     this.buttons = [];
 
     // bind event handlers
-    this.handleClick = this.handleClick.bind(this);
-    this.handleBtnMinAppClick = this.handleBtnMinAppClick.bind(this);
-    this.handleBtnMaxAppClick = this.handleBtnMaxAppClick.bind(this);
-    this.handleBtnCloseAppClick = this.handleBtnCloseAppClick.bind(this);
+    [
+      'handleClick',
+      'handleBtnMinAppClick',
+      'handleBtnMaxAppClick',
+      'handleBtnCloseAppClick'
+    ].forEach(methodName => {
+      this[methodName] = this[methodName].bind(this);
+    });
   }
 
 
@@ -71,20 +78,24 @@ class MenuComponent extends Component {
   handleClick(event) {
     this.setState({
       menuOpen: false
-    })
+    });
   }
 
   handleBtnMinAppClick(event) {
     ipcHelper.minimizeWindow();
   }
 
-  handleBtnMaxAppClick(event) {
-    ipcHelper.toggleMaximizeWindow();
+  handleBtnMaxAppClick(event) {    
+    ipcHelper.toggleMaximizeWindow((_, data) => {      
+      this.setState({
+        isWindowMaximized: data.isMaximized
+      });
+    });
   }
 
   handleBtnCloseAppClick(event) {
     ipcHelper.closeWindow();
-  }
+  }  
 
   /* end of event handlers */
 
@@ -104,18 +115,26 @@ class MenuComponent extends Component {
         {/* <div id="app-name">School VR</div> */}
         <div id="app-buttons">
           {props.menuButtons.map((rootBtn, idx) => {
-            return <div className={`menu-group${rootBtn.disabled? ' disabled': ''}${state.menuOpen && state.hoverItem === idx? ' hover': ''}`} key={idx}>
+            const isDisabled = rootBtn.disabled === true;
+            const isMenuOpened = state.menuOpen;
+            const isHovered = state.hoverItem === idx;
+            return <div className={`menu-group${isDisabled ? ' disabled': ''}${isHovered ? ' hover': ''}`} key={idx}>
               <button
-                onMouseEnter={()=> {
-                  if (!rootBtn.disabled) {
+                onMouseEnter={_ => {                              
+                  if (!isDisabled) {
                     this.setState({
                       hoverItem: idx
-                    })
+                    });
                   }
+                }}
+                onMouseExit={_ => {
+                  this.setState({
+                    hoverItem: -1
+                  });
                 }}
                 onClick={(e) => {
                   e.nativeEvent.stopImmediatePropagation();
-                  if (!rootBtn.disabled) {
+                  if (!isDisabled) {
                     invokeIfIsFunction(rootBtn.onClick);                    
                     this.setState((currentState) => {
                       return {
@@ -127,7 +146,7 @@ class MenuComponent extends Component {
               >
                 {rootBtn.label}
               </button>
-              {rootBtn.children && rootBtn.children.length && state.menuOpen && state.hoverItem === idx &&
+              {rootBtn.children && rootBtn.children.length && isMenuOpened && isHovered &&
                 <div className="menu-list" onClick={(e) => {
                   e.nativeEvent.stopImmediatePropagation(); 
                 }} >
@@ -164,9 +183,20 @@ class MenuComponent extends Component {
           <div className="app-name">{appName}</div>
         </div>
         <div id="system-buttons">
-          <button id="btn-min-app" onClick={this.handleBtnMinAppClick} />
-          <button id="btn-max-app" onClick={this.handleBtnMaxAppClick} />
-          <button id="btn-close-app" onClick={this.handleBtnCloseAppClick} />
+          <button id="btn-min-app" onClick={this.handleBtnMinAppClick}>
+            <FontAwesomeIcon icon="window-minimize" />
+          </button>
+          <button id="btn-max-app" onClick={this.handleBtnMaxAppClick}>
+            {
+              state.isWindowMaximized ?
+              <FontAwesomeIcon icon="window-restore" />
+              :
+              <FontAwesomeIcon icon="window-maximize" />
+            }            
+          </button>
+          <button id="btn-close-app" onClick={this.handleBtnCloseAppClick}>
+            <FontAwesomeIcon icon="window-close" />
+          </button>
         </div>
       </div>
     );
