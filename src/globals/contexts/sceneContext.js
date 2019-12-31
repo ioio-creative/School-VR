@@ -266,21 +266,22 @@ class SceneContextProvider extends Component {
   }
   componentDidUpdate(prevProps, prevState) {
     const {
-      sceneData, assetsData
+      //sceneData, assetsData,
+      undoQueue
     } = this.state;
+
+    const isUndoQueueChanged = prevState.undoQueue !== undoQueue;
     
-    const isSceneDataChanged = prevState.sceneData !== sceneData;
-    const isAssetsDataChanged = prevState.assetsData !== assetsData;
-    
+    // const isSceneDataChanged = prevState.sceneData !== sceneData;
+    // const isAssetsDataChanged = prevState.assetsData !== assetsData;
     // if (isSceneDataChanged) {
     //   console.log('scene data changed');
-    // }
-    
+    // }    
     // if (isAssetsDataChanged) {
     //   console.log('assets data changed');
     // }
 
-    if (isSceneDataChanged || isAssetsDataChanged) {      
+    if (isUndoQueueChanged) {      
       this.setState({
         isProjectSaved: false
       });

@@ -383,6 +383,17 @@ function saveRaw360CaptureForVideo(videoUuid, fps, currentFrame, totalFrame, img
 /* end of 360 capture */
 
 
+/* presentation mode 2D recording */
+
+function savePresentationRecordingInMp4(videoBlob, callBack) {
+  generalIpcCall('savePresentationRecordingInMp4', callBack, {
+    videoBlob: videoBlob
+  });
+}
+
+/* end of presentation mode 2D recording */
+
+
 export default {
   // listeners
   addListener,
@@ -461,4 +472,7 @@ export default {
   // 360 capture
   saveRaw360Capture,
   saveRaw360CaptureForVideo,
+
+  // presentation mode 2D recording
+  savePresentationRecordingInMp4
 };

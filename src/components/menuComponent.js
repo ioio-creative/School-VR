@@ -54,7 +54,7 @@ class MenuComponent extends Component {
           // hoverItem: 0,
           menuOpen: isAnyMenuOpened ? -1 : currentState.hoverItem
         }
-      })
+      });
     });
     Mousetrap.bind('ctrl+z', (e) => {
       e.preventDefault();
@@ -125,10 +125,10 @@ class MenuComponent extends Component {
               <button
                 onMouseEnter={_ => {                              
                   if (!isDisabled) {
-                    this.setState({
+                    this.setState((currentState) => ({
                       hoverItem: idx,
-                      menuOpen: isAnyMenuOpened ? idx : state.menuOpen
-                    });
+                      menuOpen: isAnyMenuOpened ? idx : currentState.menuOpen
+                    }));
                   }
                 }}
                 onMouseLeave={_ => {                  

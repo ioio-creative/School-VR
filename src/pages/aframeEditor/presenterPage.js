@@ -28,6 +28,7 @@ import io from 'socket.io-client';
 import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 import ipcHelper from 'utils/ipc/ipcHelper';
+import fileHelper from 'utils/fileHelper/fileHelper';
 
 import {jsonCopy} from "globals/helperfunctions";
 
@@ -302,6 +303,7 @@ class PresenterPage extends Component {
       recordingTimerInfo: recordingTimerInfo
     });
   }
+
   handleButtonRecordSlideClick(event) {
     const { isInRecording } = this.state;
 
@@ -457,7 +459,12 @@ class PresenterPage extends Component {
 
   saveRecording(mediaObjToSave) {
     const tempMediaFileName = `sharingRecording-${Date.now()}${config.presentationRecordingVideoExtension}`;
-    saveAs(mediaObjToSave, tempMediaFileName);
+
+    if (fileHelper.getFileExtensionWithoutLeadingDot(tempMediaFileName) === 'mp4') {
+
+    } else {
+      saveAs(mediaObjToSave, tempMediaFileName);
+    }    
   }
 
   startRecording() {
