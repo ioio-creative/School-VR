@@ -127,7 +127,7 @@ class MenuComponent extends Component {
                     });
                   }
                 }}
-                onMouseExit={_ => {
+                onMouseLeave={_ => {                  
                   this.setState({
                     hoverItem: -1
                   });

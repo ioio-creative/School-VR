@@ -106,6 +106,7 @@ class ViewerPage extends Component {
   render() {
     const state = this.state;
     const sceneContext = this.props.sceneContext;
+    console.log('reach here');
     return (
       <div id="viewer">
         {/* <LanguageContextConsumer render={

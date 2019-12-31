@@ -148,11 +148,11 @@ class App extends Component {
         <LanguageContextProvider>
           <SceneContextProvider>
             <div id="App">
+              {/* if !electron, return viewer page only */}
               {
                 this.isElectronApp ?
 
-                <Switch>
-                  {/* maybe add some checking here, if !electron, return viewer page only */}
+                <Switch>                  
                   <PrivateRoute exact path="/file-explorer" component={AsyncTestFileExplorer} fallBackRedirectPath={routes.home} fallBackRedirectPath={routes.home} />
                   <PrivateRoute exact path={routes.editor} component={AsyncEditorPage} fallBackRedirectPath={routes.home} />
                   <PrivateRoute exact path={routes.presenter} component={AsyncPresenterPage} fallBackRedirectPath={routes.home} />
