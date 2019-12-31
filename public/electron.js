@@ -222,7 +222,7 @@ async function openWebServerAsync() {
     rootDirPath: indexHtmlPath,
     filesDirPath: webServerFilesDirectory,
     webServerStaticFilesPathPrefix: config.webServerStaticFilesPathPrefix,
-  });
+  });  
 }
 
 function closeWebServer() {

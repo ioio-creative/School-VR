@@ -56,7 +56,7 @@ faIconsNeed.forEach(iconName => {
 // https://serverless-stack.com/chapters/code-splitting-in-create-react-app.html
 const ViewerPage = require('pages/aframeEditor/viewerPage').default;
 const AsyncEditorPage = asyncLoadingComponent(_ => import('pages/aframeEditor/editorPage'));
-const AsyncViewerPage = asyncLoadingComponent(_ => import('pages/aframeEditor/viewerPage'));
+//const AsyncViewerPage = asyncLoadingComponent(_ => import('pages/aframeEditor/viewerPage'));
 const AsyncPresenterPage = asyncLoadingComponent(_ => import('pages/aframeEditor/presenterPage'));
 //const AsyncTestSaveLoad = asyncLoadingComponent(_ => import('pages/TestSaveLoad'));
 const AsyncTestFileExplorer = asyncLoadingComponent(_ => import('pages/TestFileExplorer/TestFileExplorer'));
@@ -74,7 +74,7 @@ class App extends Component {
       isGotAppData: this.isElectronApp ? false : true,
       isGotParamsReadFromExternalConfig: this.isElectronApp ? false : true,
       isGotCustomizedAppData: this.isElectronApp ? false : true,
-      isAuthenticationDone: false
+      isAuthenticationDone: this.isElectronApp ? false : true,
     };
   }
   componentDidMount() {
@@ -141,6 +141,10 @@ class App extends Component {
       isGotCustomizedAppData,
       isAuthenticationDone
     } = this.state;
+    // console.log('isGotAppData:', isGotAppData);
+    // console.log('isGotParamsReadFromExternalConfig:', isGotParamsReadFromExternalConfig);
+    // console.log('isGotCustomizedAppData:', isGotCustomizedAppData);
+    // console.log('isAuthenticationDone:', isAuthenticationDone);
     return !(isGotAppData && isGotParamsReadFromExternalConfig && isGotCustomizedAppData && isAuthenticationDone) ?
       <DefaultLoading />
       :
