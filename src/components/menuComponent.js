@@ -23,8 +23,8 @@ class MenuComponent extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      menuOpen: false,
-      hoverItem: null,
+      menuOpen: -1,
+      hoverItem: -1,
       isWindowMaximized: false
     };
     this.buttons = [];
@@ -49,20 +49,21 @@ class MenuComponent extends Component {
     Mousetrap.bind('alt', (e) => {
       e.preventDefault();
       self.setState((currentState) => {
+        const isAnyMenuOpened = currentState.menuOpen !== -1;
         return {
           // hoverItem: 0,
-          menuOpen: !currentState.menuOpen
+          menuOpen: isAnyMenuOpened ? -1 : currentState.hoverItem
         }
       })
-    })
+    });
     Mousetrap.bind('ctrl+z', (e) => {
       e.preventDefault();
       self.props.sceneContext.undo()
-    })
+    });
     Mousetrap.bind('ctrl+y', (e) => {
       e.preventDefault();
       self.props.sceneContext.redo()
-    })
+    });
   }
 
   componentWillUnmount() {
@@ -77,7 +78,7 @@ class MenuComponent extends Component {
 
   handleClick(event) {
     this.setState({
-      menuOpen: false
+      menuOpen: -1
     });
   }
 
@@ -116,14 +117,17 @@ class MenuComponent extends Component {
         <div id="app-buttons">
           {props.menuButtons.map((rootBtn, idx) => {
             const isDisabled = rootBtn.disabled === true;
-            const isMenuOpened = state.menuOpen;
+            const isAnyMenuOpened = state.menuOpen !== -1;
+            const isMenuOpened = state.menuOpen === idx;
             const isHovered = state.hoverItem === idx;
-            return <div className={`menu-group${isDisabled ? ' disabled': ''}${isHovered ? ' hover': ''}`} key={idx}>
+            const shouldBeHighlighted = isHovered || isMenuOpened;
+            return <div className={`menu-group${isDisabled ? ' disabled': ''}${shouldBeHighlighted ? ' hover': ''}`} key={idx}>
               <button
                 onMouseEnter={_ => {                              
                   if (!isDisabled) {
                     this.setState({
-                      hoverItem: idx
+                      hoverItem: idx,
+                      menuOpen: isAnyMenuOpened ? idx : state.menuOpen
                     });
                   }
                 }}
@@ -138,7 +142,7 @@ class MenuComponent extends Component {
                     invokeIfIsFunction(rootBtn.onClick);                    
                     this.setState((currentState) => {
                       return {
-                        menuOpen: !currentState.menuOpen
+                        menuOpen: isMenuOpened ? -1 : idx 
                       }
                     })
                   }
@@ -146,7 +150,7 @@ class MenuComponent extends Component {
               >
                 {rootBtn.label}
               </button>
-              {rootBtn.children && rootBtn.children.length && isMenuOpened && isHovered &&
+              {rootBtn.children && rootBtn.children.length && isMenuOpened && 
                 <div className="menu-list" onClick={(e) => {
                   e.nativeEvent.stopImmediatePropagation(); 
                 }} >
@@ -158,7 +162,7 @@ class MenuComponent extends Component {
                         if (!childBtn.disabled) {
                           invokeIfIsFunction(childBtn.onClick);                          
                           this.setState({
-                            menuOpen: false
+                            menuOpen: -1
                           });
                         }
                       }}>
