@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {languages, getLanguageFromLanguageCode} from 'globals/config';
+import config, {languages, getLanguageFromLanguageCode} from 'globals/config';
 import {setCustomizedAppDataLangCodePromise} from 'globals/customizedAppData/customizedAppData';
 /**
   Our translated strings
@@ -12,7 +12,8 @@ import localizedData from './localizedData.js';
 
 /* language settings */
 
-let globalLanguage;
+// set default for non-electron environment
+let globalLanguage = config.defaultLanguage;
 
 // this is for setting language specific css
 const htmlElement = document.querySelector('html');
