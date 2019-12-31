@@ -460,11 +460,14 @@ class PresenterPage extends Component {
   saveRecording(mediaObjToSave) {
     const tempMediaFileName = `sharingRecording-${Date.now()}${config.presentationRecordingVideoExtension}`;
 
-    if (fileHelper.getFileExtensionWithoutLeadingDot(tempMediaFileName) === 'mp4') {
+    saveAs(mediaObjToSave, tempMediaFileName);
 
-    } else {
-      saveAs(mediaObjToSave, tempMediaFileName);
-    }    
+
+    // if (fileHelper.getFileExtensionWithoutLeadingDot(tempMediaFileName) === 'mp4') {
+
+    // } else {
+    //   saveAs(mediaObjToSave, tempMediaFileName);
+    // }    
   }
 
   startRecording() {
