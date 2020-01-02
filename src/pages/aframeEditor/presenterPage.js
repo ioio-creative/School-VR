@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 import {withRouter, Link, Prompt} from 'react-router-dom';
 
 import {withSceneContext} from 'globals/contexts/sceneContext';
-import {LanguageContextConsumer, LanguageContextMessagesConsumer, getLocalizedMessage} from 'globals/contexts/locale/languageContext';
+import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/locale/languageContext';
 import {languages} from 'globals/config';
 
 import MenuComponent from 'components/menuComponent';
@@ -52,27 +52,17 @@ const Events = require('vendor/Events.js');
 // const validator = new jsonSchemaValidator();
 // const schema = require('schema/aframe_schema_20181108.json');
 
+
 function PresenterPageMenu(props) {
   const {
-    messages,
-    changeLanguagePromises,
-
-    handleHomeButtonClick,
-    handleOpenProjectButtonClick,
-    handleExitButtonClick
-  } = props;
-
-  async function handleBtnEnglishClickPromise() {
-    await changeLanguagePromises[languages.english.code]();
-  }
-
-  async function handleBtnTraditionalChineseClickPromise() {
-    await changeLanguagePromises[languages.traditionalChinese.code]();
-  }
+    messages,    
+    
+    handleOpenProjectButtonClick,      
+  } = props;  
 
   return (
-    <MenuComponent
-      // projectName="Untitled_1"
+    <MenuComponent      
+      // projectName="Untitled_1"      
       menuButtons={[
         {
           label: messages['Menu.FileLabel'],
@@ -81,7 +71,7 @@ function PresenterPageMenu(props) {
             {
               label: messages['Menu.File.HomeLabel'],
               disabled: false,
-              onClick: handleHomeButtonClick
+              methodNameToInvoke: 'goToHomePage'
             },
             {
               label: '-'
@@ -97,7 +87,7 @@ function PresenterPageMenu(props) {
             {
               label: messages['Menu.File.ExitLabel'],
               disabled: false,
-              onClick: handleExitButtonClick
+              methodNameToInvoke: 'closeApp'
             }
           ]
         },
@@ -105,19 +95,20 @@ function PresenterPageMenu(props) {
           label: messages["Menu.LanguageLabel"],
           children: [
             {
-              label: messages["Menu.Language.English"],
-              onClick: handleBtnEnglishClickPromise
+              label: messages["Menu.Language.English"],              
+              languageCodeToChangeTo: languages.english.code,
             },
             {
-              label: messages["Menu.Language.TraditionalChinese"],
-              onClick: handleBtnTraditionalChineseClickPromise
+              label: messages["Menu.Language.TraditionalChinese"],              
+              languageCodeToChangeTo: languages.traditionalChinese.code,
             }
           ]
         }
       ]}
     />
   );
-}
+}  
+
 
 class PresenterPage extends Component {
   constructor(props) {
@@ -133,8 +124,6 @@ class PresenterPage extends Component {
       loadedProjectFilePath: '',
       showUi: true,
 
-      isInRecording: false,
-
       recordingTimerInfo: null
     };
 
@@ -147,10 +136,8 @@ class PresenterPage extends Component {
       'handleButtonPlaySlideClick',
       'handleButtonNextSlideClick',
 
-      // menu buttons
-      'handleHomeButtonClick',
-      'handleOpenProjectButtonClick',
-      'handleExitButtonClick',      
+      // menu buttons      
+      'handleOpenProjectButtonClick',      
 
       // methods
       'loadProject',
@@ -306,9 +293,8 @@ class PresenterPage extends Component {
   }
 
   handleButtonRecordSlideClick(event) {
-    const { isInRecording } = this.state;
-
-    if (!isInRecording) {
+    const { sceneContext } = this.props;
+    if (!sceneContext.isInPresentationRecording) {
       this.startRecording();
     } else {
       this.stopRecording(true);
@@ -368,11 +354,7 @@ class PresenterPage extends Component {
     }
   }
 
-  // menu buttons
-
-  handleHomeButtonClick(event) {
-    this.props.history.push(routes.home);
-  }
+  // menu buttons  
 
   handleOpenProjectButtonClick(event) {
     ipcHelper.openSchoolVrFileDialog((err, data) => {
@@ -389,11 +371,7 @@ class PresenterPage extends Component {
       this.loadProject(filePaths[0]);
     });
   }
-
-  handleExitButtonClick(event) {
-    ipcHelper.closeWindow();
-  }
-
+  
   /* end of event handlers */
 
 
@@ -472,30 +450,24 @@ class PresenterPage extends Component {
   }
 
   startRecording() {
-    const { isInRecording } = this.state;
-    if (!isInRecording) {
-      const { sceneContext } = this.props;    
+    const { sceneContext } = this.props;
+    if (!sceneContext.isInPresentationRecording) {         
       const fps = config.presentationRecordingVideoFps;
       const handleRecordingErrorCallback = err => {
         console.error('mediaRecorder.onerror', err);
         alert('mediaRecorder.onerror', err);
       };
       sceneContext.startRecording(fps, this.recordingTimerIntervalInMillis, this.handleRecordingTimerEvent, handleRecordingErrorCallback);
-      this.setState({
-        isInRecording: true
-      });
     }
   }
 
   stopRecording(isDownloadVideo) {
-    const { isInRecording } = this.state;
-    if (isInRecording) {
-      const { sceneContext } = this.props;
+    const { sceneContext } = this.props;
+    if (sceneContext.isInPresentationRecording) {      
       const videoOutputExtensionWithDot = config.presentationRecordingVideoExtension;    
       const handleRecordingAvailableCallback = isDownloadVideo ? this.saveRecording : null;  
       sceneContext.stopRecording(videoOutputExtensionWithDot, handleRecordingAvailableCallback);
-      this.setState({
-        isInRecording: false,
+      this.setState({        
         recordingTimerInfo: null
       });
     }    
@@ -507,12 +479,14 @@ class PresenterPage extends Component {
   render() {    
     const { sceneContext } = this.props;
     const {
-      localIps, port, viewerCount, loadedProjectFilePath: projectFilePathToLoad, showUi, socket, isInRecording, recordingTimerInfo
+      localIps, port, viewerCount, loadedProjectFilePath: projectFilePathToLoad, showUi, socket, recordingTimerInfo
     } = this.state;
     
     const slidesList = sceneContext.getSlidesList();
     const currentSlide = sceneContext.getCurrentSlideId();    
-    const currentSlideIdx = slidesList.findIndex(slide => slide.id === currentSlide);    
+    const currentSlideIdx = slidesList.findIndex(slide => slide.id === currentSlide);
+
+    const isInPresentationRecording = sceneContext.isInPresentationRecording;
     
     // for exit button
     // const searchObj = getSearchObjectFromHistory(this.props.history);    
@@ -523,7 +497,7 @@ class PresenterPage extends Component {
         <LanguageContextConsumer render={
             ({ messages }) => (
               <Prompt
-                when={isInRecording}
+                when={isInPresentationRecording}
                 message={messages['Prompt.IncompleteRecordingMessage']}
               />
             )
@@ -531,14 +505,11 @@ class PresenterPage extends Component {
         />
         {/* <SystemPanel projectName={this.projectName} /> */}
         <LanguageContextConsumer render={
-          ({ messages, changeLanguagePromises }) => (
+          ({ messages }) => (
             <PresenterPageMenu
-              messages={messages}
-              changeLanguagePromises={changeLanguagePromises}
-
-              handleHomeButtonClick={this.handleHomeButtonClick}
-              handleOpenProjectButtonClick={this.handleOpenProjectButtonClick}
-              handleExitButtonClick={this.handleExitButtonClick}
+              messages={messages}              
+              
+              handleOpenProjectButtonClick={this.handleOpenProjectButtonClick}              
             />
           )
         } />
@@ -609,7 +580,7 @@ class PresenterPage extends Component {
           </div>
           <div className="buttons-group">
             <div className={`button-recordSlide`} onClick={this.handleButtonRecordSlideClick}>
-              {isInRecording?
+              {isInPresentationRecording?
                 <FontAwesomeIcon icon="video-slash"/>
                 :
                 <FontAwesomeIcon icon="video"/>
@@ -652,7 +623,7 @@ class PresenterPage extends Component {
           onMouseEnter={this.showUi}
         />
         {
-          isInRecording &&
+          isInPresentationRecording &&
           <div className="recordingInfo-panel">
             <TwinklingContainer
               animationDurationInSecs={1}

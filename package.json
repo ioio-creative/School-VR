@@ -87,7 +87,7 @@
     },
     "nsis": {
       "installerIcon": "build/favicon.ico",
-      "uninstallerIcon": "build/favicon.ico"
+      "uninstallerIcon": "build/favicon.ico"      
     },
     "win": {
       "icon": "build/favicon.ico"

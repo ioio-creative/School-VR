@@ -3,11 +3,13 @@
   File | Edit | XXX | YYY        x
 */
 import React, {Component} from 'react';
-
+import {withRouter} from 'react-router-dom';
+import Mousetrap from 'mousetrap';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
+import routes from 'globals/routes';
 import {withSceneContext} from 'globals/contexts/sceneContext';
-import Mousetrap from 'mousetrap';
+import {LanguageContextConsumer, getLocalizedMessage} from 'globals/contexts/locale/languageContext';
 
 import ipcHelper from 'utils/ipc/ipcHelper';
 import {invokeIfIsFunction} from 'utils/variableType/isFunction';
@@ -29,12 +31,19 @@ class MenuComponent extends Component {
     };
     this.buttons = [];
 
-    // bind event handlers
     [
+      // event handlers
       'handleClick',
       'handleBtnMinAppClick',
       'handleBtnMaxAppClick',
-      'handleBtnCloseAppClick'
+      'handleBtnCloseAppClick',
+
+      // public methods
+      'goToHomePage',
+      'closeApp',
+      
+      // private methods      
+      'confirmLeave',
     ].forEach(methodName => {
       this[methodName] = this[methodName].bind(this);
     });
@@ -71,7 +80,7 @@ class MenuComponent extends Component {
     Mousetrap.reset();
   }
 
-  /* end react lifecycles */
+  /* end react lifecycles */  
 
 
   /* event handlers */
@@ -94,26 +103,65 @@ class MenuComponent extends Component {
     });
   }
 
-  handleBtnCloseAppClick(event) {
-    ipcHelper.closeWindow();
-  }  
+  handleBtnCloseAppClick(event) {    
+    this.closeApp();
+  }
 
-  /* end of event handlers */
+  /* end of event handlers */  
+
+
+  /* public methods */
+
+  goToHomePage() {
+    this.props.history.push(routes.home);
+  }
+  
+  closeApp() {
+    if (this.confirmLeave()) {
+      ipcHelper.closeWindow();
+    }
+  }
+
+  /* end of public methods */
+
+
+  /* private methods */
+
+  confirmLeave() {
+    let isConfirmCloseApp = false;
+    const { history, sceneContext } = this.props;    
+    switch (history.location.pathname) {
+      case routes.editor:
+        isConfirmCloseApp = sceneContext.isProjectSaved || window.confirm(getLocalizedMessage('Prompt.UnsavedWorkMessage'));
+        break;
+      case routes.presenter:
+        isConfirmCloseApp = !sceneContext.isInPresentationRecording || window.confirm(getLocalizedMessage('Prompt.IncompleteRecordingMessage'));
+        break;
+      default:
+        isConfirmCloseApp = true;
+        break;
+    }
+    return isConfirmCloseApp;
+  }
+
+  /* end of private methods */
 
   
   render() {
     const props = this.props;
     const state = this.state;
     this.buttons.length = 0;
-    const projectName = props.sceneContext.getProjectName();
+    const sceneContext = props.sceneContext;
+    const projectName = sceneContext.getProjectName();
     const appName = config.appName;
     // console.log(props.menuButtons);
+        
     return (
       <div id="system-panel">
         <div id="app-icon">
           <img src={appIcon} />
         </div>
-        {/* <div id="app-name">School VR</div> */}
+        {/* <div id="app-name">School VR</div> */}        
         <div id="app-buttons">
           {props.menuButtons.map((rootBtn, idx) => {
             const isDisabled = rootBtn.disabled === true;
@@ -140,11 +188,9 @@ class MenuComponent extends Component {
                   e.nativeEvent.stopImmediatePropagation();
                   if (!isDisabled) {
                     invokeIfIsFunction(rootBtn.onClick);                    
-                    this.setState((currentState) => {
-                      return {
-                        menuOpen: isMenuOpened ? -1 : idx 
-                      }
-                    })
+                    this.setState({
+                      menuOpen: isMenuOpened ? -1 : idx 
+                    });
                   }
                 }}
               >
@@ -158,16 +204,29 @@ class MenuComponent extends Component {
                     if (childBtn.label === '-') {
                       return <div className={`seperator${childBtn.disabled? ' disabled': ''}`} key={childIdx} />;
                     } else {
-                      return <div className={`menu-item${childBtn.disabled? ' disabled': ''}`} key={childIdx} onClick={(e) => {
-                        if (!childBtn.disabled) {
-                          invokeIfIsFunction(childBtn.onClick);                          
-                          this.setState({
-                            menuOpen: -1
-                          });
-                        }
-                      }}>
-                        {childBtn.label}
-                      </div>
+                      return (
+                        <LanguageContextConsumer render={
+                          ({ changeLanguagePromises }) => (
+
+                            <div className={`menu-item${childBtn.disabled? ' disabled': ''}`} key={childIdx} onClick={async (e) => {
+                              if (!childBtn.disabled) {
+                                invokeIfIsFunction(childBtn.onClick);
+                                invokeIfIsFunction(this[childBtn.methodNameToInvoke]);                                
+
+                                this.setState({
+                                  menuOpen: -1
+                                });
+
+                                if (childBtn.languageCodeToChangeTo) {
+                                  await changeLanguagePromises[childBtn.languageCodeToChangeTo]();
+                                }
+                              }
+                            }}>
+                              {childBtn.label}
+                            </div>
+                          )
+                        } />
+                      );
                     }
                   })}
                 </div>
@@ -176,10 +235,10 @@ class MenuComponent extends Component {
           })}
         </div>
         <div id="app-name" title={`${projectName? projectName + ' - ': ''}${appName}`}>
-          {projectName && <div className="project-name" onClick={()=>{
+          {projectName && <div className="project-name" onClick={_ => {
             let newProjectName = prompt('Enter New Project Name', projectName);
             if (newProjectName) {
-              props.sceneContext.setProjectName(newProjectName);
+              sceneContext.setProjectName(newProjectName);
             }
           }}>{projectName}</div>
           }
@@ -206,4 +265,5 @@ class MenuComponent extends Component {
     );
   }
 }
-export default withSceneContext(MenuComponent);
+
+export default withSceneContext(withRouter(MenuComponent));

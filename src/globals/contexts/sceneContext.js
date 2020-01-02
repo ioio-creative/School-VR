@@ -116,6 +116,8 @@ class SceneContextProvider extends Component {
 
       // track isProjectSaved
       isProjectSaved: false,
+
+      isInPresentationRecording: false,
     };
 
     this.editor = null;
@@ -205,7 +207,9 @@ class SceneContextProvider extends Component {
             
       'handleRecordingTimerEvent',
       'startRecording',
-      'stopRecording',   
+      'stopRecording',
+      
+      'getIsEditorOpened',
     ].forEach(methodName => {
       this[methodName] = this[methodName].bind(this);
     });
@@ -1770,6 +1774,10 @@ class SceneContextProvider extends Component {
   // https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_Recording_API
   startRecording(fps, timerIntervalInMillis, onTimerCallback, onErrorCallback) {
     if (!this.mediaRecorder) {
+      this.setState({
+        isInPresentationRecording: true
+      });
+
       const editor = this.editor;
       const canvas = editor.container;
       const stream = canvas.captureStream(fps);
@@ -1803,6 +1811,10 @@ class SceneContextProvider extends Component {
   // https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_Recording_API
   stopRecording(videoOutputExtensionWithDot, onRecordingAvailableCallback) {
     if (this.mediaRecorder) {
+      this.setState({
+        isInPresentationRecording: false
+      });
+
       const videoOutputMimeType = recordingVideoOutputExtensionWithDotToMimeMap[videoOutputExtensionWithDot];
 
       const mediaRecorder = this.mediaRecorder;
@@ -1830,6 +1842,10 @@ class SceneContextProvider extends Component {
     }
     
     this.mediaRecorder = null;
+  }
+
+  getIsEditorOpened() {
+    return this.editor && this.editor.opened
   }
 
   seekSlide(timeInSec) {
@@ -2046,7 +2062,9 @@ class SceneContextProvider extends Component {
           // appName: state.appName,
           // projectName: state.projectName,
 
-          isProjectSaved: state.isProjectSaved,
+          isProjectSaved: state.isProjectSaved,          
+          isInPresentationRecording: state.isInPresentationRecording,
+          getIsEditorOpened: this.getIsEditorOpened
         }}>
         {props.children}
       </SceneContext.Provider>

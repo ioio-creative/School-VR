@@ -54,15 +54,12 @@ function EditorPageMenu(props) {
   const {
     sceneContext,
 
-    messages,
-    changeLanguagePromises,
-
-    handleHomeButtonClick,
+    messages,    
+    
     handleNewProjectButtonClick,
     handleOpenProjectButtonClick,
     handleSaveProjectButtonClick,
-    handleSaveAsProjectButtonClick,
-    handleExitButtonClick,
+    handleSaveAsProjectButtonClick,    
     handleUndoButtonClick,
     handleRedoButtonClick,
 
@@ -71,17 +68,9 @@ function EditorPageMenu(props) {
     handleCapture360_4kImageClick,
     handleCapture360_2kVideoClick,
     handleCapture360_4kVideoClick,
-  } = props;
+  } = props;  
 
-  async function handleBtnEnglishClickPromise() {
-    await changeLanguagePromises[languages.english.code]();
-  }
-
-  async function handleBtnTraditionalChineseClickPromise() {
-    await changeLanguagePromises[languages.traditionalChinese.code]();
-  }
-
-  const isEditorOpened = sceneContext.editor && sceneContext.editor.opened;
+  const isEditorOpened = sceneContext.getIsEditorOpened();
 
   const menuButtons = [
     {
@@ -91,7 +80,7 @@ function EditorPageMenu(props) {
         {
           label: messages["Menu.File.HomeLabel"],
           disabled: false,
-          onClick: handleHomeButtonClick
+          methodNameToInvoke: 'goToHomePage'
         },
         {
           label: '-'
@@ -125,7 +114,7 @@ function EditorPageMenu(props) {
         {
           label: messages["Menu.File.ExitLabel"],
           disabled: false,
-          onClick: handleExitButtonClick
+          methodNameToInvoke: 'closeApp'
         }
       ]
     }
@@ -153,11 +142,11 @@ function EditorPageMenu(props) {
       children: [
         {
           label: messages["Menu.Language.English"],
-          onClick: handleBtnEnglishClickPromise
+          languageCodeToChangeTo: languages.english.code,
         },
         {
           label: messages["Menu.Language.TraditionalChinese"],
-          onClick: handleBtnTraditionalChineseClickPromise
+          languageCodeToChangeTo: languages.traditionalChinese.code,
         }
       ]
     }
@@ -227,13 +216,11 @@ class EditorPage extends Component {
       'saveProjectAs',
       'capture360Image',
       'capture360Video',
-
-      'handleHomeButtonClick',
+      
       'handleNewProjectButtonClick',
       'handleOpenProjectButtonClick',
       'handleSaveProjectButtonClick',
-      'handleSaveAsProjectButtonClick',
-      'handleExitButtonClick',
+      'handleSaveAsProjectButtonClick',      
       'handleUndoButtonClick',
       'handleRedoButtonClick',
       
@@ -411,11 +398,7 @@ class EditorPage extends Component {
   /* end of methods */
 
 
-  /* event handlers */
-
-  handleHomeButtonClick(event) {
-    this.props.history.push(routes.home);
-  }
+  /* event handlers */  
 
   handleNewProjectButtonClick(event) {
     if (this.confirmLeaveProject()) {
@@ -460,11 +443,7 @@ class EditorPage extends Component {
 
   handleSaveAsProjectButtonClick(event) {
     this.saveProjectAs();
-  }
-
-  handleExitButtonClick(event) {
-    ipcHelper.closeWindow();
-  }
+  }  
 
   handleUndoButtonClick(event) {    
     this.props.sceneContext.undo();
@@ -507,7 +486,7 @@ class EditorPage extends Component {
       loadedProjectFilePath
     } = this.state;
 
-    console.log('sceneContext.isProjectSaved:', sceneContext.isProjectSaved);
+    //console.log('sceneContext.isProjectSaved:', sceneContext.isProjectSaved);
 
     return (
       // <SceneContextProvider>
@@ -528,13 +507,11 @@ class EditorPage extends Component {
 
                 messages={messages}
                 changeLanguagePromises={changeLanguagePromises}
-
-                handleHomeButtonClick={this.handleHomeButtonClick}
+                
                 handleNewProjectButtonClick={this.handleNewProjectButtonClick}
                 handleOpenProjectButtonClick={this.handleOpenProjectButtonClick}
                 handleSaveProjectButtonClick={this.handleSaveProjectButtonClick}
-                handleSaveAsProjectButtonClick={this.handleSaveAsProjectButtonClick}
-                handleExitButtonClick={this.handleExitButtonClick}
+                handleSaveAsProjectButtonClick={this.handleSaveAsProjectButtonClick}                
                 handleUndoButtonClick={this.handleUndoButtonClick}
                 handleRedoButtonClick={this.handleRedoButtonClick}
 

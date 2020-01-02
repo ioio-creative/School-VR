@@ -486,7 +486,7 @@ class ProjectOrderSelect extends Component {
 
 function ProjectListPageMenu(props) {
   const {
-    messages, changeLanguagePromises
+    messages
   } = props;
 
   /* event handlers */
@@ -511,18 +511,6 @@ function ProjectListPageMenu(props) {
     })
   }
 
-  function handleBtnExitClick(event) {
-    ipcHelper.closeWindow();
-  }
-
-  async function handleBtnEnglishClickPromise() {
-    await changeLanguagePromises[languages.english.code]();
-  }
-
-  async function handleBtnTraditionalChineseClickPromise() {
-    await changeLanguagePromises[languages.traditionalChinese.code]();
-  }
-
   /* end of event handlers */
 
   return (
@@ -545,7 +533,7 @@ function ProjectListPageMenu(props) {
             },
             {
               label: messages["Menu.File.ExitLabel"],
-              onClick: handleBtnExitClick
+              methodNameToInvoke: 'closeApp'
             }
           ]
         },
@@ -554,11 +542,11 @@ function ProjectListPageMenu(props) {
           children: [
             {
               label: messages["Menu.Language.English"],
-              onClick: handleBtnEnglishClickPromise
+              languageCodeToChangeTo: languages.english.code,
             },
             {
               label: messages["Menu.Language.TraditionalChinese"],
-              onClick: handleBtnTraditionalChineseClickPromise
+              languageCodeToChangeTo: languages.traditionalChinese.code,
             }
           ]
         }
