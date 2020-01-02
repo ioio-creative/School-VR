@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 
 import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/locale/languageContext';
-import {languages} from 'globals/config';
 
 import MenuComponent from 'components/menuComponent';
 import CrossButton from 'components/crossButton';
@@ -485,14 +484,12 @@ class ProjectOrderSelect extends Component {
 
 
 function ProjectListPageMenu(props) {
-  const {
-    messages
-  } = props;
-
+  const { history } = props;
+  
   /* event handlers */
 
   function handleBtnNewClick(event) {
-    props.history.push(routes.editor);
+    history.push(routes.editor);
   }
 
   function handleBtnOpenClick(event) {
@@ -504,7 +501,7 @@ function ProjectListPageMenu(props) {
 
       const filePaths = data.filePaths;
       if (isNonEmptyArray(filePaths)) {
-        props.history.push(routes.editorWithProjectFilePathQuery(filePaths[0]));
+        history.push(routes.editorWithProjectFilePathQuery(filePaths[0]));
       } else {
         //alert('No files are selected!');
       }
@@ -517,36 +514,23 @@ function ProjectListPageMenu(props) {
     <MenuComponent
       menuButtons={[
         {
-          label: messages["Menu.FileLabel"],
+          labelId: "Menu.FileLabel",
           // onClick: _=> { console.log('file') },
           children: [
             {
-              label: messages["Menu.File.NewLabel"],
+              labelId: "Menu.File.NewLabel",
               onClick: handleBtnNewClick
             },
             {
-              label: messages["Menu.File.OpenLabel"],
+              labelId: "Menu.File.OpenLabel",
               onClick: handleBtnOpenClick
             },
             {
-              label: '-'
+              labelId: '-'
             },
             {
-              label: messages["Menu.File.ExitLabel"],
+              labelId: "Menu.File.ExitLabel",
               methodNameToInvoke: 'closeApp'
-            }
-          ]
-        },
-        {
-          label: messages["Menu.LanguageLabel"],
-          children: [
-            {
-              label: messages["Menu.Language.English"],
-              languageCodeToChangeTo: languages.english.code,
-            },
-            {
-              label: messages["Menu.Language.TraditionalChinese"],
-              languageCodeToChangeTo: languages.traditionalChinese.code,
             }
           ]
         }
@@ -679,17 +663,10 @@ class ProjectListPage extends Component {
     return (
       <div id="project-list-page">
         <div className="outer-container" onScroll={this.handleOuterContainerScroll}>
-          <div className="inner-container">
-            <LanguageContextConsumer render={
-              ({ messages, changeLanguagePromises }) => (
-                <ProjectListPageMenu
-                  history={props.history}
-
-                  messages={messages}
-                  changeLanguagePromises={changeLanguagePromises}
-                />
-              )
-            } />
+          <div className="inner-container">            
+            <ProjectListPageMenu
+              history={props.history}                 
+            />            
             <div className="project-top">
               <div className="project-order">
                 <LanguageContextConsumer render={

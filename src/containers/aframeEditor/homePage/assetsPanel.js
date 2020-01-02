@@ -1,12 +1,12 @@
 import React, {Component} from 'react';
 
-import ipcHelper from 'utils/ipc/ipcHelper';
-import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
-import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
+// import ipcHelper from 'utils/ipc/ipcHelper';
+// import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
+// import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 
 import './assetsPanel.css';
 
-const Events = require('vendor/Events.js');
+//const Events = require('vendor/Events.js');
 
 function handleUpload(event, callback) {
   var self = event.target;

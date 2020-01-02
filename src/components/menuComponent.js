@@ -13,10 +13,11 @@ import {LanguageContextConsumer, getLocalizedMessage} from 'globals/contexts/loc
 
 import ipcHelper from 'utils/ipc/ipcHelper';
 import {invokeIfIsFunction} from 'utils/variableType/isFunction';
+import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 
 import appIcon from 'app_icon.png';
 
-import config from 'globals/config';
+import config, {languages} from 'globals/config';
 
 import './menuComponent.css';
 
@@ -29,7 +30,21 @@ class MenuComponent extends Component {
       hoverItem: -1,
       isWindowMaximized: false
     };
-    this.buttons = [];
+
+    // constants
+    this.langBtns = {
+      labelId: "Menu.LanguageLabel",
+      children: [
+        {
+          labelId: "Menu.Language.English",
+          languageCodeToChangeTo: languages.english.code,
+        },
+        {
+          labelId: "Menu.Language.TraditionalChinese",
+          languageCodeToChangeTo: languages.traditionalChinese.code,
+        }
+      ]
+    };
 
     [
       // event handlers
@@ -149,8 +164,7 @@ class MenuComponent extends Component {
   
   render() {
     const props = this.props;
-    const state = this.state;
-    this.buttons.length = 0;
+    const state = this.state;    
     const sceneContext = props.sceneContext;
     const projectName = sceneContext.getProjectName();
     const appName = config.appName;
@@ -163,50 +177,55 @@ class MenuComponent extends Component {
         </div>
         {/* <div id="app-name">School VR</div> */}        
         <div id="app-buttons">
-          {props.menuButtons.map((rootBtn, idx) => {
+          {props.menuButtons.concat(this.langBtns).map((rootBtn, idx) => {
             const isDisabled = rootBtn.disabled === true;
             const isAnyMenuOpened = state.menuOpen !== -1;
             const isMenuOpened = state.menuOpen === idx;
             const isHovered = state.hoverItem === idx;
             const shouldBeHighlighted = isHovered || isMenuOpened;
+            const children = rootBtn.children;
             return <div className={`menu-group${isDisabled ? ' disabled': ''}${shouldBeHighlighted ? ' hover': ''}`} key={idx}>
-              <button
-                onMouseEnter={_ => {                              
-                  if (!isDisabled) {
-                    this.setState((currentState) => ({
-                      hoverItem: idx,
-                      menuOpen: isAnyMenuOpened ? idx : currentState.menuOpen
-                    }));
-                  }
-                }}
-                onMouseLeave={_ => {                  
-                  this.setState({
-                    hoverItem: -1
-                  });
-                }}
-                onClick={(e) => {
-                  e.nativeEvent.stopImmediatePropagation();
-                  if (!isDisabled) {
-                    invokeIfIsFunction(rootBtn.onClick);                    
-                    this.setState({
-                      menuOpen: isMenuOpened ? -1 : idx 
-                    });
-                  }
-                }}
-              >
-                {rootBtn.label}
-              </button>
-              {rootBtn.children && rootBtn.children.length && isMenuOpened && 
+              <LanguageContextConsumer render={
+                ({ messages }) => (
+                  <button
+                    onMouseEnter={_ => {                              
+                      if (!isDisabled) {
+                        this.setState((currentState) => ({
+                          hoverItem: idx,
+                          menuOpen: isAnyMenuOpened ? idx : currentState.menuOpen
+                        }));
+                      }
+                    }}
+                    onMouseLeave={_ => {                  
+                      this.setState({
+                        hoverItem: -1
+                      });
+                    }}
+                    onClick={(e) => {
+                      e.nativeEvent.stopImmediatePropagation();
+                      if (!isDisabled) {
+                        invokeIfIsFunction(rootBtn.onClick);                    
+                        this.setState({
+                          menuOpen: isMenuOpened ? -1 : idx 
+                        });
+                      }
+                    }}
+                  >
+                    {messages[rootBtn.labelId]}
+                  </button>
+                )
+              } />                
+              {isNonEmptyArray(children) && isMenuOpened && 
                 <div className="menu-list" onClick={(e) => {
                   e.nativeEvent.stopImmediatePropagation(); 
                 }} >
-                  {rootBtn.children.map((childBtn, childIdx) => {
-                    if (childBtn.label === '-') {
+                  {children.map((childBtn, childIdx) => {
+                    if (childBtn.labelId === '-') {
                       return <div className={`seperator${childBtn.disabled? ' disabled': ''}`} key={childIdx} />;
                     } else {
                       return (
                         <LanguageContextConsumer render={
-                          ({ changeLanguagePromises }) => (
+                          ({ messages, changeLanguagePromises }) => (
 
                             <div className={`menu-item${childBtn.disabled? ' disabled': ''}`} key={childIdx} onClick={async (e) => {
                               if (!childBtn.disabled) {
@@ -222,7 +241,7 @@ class MenuComponent extends Component {
                                 }
                               }
                             }}>
-                              {childBtn.label}
+                              {messages[childBtn.labelId]}
                             </div>
                           )
                         } />

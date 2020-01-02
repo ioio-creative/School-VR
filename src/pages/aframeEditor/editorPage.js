@@ -7,7 +7,7 @@ import {formatDateTimeForFileName} from 'utils/dateTime/formatDateTime';
 
 import {withSceneContext, capture360OutputResolutionTypes} from 'globals/contexts/sceneContext';
 import {LanguageContextConsumer, getLocalizedMessage} from 'globals/contexts/locale/languageContext';
-import config, {languages} from 'globals/config';
+import config from 'globals/config';
 
 import MenuComponent from 'components/menuComponent';
 
@@ -32,8 +32,6 @@ import dataUrlToBlob from 'utils/blobs/dataUrlToBlob';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 import ipcHelper from 'utils/ipc/ipcHelper';
 
-import routes from 'globals/routes';
-
 import {getSearchObjectFromHistory} from 'utils/queryString/getSearchObject';
 import getProjectFilePathFromSearchObject from 'utils/queryString/getProjectFilePathFromSearchObject';
 
@@ -52,9 +50,7 @@ const uuid = require('uuid/v1');
 
 function EditorPageMenu(props) {
   const {
-    sceneContext,
-
-    messages,    
+    sceneContext,       
     
     handleNewProjectButtonClick,
     handleOpenProjectButtonClick,
@@ -74,111 +70,98 @@ function EditorPageMenu(props) {
 
   const menuButtons = [
     {
-      label: messages["Menu.FileLabel"],
+      labelId: "Menu.FileLabel",
       // onClick: _=> { console.log('file') },
       children: [
         {
-          label: messages["Menu.File.HomeLabel"],
+          labelId: "Menu.File.HomeLabel",
           disabled: false,
           methodNameToInvoke: 'goToHomePage'
         },
         {
-          label: '-'
+          labelId: '-'
         },
         {
-          label: messages["Menu.File.NewLabel"],
+          labelId: "Menu.File.NewLabel",
           disabled: false,
           onClick: handleNewProjectButtonClick
         },
         {
-          label: '-'
+          labelId: '-'
         },
         {
-          label: messages["Menu.File.OpenLabel"],
+          labelId: "Menu.File.OpenLabel",
           disabled: false,
           onClick: handleOpenProjectButtonClick
         },
         {
-          label: messages["Menu.File.SaveLabel"],
+          labelId: "Menu.File.SaveLabel",
           disabled: false,
           onClick: handleSaveProjectButtonClick
         },
         {
-          label: messages["Menu.File.SaveAsLabel"],
+          labelId: "Menu.File.SaveAsLabel",
           disabled: false,
           onClick: handleSaveAsProjectButtonClick
         },
         {
-          label: '-'
+          labelId: '-'
         },
         {
-          label: messages["Menu.File.ExitLabel"],
+          labelId: "Menu.File.ExitLabel",
           disabled: false,
           methodNameToInvoke: 'closeApp'
         }
       ]
     }
   ];
+
   if (isEditorOpened) {
     menuButtons.push({
-      label: messages["Menu.EditLabel"],
+      labelId: "Menu.EditLabel",
       children: [
         {
-          label: messages["Menu.Edit.UndoLabel"],
+          labelId: "Menu.Edit.UndoLabel",
           disabled: !sceneContext.getUndoQueueLength(),
           onClick: handleUndoButtonClick
         },
         {
-          label: messages["Menu.Edit.RedoLabel"],
+          labelId: "Menu.Edit.RedoLabel",
           disabled: !sceneContext.getRedoQueueLength(),
           onClick: handleRedoButtonClick
         }
       ]
     });
   }
-  menuButtons.push(
-    {
-      label: messages["Menu.LanguageLabel"],
-      children: [
-        {
-          label: messages["Menu.Language.English"],
-          languageCodeToChangeTo: languages.english.code,
-        },
-        {
-          label: messages["Menu.Language.TraditionalChinese"],
-          languageCodeToChangeTo: languages.traditionalChinese.code,
-        }
-      ]
-    }
-  );
+  
   if (isEditorOpened) {
     menuButtons.push({
-      label: messages["Menu.CaptureImageLabel"],
+      labelId: "Menu.CaptureImageLabel",
       children: [
         {
-          label: messages["Menu.CaptureImage.Normal"],          
+          labelId: "Menu.CaptureImage.Normal",          
           onClick: handleCaptureNormalImageClick          
         },
         // {
-        //   label: messages["Menu.CaptureImage.360_2k"],          
+        //   labelId: "Menu.CaptureImage.360_2k",          
         //   onClick: handleCapture360_2kImageClick
         // },
         // {
-        //   label: messages["Menu.CaptureImage.360_4k"],          
+        //   labelId: "Menu.CaptureImage.360_4k",          
         //   onClick: handleCapture360_4kImageClick
         // }
       ]
     });
 
     // menuButtons.push({
-    //   label: messages["Menu.CaptureVideoLabel"],
+    //   labelId: "Menu.CaptureVideoLabel",
     //   children: [
     //     {
-    //       label: messages["Menu.CaptureVideo.360_2k"],          
+    //       labelId: "Menu.CaptureVideo.360_2k",          
     //       onClick: handleCapture360_2kVideoClick
     //     },
     //     {
-    //       label: messages["Menu.CaptureVideo.360_4k"],          
+    //       labelId: "Menu.CaptureVideo.360_4k",          
     //       onClick: handleCapture360_4kVideoClick
     //     }
     //   ]
@@ -499,30 +482,23 @@ class EditorPage extends Component {
               />
             )
           } />
-          {/* <SystemPanel projectName={this.projectName} /> */}
-          <LanguageContextConsumer render={
-            ({ messages, changeLanguagePromises }) => (
-              <EditorPageMenu
-                sceneContext={sceneContext}
+          {/* <SystemPanel projectName={this.projectName} /> */}          
+          <EditorPageMenu
+            sceneContext={sceneContext}                                
+            
+            handleNewProjectButtonClick={this.handleNewProjectButtonClick}
+            handleOpenProjectButtonClick={this.handleOpenProjectButtonClick}
+            handleSaveProjectButtonClick={this.handleSaveProjectButtonClick}
+            handleSaveAsProjectButtonClick={this.handleSaveAsProjectButtonClick}                
+            handleUndoButtonClick={this.handleUndoButtonClick}
+            handleRedoButtonClick={this.handleRedoButtonClick}
 
-                messages={messages}
-                changeLanguagePromises={changeLanguagePromises}
-                
-                handleNewProjectButtonClick={this.handleNewProjectButtonClick}
-                handleOpenProjectButtonClick={this.handleOpenProjectButtonClick}
-                handleSaveProjectButtonClick={this.handleSaveProjectButtonClick}
-                handleSaveAsProjectButtonClick={this.handleSaveAsProjectButtonClick}                
-                handleUndoButtonClick={this.handleUndoButtonClick}
-                handleRedoButtonClick={this.handleRedoButtonClick}
-
-                handleCaptureNormalImageClick={this.handleCaptureNormalImageClick}
-                handleCapture360_2kImageClick={this.handleCapture360_2kImageClick}
-                handleCapture360_4kImageClick={this.handleCapture360_4kImageClick}
-                handleCapture360_2kVideoClick={this.handleCapture360_2kVideoClick}
-                handleCapture360_4kVideoClick={this.handleCapture360_4kVideoClick}
-              />
-            )
-          } />
+            handleCaptureNormalImageClick={this.handleCaptureNormalImageClick}
+            handleCapture360_2kImageClick={this.handleCapture360_2kImageClick}
+            handleCapture360_4kImageClick={this.handleCapture360_4kImageClick}
+            handleCapture360_2kVideoClick={this.handleCapture360_2kVideoClick}
+            handleCapture360_4kVideoClick={this.handleCapture360_4kVideoClick}
+          />            
           <ButtonsPanel currentLoadedProjectPath={loadedProjectFilePath} />
           <AFramePanel user-mode="editor" />
           <SlidesPanel isEditing={sceneContext.editor && sceneContext.editor.opened} />

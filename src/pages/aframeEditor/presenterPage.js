@@ -4,7 +4,6 @@ import {withRouter, Link, Prompt} from 'react-router-dom';
 
 import {withSceneContext} from 'globals/contexts/sceneContext';
 import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/locale/languageContext';
-import {languages} from 'globals/config';
 
 import MenuComponent from 'components/menuComponent';
 import Mousetrap from 'mousetrap';
@@ -54,9 +53,7 @@ const Events = require('vendor/Events.js');
 
 
 function PresenterPageMenu(props) {
-  const {
-    messages,    
-    
+  const {    
     handleOpenProjectButtonClick,      
   } = props;  
 
@@ -65,42 +62,29 @@ function PresenterPageMenu(props) {
       // projectName="Untitled_1"      
       menuButtons={[
         {
-          label: messages['Menu.FileLabel'],
+          labelId: 'Menu.FileLabel',
           // onClick: _=> { console.log('file') },
           children: [
             {
-              label: messages['Menu.File.HomeLabel'],
+              labelId: 'Menu.File.HomeLabel',
               disabled: false,
               methodNameToInvoke: 'goToHomePage'
             },
             {
-              label: '-'
+              labelId: '-'
             },
             {
-              label: messages['Menu.File.OpenLabel'],
+              labelId: 'Menu.File.OpenLabel',
               disabled: false,
               onClick: handleOpenProjectButtonClick
             },
             {
-              label: '-'
+              labelId: '-'
             },
             {
-              label: messages['Menu.File.ExitLabel'],
+              labelId: 'Menu.File.ExitLabel',
               disabled: false,
               methodNameToInvoke: 'closeApp'
-            }
-          ]
-        },
-        {
-          label: messages["Menu.LanguageLabel"],
-          children: [
-            {
-              label: messages["Menu.Language.English"],              
-              languageCodeToChangeTo: languages.english.code,
-            },
-            {
-              label: messages["Menu.Language.TraditionalChinese"],              
-              languageCodeToChangeTo: languages.traditionalChinese.code,
             }
           ]
         }
@@ -504,15 +488,11 @@ class PresenterPage extends Component {
           }
         />
         {/* <SystemPanel projectName={this.projectName} /> */}
-        <LanguageContextConsumer render={
-          ({ messages }) => (
-            <PresenterPageMenu
-              messages={messages}              
-              
-              handleOpenProjectButtonClick={this.handleOpenProjectButtonClick}              
-            />
-          )
-        } />
+        
+        <PresenterPageMenu              
+          handleOpenProjectButtonClick={this.handleOpenProjectButtonClick}              
+        />
+                  
         {/* <ButtonsPanel /> */}
         <AFramePanel disableVR={true} socket={socket} user-mode="presenter" />
         <SlidesPanel isEditing={false} socket={socket} />
