@@ -28,7 +28,7 @@ import io from 'socket.io-client';
 import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 import ipcHelper from 'utils/ipc/ipcHelper';
-import fileHelper from 'utils/fileHelper/fileHelper';
+//import fileHelper from 'utils/fileHelper/fileHelper';
 
 import {jsonCopy} from "globals/helperfunctions";
 

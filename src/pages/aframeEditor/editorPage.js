@@ -217,6 +217,8 @@ class EditorPage extends Component {
 
     // bind methods
     [
+      'confirmLeaveProject',
+      'onEditorLoad',
       'newProject',
       'loadProject',
       'saveProject',
@@ -237,9 +239,7 @@ class EditorPage extends Component {
       'handleCapture360_2kImageClick',
       'handleCapture360_4kImageClick',
       'handleCapture360_2kVideoClick',
-      'handleCapture360_4kVideoClick',
-      
-      'onEditorLoad'
+      'handleCapture360_4kVideoClick',            
     ].forEach(methodName => {
       this[methodName] = this[methodName].bind(this);
     });
@@ -269,6 +269,11 @@ class EditorPage extends Component {
 
 
   /* methods */
+
+  confirmLeaveProject() {
+    const { sceneContext } = this.props;    
+    return sceneContext.isProjectSaved || window.confirm(getLocalizedMessage('Prompt.UnsavedWorkMessage'));    
+  }  
 
   onEditorLoad(editor) {
     // load project
@@ -411,24 +416,28 @@ class EditorPage extends Component {
   }
 
   handleNewProjectButtonClick(event) {
-    this.newProject();
+    if (this.confirmLeaveProject()) {
+      this.newProject();
+    }
   }
 
   handleOpenProjectButtonClick(event) {
-    ipcHelper.openSchoolVrFileDialog((err, data) => {
-      if (err) {
-        handleErrorWithUiDefault(err);
-        return;
-      }
-
-      const filePaths = data.filePaths;
-
-      if (!isNonEmptyArray(filePaths)) {
-        return;
-      }
-
-      this.loadProject(filePaths[0]);
-    });
+    if (this.confirmLeaveProject()) {
+      ipcHelper.openSchoolVrFileDialog((err, data) => {
+        if (err) {
+          handleErrorWithUiDefault(err);
+          return;
+        }
+  
+        const filePaths = data.filePaths;
+  
+        if (!isNonEmptyArray(filePaths)) {
+          return;
+        }
+  
+        this.loadProject(filePaths[0]);
+      });
+    }    
   }
 
   handleSaveProjectButtonClick(event) {
@@ -496,7 +505,7 @@ class EditorPage extends Component {
       loadedProjectFilePath
     } = this.state;
 
-    //console.log('sceneContext.isProjectSaved:', sceneContext.isProjectSaved);
+    console.log('sceneContext.isProjectSaved:', sceneContext.isProjectSaved);
 
     return (
       // <SceneContextProvider>

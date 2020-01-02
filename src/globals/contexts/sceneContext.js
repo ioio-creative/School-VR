@@ -270,16 +270,7 @@ class SceneContextProvider extends Component {
       undoQueue
     } = this.state;
 
-    const isUndoQueueChanged = prevState.undoQueue !== undoQueue;
-    
-    // const isSceneDataChanged = prevState.sceneData !== sceneData;
-    // const isAssetsDataChanged = prevState.assetsData !== assetsData;
-    // if (isSceneDataChanged) {
-    //   console.log('scene data changed');
-    // }    
-    // if (isAssetsDataChanged) {
-    //   console.log('assets data changed');
-    // }
+    const isUndoQueueChanged = prevState.undoQueue !== undoQueue;    
 
     if (isUndoQueueChanged) {      
       this.setState({
@@ -413,14 +404,12 @@ class SceneContextProvider extends Component {
     this.setState({
       sceneData: sceneData,
       slideId: undefined,
+
+      isProjectSaved: true
     }, _ => {
       const cameraEl = document.querySelector('a-camera[el-defaultCamera="true"]');
       this.updateCameraEl(cameraEl);
       this.selectSlide(sceneData.slides[0].id);
-
-      this.setState({
-        isProjectSaved: true
-      });
     });
   }
   updateCameraEl(cameraEl) {
