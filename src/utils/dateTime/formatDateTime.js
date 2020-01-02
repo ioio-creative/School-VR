@@ -5,6 +5,7 @@ import moment from 'moment';
 const dateFormatDefault = "YYYY/MM/DD";
 const timeFormatDefault = "HH:mm";
 const dateTimeFormatDefault = `${dateFormatDefault} ${timeFormatDefault}`;
+const dateTimeFormatForFileName = 'YYYY-MM-DD' + 'T' + 'HH-mm-ss';
 
 
 const formatDate = (dateObj, format = dateFormatDefault) => {
@@ -19,9 +20,14 @@ const formatDateTime = (dateObj, format = dateTimeFormatDefault) => {
   return moment(dateObj).format(format);
 };
 
+const formatDateTimeForFileName = (dateObj) => {
+  return formatDateTime(dateObj, dateTimeFormatForFileName);
+}
+
 
 export {
   formatDate,
   formatTime,
-  formatDateTime
+  formatDateTime,
+  formatDateTimeForFileName
 };

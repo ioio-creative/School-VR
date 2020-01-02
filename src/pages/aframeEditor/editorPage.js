@@ -1,7 +1,9 @@
 import React, {Component} from 'react';
 // import SystemPanel from 'containers/aframeEditor/homePage/systemPanel';
 import {withRouter, Prompt} from 'react-router-dom';
+
 import saveAs from 'utils/fileSaver/saveAs';
+import {formatDateTimeForFileName} from 'utils/dateTime/formatDateTime';
 
 import {withSceneContext, capture360OutputResolutionTypes} from 'globals/contexts/sceneContext';
 import {LanguageContextConsumer, getLocalizedMessage} from 'globals/contexts/locale/languageContext';
@@ -475,7 +477,7 @@ class EditorPage extends Component {
   handleCaptureNormalImageClick(event) {
     const snapshotDataUrl = this.props.sceneContext.takeSnapshot();
     const snapshotBlob = dataUrlToBlob(snapshotDataUrl);  
-    saveAs(snapshotBlob, `snapShot-${Date.now()}${config.captured360ImageExtension}`);
+    saveAs(snapshotBlob, `snapShot_${formatDateTimeForFileName(Date.now())}${config.captured360ImageExtension}`);
   }
 
   handleCapture360_2kImageClick(event) {    

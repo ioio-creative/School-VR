@@ -39,6 +39,7 @@ import {getSearchObjectFromHistory} from 'utils/queryString/getSearchObject';
 import getProjectFilePathFromSearchObject from 'utils/queryString/getProjectFilePathFromSearchObject';
 
 import saveAs from 'utils/fileSaver/saveAs';
+import {formatDateTimeForFileName} from 'utils/dateTime/formatDateTime';
 
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 //import iconViewer from 'media/icons/viewer.svg';
@@ -458,7 +459,7 @@ class PresenterPage extends Component {
   }
 
   saveRecording(mediaObjToSave) {
-    const tempMediaFileName = `sharingRecording-${Date.now()}${config.presentationRecordingVideoExtension}`;
+    const tempMediaFileName = `sharingRecording_${formatDateTimeForFileName(Date.now())}${config.presentationRecordingVideoExtension}`;
 
     saveAs(mediaObjToSave, tempMediaFileName);
 
