@@ -22,7 +22,10 @@ appDirectory.appTempWebContainerDirectory = myPath.join(appDirectory.appTempAppW
 appDirectory.appTempCapturesContainerDirectory = myPath.join(appDirectory.appTempAppWorkingDirectory, 'captures');
 
 //appDirectory.appAsarInstallationPath = myPath.join(app.getAppPath(), 'resources', 'app.asar');
-appDirectory.appAsarInstallationPath = myPath.join(app.getPath('appData'), '..', 'Local', 'Programs', app.getName(), 'resources', 'app.asar');
+console.log('__dirname:', __dirname);
+console.log('app.getAppPath():', app.getAppPath());
+let appAsarInstallationPath = process.platform.toLowerCase() === 'darwin' ? app.getAppPath() : myPath.join(app.getPath('appData'), '..', 'Local', 'Programs', app.getName(), 'resources', 'app.asar');
+appDirectory.appAsarInstallationPath = appAsarInstallationPath;
 appDirectory.webServerRootDirectory = myPath.join(appDirectory.appAsarInstallationPath, 'build');  // directly serves within app.asar (which acts as a directory)
 appDirectory.webServerFilesDirectory = myPath.join(appDirectory.appTempWebContainerDirectory, 'files');
 

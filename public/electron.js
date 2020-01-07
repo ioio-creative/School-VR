@@ -38,7 +38,7 @@ console.log('node version:', process.version);
 const configFilePath = './config.jsonc';
 
 // default values
-let webServerPort = 1413;
+let webServerPort = 81;//1413;
 //let webServerRootDirPath = __dirname;  // public folder
 
 let splashScreenDurationInMillis = 2000;
@@ -130,7 +130,7 @@ function createWindow() {
       // create App Data directories if they do not exist
       await forEach(appDirectory.createOnStartUpDirectories, async (directoryPath) => {       
         console.log('Directory created:', directoryPath);
-        await fileSystem.createDirectoryIfNotExistsPromise(directoryPath);
+        await fileSystem.createDirectoryIfNotExistsPromise(directoryPath);        
       });
       console.log('App directories created.');
 
@@ -207,13 +207,15 @@ function createWindow() {
 
 /* web server */
 
-async function openWebServerAsync() {
+async function openWebServerAsync() {  
   await fileSystem.myDeletePromise(webServerFilesDirectory);
   await fileSystem.createDirectoryIfNotExistsPromise(webServerFilesDirectory);
 
   const indexHtmlPath = isDev ? myPath.join(__dirname, '../build') : webServerRootDirectory;
 
   webServerProcess = fork(serverProgramPath);
+
+  console.log('Presentation port to use:', webServerPort);
 
   // https://nodejs.org/api/child_process.html#child_process_subprocess_send_message_sendhandle_options_callback
   webServerProcess.send({
