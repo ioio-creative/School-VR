@@ -41,7 +41,7 @@
 }
 
 #app-icon {
-  /* background-color: #8597ad; */
+  /* background-color: var(--secondaryFontColor); */
   width: 22px;
   height: 22px;
   border-radius: 50%;

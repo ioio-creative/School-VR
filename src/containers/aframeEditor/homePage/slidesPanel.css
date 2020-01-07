@@ -42,7 +42,7 @@
 #slides-panel .toggle-size:after {
   content: '';
   position: absolute;
-  border-top: 8px solid #8597AD;
+  border-top: 8px solid var(--secondaryFontColor);
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
   top: 50%;
@@ -52,7 +52,7 @@
 }
 #slides-panel.mini .toggle-size:after {
   border-top: 0;
-  border-bottom: 8px solid #8597AD;
+  border-bottom: 8px solid var(--secondaryFontColor);
 }
 #slides-panel .sortable-list {
   position: relative;

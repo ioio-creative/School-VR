@@ -3,14 +3,14 @@
   --panel-background-color: rgba(2, 19, 27, 0.8);
   --timeline-selected-color: #28a8ff;
   --timeline-indicator-background-color: #010e14;
-  --default-color: #8597ad;
+  --default-color: var(--secondaryFontColor);
 }
 #timeline-panel .timeline-list::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 #timeline-panel .timeline-list::-webkit-scrollbar-thumb {
-  background-color: #8597ad;
+  background-color: var(--default-color);
   border-radius: 10px;
 }
 #timeline-panel .timeline-list::-webkit-scrollbar-corner {
