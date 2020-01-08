@@ -564,7 +564,7 @@ class InfoPanel extends Component {
         {staticPanel}        
         <div id="info-panel">
           <div className="panel">
-            <div className="menu-item delete-timeline" onClick={() => {
+            <div className="menu-item delete-timeline" onClick={_ => {
               this.deleteTimeline();
             }}>
               <svg viewBox="0 0 43.15 50.54" xmlSpace="preserve">

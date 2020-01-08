@@ -6,7 +6,7 @@
    └────────┘
    ==========
 */
-import React, {Component, Fragment} from 'react';
+import React, {Component} from 'react';
 
 import {withSceneContext} from 'globals/contexts/sceneContext';
 import {LanguageContextConsumer, LanguageContextMessagesConsumer} from 'globals/contexts/locale/languageContext';
@@ -15,13 +15,13 @@ import Draggable from 'react-draggable';
 // import {Resizable} from 'react-resizable';
 import {Rnd as ResizableAndDraggable} from 'react-rnd';
 // import EntitiesList from 'containers/panelItem/entitiesList';
-import {roundTo, jsonCopy} from 'globals/helperfunctions';
+import {jsonCopy} from 'globals/helperfunctions';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 import './timelinePanel.css';
 
-const Events = require('vendor/Events.js');
-const uuid = require('uuid/v1');
+//const Events = require('vendor/Events.js');
+//const uuid = require('uuid/v1');
 
 function getScaleIndicatorText(totaltime, scale, elWidth) {
   const listEl = [];

@@ -30,6 +30,7 @@ const { getMacAddressHelper, getMacAddressPromiseHelper } = require('./utils/net
 const shallowMergeObjects = require('./utils/js/shallowMergeObjects');
 const { hashForUniqueId } = require('./utils/crypto');
 const jsonStringifyFormatted = require('./utils/json/jsonStringifyFormatted');
+const { isMac } = require('./utils/platform/platform');
 
 console.log('node version:', process.version);
 
@@ -38,7 +39,7 @@ console.log('node version:', process.version);
 const configFilePath = './config.jsonc';
 
 // default values
-let webServerPort = 81;//1413;
+let webServerPort = 1413;
 //let webServerRootDirPath = __dirname;  // public folder
 
 let splashScreenDurationInMillis = 2000;
@@ -209,9 +210,7 @@ function createWindow() {
 
 async function openWebServerAsync() {  
   await fileSystem.myDeletePromise(webServerFilesDirectory);
-  await fileSystem.createDirectoryIfNotExistsPromise(webServerFilesDirectory);
-
-  const indexHtmlPath = isDev ? myPath.join(__dirname, '../build') : webServerRootDirectory;
+  await fileSystem.createDirectoryIfNotExistsPromise(webServerFilesDirectory);  
 
   webServerProcess = fork(serverProgramPath);
 
@@ -221,7 +220,7 @@ async function openWebServerAsync() {
   webServerProcess.send({
     address: 'open-server',
     port: webServerPort,
-    rootDirPath: indexHtmlPath,
+    rootDirPath: webServerRootDirectory,
     filesDirPath: webServerFilesDirectory,
     webServerStaticFilesPathPrefix: config.webServerStaticFilesPathPrefix,
   });  
@@ -232,6 +231,8 @@ function closeWebServer() {
     webServerProcess.send({
       address: 'close-server'
     });
+
+    console.log('Web server closed.');
   }
 }
 
@@ -262,10 +263,16 @@ app.on('window-all-closed', async _ => {
   });
   console.log('App directories deleted.');
 
-  const platform = process.platform.toLowerCase();
-  if (platform !== 'darwin') {
+  // Always check if web server is closed when all windows are closed
+  closeWebServer();
+
+  // TODO: Rationale behind isMac check:
+  // In mac, when all windows are closed, the app does not necessarily quit.
+  // But this in-mac behaviour may require Application Menu implementation as well,
+  // so that a window can be opened again after all windows are closed.
+  if (!isMac) {
     app.quit();
-  }
+  }  
 });
 
 app.on('activate', () => {
