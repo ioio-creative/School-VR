@@ -271,6 +271,7 @@ app.on('window-all-closed', async _ => {
   // But this in-mac behaviour may require Application Menu implementation as well,
   // so that a window can be opened again after all windows are closed.
   if (!isMac) {
+    console.log('App quit.');
     app.quit();
   }  
 });
