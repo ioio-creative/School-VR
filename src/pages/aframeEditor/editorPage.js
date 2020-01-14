@@ -142,10 +142,10 @@ function EditorPageMenu(props) {
           labelId: "Menu.CaptureImage.Normal",          
           onClick: handleCaptureNormalImageClick          
         },
-        // {
-        //   labelId: "Menu.CaptureImage.360_2k",          
-        //   onClick: handleCapture360_2kImageClick
-        // },
+        {
+          labelId: "Menu.CaptureImage.360_2k",          
+          onClick: handleCapture360_2kImageClick
+        },
         // {
         //   labelId: "Menu.CaptureImage.360_4k",          
         //   onClick: handleCapture360_4kImageClick
@@ -261,9 +261,7 @@ class EditorPage extends Component {
     }
   }
 
-  newProject() {
-    //console.log('new');
-
+  newProject() {    
     // test open file with user defined extension
     // const fileDialog = document.createElement('input');
     // fileDialog.type = 'file';
@@ -271,11 +269,13 @@ class EditorPage extends Component {
     // fileDialog.accept = ['image/x-png','image/gif'];
     // fileDialog.click();
 
+    const { sceneContext } = this.props;
+
     this.setState({
       loadedProjectFilePath: ''
     });
 
-    this.props.sceneContext.newProject();
+    sceneContext.newProject();
   }
 
   loadProject(projectFilePath) {

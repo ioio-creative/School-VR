@@ -378,8 +378,8 @@ class TimelinePanel extends Component {
                     <div className="entity-name"
                       onClick={(event) => {
                         {/* console.log('Ctrl pressed: ', event.ctrlKey); */}
-                        console.log('entityId: ', [entityId, selectedEntityId]);
-                        this.selectEntity(event, entityId)
+                        //console.log('entityId: ', [entityId, selectedEntityId]);
+                        this.selectEntity(event, entityId);
                       }}
                       onContextMenu={(event) => {
                         this.selectEntity(event, entityId);

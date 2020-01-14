@@ -110,7 +110,7 @@ class StaticInfoRenderer extends Component {
     }
   }
   changeObjectField(field, value) {
-    const props = this.props;
+    const { sceneContext } = this.props;
     const tmp = {};
     let pointer = tmp;
     field.split('.').forEach((key, idx, arr) => {
@@ -123,32 +123,30 @@ class StaticInfoRenderer extends Component {
     })
     // tmp[field] = value;
     // console.log(tmp);
-    props.sceneContext.updateDefaultAttributes(
+    sceneContext.updateDefaultAttributes(
       tmp
     );
     // Events.emit('updateSelectedEntityAttribute', tmp);
 
   }
   changeObjectMultipleFields(objs) {
-    const props = this.props;
+    const { sceneContext } = this.props;
     const tmp = {};
     Object.keys(objs).forEach(field => {
       const value = objs[field];
       let pointer = tmp;
       field.split('.').forEach((key, idx, arr) => {
         if (idx === arr.length - 1) {
-          pointer[key] = value
-        } else {
-          if (!pointer[key])
-            pointer[key] = {}
-          pointer = pointer[key]
+          pointer[key] = value;
+        } else {          
+          pointer = pointer[key] || {};
         }
       })
       // console.log(tmp);
       // console.log(pointer);
     })
     // tmp[field] = value;
-    props.sceneContext.updateDefaultAttributes(
+    sceneContext.updateDefaultAttributes(
       tmp
     );
     // Events.emit('updateSelectedEntityAttribute', tmp);

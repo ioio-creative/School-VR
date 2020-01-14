@@ -126,6 +126,8 @@ class SceneContextProvider extends Component {
     this.mediaRecorder = null;
     this.recordingStartDT = null;
     this.recordingTimerHandle = null;
+
+    this.cameraRotationBeforeToggle = null;
     
     [
       'setAppName',
@@ -145,6 +147,13 @@ class SceneContextProvider extends Component {
       'selectSlide',
       'sortSlide',
       'getSlideTotalTime',
+
+      'getCameraEl',
+      'getCameraElAttributeObjCopy',
+      'getCameraElPositionCopy',
+      'getCameraElRotationCopy',      
+      'setCameraElPosition',
+      'setCameraElRotation',  
 
       'getEntitiesList',
       'getCurrentEntity',
@@ -191,6 +200,7 @@ class SceneContextProvider extends Component {
 
       'resetView',
 
+      'openEditor',
       'toggleEditor',
 
       'takeSnapshot',
@@ -317,11 +327,13 @@ class SceneContextProvider extends Component {
     // const entityId = uuid();
     // const timelineId = uuid();
     const projectName = `untitled_${newProjectIdx}`;
-    const cameraEl = document.querySelector('a-camera[el-defaultCamera="true"]');
+    const cameraEl = this.getCameraEl();
+    //console.log(cameraEl);
     if (cameraEl) {
       cameraEl.setAttribute('id', cameraId);
     }
     const cameraModel = new entityModel['a-camera'];
+    //console.log(cameraModel);
     const data = {
       projectName: projectName,
       slides: [
@@ -411,7 +423,7 @@ class SceneContextProvider extends Component {
 
       isProjectSaved: true
     }, _ => {
-      const cameraEl = document.querySelector('a-camera[el-defaultCamera="true"]');
+      const cameraEl = this.getCameraEl();
       this.updateCameraEl(cameraEl);
       this.selectSlide(sceneData.slides[0].id);
     });
@@ -635,7 +647,7 @@ class SceneContextProvider extends Component {
             }
           }
         }
-      })
+      });
       return {
         sceneData: newSceneData,
         entityId: null,
@@ -652,6 +664,10 @@ class SceneContextProvider extends Component {
       const newTl = this.rebuildTimeline(false);
       if (autoPlay) {
         newTl.then(tl => tl.play(0));
+      } else {        
+        // newTl.then(tl => {     
+        //   tl.play();
+        // });
       }
     })
   }
@@ -669,6 +685,35 @@ class SceneContextProvider extends Component {
     return maxTime;
   }
 
+  getCameraEl() {
+    return document.querySelector('a-camera[el-defaultCamera="true"]');
+  }
+  getCameraElAttributeObjCopy(attributeName) {
+    return jsonCopy(this.getCameraEl().getAttribute(attributeName));
+  }
+  getCameraElPositionCopy() {
+    return this.getCameraElAttributeObjCopy('position');
+  }
+  getCameraElRotationCopy() {
+    return this.getCameraElAttributeObjCopy('rotation');
+  }
+  setCameraElPosition(valueObj) {
+    this.getCameraEl().setAttribute('position', {
+      x: valueObj.x + 1,
+      y: valueObj.y + 1,
+      z: valueObj.z + 1
+    });
+    this.getCameraEl().setAttribute('position', valueObj);
+  }
+  setCameraElRotation(valueObj) {
+    this.getCameraEl().setAttribute('rotation', {
+      x: valueObj.x + 1,
+      y: valueObj.y + 1,
+      z: valueObj.z + 1
+    });
+    this.getCameraEl().setAttribute('rotation', valueObj);
+  }
+
   getEntitiesList(slideId = this.state.slideId) {
     const state = this.state;
     const slides = state.sceneData.slides;
@@ -681,6 +726,7 @@ class SceneContextProvider extends Component {
     // should be somethings wrong
     return [];
   }
+
   addEntity() {
     // what ??
   }
@@ -1162,8 +1208,8 @@ class SceneContextProvider extends Component {
         undoQueue: newUndoQueue,
         redoQueue: [],
       }
-    }, _=> {
-      this.rebuildTimeline()
+    }, _ => {
+      this.rebuildTimeline();
     })
   }
   getCurrentTime() {
@@ -1410,8 +1456,8 @@ class SceneContextProvider extends Component {
     })
     return nested;
   }
-  rebuildTimeline(generateThumb = true) {
-    return new Promise((resolve, reject) => {
+  rebuildTimeline(generateThumb = true) {    
+    return new Promise((resolve, reject) => {      
       // use timelinemax to build the timeline here
       this.setState((prevState) => {
         const currentSlideId = prevState.sceneData.slides.findIndex(slide => slide.id === prevState.slideId);
@@ -1486,13 +1532,13 @@ class SceneContextProvider extends Component {
           })
 
           if (firstTimeline) {
-            tl.add(() => {
+            tl.add(_ => {
               aEntity.updateEntityAttributes(firstTimeline.startAttribute);
             }, 0);
             // must need timeline to enable play
             // media playing
             if (entityMedia['mediaEl']) {
-              tl.add(() => {
+              tl.add(_ => {
                 entityMedia['mediaEl'].loop = true;
                 if (!tl.paused()) {
                   entityMedia['mediaEl'].load();
@@ -1501,7 +1547,7 @@ class SceneContextProvider extends Component {
               }, firstTimeline.start + deltaOffset);
 
 
-              tl.add(() => {
+              tl.add(_ => {
                 entityMedia['mediaEl'].pause();
               }, lastTimeline.start + lastTimeline.duration);
             }
@@ -1967,7 +2013,13 @@ class SceneContextProvider extends Component {
     this.editor = editor;
   }
 
+  openEditor() {    
+    this.setCameraElRotation(this.cameraRotationBeforeToggle);
+    this.editor.open();
+  }
+
   toggleEditor() {
+    this.cameraRotationBeforeToggle = this.getCameraElRotationCopy();    
     this.editor.toggle();
     // this.forceUpdate();
   }
@@ -2050,6 +2102,7 @@ class SceneContextProvider extends Component {
           // editor
           editor: this.editor,
           updateEditor: this.updateEditor,
+          openEditor: this.openEditor,
           toggleEditor: this.toggleEditor,
 
           takeSnapshot: this.takeSnapshot, 

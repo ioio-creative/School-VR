@@ -181,11 +181,11 @@ class ButtonsPanel extends Component {
                 <button className="button-redo" onClick={sceneContext.redo} title={messages['Menu.Edit.RedoLabel']}>
                   <img src={iconRedo} alt={messages['Menu.Edit.RedoLabel']} />
                 </button>
-                <div className="seperator"></div>
+                <div className="seperator" />
                 <button className="button-resetView" onClick={this.resetView} title={messages['PresentationPreparationPanel.ResetViewTooltip']}>
                   <img src={iconResetView} alt={messages['PresentationPreparationPanel.ResetViewTooltip']} />
                 </button>
-                <div className="seperator"></div>
+                <div className="seperator" />
                 <button className="button-preview"
                   onClick={this.toggleEditor}
                   // disable it to prevent press space trigger it when hide

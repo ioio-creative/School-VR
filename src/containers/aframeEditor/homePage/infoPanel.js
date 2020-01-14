@@ -41,14 +41,14 @@ import AVideo from 'utils/aframeEditor/aVideo';
 import ipcHelper from 'utils/ipc/ipcHelper';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
-import fileHelper from 'utils/fileHelper/fileHelper';
+//import fileHelper from 'utils/fileHelper/fileHelper';
 
 import iconCirclePlus from 'media/icons/circleplus.svg';
 import iconCircleMinus from 'media/icons/circleminus.svg';
 import iconImage from 'media/icons/image.svg';
 import iconVideo from 'media/icons/video.svg';
 
-var Events = require('vendor/Events.js');
+//var Events = require('vendor/Events.js');
 
 // const infoRenderer = {
 //   'a-box': InfoTypeBox,
@@ -175,7 +175,7 @@ class InfoPanel extends Component {
         inputField = 
         <div key={staticAttribute.name} className="attribute-row">
           <LanguageContextConsumer render={
-            ({ language, messages }) => (
+            ({ messages }) => (
               <input type="text" className="contentTextInput" key={selectedEntity.el.id} onInput={(event) => {
                 {/* selectedEntity.el.setAttribute(staticAttribute.attributeKey,
                 {
@@ -229,7 +229,7 @@ class InfoPanel extends Component {
         // use electron api to load
         inputField = 
         <div key={staticAttribute.name} className="attribute-button">
-          <div onClick={_=> {
+          <div onClick={_ => {
             ipcHelper.openImageDialog((err, data) => {
               if (isNonEmptyArray(data.filePaths)) {
                 const filePath =data.filePaths[0];
@@ -424,7 +424,7 @@ class InfoPanel extends Component {
         inputField = 
           <div key={staticAttribute.name} className="attribute-row">
             <LanguageContextConsumer render={
-              ({ language, messages }) => (
+              ({ messages }) => (
                 <select onChange={(event) => {
                     model.updateEntityAttributes({
                       [staticAttribute.attributeKey]: event.target.value

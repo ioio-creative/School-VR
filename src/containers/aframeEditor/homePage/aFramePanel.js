@@ -9,7 +9,7 @@ import {withSceneContext} from 'globals/contexts/sceneContext';
 
 // fonts
 import TTFLoader from 'vendor/threejs/TTFLoader';
-import fontSchoolbellRegular from 'fonts/Schoolbell/SchoolbellRegular.png';
+//import fontSchoolbellRegular from 'fonts/Schoolbell/SchoolbellRegular.png';
 // import fontNotoSansRegular from 'fonts/Noto_Sans_TC/NotoSansTC-Regular.otf';
 import fontYenHeavy from 'fonts/Yen_Heavy/wt009.ttf';
 
@@ -19,7 +19,7 @@ import './aFramePanel.css';
 import { TweenMax } from 'gsap';
 
 // console.log(AFRAME.THREE.Font);
-const Events = require('vendor/Events.js');
+//const Events = require('vendor/Events.js');
 
 const ttfFonts = {
 
@@ -320,10 +320,19 @@ class AFramePanel extends Component {
     // this.Editor = this.props.editor;
     this.editor = null;
     this.sceneEl = null;
+    this.setSceneEl = element => this.sceneEl = element;
     this.cameraEl = null;
+    this.setCameraEl = element => this.cameraEl = element;
     this.cameraPreviewEl = null;
+    //this.setCameraPreviewEl = element => this.cameraPreviewEl = element;
     this.cameraPreviewScreenEl = null;
-    this.updateCameraView = this.updateCameraView.bind(this);
+    //this.setCameraPreviewScreenEl = element => this.cameraPreviewScreenEl = element;
+    
+    [
+      'updateCameraView'
+    ].forEach(methodName => {
+      this[methodName] = this[methodName].bind(this);
+    });    
   }
   componentDidMount() {
     // real-time view on the camera
@@ -339,8 +348,9 @@ class AFramePanel extends Component {
     this.sceneEl.data = {
       socket: props.socket,      
       sceneContext: sceneContext
-    }
-    
+    };    
+  }
+  componentWillUnmount() {
   }
   componentDidUpdate(prevProps, prevState) {
     if (this.props.socket !== prevProps.socket) {
@@ -381,25 +391,21 @@ class AFramePanel extends Component {
       this.cameraPreviewScreenEl.setAttribute( 'height', canvas.height / newHeight * 0.6 );
     }
     ctx.drawImage(renderer.domElement, 0, 0, canvas.width, canvas.height);
-  }
-  componentWillUnmount() {
-  }
+  }  
   render() {
     const props = this.props;
     const sceneContext = props.sceneContext;
     const entitiesList = sceneContext.getEntitiesList();
     return (
     	<div id="aframe-panel">
-	    	<a-scene embedded background="color:#6EBAA7" el-name="Background" ref={ref=> {
-            this.sceneEl = ref;
-          }} vr-mode-ui={`enabled: ${props.disableVR? 'false': 'true'}`}
+	    	<a-scene embedded background="color:#6EBAA7" el-name="Background" ref={this.setSceneEl} vr-mode-ui={`enabled: ${props.disableVR? 'false': 'true'}`}
           user-mode={props['user-mode']}
           disable-inspector
         >
           <a-assets>
             {/* try load some fonts */}
             <img src={iconNavigation} id="iconNavigation" />
-            {/* <canvas ref={(ref)=>this.cameraPreviewEl=ref} id="camera-preview"/> */}
+            {/* <canvas ref={this.setCameraPreviewEl} id="camera-preview"/> */}
             
             {/* <a-asset-item id="dcjaiModelObj" src={dcjaiobj}></a-asset-item>
             <img id="dcjaiModelTex" src={dcjaitex} /> */}
@@ -408,16 +414,16 @@ class AFramePanel extends Component {
             {/* <a-asset-item id="fontNotoSerifTC" src={fontNotoSerifTC} /> */}
           </a-assets>
           {/* <a-sky el-name="sky" el-isSystem={true} color="#FF0000"></a-sky> */}
-          <a-entity position="0 0 0">
+          <a-entity position="0 0 0" rotation="0 0 0">
             {/* test */}
-            <a-camera el-isSystem={false} position="0 0 0" el-defaultCamera="true" look-controls ref={(ref)=>this.cameraEl=ref}>
+            <a-camera el-isSystem={false} position="0 0 0" el-defaultCamera="true" look-controls ref={this.setCameraEl}>
               {/* camera model */}
               <a-cone position="0 0 0.5" rotation="90 0 0" geometry="radius-top: 0.15;radius-bottom: 0.5" material="color:#333"></a-cone>
               <a-box position="0 0 1" scale="0.8 0.8 1.2" material="color:#222"></a-box>
               <a-cylinder position="0 0.6 0.7" scale="0.3 0.3 0.3" rotation="0 0 90" material="color:#272727"></a-cylinder>
               <a-cylinder position="0 0.6 1.3" scale="0.3 0.3 0.3" rotation="0 0 90" material="color:#272727"></a-cylinder>
               {/* camera "monitor" */}
-              {/* <a-plane position="0 0 1.61" material="src: #camera-preview" ref={ref=>this.cameraPreviewScreenEl=ref }scale="0.8 0.8 0.8" rotation="0 0 0"></a-plane> */}
+              {/* <a-plane position="0 0 1.61" material="src: #camera-preview" ref={this.setCameraPreviewScreenEl} scale="0.8 0.8 0.8" rotation="0 0 0"></a-plane> */}
               {/* camera model end */}
               {/* click pointer */}
               <a-entity cursor="fuse: true; fuseTimeout: 1000"
@@ -435,8 +441,8 @@ class AFramePanel extends Component {
            */}
           {/* <a-entity obj-model="obj:#dcjaiModelObj" material="src:#dcjaiModelTex" scale="0.03 0.03 0.03"></a-entity> */}
         </a-scene>
-	    </div>
-	);
+      </div>
+	  );
   }
 }
 export default withSceneContext(AFramePanel);
