@@ -17,7 +17,7 @@ import {TweenMax} from 'gsap';
 
 import './slidesPanel.css';
 
-const Events = require('vendor/Events.js');
+//const Events = require('vendor/Events.js');
 
 
 
@@ -32,14 +32,27 @@ class SortableList extends Component {
       startX: null,
       startY: null,
       isHoverDeleteEl: false,
-    }
-    this.onSortStart = this.onSortStart.bind(this);
-    this.onSorting = this.onSorting.bind(this);
-    this.onSortEnd = this.onSortEnd.bind(this);
+    };
+    [
+      'onSortStart',
+      'onSorting',
+      'onSortEnd',
+    ].forEach(methodName => {
+      this[methodName] = this[methodName].bind(this);
+    })    
   }
-  componentDidMount() {
 
+  componentDidMount() {}
+
+  componentWillUnmount() {
+    if (this.state.currentElement) {
+      document.removeEventListener('mousemove', this.onSorting);
+      document.removeEventListener('mouseup', this.onSortEnd);
+      this.state.currentElement.removeEventListener('touchmove', this.onSorting);
+      this.state.currentElement.removeEventListener('touchend', this.onSortEnd);
+    }
   }
+
   onSortStart(event) {
     const props = this.props;
     if (props.children.length < 2) { return; }
@@ -100,6 +113,7 @@ class SortableList extends Component {
       }
     })
   }
+
   onSorting(event) {
     const props = this.props;
     if (props.disabled) { return; }
@@ -124,6 +138,7 @@ class SortableList extends Component {
       y: pointer.pageY - state.startY
     })
   }
+
   onSortEnd(event) {
     const props = this.props;
     const state = this.state;
@@ -178,14 +193,7 @@ class SortableList extends Component {
       newIdx: null
     })
   }
-  componentWillUnmount() {
-    if (this.state.currentElement) {
-      document.removeEventListener('mousemove', this.onSorting);
-      document.removeEventListener('mouseup', this.onSortEnd);
-      this.state.currentElement.removeEventListener('touchmove', this.onSorting);
-      this.state.currentElement.removeEventListener('touchend', this.onSortEnd);
-    }
-  }
+  
   render() {
     const props = this.props;
     const state = this.state;
@@ -333,11 +341,11 @@ class SlidePanel extends Component {
     const props = this.props;
     const state = this.state;
     const sceneContext = props.sceneContext;
-    const slidesList = sceneContext.getSlidesList();
+    const slidesList = sceneContext.getSlidesList();    
     const selectedSlideId = sceneContext.getCurrentSlideId();
     
     // console.log(selectedSlideId);
-    let prevSlideId = null;
+    
     const panelClassList = [];
     if (state.isMinimized) {
       panelClassList.push('mini');
@@ -360,9 +368,10 @@ class SlidePanel extends Component {
               const slideId = slide['id'];
               const slideImg = slide['image'];
               {/* const totalTime = idx;// slide['totalTime']; */}
+              const isSlideSelected = slideId === selectedSlideId;
               return (
                 <div key={slideId}
-                  className={"slide" + (slideId === selectedSlideId? " selected":"" )}
+                  className={"slide" + (isSlideSelected ? " selected" : "")}
                   // onClick={()=>{ sceneContext.selectSlide(idx) }}
                   onContextMenu={this.showContextMenu}
                 >
