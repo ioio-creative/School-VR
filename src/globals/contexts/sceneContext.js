@@ -390,9 +390,7 @@ class SceneContextProvider extends Component {
         
     this.setState({
       isProjectSaved: true
-    });
-
-    console.log(sceneData);
+    });    
     
     return {
       projectName: sceneData.projectName,
@@ -660,8 +658,7 @@ class SceneContextProvider extends Component {
         slideId: slideId
       }
     }, _ => {
-      // console.log(this.editor);
-      // debugger;
+      // console.log(this.editor);      
       this.editor && this.editor.selectEntity(null);
       const newTl = this.rebuildTimeline(false);
       if (autoPlay) {
