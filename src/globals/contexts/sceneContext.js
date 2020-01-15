@@ -20,6 +20,7 @@ import {mediaType} from 'globals/config';
 import {getLocalizedMessage} from 'globals/contexts/locale/languageContext';
 
 import isFunction, {invokeIfIsFunction} from 'utils/variableType/isFunction';
+import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 import {makeVideoSeekableByInjectingMetadataPromise} from 'utils/videos/injectMetaData';
 
 //import bytesToBase64 from 'utils/js/uint8ToBase64';
@@ -139,6 +140,7 @@ class SceneContextProvider extends Component {
       'loadProject',
 
       'getSlidesList',
+      'getSlideById',
       'getCurrentSlide',
       'getCurrentSlideId',
 
@@ -153,13 +155,14 @@ class SceneContextProvider extends Component {
       'getCameraElPositionCopy',
       'getCameraElRotationCopy',      
       'setCameraElPosition',
-      'setCameraElRotation',  
+      'setCameraElRotation',      
 
       'getEntitiesList',
+      'getEntityById',
       'getCurrentEntity',
       'getCurrentEntityId',
+      
       'copyEntity',
-
       'addEntity',
       'deleteEntity',
       'selectEntity',
@@ -390,9 +393,7 @@ class SceneContextProvider extends Component {
         
     this.setState({
       isProjectSaved: true
-    });
-
-    console.log(sceneData);
+    });    
     
     return {
       projectName: sceneData.projectName,
@@ -401,14 +402,14 @@ class SceneContextProvider extends Component {
     };
   }
   loadProject(projectData) {
-    // empty current scene
-    const currentSlide = this.getCurrentSlide();
-    if (currentSlide) {
-      currentSlide.entities.forEach(entity => {
+    // empty current scene    
+    const currentSlideEntites = this.getEntitiesList();
+    if (isNonEmptyArray(currentSlideEntites)) {
+      currentSlideEntites.forEach(entity => {
         if (entity.type !== 'a-camera') {
           this.editor.removeObject(entity.el.object3D);
         }
-      })
+      });
     }
     // need to parse camera data inside data
     const projectName = projectData['projectName'];
@@ -484,7 +485,7 @@ class SceneContextProvider extends Component {
           undoQueue: newUndoQueue,
           redoQueue: [],
         }
-      }, _=> {
+      }, _ => {
         this.selectSlide(newSlide.id);
       })
       // this.forceUpdate();
@@ -588,33 +589,34 @@ class SceneContextProvider extends Component {
       })
     }
   }
-  getSlidesList() {
-    if (this.state.sceneData.slides) {
-      return this.state.sceneData.slides;
+  getSlidesList(state = this.state) {
+    if (!isNonEmptyArray(state.sceneData.slides)) {
+      return state.sceneData.slides;
     } else {
       return [];
     }
+  }  
+  getSlideById(slideId, state = this.state) {
+    const slides = this.getSlidesList(state);
+    if (!isNonEmptyArray(slides)) {
+      return null;
+    }
+    return slides.find(el => el.id === slideId);
   }
-  getCurrentSlide() {
-    const state = this.state;
-    const sceneData = state.sceneData;
-    const slides = sceneData.slides;
-    if (!slides) return null;
-    const currentSlide = slides.find(el => el.id === state.slideId);
-    return currentSlide;
+  getCurrentSlide(state = this.state) {
+    return this.getSlideById(this.getCurrentSlideId(state), state);
   }
-  getCurrentSlideId() {
-    return this.state.slideId;
+  getCurrentSlideId(state = this.state) {
+    return state.slideId;
   }
 
   selectSlide(slideId, autoPlay) {
     const editor = this.editor;
-    this.setState((prevState) => {
-      const sceneData = prevState.sceneData;
+    this.setState((prevState) => {      
       if (prevState.slideId) {
-        const currentSlide = sceneData.slides.find(slide => slide.id === prevState.slideId);
-        if (currentSlide) {
-          currentSlide.entities.forEach(entity => {
+        const currentSlideEntities = this.getEntitiesList(prevState.slideId, prevState);        
+        if (isNonEmptyArray(currentSlideEntities)) {
+          currentSlideEntities.forEach(entity => {
             if (entity.type !== 'a-camera') {
               editor.removeObject(entity.el.object3D);
             }
@@ -677,7 +679,7 @@ class SceneContextProvider extends Component {
       }
     })
   }
-  getSlideTotalTime(slideId = this.state.slideId) {
+  getSlideTotalTime(slideId = this.getCurrentSlideId()) {
     // loop through all entities and timelines to get the max total time
     const entities = this.getEntitiesList(slideId);
     let maxTime = 0;
@@ -720,81 +722,29 @@ class SceneContextProvider extends Component {
     this.getCameraEl().setAttribute('rotation', valueObj);
   }
 
-  getEntitiesList(slideId = this.state.slideId) {
-    const state = this.state;
-    const slides = state.sceneData.slides;
-    if (slides) {
-      const currentSlide = slides.find(el => el.id === slideId);
-      if (currentSlide) {
-        return currentSlide['entities'];
-      }
+  getEntitiesList(slideId = this.getCurrentSlideId(), state = this.state) {
+    const slide = this.getSlideById(slideId, state);
+    if (!slide) {
+      // should be somethings wrong
+      return [];
     }
-    // should be somethings wrong
-    return [];
+    return slide.entities;
+  }
+  getEntityById(entityId = this.getCurrentEntityId(), slideId = this.getCurrentSlideId(), state = this.state) {
+    const entities = this.getEntitiesList(slideId, state);
+    if (!isNonEmptyArray(entities)) {
+      return null;
+    }
+    return entities.find(el => el.id === entityId);
+  }
+  getCurrentEntity(entityId = this.getCurrentEntityId()) {    
+    return this.getEntityById(entityId);
+  }
+  getCurrentEntityId(state = this.state) {
+    return state.entityId;
   }
 
-  addEntity() {
-    // what ??
-  }
-  deleteEntity(entityId) {
-    this.setState((prevState) => {
-      const newSceneData = jsonCopy(prevState.sceneData);
-      const slides = newSceneData.slides;
-      const currentSlide = slides.find(el => el.id === prevState.slideId);
-      const deleteEntityIdx = currentSlide.entities.findIndex(el => el.id === entityId);
-      const deletedEntity = currentSlide.entities.splice(deleteEntityIdx, 1)[0];
-      this.editor.removeObject(deletedEntity.el.object3D);
-      const newUndoQueue = jsonCopy(prevState.undoQueue);
-      newUndoQueue.push({
-        sceneData: jsonCopy(prevState.sceneData),
-        slideId: prevState.slideId,
-        entityId: prevState.entityId,
-        timelineId: prevState.timelineId,
-        timelinePosition: prevState.timelinePosition,
-        currentTime: prevState.currentTime,
-      });
-      return {
-        sceneData: newSceneData,
-        entityId: undefined,
-        undoQueue: newUndoQueue,
-        redoQueue: [],
-      }
-    }, _=> {
-      this.rebuildTimeline()
-    })
-  }
-  selectEntity(entityId) {
-    // pass back to editor to select?
-    const state = this.state;
-    const sceneData = state.sceneData;
-    const slides = sceneData.slides;
-    if (!slides) return null;
-    const currentSlide = slides.find(el => el.id === state.slideId);
-    if (!currentSlide) return null;
-    const selectedEntity = currentSlide.entities.find(el => el.id === entityId);
-
-    this.editor.selectEntity(selectedEntity.el);
-    // after editor select, an event will be emit and state will update there
-    // this.setState({
-    //   entityId: entityId
-    // })
-  }
-  getCurrentEntity(entityId = this.state.entityId) {
-    const state = this.state;
-    const sceneData = state.sceneData;
-    const slides = sceneData.slides;
-    if (!slides) return null;
-    const currentSlide = slides.find(el => el.id === state.slideId);
-    if (!currentSlide) return null;
-    const selectedEntity = currentSlide.entities.find(el => el.id === entityId);
-    // if (!selectedEntity) return null;
-    return selectedEntity;
-  }
-  getCurrentEntityId() {
-    return this.state.entityId;
-  }
-  copyEntity(entityId = this.state.entityId) {
-    const state = this.state;
+  copyEntity(entityId = this.state.entityId) {    
     const copyFromEntity = this.getCurrentEntity(entityId);
     const type = copyFromEntity.type;
     const objectModel = new entityModel[type];
@@ -829,8 +779,8 @@ class SceneContextProvider extends Component {
     this.setState((prevState) => {
       const newSceneData = jsonCopy(prevState.sceneData);
       const newUndoQueue = jsonCopy(prevState.undoQueue);
-      const currentSlide = newSceneData.slides.find(slide => slide.id === prevState.slideId);
-      currentSlide.entities.push(newElement);
+      const currentSlideEntities = this.getEntitiesList(prevState.slideId, prevState);      
+      currentSlideEntities.push(newElement);
       newUndoQueue.push({
         sceneData: jsonCopy(prevState.sceneData),
         slideId: prevState.slideId,
@@ -849,6 +799,48 @@ class SceneContextProvider extends Component {
     }, _=> {
       this.rebuildTimeline().then(tl => tl.seek(this.state.currentTime, false));
     })
+  }
+  addEntity() {
+    // what ??
+  }
+  deleteEntity(entityId) {
+    this.setState((prevState) => {
+      const newSceneData = jsonCopy(prevState.sceneData);            
+      const currentSlideEntities = this.getEntitiesList(prevState.slideId, prevState);
+      if (!isNonEmptyArray(currentSlideEntities)) {
+        // should be somethings wrong
+        return;
+      }
+      const deleteEntityIdx = currentSlideEntities.findIndex(el => el.id === entityId);
+      const deletedEntity = currentSlideEntities.splice(deleteEntityIdx, 1)[0];
+      this.editor.removeObject(deletedEntity.el.object3D);
+      const newUndoQueue = jsonCopy(prevState.undoQueue);
+      newUndoQueue.push({
+        sceneData: jsonCopy(prevState.sceneData),
+        slideId: prevState.slideId,
+        entityId: prevState.entityId,
+        timelineId: prevState.timelineId,
+        timelinePosition: prevState.timelinePosition,
+        currentTime: prevState.currentTime,
+      });
+      return {
+        sceneData: newSceneData,
+        entityId: undefined,
+        undoQueue: newUndoQueue,
+        redoQueue: [],
+      }
+    }, _ => {
+      this.rebuildTimeline();
+    })
+  }
+  selectEntity(entityId) {
+    // pass back to editor to select?        
+    const selectedEntity = this.getEntityById(entityId);
+    this.editor.selectEntity(selectedEntity.el);
+    // after editor select, an event will be emit and state will update there
+    // this.setState({
+    //   entityId: entityId
+    // })
   }
   updateEntity(newAttrs, entityId) {
     this.setState((prevState) => {
@@ -893,7 +885,6 @@ class SceneContextProvider extends Component {
       this.rebuildTimeline()
     })
   }
-
 
   getTimelinesList(entityId) {
     const state = this.state;
@@ -1342,7 +1333,7 @@ class SceneContextProvider extends Component {
           undoQueue: undoQueue,
           redoQueue: redoQueue
         }
-      }, _=> {
+      }, _ => {
         const newSceneData = this.state.sceneData;
         const newSlide = newSceneData.slides.find(slide => slide.id === this.state.slideId);
         newSlide.entities.forEach(entity => {
@@ -1391,7 +1382,7 @@ class SceneContextProvider extends Component {
           undoQueue: undoQueue,
           redoQueue: redoQueue
         }
-      }, _=> {
+      }, _ => {
         const newSceneData = this.state.sceneData;
         const newSlide = newSceneData.slides.find(slide => slide.id === this.state.slideId);
         newSlide.entities.forEach(entity => {
@@ -1506,7 +1497,7 @@ class SceneContextProvider extends Component {
           if (entity['type'] === 'a-camera' && entity.timelines.length === 0) {
             // camera only
             // no timeline, just set the component
-            tl.add(() => {
+            tl.add(_ => {
               aEntity.updateEntityAttributes(entity.components);
             }, deltaOffset);
           }
@@ -2054,7 +2045,7 @@ class SceneContextProvider extends Component {
           saveProject: this.saveProject,
           loadProject: this.loadProject,
 
-          getSlidesList: this.getSlidesList,
+          getSlidesList: this.getSlidesList,          
           getCurrentSlide: this.getCurrentSlide,
           getCurrentSlideId: this.getCurrentSlideId,
 
