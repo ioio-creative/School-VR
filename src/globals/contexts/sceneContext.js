@@ -658,7 +658,6 @@ class SceneContextProvider extends Component {
         slideId: slideId
       }
     }, _ => {
-      // console.log(this.editor);      
       this.editor && this.editor.selectEntity(null);
       const newTl = this.rebuildTimeline(false);
       if (autoPlay) {
@@ -765,12 +764,12 @@ class SceneContextProvider extends Component {
     const state = this.state;
     const sceneData = state.sceneData;
     const slides = sceneData.slides;
-    if (!slides) return null;
+    if (!slides) return null;    
     const currentSlide = slides.find(el => el.id === state.slideId);
-    if (!currentSlide) return null;
+    if (!currentSlide) return null;    
     const selectedEntity = currentSlide.entities.find(el => el.id === entityId);
 
-    this.editor.selectEntity(selectedEntity.el);
+    this.editor.selectEntity(selectedEntity.el);    
     // after editor select, an event will be emit and state will update there
     // this.setState({
     //   entityId: entityId

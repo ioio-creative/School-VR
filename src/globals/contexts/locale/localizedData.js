@@ -126,6 +126,7 @@ const localizedData = {
 
     "TimelinePanel.HeaderLabel": "Timeline",
     "TimelinePanel.AddAnimationLabel": "Add animation +",
+    "TimelinePanel.Entity.ContextMenu.CopyLabel": "Copy object",    
 
     "PreviewPanel.BackLabel": "Back",
 
@@ -262,6 +263,7 @@ const localizedData = {
 
     "TimelinePanel.HeaderLabel": "時間線",
     "TimelinePanel.AddAnimationLabel": "添加動畫 +",
+    "TimelinePanel.Entity.ContextMenu.CopyLabel": "複製物件",    
 
     "PreviewPanel.BackLabel": "返回",
 

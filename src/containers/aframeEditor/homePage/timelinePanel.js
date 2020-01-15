@@ -411,7 +411,7 @@ class TimelinePanel extends Component {
             </div>
           </div>
           <LanguageContextConsumer render={
-            ({ language, messages }) => (
+            ({ messages }) => (
               <div className="timeline-list" onScroll={this.handleScroll} ref={ref=> this.timelineListEl = ref}>
                 {/* slice(0) to shallow copy */}
                 {entitiesList.slice(0).reverse().map((entity) => {
@@ -552,8 +552,12 @@ class TimelinePanel extends Component {
                 top: state.menuPosition.y,
                 left: state.menuPosition.x,
               }}>
-                <div className="menu-item-wrapper">
-                  <div className="menu-item" onClick={this.copyEntity}>Copy Object</div>
+                <div className="menu-item-wrapper">                  
+                  <div className="menu-item" onClick={this.copyEntity}>
+                    <LanguageContextMessagesConsumer
+                      messageId='TimelinePanel.Entity.ContextMenu.CopyLabel'
+                    />
+                  </div>
                 </div>
               </div>
             </div>
