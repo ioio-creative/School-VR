@@ -221,13 +221,16 @@ class MenuComponent extends Component {
                 }} >
                   {children.map((childBtn, childIdx) => {
                     if (childBtn.labelId === '-') {
-                      return <div className={`seperator${childBtn.disabled? ' disabled': ''}`} key={childIdx} />;
+                      return (
+                        <div className={`seperator${childBtn.disabled? ' disabled': ''}`} key={childIdx}
+                        />
+                      );
                     } else {
                       return (
-                        <LanguageContextConsumer render={
+                        <LanguageContextConsumer key={childIdx} render={
                           ({ messages, changeLanguagePromises }) => (
 
-                            <div className={`menu-item${childBtn.disabled? ' disabled': ''}`} key={childIdx} onClick={async (e) => {
+                            <div className={`menu-item${childBtn.disabled? ' disabled': ''}`} onClick={async (e) => {
                               if (!childBtn.disabled) {
                                 invokeIfIsFunction(childBtn.onClick);
                                 invokeIfIsFunction(this[childBtn.methodNameToInvoke]);                                

@@ -57,8 +57,8 @@ class ACamera extends AEntity {
     const self = this;
     for (let key in attrs) {
       if (self.animatableAttributes.hasOwnProperty(key)) {
-        self._el.setAttribute(key, attrs[key]);
-        //self._el.parentEl.setAttribute(key, attrs[key]);
+        //self._el.setAttribute(key, self._el.getAttribute(key));
+        self._el.setAttribute(key, attrs[key]);        
         
         // if (key === 'rotation') {
         //   self._el.components['look-controls'].yawObject.rotation.x = attrs[key]['x'];

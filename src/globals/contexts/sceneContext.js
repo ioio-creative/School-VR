@@ -391,6 +391,8 @@ class SceneContextProvider extends Component {
     this.setState({
       isProjectSaved: true
     });
+
+    console.log(sceneData);
     
     return {
       projectName: sceneData.projectName,
@@ -657,7 +659,7 @@ class SceneContextProvider extends Component {
         currentTime: 0,
         slideId: slideId
       }
-    }, _=> {
+    }, _ => {
       // console.log(this.editor);
       // debugger;
       this.editor && this.editor.selectEntity(null);
@@ -665,9 +667,13 @@ class SceneContextProvider extends Component {
       if (autoPlay) {
         newTl.then(tl => tl.play(0));
       } else {        
-        // newTl.then(tl => {     
-        //   tl.play();
-        // });
+        newTl.then(tl => {     
+          tl.play();
+          setTimeout(_ => {            
+            tl.stop();
+            this.seekSlide(0);
+          }, 100);
+        });        
       }
     })
   }
@@ -1542,7 +1548,11 @@ class SceneContextProvider extends Component {
                 entityMedia['mediaEl'].loop = true;
                 if (!tl.paused()) {
                   entityMedia['mediaEl'].load();
-                  entityMedia['mediaEl'].play();
+                  try {
+                    entityMedia['mediaEl'].play();
+                  } catch (err) {
+                    console.error(err);
+                  }
                 }
               }, firstTimeline.start + deltaOffset);
 

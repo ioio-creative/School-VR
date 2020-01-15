@@ -115,7 +115,7 @@ class InfoTypeCamera extends Component {
         </div>
         <div className="attribute-col">
           <div>Preview</div>
-          <canvas ref={ref=>this.previewCamera = ref} classname="preview-camera"/>
+          <canvas ref={ref=>this.previewCamera = ref} classname="preview-camera" />
         </div>
       </div>
     );
