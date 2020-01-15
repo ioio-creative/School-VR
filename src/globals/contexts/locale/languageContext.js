@@ -105,10 +105,11 @@ function LanguageContextConsumer(props) {
 }
 
 function LanguageContextMessagesConsumer(props) {
+  const { messageId } = props;  
   return (
     <LanguageContextConsumer render={
       ({ messages }) => (
-        <>{messages[props.messageId]}</>
+        <>{messages[messageId]}</>
       )
     } />
   );

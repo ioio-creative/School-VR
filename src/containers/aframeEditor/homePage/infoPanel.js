@@ -18,9 +18,7 @@ import staticInfoRenderer from 'containers/aframeEditor/homePage/infoPanel/stati
 // import InfoTypeCamera from 'containers/aframeEditor/homePage/infoPanel/infoTypeCamera';
 // import InfoTypeBackground from 'containers/aframeEditor/homePage/infoPanel/infoTypeBackground';
 
-
-
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
+//import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 // import {roundTo} from 'globals/helperfunctions';
 
 import './infoPanel.css';

@@ -43,6 +43,7 @@ const faIconsNeed = [
   "faWindowMaximize",
   "faWindowRestore",
   "faWindowClose",
+  //"faUndo",  // could be used in MenuComponent
 ];
 
 faIconsNeed.forEach(iconName => {

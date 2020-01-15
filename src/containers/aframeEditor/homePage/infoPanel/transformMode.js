@@ -1,8 +1,9 @@
 import React, {Component} from 'react';
-// import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+//import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 import tranformModeId from 'globals/constants/transformModeId';
 import {LanguageContextConsumer} from 'globals/contexts/locale/languageContext';
+import {withSceneContext} from 'globals/contexts/sceneContext';
 
 import isNonEmptyArray from 'utils/variableType/isNonEmptyArray';
 
@@ -29,9 +30,11 @@ class TransformMode extends Component {
     
     // method binding
     [
+      'handleResetCurrentEntityRotationClick',
+
       'updateEntity',
-      'changeTransformModeFuncFactory',
-    ].forEach(methodName => {
+      'changeTransformModeFuncFactory',      
+    ].forEach(methodName => {      
       this[methodName] = this[methodName].bind(this);
     });
     
@@ -113,6 +116,16 @@ class TransformMode extends Component {
   }
 
   /* end of react lifecycles */
+
+
+  /* event handlers */
+
+  handleResetCurrentEntityRotationClick() {
+    const { sceneContext } = this.props;
+    sceneContext.resetCurrentEntityRotation();
+  }
+
+  /* end of event handlers */
   
   
   /* methods */
@@ -126,7 +139,7 @@ class TransformMode extends Component {
   }
 
   changeTransformModeFuncFactory(newMode) {
-    const setStateCallBack = _=> {
+    const setStateCallBack = _ => {
       if (newMode) {
         Events.emit('transformmodechanged', newMode);
         Events.emit('enablecontrols');
@@ -140,7 +153,7 @@ class TransformMode extends Component {
         editorMode: newMode
       }, setStateCallBack);
     };    
-  }
+  }  
 
   /* end of methods */
   
@@ -178,11 +191,10 @@ class TransformMode extends Component {
             {
               modes.includes(tranformModeId.rotate) &&
               <button                                 
-                onClick={_ => {
-                  
-                }}
+                onClick={this.handleResetCurrentEntityRotationClick}
                 title={messages['EditThingPanel.TransformModes.RotateResetTooltip']}
               >
+                {/* <FontAwesomeIcon icon="undo" /> */}
                 <div>{messages['EditThingPanel.TransformModes.RotateResetLabel']}</div>
               </button>
             }         
@@ -192,4 +204,4 @@ class TransformMode extends Component {
     )
   }
 }
-export default TransformMode;
+export default withSceneContext(TransformMode);

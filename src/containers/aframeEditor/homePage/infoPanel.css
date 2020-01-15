@@ -94,7 +94,7 @@
 #info-panel .vec3D-btn-col {
   display: flex;
   margin: 19px 0px 10px;
-  justify-content: space-between;
+  justify-content: space-between;  
 }
 #info-panel .vec3D-btn-col.buttons-2 {
   justify-content: center;
@@ -113,13 +113,15 @@
   width: 70px;
   height: 70px;
   flex: 0 0 70px;  
+}#info-panel .vec3D-btn-col.buttons-3 button {
+  flex: 1 1 100%;
 }
 #info-panel .vec3D-btn-col.buttons-2 button {
   margin-left: 10px;
   margin-right: 10px;
 }
 #info-panel .vec3D-btn-col.buttons-1 button {
-  flex: 1 1 100%;  
+  flex: 1 1 100%;
   /* padding: 15px 0; */
 }
 #info-panel .vec3D-btn-col button.selected {

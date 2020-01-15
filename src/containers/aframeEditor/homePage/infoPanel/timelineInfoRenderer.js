@@ -12,6 +12,8 @@ import OpacityPicker from './opacityPicker';
 
 // import ABox from 'utils/aBox';
 
+import {LanguageContextMessagesConsumer} from 'globals/contexts/locale/languageContext';
+
 import './infoTypeBox.css';
 
 var Events = require('vendor/Events.js');
@@ -203,7 +205,9 @@ class TimelineInfoRenderer extends Component {
                 }}
                 currentEntity={currentEntity}
               />
-              <div className="field-label">Color</div>
+              <div className="field-label">
+                <LanguageContextMessagesConsumer messageId="EditThingPanel.Color.ColorLabel" />
+              </div>
             </div>
           }
           {animatableAttributes.material && animatableAttributes.material.indexOf('opacity') !== -1 &&
@@ -218,7 +222,9 @@ class TimelineInfoRenderer extends Component {
                 }}
                 currentEntity={currentEntity}
               />
-              <div className="field-label">Opacity</div>
+              <div className="field-label">
+                <LanguageContextMessagesConsumer messageId="EditThingPanel.Color.OpacityLabel" />
+              </div>
             </div>
           }
           {animatableAttributes.ttfFont && animatableAttributes.ttfFont.indexOf('color') !== -1 &&

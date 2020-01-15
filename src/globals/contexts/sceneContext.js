@@ -156,6 +156,8 @@ class SceneContextProvider extends Component {
       'setCameraElRotation',  
 
       'getEntitiesList',
+      'setCurrentEntityRotation',
+      'resetCurrentEntityRotation',
       'getCurrentEntity',
       'getCurrentEntityId',
       'copyEntity',
@@ -465,6 +467,7 @@ class SceneContextProvider extends Component {
       this.setState((prevState) => {
         const newSceneData = jsonCopy(prevState.sceneData);
         const newUndoQueue = jsonCopy(prevState.undoQueue);
+        console.log('addSlide 1');
         newUndoQueue.push({
           sceneData: jsonCopy(prevState.sceneData),
           slideId: prevState.slideId,
@@ -504,6 +507,7 @@ class SceneContextProvider extends Component {
       this.setState((prevState) => {
         const newSceneData = jsonCopy(prevState.sceneData);
         const newUndoQueue = jsonCopy(prevState.undoQueue);
+        console.log('addSlide 2');
         newUndoQueue.push({
           sceneData: jsonCopy(prevState.sceneData),
           slideId: prevState.slideId,
@@ -533,6 +537,7 @@ class SceneContextProvider extends Component {
         // https://stackoverflow.com/questions/5306680/move-an-array-element-from-one-array-position-to-another
         newSceneData.slides.splice(newIdx, 0, newSceneData.slides.splice(oldIdx, 1)[0])
         const newUndoQueue = jsonCopy(prevState.undoQueue);
+        console.log('sortSlide');
         newUndoQueue.push({
           sceneData: jsonCopy(prevState.sceneData),
           slideId: prevState.slideId,
@@ -565,6 +570,7 @@ class SceneContextProvider extends Component {
         }
         newSceneData.slides.splice(slideIdx, 1);
         const newUndoQueue = jsonCopy(prevState.undoQueue);
+        console.log('deleteSlide');
         newUndoQueue.push({
           sceneData: jsonCopy(prevState.sceneData),
           slideId: prevState.slideId,
@@ -741,6 +747,7 @@ class SceneContextProvider extends Component {
       const deletedEntity = currentSlide.entities.splice(deleteEntityIdx, 1)[0];
       this.editor.removeObject(deletedEntity.el.object3D);
       const newUndoQueue = jsonCopy(prevState.undoQueue);
+      console.log('deleteEntity');
       newUndoQueue.push({
         sceneData: jsonCopy(prevState.sceneData),
         slideId: prevState.slideId,
@@ -775,6 +782,22 @@ class SceneContextProvider extends Component {
     //   entityId: entityId
     // })
   }
+  setCurrentEntityRotation(valueObj) {    
+    const currentEntity = this.getCurrentEntity();
+    if (currentEntity) {
+      const currentEntityModel = new entityModel[currentEntity['type']];
+      const valueObjToUse = jsonCopy(valueObj || currentEntityModel.getAnimatableAttributesValues().rotation);
+      if (valueObjToUse) {        
+        currentEntity.el.setAttribute('rotation', valueObjToUse);
+        this.updateDefaultAttributes({
+          rotation: valueObjToUse
+        });
+      }
+    }
+  }
+  resetCurrentEntityRotation() {    
+    this.setCurrentEntityRotation(null);    
+  }
   getCurrentEntity(entityId = this.state.entityId) {
     const state = this.state;
     const sceneData = state.sceneData;
@@ -789,8 +812,7 @@ class SceneContextProvider extends Component {
   getCurrentEntityId() {
     return this.state.entityId;
   }
-  copyEntity(entityId = this.state.entityId) {
-    const state = this.state;
+  copyEntity(entityId = this.state.entityId) {    
     const copyFromEntity = this.getCurrentEntity(entityId);
     const type = copyFromEntity.type;
     const objectModel = new entityModel[type];
@@ -827,6 +849,7 @@ class SceneContextProvider extends Component {
       const newUndoQueue = jsonCopy(prevState.undoQueue);
       const currentSlide = newSceneData.slides.find(slide => slide.id === prevState.slideId);
       currentSlide.entities.push(newElement);
+      console.log('copyEntity');
       newUndoQueue.push({
         sceneData: jsonCopy(prevState.sceneData),
         slideId: prevState.slideId,
@@ -847,8 +870,7 @@ class SceneContextProvider extends Component {
     })
   }
   updateEntity(newAttrs, entityId) {
-    this.setState((prevState) => {
-      // console.log('updateEntity');
+    this.setState((prevState) => {      
       const newSceneData = jsonCopy(prevState.sceneData);
       const slides = newSceneData.slides;
       const currentSlide = slides.find(el => el.id === prevState.slideId);
@@ -871,6 +893,7 @@ class SceneContextProvider extends Component {
       // currentEntity = {...currentEntity, ...newAttrs};
       // console.log(currentEntity);
       const newUndoQueue = jsonCopy(prevState.undoQueue);
+      console.log('updateEntity');
       newUndoQueue.push({
         sceneData: jsonCopy(prevState.sceneData),
         slideId: prevState.slideId,
@@ -969,6 +992,7 @@ class SceneContextProvider extends Component {
         }
       }
       const newUndoQueue = jsonCopy(prevState.undoQueue);
+      console.log('addTimeline');
       newUndoQueue.push({
         sceneData: jsonCopy(prevState.sceneData),
         slideId: prevState.slideId,
@@ -1022,6 +1046,7 @@ class SceneContextProvider extends Component {
       }
       this.editor.enableControls(false);
       const newUndoQueue = jsonCopy(prevState.undoQueue);
+      console.log('deleteTimeline');
       newUndoQueue.push({
         sceneData: jsonCopy(prevState.sceneData),
         slideId: prevState.slideId,
@@ -1061,6 +1086,7 @@ class SceneContextProvider extends Component {
         currentTimeline.start = start;
         currentTimeline.duration = duration;
         const newUndoQueue = jsonCopy(prevState.undoQueue);
+        console.log('updateTimeline');
         newUndoQueue.push({
           sceneData: jsonCopy(prevState.sceneData),
           slideId: prevState.slideId,
@@ -1155,6 +1181,7 @@ class SceneContextProvider extends Component {
         }
       }
       const newUndoQueue = jsonCopy(prevState.undoQueue);
+      console.log('updateTimelinePositionAttributes');
       newUndoQueue.push({
         sceneData: jsonCopy(prevState.sceneData),
         slideId: prevState.slideId,
@@ -1176,6 +1203,7 @@ class SceneContextProvider extends Component {
   }
 
   updateDefaultAttributes(newAttrs) {
+    console.log(newAttrs);
     this.setState((prevState) => {
       const newSceneData = jsonCopy(prevState.sceneData);
       const slides = newSceneData.slides;
@@ -1188,12 +1216,13 @@ class SceneContextProvider extends Component {
           if (entityComponent.hasOwnProperty(k)) {
             if (typeof(newAttrs[k]) === "object") {
               // console.log(selectedTimelinePosition[k], newAttrs[k]);
-              Object.assign(entityComponent[k], newAttrs[k]);
+              Object.assign(entityComponent[k], newAttrs[k]);              
             } else {
-              entityComponent[k] = newAttrs[k];
+              entityComponent[k] = newAttrs[k];              
             }
           }
         }
+        console.log('updateDefaultAttributes');
         newUndoQueue.push({
           sceneData: jsonCopy(prevState.sceneData),
           slideId: prevState.slideId,
@@ -1271,6 +1300,7 @@ class SceneContextProvider extends Component {
       const newUndoQueue = jsonCopy(prevState.undoQueue);
       const currentSlide = newSceneData.slides.find(slide => slide.id === prevState.slideId);
       currentSlide.entities.push(newElement);
+      console.log('addNewEntity');
       newUndoQueue.push({
         sceneData: jsonCopy(prevState.sceneData),
         slideId: prevState.slideId,
@@ -1323,8 +1353,7 @@ class SceneContextProvider extends Component {
         })
         const undoQueue = jsonCopy(prevState.undoQueue);
         const redoQueue = jsonCopy(prevState.redoQueue);
-        const lastState = undoQueue.pop();
-        console.log(lastState);
+        const lastState = undoQueue.pop();        
         redoQueue.push({
           sceneData: jsonCopy(prevState.sceneData),
           slideId: prevState.slideId,
@@ -1338,7 +1367,7 @@ class SceneContextProvider extends Component {
           undoQueue: undoQueue,
           redoQueue: redoQueue
         }
-      }, _=> {
+      }, _ => {
         const newSceneData = this.state.sceneData;
         const newSlide = newSceneData.slides.find(slide => slide.id === this.state.slideId);
         newSlide.entities.forEach(entity => {
@@ -2061,6 +2090,7 @@ class SceneContextProvider extends Component {
           getSlideTotalTime: this.getSlideTotalTime,
 
           getEntitiesList: this.getEntitiesList,
+          resetCurrentEntityRotation: this.resetCurrentEntityRotation,
           getCurrentEntity: this.getCurrentEntity,
           getCurrentEntityId: this.getCurrentEntityId,
           copyEntity: this.copyEntity,
