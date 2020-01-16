@@ -171,7 +171,7 @@ class TimelineInfoRenderer extends Component {
     }
     if (animatableAttributes.scale) {
       transformModes.push(transformModeId.scale);
-    }
+    }    
     // ABox
     return (
       <div className="animatable-params">

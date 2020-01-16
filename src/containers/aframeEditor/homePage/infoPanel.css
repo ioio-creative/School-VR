@@ -118,12 +118,10 @@
   flex: 1 1 33%;
 }
 #info-panel .vec3D-btn-col.buttons-2 button {
-  margin-left: 10px;
-  margin-right: 10px;
+  flex: 1 1 50%;
 }
 #info-panel .vec3D-btn-col.buttons-1 button {
   flex: 1 1 100%;
-  /* padding: 15px 0; */
 }
 #info-panel .vec3D-btn-col button.selected {
   cursor: default;

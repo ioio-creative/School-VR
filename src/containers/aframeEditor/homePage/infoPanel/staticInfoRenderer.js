@@ -192,7 +192,7 @@ class StaticInfoRenderer extends Component {
     if (animatableAttributes.scale) {
       transformModes.push(transformModeId.scale);
     }
-    // ABox
+    // ABox    
     return (
       <div className="animatable-params">
         {
