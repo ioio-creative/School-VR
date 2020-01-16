@@ -25,6 +25,7 @@ var socketServer;  // socket.io server
 /* open server */
 
 function openServer(port, rootDirPath = 'public/server/static', filesDirPath = null, webServerStaticFilesPathPrefix = null) {
+  console.log('socketio-server: openServer');
   // Setup and configure Express http server. Expect a subfolder called "static" to be the web root.
   app = express();  
   console.log('rootDirPath: ' + rootDirPath);
@@ -72,7 +73,7 @@ function openServer(port, rootDirPath = 'public/server/static', filesDirPath = n
     });
     socket.on('disconnect', () => {
       console.log('user disconnected');
-      if (socket !== presenter) {
+      if (presenter && (socket !== presenter)) {
         viewer = viewer.filter((val, idx, arr) => {
           return val !== socket;
         })
@@ -143,22 +144,29 @@ function closeServer() {
   socketServer.close(_ => {
     socketServer = null;
     webServer.close((err) => {
+      if (err) {
+        console.error('socketio-server closeServer error:', err);
+      }
       app = null;
       webServer = null;
+      console.log('socketio-server: closeServer');
       exitSuccess();
     });
   });
-  setTimeout(_ => {
-    socketServer = null;
-    app = null;
-    webServer = null;
-    exitSuccess();
-  }, closeServerTimeoutInMillis);
+  
+  // setTimeout(_ => {
+  //   socketServer = null;
+  //   app = null;
+  //   webServer = null;    
+  // }, closeServerTimeoutInMillis);    
 }
 
 function exitSuccess() {
-  console.log("socketio-server: web server closed.");
-  process.exit(0);
+  console.log('socketio-server: exitSuccess');
+  exitHandler.bind(null, {
+    cleanup: true,
+    exit: true
+  });
 }
 
 /* end of close server */
@@ -175,9 +183,65 @@ process.on('message', (message) => {
     case 'close-server':
       closeServer();
       break;
-  }  
+  }
 });
 
 /* end of ipc */
 
 // openServer(1111, './');
+
+
+
+/* 
+ * doing a cleanup action just before Node.js exits
+ * https://stackoverflow.com/questions/14031763/doing-a-cleanup-action-just-before-node-js-exits 
+ */
+
+function exitHandler(options, exitCode) {    
+  if (options.cleanup) console.log('socketio-server exitHandler: clean');
+  if (exitCode || exitCode === 0) console.log('socketio-server exitHandler exitCode:', exitCode);
+  if (options.exit) process.exit();
+}
+
+//do something when app is closing
+process.on('exit', _ => {
+  console.log('socketio-server on: exit');
+});
+
+//catches ctrl+c event
+process.on('SIGINT', _ => {
+  console.log('socketio-server on: SIGINT');
+  exitHandler.bind(null, {
+    exit: true,
+    clean: true
+  });
+});
+
+// catches "kill pid" (for example: nodemon restart)
+process.on('SIGUSR1', _ => {
+  console.log('socketio-server on: SIGUSR1');
+  exitHandler.bind(null, {
+    exit: true,
+    clean: true
+  });
+});
+process.on('SIGUSR2', _ => {
+  console.log('socketio-server on: SIGUSR2');
+  exitHandler.bind(null, {
+    exit: true,
+    clean: true
+  });
+});
+
+//catches uncaught exceptions
+// https://stackoverflow.com/questions/40867345/catch-all-uncaughtexception-for-node-js-app
+process
+  .on('unhandledRejection', (reason, p) => {
+    console.error('socketio-server on unhandledRejection:', reason, 'Unhandled Rejection at Promise', p);
+  })
+  .on('uncaughtException', err => {
+    console.error('socketio-server on uncaughtException:', err, 'Uncaught Exception thrown');
+    process.exit(1);
+  });
+
+/* end of doing a cleanup action just before Node.js exits */

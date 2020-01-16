@@ -1,8 +1,9 @@
 const platformName = process.platform.toLowerCase();
+console.log('platformName:', platformName);
 const isMac = platformName === 'darwin';
+console.log('isMac:', isMac);
 
-
-module.export = {
+module.exports = {
   platformName,
   isMac,
 };

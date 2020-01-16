@@ -229,13 +229,16 @@ async function openWebServerAsync() {
 }
 
 function closeWebServer() {
-  if (webServerProcess && webServerProcess.connected) {    
-    webServerProcess.send({
-      address: 'close-server'
-    });
-
-    console.log('Web server closed.');
+  if (webServerProcess) {
+    if (webServerProcess.connected) {      
+      webServerProcess.send({
+        address: 'close-server'
+      });
+    } else {
+      webServerProcess.kill('SIGUSR1');
+    }
   }
+  console.log('Web server closed.');
 }
 
 /* end of web server */
@@ -268,14 +271,14 @@ app.on('window-all-closed', async _ => {
   // Always check if web server is closed when all windows are closed
   closeWebServer();
 
-  // TODO: Rationale behind isMac check:
+  // TODO: Rationale behind isMac check (now commented out):
   // In mac, when all windows are closed, the app does not necessarily quit.
   // But this in-mac behaviour may require Application Menu implementation as well,
-  // so that a window can be opened again after all windows are closed.
-  if (!isMac) {
+  // so that a window can be opened again after all windows are closed.  
+  //if (!isMac) {
     console.log('App quit.');
     app.quit();
-  }  
+  //}
 });
 
 app.on('activate', () => {

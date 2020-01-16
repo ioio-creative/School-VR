@@ -2083,8 +2083,11 @@ class SceneContextProvider extends Component {
     this.editor = editor;
   }
 
-  openEditor() {    
-    this.setCameraElRotation(this.cameraRotationBeforeToggle);
+  openEditor() {  
+    if (this.cameraRotationBeforeToggle) {
+      this.setCameraElRotation(this.cameraRotationBeforeToggle);
+      this.cameraRotationBeforeToggle = null;
+    }    
     this.editor.open();
   }
 
