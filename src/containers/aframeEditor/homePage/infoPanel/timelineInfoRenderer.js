@@ -109,7 +109,7 @@ class TimelineInfoRenderer extends Component {
     }
   }
   changeObjectField(field, value) {
-    const props = this.props;
+    const { sceneContext } = this.props;    
     const tmp = {};
     let pointer = tmp;
     field.split('.').forEach((key, idx, arr) => {
@@ -122,11 +122,10 @@ class TimelineInfoRenderer extends Component {
     })
     // tmp[field] = value;
     // console.log(tmp);
-    props.sceneContext.updateTimelinePositionAttributes(
+    sceneContext.updateTimelinePositionAttributes(
       tmp
     );
     // Events.emit('updateSelectedEntityAttribute', tmp);
-
   }
   changeObjectMultipleFields(objs) {
     const props = this.props;
@@ -180,7 +179,8 @@ class TimelineInfoRenderer extends Component {
           isNonEmptyArray(transformModes) && 
           <div className={`vec3D-btn-col buttons-${transformModes.length}`}>
             <TransformMode 
-              modes={transformModes} 
+              modes={transformModes}
+              isInTimeline={true}
               onUpdate={(newPosition, newRotation, newScale) => {
                 this.changeObjectMultipleFields({
                   'position': newPosition,

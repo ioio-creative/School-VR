@@ -156,12 +156,14 @@ class SceneContextProvider extends Component {
       'setCameraElRotation',  
 
       'getEntitiesList',
+      'setEntityRotation',
       'setCurrentEntityRotation',
+      'resetEntityRotation',
       'resetCurrentEntityRotation',
       'getCurrentEntity',
-      'getCurrentEntityId',
-      'copyEntity',
+      'getCurrentEntityId',      
 
+      'copyEntity',
       'addEntity',
       'deleteEntity',
       'selectEntity',
@@ -706,20 +708,30 @@ class SceneContextProvider extends Component {
     return this.getCameraElAttributeObjCopy('rotation');
   }
   setCameraElPosition(valueObj) {
-    this.getCameraEl().setAttribute('position', {
-      x: valueObj.x + 1,
-      y: valueObj.y + 1,
-      z: valueObj.z + 1
-    });
-    this.getCameraEl().setAttribute('position', valueObj);
+    if (valueObj) {
+      const cameraEl = this.getCameraEl();
+      if (cameraEl) {
+        cameraEl.setAttribute('position', {
+          x: valueObj.x + 1,
+          y: valueObj.y + 1,
+          z: valueObj.z + 1
+        });
+        cameraEl.setAttribute('position', valueObj);
+      }      
+    }
   }
   setCameraElRotation(valueObj) {
-    this.getCameraEl().setAttribute('rotation', {
-      x: valueObj.x + 1,
-      y: valueObj.y + 1,
-      z: valueObj.z + 1
-    });
-    this.getCameraEl().setAttribute('rotation', valueObj);
+    if (valueObj) {
+      const cameraEl = this.getCameraEl();
+      if (cameraEl) {
+        cameraEl.setAttribute('rotation', {
+          x: valueObj.x + 1,
+          y: valueObj.y + 1,
+          z: valueObj.z + 1
+        });
+        cameraEl.setAttribute('rotation', valueObj);
+      }
+    }        
   }
 
   getEntitiesList(slideId = this.state.slideId) {
@@ -734,69 +746,45 @@ class SceneContextProvider extends Component {
     // should be somethings wrong
     return [];
   }
-
-  addEntity() {
-    // what ??
-  }
-  deleteEntity(entityId) {
-    this.setState((prevState) => {
-      const newSceneData = jsonCopy(prevState.sceneData);
-      const slides = newSceneData.slides;
-      const currentSlide = slides.find(el => el.id === prevState.slideId);
-      const deleteEntityIdx = currentSlide.entities.findIndex(el => el.id === entityId);
-      const deletedEntity = currentSlide.entities.splice(deleteEntityIdx, 1)[0];
-      this.editor.removeObject(deletedEntity.el.object3D);
-      const newUndoQueue = jsonCopy(prevState.undoQueue);
-      console.log('deleteEntity');
-      newUndoQueue.push({
-        sceneData: jsonCopy(prevState.sceneData),
-        slideId: prevState.slideId,
-        entityId: prevState.entityId,
-        timelineId: prevState.timelineId,
-        timelinePosition: prevState.timelinePosition,
-        currentTime: prevState.currentTime,
+  setEntityRotation(entity, valueObj, isUpdateUndoQueue = true, isInTimeline = false) {    
+    if (entity && valueObj) {      
+      entity.el.setAttribute('rotation', {
+        x: valueObj.x + 1,
+        y: valueObj.y + 1,
+        z: valueObj.z + 1
       });
-      return {
-        sceneData: newSceneData,
-        entityId: undefined,
-        undoQueue: newUndoQueue,
-        redoQueue: [],
-      }
-    }, _=> {
-      this.rebuildTimeline()
-    })
-  }
-  selectEntity(entityId) {
-    // pass back to editor to select?
-    const state = this.state;
-    const sceneData = state.sceneData;
-    const slides = sceneData.slides;
-    if (!slides) return null;    
-    const currentSlide = slides.find(el => el.id === state.slideId);
-    if (!currentSlide) return null;    
-    const selectedEntity = currentSlide.entities.find(el => el.id === entityId);
-
-    this.editor.selectEntity(selectedEntity.el);    
-    // after editor select, an event will be emit and state will update there
-    // this.setState({
-    //   entityId: entityId
-    // })
-  }
-  setCurrentEntityRotation(valueObj) {    
-    const currentEntity = this.getCurrentEntity();
-    if (currentEntity) {
-      const currentEntityModel = new entityModel[currentEntity['type']];
-      const valueObjToUse = jsonCopy(valueObj || currentEntityModel.getAnimatableAttributesValues().rotation);
-      if (valueObjToUse) {        
-        currentEntity.el.setAttribute('rotation', valueObjToUse);
-        this.updateDefaultAttributes({
-          rotation: valueObjToUse
-        });
+      entity.el.setAttribute('rotation', jsonCopy(valueObj));
+      if (isUpdateUndoQueue) {
+        const updateAttributesFuncArg = {
+          rotation: valueObj
+        };
+        if (isInTimeline) {
+          this.updateTimelinePositionAttributes(updateAttributesFuncArg);
+        } else {
+          this.updateDefaultAttributes(updateAttributesFuncArg);
+        }        
       }
     }
   }
-  resetCurrentEntityRotation() {    
-    this.setCurrentEntityRotation(null);    
+  setCurrentEntityRotation(valueObj, isUpdateUndoQueue = true, isInTimeline = false) {
+    if (valueObj) {
+      const currentEntity = this.getCurrentEntity();
+      if (currentEntity) {            
+        this.setEntityRotation(currentEntity, valueObj, isUpdateUndoQueue, isInTimeline);            
+      }
+    }
+  }
+  resetEntityRotation(entity, isUpdateUndoQueue = true, isInTimeline = false) {    
+    if (entity) {
+      const myEntityModel = new entityModel[entity['type']];
+      const valueObjToUse = (myEntityModel.getAnimatableAttributesValues() && myEntityModel.getAnimatableAttributesValues().rotation);
+      if (valueObjToUse) {        
+        this.setEntityRotation(entity, valueObjToUse, isUpdateUndoQueue, isInTimeline);      
+      }
+    }
+  }
+  resetCurrentEntityRotation(isUpdateUndoQueue = true, isInTimeline = false) {    
+    this.resetEntityRotation(this.getCurrentEntity(), isUpdateUndoQueue, isInTimeline);
   }
   getCurrentEntity(entityId = this.state.entityId) {
     const state = this.state;
@@ -812,6 +800,7 @@ class SceneContextProvider extends Component {
   getCurrentEntityId() {
     return this.state.entityId;
   }
+
   copyEntity(entityId = this.state.entityId) {    
     const copyFromEntity = this.getCurrentEntity(entityId);
     const type = copyFromEntity.type;
@@ -869,6 +858,53 @@ class SceneContextProvider extends Component {
       this.rebuildTimeline().then(tl => tl.seek(this.state.currentTime, false));
     })
   }
+  addEntity() {
+    // what ??
+  }
+  deleteEntity(entityId) {
+    this.setState((prevState) => {
+      const newSceneData = jsonCopy(prevState.sceneData);
+      const slides = newSceneData.slides;
+      const currentSlide = slides.find(el => el.id === prevState.slideId);
+      const deleteEntityIdx = currentSlide.entities.findIndex(el => el.id === entityId);
+      const deletedEntity = currentSlide.entities.splice(deleteEntityIdx, 1)[0];
+      this.editor.removeObject(deletedEntity.el.object3D);
+      const newUndoQueue = jsonCopy(prevState.undoQueue);
+      console.log('deleteEntity');
+      newUndoQueue.push({
+        sceneData: jsonCopy(prevState.sceneData),
+        slideId: prevState.slideId,
+        entityId: prevState.entityId,
+        timelineId: prevState.timelineId,
+        timelinePosition: prevState.timelinePosition,
+        currentTime: prevState.currentTime,
+      });
+      return {
+        sceneData: newSceneData,
+        entityId: undefined,
+        undoQueue: newUndoQueue,
+        redoQueue: [],
+      }
+    }, _ => {
+      this.rebuildTimeline()
+    })
+  }
+  selectEntity(entityId) {
+    // pass back to editor to select?
+    const state = this.state;
+    const sceneData = state.sceneData;
+    const slides = sceneData.slides;
+    if (!slides) return null;    
+    const currentSlide = slides.find(el => el.id === state.slideId);
+    if (!currentSlide) return null;    
+    const selectedEntity = currentSlide.entities.find(el => el.id === entityId);
+
+    this.editor.selectEntity(selectedEntity.el);    
+    // after editor select, an event will be emit and state will update there
+    // this.setState({
+    //   entityId: entityId
+    // })
+  }    
   updateEntity(newAttrs, entityId) {
     this.setState((prevState) => {      
       const newSceneData = jsonCopy(prevState.sceneData);
@@ -912,7 +948,6 @@ class SceneContextProvider extends Component {
       this.rebuildTimeline()
     })
   }
-
 
   getTimelinesList(entityId) {
     const state = this.state;
@@ -1203,7 +1238,7 @@ class SceneContextProvider extends Component {
   }
 
   updateDefaultAttributes(newAttrs) {
-    console.log(newAttrs);
+    //console.log(newAttrs);
     this.setState((prevState) => {
       const newSceneData = jsonCopy(prevState.sceneData);
       const slides = newSceneData.slides;
@@ -2093,8 +2128,8 @@ class SceneContextProvider extends Component {
           resetCurrentEntityRotation: this.resetCurrentEntityRotation,
           getCurrentEntity: this.getCurrentEntity,
           getCurrentEntityId: this.getCurrentEntityId,
+          
           copyEntity: this.copyEntity,
-
           addEntity: this.addEntity,
           deleteEntity: this.deleteEntity,
           selectEntity: this.selectEntity,

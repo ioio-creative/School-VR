@@ -199,7 +199,8 @@ class StaticInfoRenderer extends Component {
           isNonEmptyArray(transformModes) && 
           <div className={`vec3D-btn-col buttons-${transformModes.length}`}>
             <TransformMode 
-              modes={transformModes} 
+              modes={transformModes}
+              isInTimeline={false}
               onUpdate={(newPosition, newRotation, newScale) => {
                 this.changeObjectMultipleFields({
                   'position': newPosition,

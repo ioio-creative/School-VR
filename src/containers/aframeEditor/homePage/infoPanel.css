@@ -113,8 +113,9 @@
   width: 70px;
   height: 70px;
   flex: 0 0 70px;  
-}#info-panel .vec3D-btn-col.buttons-3 button {
-  flex: 1 1 100%;
+}
+#info-panel .vec3D-btn-col.buttons-3 button {
+  flex: 1 1 33%;
 }
 #info-panel .vec3D-btn-col.buttons-2 button {
   margin-left: 10px;

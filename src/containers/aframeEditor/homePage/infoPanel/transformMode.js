@@ -121,8 +121,9 @@ class TransformMode extends Component {
   /* event handlers */
 
   handleResetCurrentEntityRotationClick() {
-    const { sceneContext } = this.props;
-    sceneContext.resetCurrentEntityRotation();
+    const { sceneContext, isInTimeline } = this.props;
+    const isUpdateUndoQueue = true;
+    sceneContext.resetCurrentEntityRotation(isUpdateUndoQueue, isInTimeline);        
   }
 
   /* end of event handlers */
@@ -176,10 +177,8 @@ class TransformMode extends Component {
                 return (
                   <button 
                     key={mode}
-                    className={isModeSelected ? "selected": ""}
-                    onClick={_ =>{
-                      modeData.changeTranformFunc()
-                    }}
+                    className={isModeSelected ? 'selected' : ''}
+                    onClick={modeData.changeTranformFunc}
                     title={messages[modeData.tooltipMsgId]}
                   >
                     {modeData.iconElement}                  
@@ -191,8 +190,9 @@ class TransformMode extends Component {
             {
               modes.includes(tranformModeId.rotate) &&
               <button                                 
+                className='btn-reset-rotation'
                 onClick={this.handleResetCurrentEntityRotationClick}
-                title={messages['EditThingPanel.TransformModes.RotateResetTooltip']}
+                title={messages['EditThingPanel.TransformModes.RotateResetTooltip']}      
               >
                 {/* <FontAwesomeIcon icon="undo" /> */}
                 <div>{messages['EditThingPanel.TransformModes.RotateResetLabel']}</div>
@@ -200,7 +200,7 @@ class TransformMode extends Component {
             }         
           </>
         )
-      } />        
+      } />
     )
   }
 }

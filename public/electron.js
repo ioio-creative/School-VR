@@ -216,18 +216,20 @@ async function openWebServerAsync() {
 
   console.log('Presentation port to use:', webServerPort);
 
-  // https://nodejs.org/api/child_process.html#child_process_subprocess_send_message_sendhandle_options_callback
-  webServerProcess.send({
-    address: 'open-server',
-    port: webServerPort,
-    rootDirPath: webServerRootDirectory,
-    filesDirPath: webServerFilesDirectory,
-    webServerStaticFilesPathPrefix: config.webServerStaticFilesPathPrefix,
-  });  
+  if (webServerProcess.connected) {
+    // https://nodejs.org/api/child_process.html#child_process_subprocess_send_message_sendhandle_options_callback
+    webServerProcess.send({
+      address: 'open-server',
+      port: webServerPort,
+      rootDirPath: webServerRootDirectory,
+      filesDirPath: webServerFilesDirectory,
+      webServerStaticFilesPathPrefix: config.webServerStaticFilesPathPrefix,
+    });
+  }  
 }
 
 function closeWebServer() {
-  if (webServerProcess) {
+  if (webServerProcess && webServerProcess.connected) {    
     webServerProcess.send({
       address: 'close-server'
     });

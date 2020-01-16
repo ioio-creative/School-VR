@@ -20,3 +20,7 @@
 #info-panel .vec3D-btn-col button.selected svg .st145 {
   stroke:#28a8ff;
 }
+
+#info-panel .vec3D-btn-col.buttons-3 button.btn-reset-rotation {
+  flex: 0 0 20%;
+}
