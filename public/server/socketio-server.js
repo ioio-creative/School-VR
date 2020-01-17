@@ -14,7 +14,7 @@ process.title = "node-socketio-server";
 //var port = process.env.PORT || 8080;
 
 // constants
-var closeServerTimeoutInMillis = 3000;
+//var closeServerTimeoutInMillis = 3000;
 
 // global variables
 var webServer;  // node http
@@ -141,18 +141,25 @@ function openServer(port, rootDirPath = 'public/server/static', filesDirPath = n
 /* close server */
 
 function closeServer() {
-  socketServer.close(_ => {
-    socketServer = null;
-    webServer.close((err) => {
-      if (err) {
-        console.error('socketio-server closeServer error:', err);
-      }
-      app = null;
+  if (socketServer) {
+    socketServer.close(_ => {
+      /* Probably no need to call webServer.close() if socketServer.close() is called already. */
+      // if (webServer) {
+      //   console.log('socketio-server: closing server');
+      //   webServer.close((err) => {
+      //     if (err) {
+      //       console.error('socketio-server closeServer error:', err);
+      //     }          
+      //   });                
+      // }
+      
+      socketServer = null;
       webServer = null;
+      app = null;      
       console.log('socketio-server: closeServer');
       exitSuccess();
     });
-  });
+  }  
   
   // setTimeout(_ => {
   //   socketServer = null;
@@ -198,9 +205,16 @@ process.on('message', (message) => {
  */
 
 function exitHandler(options, exitCode) {    
-  if (options.cleanup) console.log('socketio-server exitHandler: clean');
-  if (exitCode || exitCode === 0) console.log('socketio-server exitHandler exitCode:', exitCode);
-  if (options.exit) process.exit();
+  if (options.cleanup) {
+    console.log('socketio-server exitHandler: cleanup');
+    closeServer();
+  }
+  if (exitCode || exitCode === 0) {
+    console.log('socketio-server exitHandler exitCode:', exitCode);
+  }
+  if (options.exit) {
+    process.exit();
+  }
 }
 
 //do something when app is closing

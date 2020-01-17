@@ -1125,3 +1125,65 @@ ipcMain.on('saveRaw360CaptureForVideo', async (event, arg) => {
 });
 
 /* end of ipc main event listeners */
+
+
+/* 
+ * doing a cleanup action just before Node.js exits
+ * https://stackoverflow.com/questions/14031763/doing-a-cleanup-action-just-before-node-js-exits 
+ */
+
+function exitHandler(options, exitCode) {    
+  if (options.cleanup) {
+    console.log('electron-main exitHandler: cleanup');
+    closeServer();
+  }
+  if (exitCode || exitCode === 0) {
+    console.log('electron-main exitHandler exitCode:', exitCode);
+  }
+  if (options.exit) {
+    process.exit();
+  }
+}
+
+//do something when app is closing
+process.on('exit', _ => {
+  console.log('electron-main on: exit');
+});
+
+//catches ctrl+c event
+process.on('SIGINT', _ => {
+  console.log('electron-main on: SIGINT');
+  exitHandler.bind(null, {
+    exit: true,
+    clean: true
+  });
+});
+
+// catches "kill pid" (for example: nodemon restart)
+process.on('SIGUSR1', _ => {
+  console.log('electron-main on: SIGUSR1');
+  exitHandler.bind(null, {
+    exit: true,
+    clean: true
+  });
+});
+process.on('SIGUSR2', _ => {
+  console.log('electron-main on: SIGUSR2');
+  exitHandler.bind(null, {
+    exit: true,
+    clean: true
+  });
+});
+
+//catches uncaught exceptions
+// https://stackoverflow.com/questions/40867345/catch-all-uncaughtexception-for-node-js-app
+process
+  .on('unhandledRejection', (reason, p) => {
+    console.error('electron-main on unhandledRejection:', reason, 'Unhandled Rejection at Promise', p);
+  })
+  .on('uncaughtException', err => {
+    console.error('electron-main on uncaughtException:', err, 'Uncaught Exception thrown');
+    process.exit(1);
+  });
+
+/* end of doing a cleanup action just before Node.js exits */
