@@ -226,7 +226,7 @@ AFRAME.registerComponent('ttfFont', {
     const el = this.el;
     const data = this.data;
     // Create geometry.
-    const checkFontLoaded = await this.isFontLoaded();
+    //const checkFontLoaded = await this.isFontLoaded();
     const textGeometry = new three.TextGeometry( data.value, {
       font: ttfFonts[data.fontFamily],
       size: data.fontSize,
