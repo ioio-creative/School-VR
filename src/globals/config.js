@@ -62,6 +62,7 @@ let config = {
   schoolVrProjectArchiveExtensionWithLeadingDot: schoolVrProjectArchiveExtensionWithLeadingDot,
   jsonFileExtensionWithLeadingDot: '.json',
 
+  // TODO:
   //defaultLanguage: languages.traditionalChinese,
   defaultLanguage: languages.english,
 
