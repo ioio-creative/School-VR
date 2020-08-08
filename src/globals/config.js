@@ -1,19 +1,42 @@
 import fileHelper from 'utils/fileHelper/fileHelper';
-import {invokeIfIsFunction} from 'utils/variableType/isFunction';
-
+import { invokeIfIsFunction } from 'utils/variableType/isFunction';
 
 /* language specifics */
 
 // have to map language names to the [react-intl locale, api query param options] pairs
 const languages = {
-  english: {code: 'en', locale: 'en', isUsed: true, isFontLoaded: true, fontFamily: ''}, 
-  traditionalChinese: {code: 'tc', locale: 'zh-Hant', isUsed: true, isFontLoaded: false, fontFamily: 'Noto Sans TC'},
-  simplifiedChinese: {code: 'zh', locale: 'zh', isUsed: false, isFontLoaded: false, fontFamily: 'Noto Sans SC'},
-  japanese: {code: 'ja', locale: 'ja', isUsed: false, isFontLoaded: false, fontFamily: ''}
+  english: {
+    code: 'en',
+    locale: 'en',
+    isUsed: true,
+    isFontLoaded: true,
+    fontFamily: ''
+  },
+  traditionalChinese: {
+    code: 'tc',
+    locale: 'zh-Hant',
+    isUsed: true,
+    isFontLoaded: false,
+    fontFamily: 'Noto Sans TC'
+  },
+  simplifiedChinese: {
+    code: 'zh',
+    locale: 'zh',
+    isUsed: false,
+    isFontLoaded: false,
+    fontFamily: 'Noto Sans SC'
+  },
+  japanese: {
+    code: 'ja',
+    locale: 'ja',
+    isUsed: false,
+    isFontLoaded: false,
+    fontFamily: ''
+  }
 };
 
 const languageCodeToLanguageMap = {};
-Object.keys(languages).forEach((key) => {
+Object.keys(languages).forEach(key => {
   languageCodeToLanguageMap[languages[key].code] = languages[key];
 });
 
@@ -30,10 +53,7 @@ function getLanguageFromLanguageCode(languageCode) {
 
 /* end of language specifics */
 
-
-
 const schoolVrProjectArchiveExtensionWithLeadingDot = '.ivr';
-
 
 let config = {
   isElectronApp: Boolean(window.require),
@@ -42,39 +62,63 @@ let config = {
   schoolVrProjectArchiveExtensionWithLeadingDot: schoolVrProjectArchiveExtensionWithLeadingDot,
   jsonFileExtensionWithLeadingDot: '.json',
 
-  defaultLanguage: languages.traditionalChinese,
+  // TODO:
+  //defaultLanguage: languages.traditionalChinese,
+  defaultLanguage: languages.english,
 
   captured360ImageExtension: '.png',
   captured360VideoExtension: '.mp4',
   captured360VideoFps: 30,
 
   presentationRecordingVideoExtension: '.webm',
-  presentationRecordingVideoFps: 60,
+  presentationRecordingVideoFps: 60
 };
 let appDirectory = {};
 const setAppData = (appData, callBack = null) => {
-  const {
-    appName, homePath, appDataPath, documentsPath
-  } = appData;
+  const { appName, homePath, appDataPath, documentsPath } = appData;
 
   // https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname
   appDirectory.homeDirectory = homePath;
 
-  appDirectory.appProjectsDirectory = fileHelper.join(documentsPath, `${appName}-Projects`);
+  appDirectory.appProjectsDirectory = fileHelper.join(
+    documentsPath,
+    `${appName}-Projects`
+  );
 
-  appDirectory.appDataDirectory = fileHelper.join(appDataPath, `${appName}-Data`);
+  appDirectory.appDataDirectory = fileHelper.join(
+    appDataPath,
+    `${appName}-Data`
+  );
 
-  appDirectory.appTempDirectory = fileHelper.join(appDataPath, `${appName}-Temp`);
-  appDirectory.appTempProjectsDirectory = fileHelper.join(appDirectory.appTempDirectory, `${appName}-Projects`);
-  appDirectory.appTempAppWorkingDirectory = fileHelper.join(appDirectory.appTempDirectory, `${appName}-App-Working`);
-  appDirectory.appTempWebContainerDirectory = fileHelper.join(appDirectory.appTempAppWorkingDirectory, 'web');
+  appDirectory.appTempDirectory = fileHelper.join(
+    appDataPath,
+    `${appName}-Temp`
+  );
+  appDirectory.appTempProjectsDirectory = fileHelper.join(
+    appDirectory.appTempDirectory,
+    `${appName}-Projects`
+  );
+  appDirectory.appTempAppWorkingDirectory = fileHelper.join(
+    appDirectory.appTempDirectory,
+    `${appName}-App-Working`
+  );
+  appDirectory.appTempWebContainerDirectory = fileHelper.join(
+    appDirectory.appTempAppWorkingDirectory,
+    'web'
+  );
 
-  appDirectory.webServerFilesDirectory = fileHelper.join(appDirectory.appTempWebContainerDirectory, 'files');
+  appDirectory.webServerFilesDirectory = fileHelper.join(
+    appDirectory.appTempWebContainerDirectory,
+    'files'
+  );
 
   // make first letter of each word upper-case
-  config.appName = appName.split('-').map(str => {
-    return str.charAt(0).toUpperCase() + str.substr(1);
-  }).join(' ');
+  config.appName = appName
+    .split('-')
+    .map(str => {
+      return str.charAt(0).toUpperCase() + str.substr(1);
+    })
+    .join(' ');
   config.appDirectory = appDirectory;
 
   invokeIfIsFunction(callBack);
@@ -85,7 +129,10 @@ const Media = {
   image: {
     typeName: 'image',
     directoryUnderProjectDirectory: 'Images',
-    openFileDialogFilter: { name: 'Images', extensions: ['jpeg', 'jpg', 'png', 'gif', 'svg'] }
+    openFileDialogFilter: {
+      name: 'Images',
+      extensions: ['jpeg', 'jpg', 'png', 'gif', 'svg']
+    }
   },
   gif: {
     typeName: 'gif',
@@ -98,7 +145,6 @@ const Media = {
     openFileDialogFilter: { name: 'Videos', extensions: ['mp4'] }
   }
 };
-
 
 /* derivatives from Media */
 
@@ -116,19 +162,23 @@ for (let key of Object.keys(Media)) {
   openFileDialogFilter[key] = MediumTypeObj.openFileDialogFilter;
 }
 
-openFileDialogFilter.schoolVrFile = { name: 'School VR Files', extensions: [schoolVrProjectArchiveExtensionWithLeadingDot.substr(1)] };
+openFileDialogFilter.schoolVrFile = {
+  name: 'School VR Files',
+  extensions: [schoolVrProjectArchiveExtensionWithLeadingDot.substr(1)]
+};
 openFileDialogFilter.allFiles = { name: 'All Files', extensions: ['*'] };
 
 /* end of derivatives from Media */
 
-
 let paramsReadFromExternalConfig = {
-  something: 1,
+  something: 1
 };
-let setParamsReadFromExternalConfig = (configObj) => {
-  paramsReadFromExternalConfig = {...paramsReadFromExternalConfig, ...configObj};
+let setParamsReadFromExternalConfig = configObj => {
+  paramsReadFromExternalConfig = {
+    ...paramsReadFromExternalConfig,
+    ...configObj
+  };
 };
-
 
 /* to prove that export is "pass-by-reference"*/
 // let something = 1;
@@ -140,7 +190,6 @@ export default config;
 
 export {
   setAppData,
-
   mediaType,
   appDirectory,
   projectDirectoryStructure,
@@ -150,11 +199,10 @@ export {
 
   paramsReadFromExternalConfig,
   setParamsReadFromExternalConfig,
-
   // language specifics
   languages,
   usedLanguagesArray,
-  getLanguageFromLanguageCode,
+  getLanguageFromLanguageCode
 };
 
 // something = 2;
