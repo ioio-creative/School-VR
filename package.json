@@ -65,7 +65,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "electron-dev": "concurrently \"BROWSER=none npm start\" \"wait-on http://localhost:1234 && electron .\"",
+    "electron-dev": "concurrently \"npm start\" \"wait-on http://localhost:1234 && electron .\"",
     "electron-build": "electron-builder -c.extraMetadata.main=build/electron.js",
     "electron-pack": "electron-builder -c.extraMetadata.main=build/electron.js",
     "preelectron-pack": "react-scripts build",
