@@ -3,8 +3,7 @@
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 const ffmpeg = require('fluent-ffmpeg');
 ffmpeg.setFfmpegPath(ffmpegPath);
-const command = ffmpeg();
-
+//const command = ffmpeg();
 
 function FfmpegCommand() {
   this.command = ffmpeg();
@@ -24,38 +23,46 @@ command
 
 */
 
-FfmpegCommand.prototype.imageSequenceToVideo = 
-  function(inputImgFileSelector, inputFps, outputVideoPath, outputFps, onEnd, onProgress, onError) {
-    // Use FFMpeg to create a video.
-    // 8 consecutive frames, held for 5 seconds each, 30fps output, no audio
-    return command
-      .on('end', onEnd || handleEnd)
-      .on('progress', onProgress || handleProgress)
-      .on('error', onError || handleError)
-      .input(inputImgFileSelector)
-      .inputFPS(inputFps)
-      .output(outputVideoPath)
-      .outputFPS(outputFps)
-      .noAudio()
-      .run();
-  };
+FfmpegCommand.prototype.imageSequenceToVideo = function (
+  inputImgFileSelector,
+  inputFps,
+  outputVideoPath,
+  outputFps,
+  onEnd,
+  onProgress,
+  onError
+) {
+  console('ffmpegPath:', ffmpegPath);
+
+  // Use FFMpeg to create a video.
+  // 8 consecutive frames, held for 5 seconds each, 30fps output, no audio
+  return this.command
+    .on('end', onEnd || handleEnd)
+    .on('progress', onProgress || handleProgress)
+    .on('error', onError || handleError)
+    .input(inputImgFileSelector)
+    .inputFPS(inputFps)
+    .output(outputVideoPath)
+    .outputFPS(outputFps)
+    .noAudio()
+    .run();
+};
 
 let timemark;
 
-function handleProgress(progress){
+function handleProgress(progress) {
   if (progress.timemark != timemark) {
     timemark = progress.timemark;
-    console.log('Time mark: ' + timemark + "...");
+    console.log('Time mark: ' + timemark + '...');
   }
 }
-  
+
 function handleError(err, stdout, stderr) {
   console.log('Cannot process video: ' + err.message);
 }
-  
+
 function handleEnd() {
   console.log('Finished processing');
 }
-
 
 module.exports = FfmpegCommand;

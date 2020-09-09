@@ -17,16 +17,40 @@ const jsoncParser = require('jsonc-parser');
 
 const mime = require('./utils/fileSystem/mime');
 const fileSystem = require('./utils/fileSystem/fileSystem');
-const { write360ImageToTempPromise, write360ImageAsPartOfVideoToTempPromise, convertTempImageSequenceToVideoPromise } = require('./utils/captures/captures');
+const {
+  write360ImageToTempPromise,
+  write360ImageAsPartOfVideoToTempPromise,
+  convertTempImageSequenceToVideoPromise
+} = require('./utils/captures/captures');
 const ProjectFile = require('./utils/saveLoadProject/ProjectFile');
-const { saveProjectToLocalAsync } = require('./utils/saveLoadProject/saveProject');
-const { loadProjectByProjectFilePathAsync, copyTempProjectDirectoryToExternalDirectoryAsync } = require('./utils/saveLoadProject/loadProject');
-const { openImageDialog, openGifDialog, openVideoDialog, openSchoolVrFileDialog, saveSchoolVrFileDialog, save360ImageDialogPromise } =
-  require('./utils/aframeEditor/openFileDialog');
-const { showYesNoQuestionMessageBox, showYesNoWarningMessageBox } = require('./utils/aframeEditor/showMessageBox');
-const { parseDataToSaveFormat } = require('./utils/saveLoadProject/parseDataToSaveFormat');
+const {
+  saveProjectToLocalAsync
+} = require('./utils/saveLoadProject/saveProject');
+const {
+  loadProjectByProjectFilePathAsync,
+  copyTempProjectDirectoryToExternalDirectoryAsync
+} = require('./utils/saveLoadProject/loadProject');
+const {
+  openImageDialog,
+  openGifDialog,
+  openVideoDialog,
+  openSchoolVrFileDialog,
+  saveSchoolVrFileDialog,
+  save360ImageDialogPromise,
+  save360VideoDialogPromise
+} = require('./utils/aframeEditor/openFileDialog');
+const {
+  showYesNoQuestionMessageBox,
+  showYesNoWarningMessageBox
+} = require('./utils/aframeEditor/showMessageBox');
+const {
+  parseDataToSaveFormat
+} = require('./utils/saveLoadProject/parseDataToSaveFormat');
 const getIpAddress = require('./utils/network/getIpAddress');
-const { getMacAddressHelper, getMacAddressPromiseHelper } = require('./utils/network/getMacAddress');
+const {
+  getMacAddressHelper,
+  getMacAddressPromiseHelper
+} = require('./utils/network/getMacAddress');
 const shallowMergeObjects = require('./utils/js/shallowMergeObjects');
 const { hashForUniqueId } = require('./utils/crypto');
 const jsonStringifyFormatted = require('./utils/json/jsonStringifyFormatted');
@@ -53,10 +77,13 @@ console.log(`webServerRootDirectory: ${webServerRootDirectory}`);
 const webServerFilesDirectory = appDirectory.webServerFilesDirectory;
 console.log(`webServerFilesDirectory: ${webServerFilesDirectory}`);
 
-const serverProgramPath = myPath.join(__dirname, 'server', 'socketio-server.js');
+const serverProgramPath = myPath.join(
+  __dirname,
+  'server',
+  'socketio-server.js'
+);
 
 /* end of constants */
-
 
 /* global variables */
 
@@ -68,7 +95,6 @@ let paramsFromExternalConfigForReact;
 
 /* end of global variables */
 
-
 async function readConfigFileAsync(configFile) {
   const data = await fileSystem.readFilePromise(configFile);
   const configObj = jsoncParser.parse(data);
@@ -76,12 +102,15 @@ async function readConfigFileAsync(configFile) {
   paramsFromExternalConfigForReact = configObj.react;
 
   // set some global variables
-  developmentServerPort = configObjForElectron.developmentServerPort || developmentServerPort;
+  developmentServerPort =
+    configObjForElectron.developmentServerPort || developmentServerPort;
 
   webServerPort = configObjForElectron.webServerPort || webServerPort;
   //webServerRootDirPath = configObjForElectron.webServerRootDirPath || webServerRootDirPath;
 
-  splashScreenDurationInMillis = configObjForElectron.splashScreenDurationInMillis || splashScreenDurationInMillis;
+  splashScreenDurationInMillis =
+    configObjForElectron.splashScreenDurationInMillis ||
+    splashScreenDurationInMillis;
 }
 
 function createWindow() {
@@ -100,7 +129,6 @@ function createWindow() {
     transparent: true
   });
 
-
   /* setting up mainWindow */
 
   mainWindow = new BrowserWindow({
@@ -110,7 +138,7 @@ function createWindow() {
     minHeight: 600,
     frame: false,
     show: false,
-    webPreferences: { webSecurity: false },  // for saving and loading assets via local path
+    webPreferences: { webSecurity: false } // for saving and loading assets via local path
   });
 
   splashScreen.loadURL(`file://${myPath.join(__dirname, 'splash.html')}`);
@@ -124,15 +152,18 @@ function createWindow() {
     // this setTimeout is to allow time for splash screen to show
     // before the thread is being blocked by running fileSystem.extractAll() or something like that
     setTimeout(async _ => {
-      console.log("splash screen");
+      console.log('splash screen');
       // delete any cached temp project files
       await ProjectFile.deleteAllTempProjectDirectoriesAsync();
 
       // create App Data directories if they do not exist
-      await forEach(appDirectory.createOnStartUpDirectories, async (directoryPath) => {       
-        console.log('Directory created:', directoryPath);
-        await fileSystem.createDirectoryIfNotExistsPromise(directoryPath);        
-      });
+      await forEach(
+        appDirectory.createOnStartUpDirectories,
+        async directoryPath => {
+          console.log('Directory created:', directoryPath);
+          await fileSystem.createDirectoryIfNotExistsPromise(directoryPath);
+        }
+      );
       console.log('App directories created.');
 
       await openWebServerAsync();
@@ -143,8 +174,11 @@ function createWindow() {
 
         //mainWindow.loadURL(isDev ? `http://localhost:${developmentServerPort}/file-explorer` : `file://${myPath.join(__dirname, '../build/index.html')}`);
         //mainWindow.loadURL(isDev ? `http://localhost:${developmentServerPort}` : `file://${myPath.join(__dirname, '../build/index.html')}`);
-        mainWindow.loadURL(isDev ? `http://localhost:${developmentServerPort}/projectlist` : `file://${myPath.join(__dirname, '../build/index.html')}`);
-
+        mainWindow.loadURL(
+          isDev
+            ? `http://localhost:${developmentServerPort}/projectlist`
+            : `file://${myPath.join(__dirname, '../build/index.html')}`
+        );
       }, splashScreenDurationInMillis);
     }, 1000);
   });
@@ -173,31 +207,34 @@ function createWindow() {
 
   /* end of setting up mainWindow */
 
-
   /* setting up menu for hot keys purpose only */
 
   const menu = new Menu();
 
-  menu.append(new MenuItem({
-    label: 'Toggle DevTools',
-    accelerator: 'F12',
-    click: _ => {
-      mainWindow.webContents.toggleDevTools();
-    }
-  }));
+  menu.append(
+    new MenuItem({
+      label: 'Toggle DevTools',
+      accelerator: 'F12',
+      click: _ => {
+        mainWindow.webContents.toggleDevTools();
+      }
+    })
+  );
 
   // https://electronjs.org/docs/tutorial/keyboard-shortcuts
   // const ret = globalShortcut.register('F5', () => {
   //   mainWindow.reload();
   // })
 
-  menu.append(new MenuItem({
-    label: 'Refresh',
-    accelerator: 'F5',
-    click: _ => {
-      mainWindow.reload();
-    }
-  }));
+  menu.append(
+    new MenuItem({
+      label: 'Refresh',
+      accelerator: 'F5',
+      click: _ => {
+        mainWindow.reload();
+      }
+    })
+  );
 
   // all windows of this application share same menu
   Menu.setApplicationMenu(menu);
@@ -205,12 +242,11 @@ function createWindow() {
   /* end of setting up menu for hot keys purpose only */
 }
 
-
 /* web server */
 
-async function openWebServerAsync() {  
+async function openWebServerAsync() {
   await fileSystem.myDeletePromise(webServerFilesDirectory);
-  await fileSystem.createDirectoryIfNotExistsPromise(webServerFilesDirectory);  
+  await fileSystem.createDirectoryIfNotExistsPromise(webServerFilesDirectory);
 
   webServerProcess = fork(serverProgramPath);
 
@@ -223,14 +259,14 @@ async function openWebServerAsync() {
       port: webServerPort,
       rootDirPath: webServerRootDirectory,
       filesDirPath: webServerFilesDirectory,
-      webServerStaticFilesPathPrefix: config.webServerStaticFilesPathPrefix,
+      webServerStaticFilesPathPrefix: config.webServerStaticFilesPathPrefix
     });
-  }  
+  }
 }
 
 function closeWebServer() {
   if (webServerProcess) {
-    if (webServerProcess.connected) {      
+    if (webServerProcess.connected) {
       webServerProcess.send({
         address: 'close-server'
       });
@@ -242,7 +278,6 @@ function closeWebServer() {
 }
 
 /* end of web server */
-
 
 /* app lifecycles */
 
@@ -262,10 +297,13 @@ app.on('window-all-closed', async _ => {
 
   // delete any cached temp project files
   await ProjectFile.deleteAllTempProjectDirectoriesAsync();
-  await forEach(appDirectory.deleteOnCloseDownDirectories, async (directoryPath) => {  
-    console.log('Directory deleted:', directoryPath);
-    await fileSystem.myDeletePromise(directoryPath);
-  });
+  await forEach(
+    appDirectory.deleteOnCloseDownDirectories,
+    async directoryPath => {
+      console.log('Directory deleted:', directoryPath);
+      await fileSystem.myDeletePromise(directoryPath);
+    }
+  );
   console.log('App directories deleted.');
 
   // Always check if web server is closed when all windows are closed
@@ -274,10 +312,10 @@ app.on('window-all-closed', async _ => {
   // TODO: Rationale behind isMac check (now commented out):
   // In mac, when all windows are closed, the app does not necessarily quit.
   // But this in-mac behaviour may require Application Menu implementation as well,
-  // so that a window can be opened again after all windows are closed.  
+  // so that a window can be opened again after all windows are closed.
   //if (!isMac) {
-    console.log('App quit.');
-    app.quit();
+  console.log('App quit.');
+  app.quit();
   //}
 });
 
@@ -288,7 +326,6 @@ app.on('activate', () => {
 });
 
 /* end of app lifecycles */
-
 
 /* ipc main event listeners */
 /**
@@ -344,7 +381,7 @@ ipcMain.on('getMacAddress', (event, arg) => {
       return;
     }
 
-    console.log("Mac address for this host: %s", mac);
+    console.log('Mac address for this host: %s', mac);
     event.sender.send('getMacAddressResponse', {
       err: null,
       data: {
@@ -475,15 +512,18 @@ ipcMain.on('base64Encode', async (event, arg) => {
 
 ipcMain.on('base64Decode', async (event, arg) => {
   try {
-    await fileSystem.base64DecodePromise(arg.locationToSaveFile, arg.encodedStr);
+    await fileSystem.base64DecodePromise(
+      arg.locationToSaveFile,
+      arg.encodedStr
+    );
     event.sender.send('base64DecodeResponse', {
-      err: null,
+      err: null
     });
   } catch (err) {
     console.error('base64Decode Error:');
     console.error(err);
     event.sender.send('base64DecodeResponse', {
-      err: err.toString(),
+      err: err.toString()
     });
   }
 });
@@ -492,13 +532,13 @@ ipcMain.on('createPackage', async (event, arg) => {
   try {
     await fileSystem.createPackagePromise(arg.src, arg.dest);
     event.sender.send('createPackageResponse', {
-      err: null,
+      err: null
     });
   } catch (err) {
     console.error('createPackage Error:');
     console.error(err);
     event.sender.send('createPackageResponse', {
-      err: err.toString(),
+      err: err.toString()
     });
   }
 });
@@ -507,13 +547,13 @@ ipcMain.on('extractAll', (event, arg) => {
   try {
     fileSystem.extractAll(arg.archive, arg.dest);
     event.sender.send('extractAllResponse', {
-      err: null,
+      err: null
     });
   } catch (err) {
     console.error('extractAll Error:');
     console.error(err);
     event.sender.send('extractAllResponse', {
-      err: err.toString(),
+      err: err.toString()
     });
   }
 });
@@ -625,7 +665,7 @@ ipcMain.on('listProjects', async (event, arg) => {
   console.log('listProjects');
   const isLoadProjectJson = true;
   ProjectFile.listProjectsAsync(isLoadProjectJson)
-    .then((projectFileObjs) => {
+    .then(projectFileObjs => {
       event.sender.send('listProjectsResponse', {
         err: null,
         data: {
@@ -645,7 +685,7 @@ ipcMain.on('listProjects', async (event, arg) => {
 
 ipcMain.on('saveProject', (event, arg) => {
   saveProjectToLocalAsync(arg.projectFilePath, arg.entitiesList, arg.assetsList)
-    .then((data) => {
+    .then(data => {
       event.sender.send('saveProjectResponse', {
         err: null,
         data: {
@@ -665,7 +705,7 @@ ipcMain.on('saveProject', (event, arg) => {
 
 ipcMain.on('parseDataToSaveFormat', (event, arg) => {
   parseDataToSaveFormat(arg.projectName, arg.entitiesList, arg.assetsList)
-    .then((data) => {
+    .then(data => {
       event.sender.send('parseDataToSaveFormatResponse', {
         err: null,
         data: {
@@ -686,7 +726,7 @@ ipcMain.on('parseDataToSaveFormat', (event, arg) => {
 ipcMain.on('loadProjectByProjectFilePath', (event, arg) => {
   const filePath = arg;
   loadProjectByProjectFilePathAsync(filePath)
-    .then((data) => {
+    .then(data => {
       event.sender.send('loadProjectByProjectFilePathResponse', {
         err: null,
         data: {
@@ -706,7 +746,9 @@ ipcMain.on('loadProjectByProjectFilePath', (event, arg) => {
 
 ipcMain.on('isCurrentLoadedProject', (event, arg) => {
   const projectFilePath = arg;
-  const isCurrentLoadedProject = ProjectFile.isCurrentLoadedProject(projectFilePath);
+  const isCurrentLoadedProject = ProjectFile.isCurrentLoadedProject(
+    projectFilePath
+  );
   event.sender.send('isCurrentLoadedProjectResponse', {
     err: null,
     data: {
@@ -772,7 +814,7 @@ ipcMain.on('saveSchoolVrFileDialog', (event, arg) => {
 
 ipcMain.on('showOpenDialog', (event, arg) => {
   const options = arg;
-  dialog.showOpenDialog(options, (filePaths) => {
+  dialog.showOpenDialog(options, filePaths => {
     event.sender.send('showOpenDialogResponse', {
       data: {
         filePaths: filePaths
@@ -783,7 +825,7 @@ ipcMain.on('showOpenDialog', (event, arg) => {
 
 ipcMain.on('showSaveDialog', (event, arg) => {
   const options = arg;
-  dialog.showOpenDialog(options, (filePath) => {
+  dialog.showOpenDialog(options, filePath => {
     event.sender.send('showSaveDialogResponse', {
       data: {
         filePath: filePath
@@ -795,7 +837,7 @@ ipcMain.on('showSaveDialog', (event, arg) => {
 // show message showMessageBox
 
 ipcMain.on('showYesNoQuestionMessageBox', (event, arg) => {
-  showYesNoQuestionMessageBox(arg.message, arg.detail, (response) => {
+  showYesNoQuestionMessageBox(arg.message, arg.detail, response => {
     const btnId = response;
     event.sender.send('showYesNoQuestionMessageBoxResponse', {
       data: {
@@ -806,7 +848,7 @@ ipcMain.on('showYesNoQuestionMessageBox', (event, arg) => {
 });
 
 ipcMain.on('showYesNoWarningMessageBox', (event, arg) => {
-  showYesNoWarningMessageBox(arg.message, arg.detail, (response) => {
+  showYesNoWarningMessageBox(arg.message, arg.detail, response => {
     const btnId = response;
     event.sender.send('showYesNoWarningMessageBoxResponse', {
       data: {
@@ -836,7 +878,10 @@ ipcMain.on('openWebServerAndLoadProject', async (event, arg) => {
     const projectFile = new ProjectFile(null, filePath, null);
     const hashedFilePath = projectFile.hashedSavedProjectFilePath;
     //console.log(`hashedFilePath: ${hashedFilePath}`);
-    const staticAssetUrlPathPrefixForWebPresentation = myPath.join(config.webServerStaticFilesPathPrefix, hashedFilePath);
+    const staticAssetUrlPathPrefixForWebPresentation = myPath.join(
+      config.webServerStaticFilesPathPrefix,
+      hashedFilePath
+    );
     //console.log(`staticAssetUrlPathPrefixForWebPresentation: ${staticAssetUrlPathPrefixForWebPresentation}`);
     const projectJson = await loadProjectByProjectFilePathAsync(filePath);
     //console.log(projectJson);
@@ -844,18 +889,27 @@ ipcMain.on('openWebServerAndLoadProject', async (event, arg) => {
     // TODO: poorly written (too many cross-references to ProjectFile class)
     // add staticAssetUrlPathPrefixForWebPresentation to asset's relativeSrc
     const newlyModifiedProjectJson = Object.assign({}, projectJson);
-    newlyModifiedProjectJson.assetsList.forEach((asset) => {
+    newlyModifiedProjectJson.assetsList.forEach(asset => {
       const assetRelativeSrc = asset.relativeSrc;
       if (ProjectFile.isAssetPathRelative(assetRelativeSrc)) {
-        asset.relativeSrc = myPath.join(staticAssetUrlPathPrefixForWebPresentation, assetRelativeSrc);
+        asset.relativeSrc = myPath.join(
+          staticAssetUrlPathPrefixForWebPresentation,
+          assetRelativeSrc
+        );
       }
     });
     /* end of load project file */
 
     /* open web server */
     // await openWebServerAsync();
-    const externalServerDirectory = myPath.join(webServerFilesDirectory, hashedFilePath);
-    await copyTempProjectDirectoryToExternalDirectoryAsync(filePath, externalServerDirectory);
+    const externalServerDirectory = myPath.join(
+      webServerFilesDirectory,
+      hashedFilePath
+    );
+    await copyTempProjectDirectoryToExternalDirectoryAsync(
+      filePath,
+      externalServerDirectory
+    );
     /* end of open web server */
 
     event.sender.send('openWebServerAndLoadProjectResponse', {
@@ -865,7 +919,7 @@ ipcMain.on('openWebServerAndLoadProject', async (event, arg) => {
       }
     });
   } catch (err) {
-    console.error('openWebServerAndLoadProject Error:')
+    console.error('openWebServerAndLoadProject Error:');
     console.error(err);
     event.sender.send('openWebServerAndLoadProjectResponse', {
       err: err.toString(),
@@ -884,11 +938,13 @@ ipcMain.on('closeWebServer', (event, arg) => {
 // customized app data
 
 const getCustomizedAppDataObjFromFilePromise = async _ => {
-  const appDataFileContent = await fileSystem.readFilePromise(appDirectory.customizedAppDataFile);
+  const appDataFileContent = await fileSystem.readFilePromise(
+    appDirectory.customizedAppDataFile
+  );
   return JSON.parse(appDataFileContent);
 };
 
-const mergeAndSetCustomizedAppDataObjToFilePromise = async (objToMerge) => {
+const mergeAndSetCustomizedAppDataObjToFilePromise = async objToMerge => {
   let existingObj = {};
   try {
     existingObj = await getCustomizedAppDataObjFromFilePromise();
@@ -899,8 +955,11 @@ const mergeAndSetCustomizedAppDataObjToFilePromise = async (objToMerge) => {
   }
   const mergedObj = shallowMergeObjects(existingObj, objToMerge);
   const mergedObjStr = jsonStringifyFormatted(mergedObj);
-  await fileSystem.writeFilePromise(appDirectory.customizedAppDataFile, mergedObjStr);
-}
+  await fileSystem.writeFilePromise(
+    appDirectory.customizedAppDataFile,
+    mergedObjStr
+  );
+};
 
 ipcMain.on('getCustomizedAppData', async (event, arg) => {
   try {
@@ -924,7 +983,9 @@ ipcMain.on('getCustomizedAppData', async (event, arg) => {
 
 ipcMain.on('setCustomizedAppData', async (event, arg) => {
   try {
-    await mergeAndSetCustomizedAppDataObjToFilePromise(JSON.parse(arg.appDataObjStr));
+    await mergeAndSetCustomizedAppDataObjToFilePromise(
+      JSON.parse(arg.appDataObjStr)
+    );
     event.sender.send('setCustomizedAppDataResponse', {
       err: null
     });
@@ -946,12 +1007,15 @@ function getEvenIdxOfStr(str) {
   return evenChars.join();
 }
 
-const identityKeySpecialDelimiter = ':::::'
+const identityKeySpecialDelimiter = ':::::';
 
-const encodeIdentityKeyPromise = async (licenseKey) => {
+const encodeIdentityKeyPromise = async licenseKey => {
   const macAddress = await getMacAddressPromiseHelper.one();
-  return licenseKey + identityKeySpecialDelimiter
-    + hashForUniqueId(licenseKey + getEvenIdxOfStr(macAddress));
+  return (
+    licenseKey +
+    identityKeySpecialDelimiter +
+    hashForUniqueId(licenseKey + getEvenIdxOfStr(macAddress))
+  );
 };
 
 const decodeIdentityKeyPromise = async _ => {
@@ -997,7 +1061,9 @@ ipcMain.on('checkIdentity', async (event, arg) => {
 ipcMain.on('setLicenseKey', async (event, arg) => {
   try {
     const licenseKeyInput = arg.licenseKey;
-    const identityKey = licenseKeyInput ? (await encodeIdentityKeyPromise(licenseKeyInput)) : '';
+    const identityKey = licenseKeyInput
+      ? await encodeIdentityKeyPromise(licenseKeyInput)
+      : '';
     await mergeAndSetCustomizedAppDataObjToFilePromise({
       identityKey: identityKey
     });
@@ -1017,7 +1083,7 @@ ipcMain.on('setLicenseKey', async (event, arg) => {
 
 ipcMain.on('saveRaw360Capture', async (event, arg) => {
   // use let because I will have to use tmpImg in finally block
-  let tmpImgFilePath;  
+  let tmpImgFilePath;
   const imgBase64Str = arg.imgBase64Str;
 
   try {
@@ -1048,16 +1114,16 @@ ipcMain.on('saveRaw360Capture', async (event, arg) => {
       err: err.toString()
     });
   } finally {
-  //   if (tmpImgFilePath) {
-  //     const tmpImgDirPath = myPath.dirname(tmpImgFilePath);
-  //     fileSystem.myDelete(tmpImgDirPath, (err) => {
-  //       if (err) { 
-  //         // silence error
-  //         console.error('saveRaw360Capture deleting temp image Error:');
-  //         console.error(err);
-  //       }
-  //     });
-  //   }
+    //   if (tmpImgFilePath) {
+    //     const tmpImgDirPath = myPath.dirname(tmpImgFilePath);
+    //     fileSystem.myDelete(tmpImgDirPath, (err) => {
+    //       if (err) {
+    //         // silence error
+    //         console.error('saveRaw360Capture deleting temp image Error:');
+    //         console.error(err);
+    //       }
+    //     });
+    //   }
   }
 });
 
@@ -1079,31 +1145,43 @@ ipcMain.on('saveRaw360CaptureForVideo', async (event, arg) => {
   const isLastFrame = currentFrame === totalFrame;
 
   try {
-    tmpImgFilePath = await write360ImageAsPartOfVideoToTempPromise(videoUuid, currentFrame, imgBase64Str);
+    tmpImgFilePath = await write360ImageAsPartOfVideoToTempPromise(
+      videoUuid,
+      currentFrame,
+      imgBase64Str
+    );
 
     if (isLastFrame) {
-      await convertTempImageSequenceToVideoPromise(videoUuid, fps);
+      const outputVideoTempPath = await convertTempImageSequenceToVideoPromise(
+        videoUuid,
+        fps
+      );
+
+      const filePathToSave = await save360VideoDialogPromise();
+
+      if (!filePathToSave) {
+        event.sender.send('saveRaw360CaptureForVideoResponse', {
+          err: null,
+          data: null
+        });
+        return;
+      }
+
+      await fileSystem.renamePromise(outputVideoTempPath, filePathToSave);
+      event.sender.send('saveRaw360CaptureForVideoResponse', {
+        err: null,
+        data: {
+          filePath: filePathToSave
+        }
+      });
+    } else {
+      event.sender.send('saveRaw360CaptureForVideoResponse', {
+        err: null,
+        data: {
+          filePath: tmpImgFilePath
+        }
+      });
     }
-
-    // const filePathToSave = await save360ImageDialogPromise();
-
-    // console.log('tmpImgFilePath:', tmpImgFilePath);
-
-    // if (!filePathToSave) {
-    //   event.sender.send('saveRaw360CaptureForVideoResponse', {
-    //     err: null,
-    //     data: null
-    //   });
-    //   return;
-    // }
-
-    // await fileSystem.renamePromise(tmpImgFilePath, filePathToSave);
-    // event.sender.send('saveRaw360CaptureForVideoResponse', {
-    //   err: null,
-    //   data: {
-    //     filePath: filePathToSave
-    //   }
-    // });
   } catch (err) {
     console.error('saveRaw360CaptureForVideo Error:');
     console.error(err);
@@ -1114,7 +1192,7 @@ ipcMain.on('saveRaw360CaptureForVideo', async (event, arg) => {
     // if (tmpImgFilePath) {
     //   const tmpImgDirPath = myPath.dirname(tmpImgFilePath);
     //   fileSystem.myDelete(tmpImgDirPath, (err) => {
-    //     if (err) { 
+    //     if (err) {
     //       // silence error
     //       console.error('saveRaw360Capture deleting temp image Error:');
     //       console.error(err);
@@ -1126,13 +1204,12 @@ ipcMain.on('saveRaw360CaptureForVideo', async (event, arg) => {
 
 /* end of ipc main event listeners */
 
-
-/* 
+/*
  * doing a cleanup action just before Node.js exits
- * https://stackoverflow.com/questions/14031763/doing-a-cleanup-action-just-before-node-js-exits 
+ * https://stackoverflow.com/questions/14031763/doing-a-cleanup-action-just-before-node-js-exits
  */
 
-function exitHandler(options, exitCode) {    
+function exitHandler(options, exitCode) {
   if (options.cleanup) {
     console.log('electron-main exitHandler: cleanup');
     closeServer();
@@ -1179,10 +1256,19 @@ process.on('SIGUSR2', _ => {
 // https://stackoverflow.com/questions/40867345/catch-all-uncaughtexception-for-node-js-app
 process
   .on('unhandledRejection', (reason, p) => {
-    console.error('electron-main on unhandledRejection:', reason, 'Unhandled Rejection at Promise', p);
+    console.error(
+      'electron-main on unhandledRejection:',
+      reason,
+      'Unhandled Rejection at Promise',
+      p
+    );
   })
   .on('uncaughtException', err => {
-    console.error('electron-main on uncaughtException:', err, 'Uncaught Exception thrown');
+    console.error(
+      'electron-main on uncaughtException:',
+      err,
+      'Uncaught Exception thrown'
+    );
     process.exit(1);
   });
 

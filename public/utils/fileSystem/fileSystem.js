@@ -3,7 +3,7 @@
 const rimraf = require('rimraf');
 const fx = require('./mkdir-recursive');
 const ncp = require('ncp').ncp;
-const {map} = require('p-iteration');
+const { map } = require('p-iteration');
 
 const myPath = require('./myPath');
 
@@ -12,7 +12,10 @@ const CustomedFileStats = require('./CustomedFileStats');
 const toBase64Str = require('../base64/toBase64Str');
 const fromBase64Str = require('../base64/fromBase64Str');
 
-const {isFunction, invokeIfIsFunction} = require('../variableType/isFunction');
+const {
+  isFunction,
+  invokeIfIsFunction
+} = require('../variableType/isFunction');
 
 // https://github.com/electron/asar
 // http://www.tc4shell.com/en/7zip/asar/
@@ -22,22 +25,21 @@ const {isFunction, invokeIfIsFunction} = require('../variableType/isFunction');
 const asar = require('asar');
 
 const fs = require('fs');
-const {promisify} = require('util');
-
+const { promisify } = require('util');
 
 /* from node.js fs implementation */
 
 // https://github.com/nodejs/node/blob/6e56771f2a9707ddf769358a4338224296a6b5fe/lib/fs.js#L1694
-const maybeCallBack = (cb) => {
+const maybeCallBack = cb => {
   if (isFunction(cb)) {
     return cb;
   }
 
   //throw new ERR_INVALID_CALLBACK();
   throw new Error(`Callback: '${cb}' is not a function.`);
-}
+};
 
-const assertEncoding = (encoding) => {
+const assertEncoding = encoding => {
   if (encoding && !Buffer.isEncoding(encoding)) {
     //throw new ERR_INVALID_OPT_VALUE_ENCODING(encoding);
     throw new Error(`Invalid opt value encoding: ${encoding}`);
@@ -45,8 +47,7 @@ const assertEncoding = (encoding) => {
 };
 
 const getOptions = (options, defaultOptions) => {
-  if (options === null || options === undefined ||
-      isFunction(options)) {
+  if (options === null || options === undefined || isFunction(options)) {
     return defaultOptions;
   }
 
@@ -56,7 +57,9 @@ const getOptions = (options, defaultOptions) => {
     options = defaultOptions;
   } else if (typeof options !== 'object') {
     //throw new ERR_INVALID_ARG_TYPE('options', ['string', 'Object'], options);
-    throw new Error(`Invalid argument type: 'options: ${options}' should be of one of the types: 'string', 'Object'.`);
+    throw new Error(
+      `Invalid argument type: 'options: ${options}' should be of one of the types: 'string', 'Object'.`
+    );
   }
 
   if (options.encoding !== 'buffer') {
@@ -64,10 +67,9 @@ const getOptions = (options, defaultOptions) => {
   }
 
   return options;
-}
+};
 
 /* end of from node.js fs implementation */
-
 
 /* error handling */
 
@@ -94,7 +96,6 @@ const handleGeneralErrAndData = (callBack, err, data) => {
 
 /* end of error handling */
 
-
 /* file api */
 
 //const useFileHandle = (filePath, )
@@ -109,12 +110,12 @@ const handleGeneralErrAndData = (callBack, err, data) => {
  */
 // https://nodejs.org/api/fs.html#fs_fs_access_path_mode_callback
 const exists = (filePath, callBack) => {
-  fs.access(filePath, fs.constants.F_OK, (err) => {
-    callBack(null, !Boolean(err));  // would throw error if callBack is undefined
+  fs.access(filePath, fs.constants.F_OK, err => {
+    callBack(null, !Boolean(err)); // would throw error if callBack is undefined
   });
 };
 
-const existsSync = (filePath) => {
+const existsSync = filePath => {
   return fs.existsSync(filePath);
 };
 
@@ -122,17 +123,19 @@ const existsPromise = promisify(exists);
 
 // for performance reasons
 const writeFileAssumingDestDirExists = (filePath, content, callBack) => {
-  fs.writeFile(filePath, content, (err) => {
+  fs.writeFile(filePath, content, err => {
     handleGeneralErr(callBack, err);
   });
-}
+};
 
 // for performance reasons
 const writeFileAssumingDestDirExistsSync = (filePath, content) => {
   fs.writeFileSync(filePath, content);
-}
+};
 
-const writeFileAssumingDestDirExistsPromise = promisify(writeFileAssumingDestDirExists);
+const writeFileAssumingDestDirExistsPromise = promisify(
+  writeFileAssumingDestDirExists
+);
 
 /**
  * writeFile would create any parent directories in filePath if not exist.
@@ -143,20 +146,22 @@ const writeFileAssumingDestDirExistsPromise = promisify(writeFileAssumingDestDir
 const writeFile = (filePath, content, callBack) => {
   const directoriesStr = myPath.dirname(filePath);
   const writeFileCallBack = () => {
-    fs.writeFile(filePath, content, (err) => {
+    fs.writeFile(filePath, content, err => {
       handleGeneralErr(callBack, err);
     });
   };
   exists(directoriesStr, (_, isExists) => {
-    if (!isExists) {  // directory does not exist
-      createDirectoryIfNotExists(directoriesStr, (err) => {
+    if (!isExists) {
+      // directory does not exist
+      createDirectoryIfNotExists(directoriesStr, err => {
         if (err) {
           handleGeneralErr(callBack, err);
           return;
         }
         writeFileCallBack();
       });
-    } else {  // directory exists
+    } else {
+      // directory exists
       writeFileCallBack();
     }
   });
@@ -172,31 +177,33 @@ const writeFileSync = (filePath, content) => {
 
 const writeFilePromise = promisify(writeFile);
 
-const createWriteStream = (outputPath) => {
+const createWriteStream = outputPath => {
   return fs.createWriteStream(outputPath);
 };
 
 const appendFile = (filePath, content, callBack) => {
   const directoriesStr = myPath.dirname(filePath);
   const appendFileCallBack = () => {
-    fs.appendFile(filePath, content, (err) => {
+    fs.appendFile(filePath, content, err => {
       handleGeneralErr(callBack, err);
     });
   };
   exists(directoriesStr, (_, isExists) => {
-    if (!isExists) {  // directory does not exist
-      createDirectoryIfNotExists(directoriesStr, (err) => {
+    if (!isExists) {
+      // directory does not exist
+      createDirectoryIfNotExists(directoriesStr, err => {
         if (err) {
           handleGeneralErr(callBack, err);
           return;
         }
         appendFileCallBack();
       });
-    } else {  // directory exists
+    } else {
+      // directory exists
       appendFileCallBack();
     }
   });
-}
+};
 
 const appendFileSync = (filePath, content) => {
   const directoriesStr = myPath.dirname(filePath);
@@ -204,13 +211,26 @@ const appendFileSync = (filePath, content) => {
     createDirectoryIfNotExistsSync(directoriesStr);
   }
   fs.appendFileSync(filePath, content);
-}
+};
 
 const appendFilePromise = promisify(appendFile);
 
 const rename = (oldPath, newPath, callBack) => {
-  fs.rename(oldPath, newPath, (err) => {
-    handleGeneralErr(callBack, err);
+  fs.rename(oldPath, newPath, renameErr => {
+    if (renameErr && renameErr.code === 'EXDEV') {
+      // https://stackoverflow.com/questions/43206198/what-does-the-exdev-cross-device-link-not-permitted-error-mean
+      copyFile(oldPath, newPath, copyFileErr => {
+        if (copyFileErr) {
+          handleGeneralErr(callBack, copyFileErr);
+          return;
+        }
+        myDelete(oldPath, myDeleteErr => {
+          handleGeneralErr(callBack, myDeleteErr);
+        });
+      });
+    } else {
+      handleGeneralErr(callBack, renameErr);
+    }
   });
 };
 
@@ -241,7 +261,7 @@ const readFileSync = (filePath, options) => {
 
 const readFilePromise = promisify(readFile);
 
-const createReadStream = (filePath) => {
+const createReadStream = filePath => {
   return fs.createReadStream(filePath);
 };
 
@@ -252,10 +272,10 @@ const copyFileAssumingDestDirExists = (src, dest, callBack) => {
     return;
   }
 
-  fs.copyFile(src, dest, (err) => {
+  fs.copyFile(src, dest, err => {
     handleGeneralErr(callBack, err);
   });
-}
+};
 
 // for performance reasons
 const copyFileAssumingDestDirExistsSync = (src, dest) => {
@@ -264,9 +284,11 @@ const copyFileAssumingDestDirExistsSync = (src, dest) => {
   }
 
   fs.copyFileSync(src, dest);
-}
+};
 
-const copyFileAssumingDestDirExistsPromise = promisify(copyFileAssumingDestDirExists);
+const copyFileAssumingDestDirExistsPromise = promisify(
+  copyFileAssumingDestDirExists
+);
 
 /**
  * copyFile and copyFileSync is structurally similar to writeFile and writeFileSync
@@ -281,20 +303,22 @@ const copyFile = (src, dest, callBack) => {
 
   const destDirectoriesStr = myPath.dirname(dest);
   const copyFileCallBack = () => {
-    fs.copyFile(src, dest, (err) => {
+    fs.copyFile(src, dest, err => {
       handleGeneralErr(callBack, err);
     });
   };
   exists(destDirectoriesStr, (_, isExists) => {
-    if (!isExists) {  // directory does not exist
-      createDirectoryIfNotExists(destDirectoriesStr, (err) => {
+    if (!isExists) {
+      // directory does not exist
+      createDirectoryIfNotExists(destDirectoriesStr, err => {
         if (err) {
           handleGeneralErr(callBack, err);
           return;
         }
         copyFileCallBack();
       });
-    } else {  // directory exists
+    } else {
+      // directory exists
       copyFileCallBack();
     }
   });
@@ -316,13 +340,12 @@ const copyFilePromise = promisify(copyFile);
 
 // most powerful
 const copy = (src, dest, callBack) => {
-  ncp(src, dest, (err) => {
+  ncp(src, dest, err => {
     handleGeneralErr(callBack, err);
   });
-}
+};
 
 const copyPromise = promisify(copy);
-
 
 /**
  * Note:
@@ -339,7 +362,7 @@ const stat = (filePath, callBack) => {
   });
 };
 
-const statSync = (filePath) => {
+const statSync = filePath => {
   const statObj = fs.statSync(filePath);
   return new CustomedFileStats(statObj, filePath);
 };
@@ -353,10 +376,10 @@ const isDirectory = (filePath, callBack) => {
       return;
     }
     handleGeneralErrAndData(callBack, null, stats.isDirectory());
-  })
+  });
 };
 
-const isDirectorySync = (filePath) => {
+const isDirectorySync = filePath => {
   return fs.statSync(filePath).isDirectory();
 };
 
@@ -369,30 +392,28 @@ const base64Encode = (filePath, callBack) => {
 };
 
 // https://stackoverflow.com/questions/24523532/how-do-i-convert-an-image-to-a-base64-encoded-data-url-in-sails-js-or-generally
-const base64EncodeSync = (filePath) => {
+const base64EncodeSync = filePath => {
   // read binary data
   const data = readFileSync(filePath);
   // convert binary data to base64 encoded string
   return toBase64Str(data);
-}
+};
 
 const base64EncodePromise = promisify(base64Encode);
 
 const base64Decode = (locationToSaveFile, encodedStr, callBack) => {
-  writeFile(locationToSaveFile,
-    fromBase64Str(encodedStr),
-    (err) => { handleGeneralErr(callBack, err); });
+  writeFile(locationToSaveFile, fromBase64Str(encodedStr), err => {
+    handleGeneralErr(callBack, err);
+  });
 };
 
 const base64DecodeSync = (locationToSaveFile, encodedStr) => {
-  writeFileSync(locationToSaveFile,
-    fromBase64Str(encodedStr));
+  writeFileSync(locationToSaveFile, fromBase64Str(encodedStr));
 };
 
 const base64DecodePromise = promisify(base64Decode);
 
 /* end of file api */
-
 
 /* asar - Electron Archive https://github.com/electron/asar/blob/master/lib/asar.js */
 
@@ -405,20 +426,29 @@ const createPackage = (src, dest, callBack) => {
 
 const createPackagePromise = promisify(createPackage);
 
-const createPackageWithTransformOption = (src, dest, transformFunc, callBack) => {
+const createPackageWithTransformOption = (
+  src,
+  dest,
+  transformFunc,
+  callBack
+) => {
   createPackageWithOptions(src, dest, { transform: transformFunc }, callBack);
 };
 
-const createPackageWithTransformOptionPromise = promisify(createPackageWithTransformOption);
+const createPackageWithTransformOptionPromise = promisify(
+  createPackageWithTransformOption
+);
 
 // overwrite existing dest
 const createPackageWithOptions = (src, dest, options, callBack) => {
   //console.log(asar);
-  asar.createPackageWithOptions(src, dest, options, (err) => {
+  asar.createPackageWithOptions(src, dest, options, err => {
     const isSuccess = !err;
 
     if (isSuccess) {
-      console.log(`fileSystem - createPackageWithOptions: ${src} packaged to ${dest}`);
+      console.log(
+        `fileSystem - createPackageWithOptions: ${src} packaged to ${dest}`
+      );
     }
 
     handleGeneralErr(callBack, err);
@@ -450,7 +480,6 @@ const extractAll = (archive, dest) => {
 
 /* end of asar - Electron Archive */
 
-
 /* directory api */
 
 // somehow this is not working
@@ -470,29 +499,31 @@ const extractAll = (archive, dest) => {
 
 // use fx instead of fs
 const mkdir = (dirPath, callBack) => {
-  fx.mkdir(fs, myPath.path, dirPath, (err) => {
+  fx.mkdir(fs, myPath.path, dirPath, err => {
     handleGeneralErr(callBack, err);
   });
 };
 
-const mkdirSync = (dirPath) => {
+const mkdirSync = dirPath => {
   fx.mkdirSync(fs, myPath.path, dirPath);
-}
+};
 
 const createDirectoryIfNotExists = (dirPath, callBack) => {
   exists(dirPath, (_, isExists) => {
-    if (!isExists) {  // directory does not exist
-      mkdir(dirPath, (mkDirErr) => {
+    if (!isExists) {
+      // directory does not exist
+      mkdir(dirPath, mkDirErr => {
         handleGeneralErr(callBack, mkDirErr);
       });
-    } else {  // directory exists
+    } else {
+      // directory exists
       passbackControlToCallBack(callBack);
     }
-  })
+  });
 };
 
 // https://stackoverflow.com/questions/21194934/node-how-to-create-a-directory-if-doesnt-exist
-const createDirectoryIfNotExistsSync = (dirPath) => {
+const createDirectoryIfNotExistsSync = dirPath => {
   if (!existsSync(dirPath)) {
     mkdirSync(dirPath);
   }
@@ -502,24 +533,25 @@ const createDirectoryIfNotExistsPromise = promisify(createDirectoryIfNotExists);
 
 // https://askubuntu.com/questions/517329/overwrite-an-existing-directory
 const createAndOverwriteDirectoryIfExists = (dirPath, callBack) => {
-  myDelete(dirPath, (err) => {
+  myDelete(dirPath, err => {
     if (err) {
       handleGeneralErr(callBack, err);
     } else {
-      mkdir(dirPath, (err) => {
+      mkdir(dirPath, err => {
         handleGeneralErr(callBack, err);
       });
     }
   });
-}
+};
 
-const createAndOverwriteDirectoryIfExistsSync = (dirPath) => {
+const createAndOverwriteDirectoryIfExistsSync = dirPath => {
   myDeleteSync(dirPath);
   mkdirSync(dirPath);
-}
+};
 
-const createAndOverwriteDirectoryIfExistsPromise = promisify(createAndOverwriteDirectoryIfExists);
-
+const createAndOverwriteDirectoryIfExistsPromise = promisify(
+  createAndOverwriteDirectoryIfExists
+);
 
 /**
  *  Note:
@@ -532,14 +564,18 @@ const readdir = (dirPath, callBack) => {
       return;
     }
 
-    const absolutePaths = fileNames.map(fileName => myPath.join(dirPath, fileName));
+    const absolutePaths = fileNames.map(fileName =>
+      myPath.join(dirPath, fileName)
+    );
     handleGeneralErrAndData(callBack, null, absolutePaths);
   });
 };
 
-const readdirSync = (dirPath) => {
-  return fs.readdirSync(dirPath).map(fileName => myPath.join(dirPath, fileName));
-}
+const readdirSync = dirPath => {
+  return fs
+    .readdirSync(dirPath)
+    .map(fileName => myPath.join(dirPath, fileName));
+};
 
 const readdirPromise = promisify(readdir);
 
@@ -550,20 +586,20 @@ const readdirPromise = promisify(readdir);
  * https://stackoverflow.com/questions/11659054/how-to-access-name-of-file-within-fs-callback-methods
  * https://nodejs.org/dist/latest-v10.x/docs/api/fs.html#fs_class_fs_stats
  */
-const readdirWithStatPromise = async (dirPath) => {
+const readdirWithStatPromise = async dirPath => {
   const fileNames = await readdirPromise(dirPath);
   if (!Array.isArray(fileNames) || fileNames.length === 0) {
     return [];
   }
 
   const absolutePaths = await readdirPromise(dirPath);
-  
-  const fileStatObjs = await map(absolutePaths, async (fileAbsolutePath) => {
+
+  const fileStatObjs = await map(absolutePaths, async fileAbsolutePath => {
     return await statPromise(fileAbsolutePath);
   });
 
   return fileStatObjs;
-}
+};
 
 // https://stackoverflow.com/questions/44199883/how-do-i-get-a-list-of-files-with-specific-file-extension-using-node-js
 const readdirWithExtensionFilter = (dirPath, extensionWithDot, callBack) => {
@@ -574,15 +610,18 @@ const readdirWithExtensionFilter = (dirPath, extensionWithDot, callBack) => {
     }
 
     const extensionWithDotLowerCase = extensionWithDot.toLowerCase();
-    const absolutePathsFiltered = fileNames.map(fileName => myPath.getFileExtensionWithLeadingDot(fileName).toLowerCase() === extensionWithDotLowerCase);
+    const absolutePathsFiltered = fileNames.map(
+      fileName =>
+        myPath.getFileExtensionWithLeadingDot(fileName).toLowerCase() ===
+        extensionWithDotLowerCase
+    );
     handleGeneralErrAndData(callBack, null, absolutePathsFiltered);
   });
-}
+};
 
 const readdirWithExtensionFilterPromise = promisify(readdirWithExtensionFilter);
 
 /* end of directory api */
-
 
 /**
  * rimraf api
@@ -590,25 +629,27 @@ const readdirWithExtensionFilterPromise = promisify(readdirWithExtensionFilter);
  * https://github.com/isaacs/rimraf
  */
 
-const defaultMyDeleteOptions = Object.assign({
-  maxBusyTries: 15
-} , fs);
+const defaultMyDeleteOptions = Object.assign(
+  {
+    maxBusyTries: 15
+  },
+  fs
+);
 
 const myDelete = (filePath, callBack) => {
-  rimraf(filePath, defaultMyDeleteOptions, (err) => {
+  rimraf(filePath, defaultMyDeleteOptions, err => {
     //console.log('file to delete: ' + filePath);
     handleGeneralErr(callBack, err);
   });
 };
 
-const myDeleteSync = (filePath) => {
+const myDeleteSync = filePath => {
   rimraf.sync(filePath, defaultMyDeleteOptions);
-}
+};
 
 const myDeletePromise = promisify(myDelete);
 
 /* end of del api */
-
 
 module.exports = {
   // error handling
@@ -643,7 +684,7 @@ module.exports = {
   copyFile,
   copyFileSync,
   copyFilePromise,
-  copy,  // most powerful
+  copy, // most powerful
   copyPromise,
   //deleteFileSafe,
   //deleteFileSafeSync,
@@ -691,5 +732,5 @@ module.exports = {
   // rimraf api
   myDelete,
   myDeleteSync,
-  myDeletePromise,
+  myDeletePromise
 };

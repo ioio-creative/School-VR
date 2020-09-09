@@ -1,15 +1,22 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 // import SystemPanel from 'containers/aframeEditor/homePage/systemPanel';
-import {withRouter, Prompt} from 'react-router-dom';
+import { withRouter, Prompt } from 'react-router-dom';
 
 import saveAs from 'utils/fileSaver/saveAs';
-import {formatDateTimeForFileName} from 'utils/dateTime/formatDateTime';
+import { formatDateTimeForFileName } from 'utils/dateTime/formatDateTime';
 
-import {withSceneContext, capture360OutputResolutionTypes} from 'globals/contexts/sceneContext';
-import {LanguageContextConsumer, getLocalizedMessage} from 'globals/contexts/locale/languageContext';
+import {
+  withSceneContext,
+  capture360OutputResolutionTypes
+} from 'globals/contexts/sceneContext';
+import {
+  LanguageContextConsumer,
+  getLocalizedMessage
+} from 'globals/contexts/locale/languageContext';
 import config from 'globals/config';
 
 import MenuComponent from 'components/menuComponent';
+import DefaultLoading from 'components/loading/defaultLoading';
 
 import ButtonsPanel from 'containers/aframeEditor/homePage/buttonsPanel';
 import AFramePanel from 'containers/aframeEditor/homePage/aFramePanel';
@@ -32,13 +39,12 @@ import dataUrlToBlob from 'utils/blobs/dataUrlToBlob';
 import handleErrorWithUiDefault from 'utils/errorHandling/handleErrorWithUiDefault';
 import ipcHelper from 'utils/ipc/ipcHelper';
 
-import {getSearchObjectFromHistory} from 'utils/queryString/getSearchObject';
+import { getSearchObjectFromHistory } from 'utils/queryString/getSearchObject';
 import getProjectFilePathFromSearchObject from 'utils/queryString/getProjectFilePathFromSearchObject';
 
 import './editorPage.css';
 import fileHelper from 'utils/fileHelper/fileHelper';
 import PreviewPanel from 'containers/aframeEditor/homePage/previewPanel';
-
 
 const Events = require('vendor/Events.js');
 const uuid = require('uuid/v1');
@@ -47,15 +53,14 @@ const uuid = require('uuid/v1');
 // const validator = new jsonSchemaValidator();
 // const schema = require('schema/aframe_schema_20181108.json');
 
-
 function EditorPageMenu(props) {
   const {
-    sceneContext,       
-    
+    sceneContext,
+
     handleNewProjectButtonClick,
     handleOpenProjectButtonClick,
     handleSaveProjectButtonClick,
-    handleSaveAsProjectButtonClick,    
+    handleSaveAsProjectButtonClick,
     handleUndoButtonClick,
     handleRedoButtonClick,
 
@@ -63,18 +68,18 @@ function EditorPageMenu(props) {
     handleCapture360_2kImageClick,
     handleCapture360_4kImageClick,
     handleCapture360_2kVideoClick,
-    handleCapture360_4kVideoClick,
-  } = props;  
+    handleCapture360_4kVideoClick
+  } = props;
 
   const isEditorOpened = sceneContext.getIsEditorOpened();
 
   const menuButtons = [
     {
-      labelId: "Menu.FileLabel",
+      labelId: 'Menu.FileLabel',
       // onClick: _=> { console.log('file') },
       children: [
         {
-          labelId: "Menu.File.HomeLabel",
+          labelId: 'Menu.File.HomeLabel',
           disabled: false,
           methodNameToInvoke: 'goToHomePage'
         },
@@ -82,7 +87,7 @@ function EditorPageMenu(props) {
           labelId: '-'
         },
         {
-          labelId: "Menu.File.NewLabel",
+          labelId: 'Menu.File.NewLabel',
           disabled: false,
           onClick: handleNewProjectButtonClick
         },
@@ -90,17 +95,17 @@ function EditorPageMenu(props) {
           labelId: '-'
         },
         {
-          labelId: "Menu.File.OpenLabel",
+          labelId: 'Menu.File.OpenLabel',
           disabled: false,
           onClick: handleOpenProjectButtonClick
         },
         {
-          labelId: "Menu.File.SaveLabel",
+          labelId: 'Menu.File.SaveLabel',
           disabled: false,
           onClick: handleSaveProjectButtonClick
         },
         {
-          labelId: "Menu.File.SaveAsLabel",
+          labelId: 'Menu.File.SaveAsLabel',
           disabled: false,
           onClick: handleSaveAsProjectButtonClick
         },
@@ -108,7 +113,7 @@ function EditorPageMenu(props) {
           labelId: '-'
         },
         {
-          labelId: "Menu.File.ExitLabel",
+          labelId: 'Menu.File.ExitLabel',
           disabled: false,
           methodNameToInvoke: 'closeApp'
         }
@@ -118,54 +123,54 @@ function EditorPageMenu(props) {
 
   if (isEditorOpened) {
     menuButtons.push({
-      labelId: "Menu.EditLabel",
+      labelId: 'Menu.EditLabel',
       children: [
         {
-          labelId: "Menu.Edit.UndoLabel",
+          labelId: 'Menu.Edit.UndoLabel',
           disabled: !sceneContext.getUndoQueueLength(),
           onClick: handleUndoButtonClick
         },
         {
-          labelId: "Menu.Edit.RedoLabel",
+          labelId: 'Menu.Edit.RedoLabel',
           disabled: !sceneContext.getRedoQueueLength(),
           onClick: handleRedoButtonClick
         }
       ]
     });
   }
-  
+
   if (isEditorOpened) {
     menuButtons.push({
-      labelId: "Menu.CaptureImageLabel",
+      labelId: 'Menu.CaptureImageLabel',
       children: [
         {
-          labelId: "Menu.CaptureImage.Normal",          
-          onClick: handleCaptureNormalImageClick          
+          labelId: 'Menu.CaptureImage.Normal',
+          onClick: handleCaptureNormalImageClick
         },
         {
-          labelId: "Menu.CaptureImage.360_2k",          
+          labelId: 'Menu.CaptureImage.360_2k',
           onClick: handleCapture360_2kImageClick
         },
-        // {
-        //   labelId: "Menu.CaptureImage.360_4k",          
-        //   onClick: handleCapture360_4kImageClick
-        // }
+        {
+          labelId: 'Menu.CaptureImage.360_4k',
+          onClick: handleCapture360_4kImageClick
+        }
       ]
     });
 
-    // menuButtons.push({
-    //   labelId: "Menu.CaptureVideoLabel",
-    //   children: [
-    //     {
-    //       labelId: "Menu.CaptureVideo.360_2k",          
-    //       onClick: handleCapture360_2kVideoClick
-    //     },
-    //     {
-    //       labelId: "Menu.CaptureVideo.360_4k",          
-    //       onClick: handleCapture360_4kVideoClick
-    //     }
-    //   ]
-    // });
+    menuButtons.push({
+      labelId: 'Menu.CaptureVideoLabel',
+      children: [
+        {
+          labelId: 'Menu.CaptureVideo.360_2k',
+          onClick: handleCapture360_2kVideoClick
+        }
+        // {
+        //   labelId: "Menu.CaptureVideo.360_4k",
+        //   onClick: handleCapture360_4kVideoClick
+        // }
+      ]
+    });
   }
   return (
     <MenuComponent
@@ -174,7 +179,6 @@ function EditorPageMenu(props) {
     />
   );
 }
-
 
 class EditorPage extends Component {
   constructor(props) {
@@ -186,11 +190,14 @@ class EditorPage extends Component {
     // state
     this.state = {
       entitiesList: [],
-      loadedProjectFilePath: ''
+      loadedProjectFilePath: '',
+      isLoading: false
     };
 
     // bind methods
     [
+      'setLoading',
+      'unsetLoading',
       'confirmLeaveProject',
       'onEditorLoad',
       'newProject',
@@ -199,24 +206,23 @@ class EditorPage extends Component {
       'saveProjectAs',
       'capture360Image',
       'capture360Video',
-      
+
       'handleNewProjectButtonClick',
       'handleOpenProjectButtonClick',
       'handleSaveProjectButtonClick',
-      'handleSaveAsProjectButtonClick',      
+      'handleSaveAsProjectButtonClick',
       'handleUndoButtonClick',
       'handleRedoButtonClick',
-      
+
       'handleCaptureNormalImageClick',
       'handleCapture360_2kImageClick',
       'handleCapture360_4kImageClick',
       'handleCapture360_2kVideoClick',
-      'handleCapture360_4kVideoClick',            
+      'handleCapture360_4kVideoClick'
     ].forEach(methodName => {
       this[methodName] = this[methodName].bind(this);
     });
   }
-
 
   /* react lifecycles */
 
@@ -239,20 +245,34 @@ class EditorPage extends Component {
 
   /* end of react lifecycles */
 
-
   /* methods */
 
+  setLoading() {
+    this.setState({
+      isLoading: true
+    });
+  }
+
+  unsetLoading() {
+    this.setState({
+      isLoading: false
+    });
+  }
+
   confirmLeaveProject() {
-    const { sceneContext } = this.props;    
-    return sceneContext.isProjectSaved || window.confirm(getLocalizedMessage('Prompt.UnsavedWorkMessage'));    
-  }  
+    const { sceneContext } = this.props;
+    return (
+      sceneContext.isProjectSaved ||
+      window.confirm(getLocalizedMessage('Prompt.UnsavedWorkMessage'))
+    );
+  }
 
   onEditorLoad(editor) {
     // load project
     const searchObj = getSearchObjectFromHistory(this.props.history);
     const projectFilePathToLoad = getProjectFilePathFromSearchObject(searchObj);
 
-    console.log("project path to load:", projectFilePathToLoad);
+    console.log('project path to load:', projectFilePathToLoad);
 
     if (!projectFilePathToLoad) {
       this.newProject();
@@ -261,7 +281,7 @@ class EditorPage extends Component {
     }
   }
 
-  newProject() {    
+  newProject() {
     // test open file with user defined extension
     // const fileDialog = document.createElement('input');
     // fileDialog.type = 'file';
@@ -299,22 +319,21 @@ class EditorPage extends Component {
     }
 
     const sceneContext = this.props.sceneContext;
-    let {entitiesList, assetsList} = sceneContext.saveProject();
+    let { entitiesList, assetsList } = sceneContext.saveProject();
     //const projectName = fileHelper.getFileNameWithoutExtension(projectFilePath);
     //console.log(projectName, entitiesList, assetsList);
     // TODO:
     //entitiesList.projectName = projectName;
-    ipcHelper.saveProject(projectFilePath, entitiesList, assetsList, (err) => {
+    ipcHelper.saveProject(projectFilePath, entitiesList, assetsList, err => {
       if (err) {
         handleErrorWithUiDefault(err);
         return;
       }
 
-      const {
-        loadedProjectFilePath
-      } = this.state;
+      const { loadedProjectFilePath } = this.state;
 
-      if (loadedProjectFilePath !== projectFilePath) {  // save as case
+      if (loadedProjectFilePath !== projectFilePath) {
+        // save as case
         // TODO: is the following good enough?
 
         /**
@@ -332,12 +351,18 @@ class EditorPage extends Component {
           loadedProjectFilePath: projectFilePath
         });
 
-        const projectName = fileHelper.getFileNameWithoutExtension(projectFilePath);
+        const projectName = fileHelper.getFileNameWithoutExtension(
+          projectFilePath
+        );
         sceneContext.setProjectName(projectName);
       }
 
-      const projectName = fileHelper.getFileNameWithoutExtension(projectFilePath);
-      alert(`${getLocalizedMessage('Alert.ProjectSavedMessage')}\n${projectName}`);
+      const projectName = fileHelper.getFileNameWithoutExtension(
+        projectFilePath
+      );
+      alert(
+        `${getLocalizedMessage('Alert.ProjectSavedMessage')}\n${projectName}`
+      );
     });
   }
 
@@ -354,34 +379,63 @@ class EditorPage extends Component {
   }
 
   capture360Image(resolutionType) {
-    const imgBase64Str = this.props.sceneContext.captureEquirectangularImage(resolutionType);        
+    this.setLoading();
+    const imgBase64Str = this.props.sceneContext.captureEquirectangularImage(
+      resolutionType
+    );
     ipcHelper.saveRaw360Capture(imgBase64Str, (err, data) => {
+      this.unsetLoading();
       if (err) {
         handleErrorWithUiDefault(err);
         return;
       }
       if (data && data.filePath) {
-        alert(`${getLocalizedMessage('Alert.CaptureSavedMessage')}\n${data.filePath}`);
-      }      
+        alert(
+          `${getLocalizedMessage('Alert.CaptureSavedMessage')}\n${
+            data.filePath
+          }`
+        );
+      }
     });
   }
 
   capture360Video(resolutionType, fps) {
     const vidoeUuid = uuid();
-    this.props.sceneContext.captureEquirectangularVideo(resolutionType, fps, (currentFrame, totalFrame, imgBase64Str) => {
-      ipcHelper.saveRaw360CaptureForVideo(vidoeUuid, fps, currentFrame, totalFrame, imgBase64Str, (err, data) => {
-        if (err) {
-          handleErrorWithUiDefault(err);
-          return;
-        }
-      });
-    });
+    this.props.sceneContext.captureEquirectangularVideo(
+      resolutionType,
+      fps,
+      (currentFrame, totalFrame, imgBase64Str) => {
+        ipcHelper.saveRaw360CaptureForVideo(
+          vidoeUuid,
+          fps,
+          currentFrame,
+          totalFrame,
+          imgBase64Str,
+          (err, data) => {
+            if (err) {
+              handleErrorWithUiDefault(err);
+              return;
+            }
+            if (data && data.filePath) {
+              // last frame
+              if (currentFrame === totalFrame) {
+                alert(
+                  `${getLocalizedMessage('Alert.CaptureSavedMessage')}\n${
+                    data.filePath
+                  }`
+                );
+              }
+            }
+          }
+        );
+      },
+      config.capture360VideoRenderFrameIntervalInMillis
+    );
   }
 
   /* end of methods */
 
-
-  /* event handlers */  
+  /* event handlers */
 
   handleNewProjectButtonClick(event) {
     if (this.confirmLeaveProject()) {
@@ -396,39 +450,42 @@ class EditorPage extends Component {
           handleErrorWithUiDefault(err);
           return;
         }
-  
+
         const filePaths = data.filePaths;
-  
+
         if (!isNonEmptyArray(filePaths)) {
           return;
         }
-  
+
         this.loadProject(filePaths[0]);
       });
-    }    
+    }
   }
 
   handleSaveProjectButtonClick(event) {
-    ipcHelper.isCurrentLoadedProject(this.state.loadedProjectFilePath, (err, data) => {
-      if (err) {
-        handleErrorWithUiDefault(err);
-        return;
-      }
+    ipcHelper.isCurrentLoadedProject(
+      this.state.loadedProjectFilePath,
+      (err, data) => {
+        if (err) {
+          handleErrorWithUiDefault(err);
+          return;
+        }
 
-      const isCurrentLoadedProject = data.isCurrentLoadedProject;
-      if (isCurrentLoadedProject) {
-        this.saveProject(this.state.loadedProjectFilePath);
-      } else {
-        this.saveProjectAs();
+        const isCurrentLoadedProject = data.isCurrentLoadedProject;
+        if (isCurrentLoadedProject) {
+          this.saveProject(this.state.loadedProjectFilePath);
+        } else {
+          this.saveProjectAs();
+        }
       }
-    });
+    );
   }
 
   handleSaveAsProjectButtonClick(event) {
     this.saveProjectAs();
-  }  
+  }
 
-  handleUndoButtonClick(event) {    
+  handleUndoButtonClick(event) {
     this.props.sceneContext.undo();
   }
 
@@ -438,78 +495,97 @@ class EditorPage extends Component {
 
   handleCaptureNormalImageClick(event) {
     const snapshotDataUrl = this.props.sceneContext.takeSnapshot();
-    const snapshotBlob = dataUrlToBlob(snapshotDataUrl);  
-    saveAs(snapshotBlob, `snapShot_${formatDateTimeForFileName(Date.now())}${config.captured360ImageExtension}`);
+    const snapshotBlob = dataUrlToBlob(snapshotDataUrl);
+    saveAs(
+      snapshotBlob,
+      `snapShot_${formatDateTimeForFileName(Date.now())}${
+        config.captured360ImageExtension
+      }`
+    );
   }
 
-  handleCapture360_2kImageClick(event) {    
+  handleCapture360_2kImageClick(event) {
     this.capture360Image(capture360OutputResolutionTypes['2k']);
   }
-  
+
   handleCapture360_4kImageClick(event) {
     this.capture360Image(capture360OutputResolutionTypes['4k']);
   }
 
-  handleCapture360_2kVideoClick(event) {    
-    this.capture360Video(capture360OutputResolutionTypes['2k'], config.captured360VideoFps);
+  handleCapture360_2kVideoClick(event) {
+    this.capture360Video(
+      capture360OutputResolutionTypes['2k'],
+      config.captured360VideoFps
+    );
   }
-  
+
   handleCapture360_4kVideoClick(event) {
-    this.capture360Video(capture360OutputResolutionTypes['4k'], config.captured360VideoFps);
+    this.capture360Video(
+      capture360OutputResolutionTypes['4k'],
+      config.captured360VideoFps
+    );
   }
 
   /* end of event handlers */
 
-
   render() {
-    const {
-      sceneContext
-    } = this.props;
-    const {
-      loadedProjectFilePath
-    } = this.state;
+    const { sceneContext } = this.props;
+    const { loadedProjectFilePath, isLoading } = this.state;
 
     //console.log('sceneContext.isProjectSaved:', sceneContext.isProjectSaved);
 
     return (
       // <SceneContextProvider>
-        <div id="editor" className={sceneContext.editor && sceneContext.editor.opened? 'editing': 'viewing'}>
-          <LanguageContextConsumer render={
-            ({ messages }) => (
+      <div
+        id='editor'
+        className={
+          sceneContext.editor && sceneContext.editor.opened
+            ? 'editing'
+            : 'viewing'
+        }
+      >
+        <div
+          className={`${isLoading ? 'show' : 'hide'} editor-loading-container`}
+        >
+          <DefaultLoading />
+        </div>
+        <div className={`${isLoading ? 'hide' : 'show'}`}>
+          <LanguageContextConsumer
+            render={({ messages }) => (
               <Prompt
                 when={!sceneContext.isProjectSaved}
                 message={messages['Prompt.UnsavedWorkMessage']}
               />
-            )
-          } />
-          {/* <SystemPanel projectName={this.projectName} /> */}          
+            )}
+          />
+          {/* <SystemPanel projectName={this.projectName} /> */}
           <EditorPageMenu
-            sceneContext={sceneContext}                                
-            
+            sceneContext={sceneContext}
             handleNewProjectButtonClick={this.handleNewProjectButtonClick}
             handleOpenProjectButtonClick={this.handleOpenProjectButtonClick}
             handleSaveProjectButtonClick={this.handleSaveProjectButtonClick}
-            handleSaveAsProjectButtonClick={this.handleSaveAsProjectButtonClick}                
+            handleSaveAsProjectButtonClick={this.handleSaveAsProjectButtonClick}
             handleUndoButtonClick={this.handleUndoButtonClick}
             handleRedoButtonClick={this.handleRedoButtonClick}
-
             handleCaptureNormalImageClick={this.handleCaptureNormalImageClick}
             handleCapture360_2kImageClick={this.handleCapture360_2kImageClick}
             handleCapture360_4kImageClick={this.handleCapture360_4kImageClick}
             handleCapture360_2kVideoClick={this.handleCapture360_2kVideoClick}
             handleCapture360_4kVideoClick={this.handleCapture360_4kVideoClick}
-          />            
+          />
           <ButtonsPanel currentLoadedProjectPath={loadedProjectFilePath} />
-          <AFramePanel user-mode="editor" />
-          <SlidesPanel isEditing={sceneContext.editor && sceneContext.editor.opened} />
+          <AFramePanel user-mode='editor' />
+          <SlidesPanel
+            isEditing={sceneContext.editor && sceneContext.editor.opened}
+          />
           <TimelinePanel />
           <InfoPanel />
           <PreviewPanel />
         </div>
+      </div>
       // </SceneContextProvider>
     );
   }
 }
-
 
 export default withSceneContext(withRouter(EditorPage));

@@ -2,6 +2,9 @@
   --defaultFastTransitionDuration: 0.4s;
   --defaultFastTransition: all var(--defaultFastTransitionDuration);
 
+  --defaultSlowTransitionDuration: 2s;
+  --defaultSlowTransition: all var(--defaultSlowTransitionDuration);
+
   --projectTopZIndex: 1;
 
   /* background-image: linear-gradient(190DEG, #2b435e, #0c4a61); */
@@ -10,15 +13,25 @@
   padding-top: 30px;
 }
 
-
 /* general */
 
 #project-list-page .upside-down {
-  transform: rotate(-180DEG);
+  transform: rotate(-180deg);
+}
+
+#project-list-page .hide {
+  opacity: 0;
+  visibility: hidden;
+  transition: var(--defaultSlowTransition);
+}
+
+#project-list-page .show {
+  opacity: 1;
+  visibility: visible;
+  transition: var(--defaultSlowTransition);
 }
 
 /* end of general */
-
 
 #project-list-page .outer-container {
   width: 100%;
@@ -29,7 +42,6 @@
   height: 100%;
   overflow-x: hidden;
 }
-
 
 /* container */
 /* https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.css */
@@ -68,6 +80,8 @@
 
 /* end of container */
 
+#project-list-page .projects-loading-container {
+}
 
 #project-list-page .project-new {
   position: fixed;
@@ -136,24 +150,25 @@
 /*style the arrow inside the select element:*/
 #project-list-page .select-selected:after {
   position: absolute;
-  content: "";
+  content: '';
   top: 17px;
   right: 10px;
   width: 0;
   height: 0;
   border: 6px solid transparent;
-  border-color: #8697AD transparent transparent transparent;
+  border-color: #8697ad transparent transparent transparent;
 }
 
 /*point the arrow upwards when the select box is open (active):*/
 #project-list-page .select-selected.select-arrow-active:after {
-  border-color: transparent transparent #8697AD transparent;
+  border-color: transparent transparent #8697ad transparent;
   top: 10px;
 }
 
 /*style the items (options), including the selected item:*/
-#project-list-page .select-items div,.select-selected {
-  color: #8697AD;
+#project-list-page .select-items div,
+.select-selected {
+  color: #8697ad;
   padding: 8px 16px;
   border: 1px solid transparent;
   /* border-color: transparent transparent rgba(0, 0, 0, 0.1) transparent; */
@@ -179,7 +194,8 @@
   display: none;
 }
 
-#project-list-page .select-items div:hover, .same-as-selected {
+#project-list-page .select-items div:hover,
+.same-as-selected {
   background-color: rgba(0, 0, 0, 0.1);
 }
 /* end of project order select */
@@ -188,20 +204,22 @@
   right: 0;
 }
 
-#project-list-page .project-search input[type="text"] {
+#project-list-page .project-search input[type='text'] {
   border-radius: 50px;
   width: 300px;
   /* height: var(--elementHeight); */
 
   padding: 10px 20px;
   background-color: #253747;
-  color: #FFFFFF;
+  color: #ffffff;
   border: 0;
   -webkit-appearance: none;
-  border-bottom: 1px
+  border-bottom: 1px;
 }
-#project-list-page .project-search input[type="text"]::-webkit-input-placeholder {
-  color: #8697AD;
+#project-list-page
+  .project-search
+  input[type='text']::-webkit-input-placeholder {
+  color: #8697ad;
 }
 
 #project-list-page .project-list {
@@ -240,13 +258,16 @@
   text-decoration: none;
 }
 
-#project-list-page .project-list .project-item.create-new-project .create-new-project-content {
+#project-list-page
+  .project-list
+  .project-item.create-new-project
+  .create-new-project-content {
   width: 72%;
   height: 72%;
   border-radius: 25px;
   cursor: pointer;
-  border: 1px solid #1EBDFF;
-  color: #1EBDFF;
+  border: 1px solid #1ebdff;
+  color: #1ebdff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -257,11 +278,18 @@
   left: 14%;
   transition: all 0.4s;
 }
-#project-list-page .project-list .project-item.create-new-project .create-new-project-content:hover {
+#project-list-page
+  .project-list
+  .project-item.create-new-project
+  .create-new-project-content:hover {
   background-color: #13394a;
 }
 
-#project-list-page .project-list .project-item.create-new-project .create-new-project-content img {
+#project-list-page
+  .project-list
+  .project-item.create-new-project
+  .create-new-project-content
+  img {
   width: 20%;
 }
 
@@ -302,17 +330,16 @@
   width: 100%;
   height: calc(100% - var(--projectImageHeight));
   background-color: #030a10;
-  color: #FFFFFF;
+  color: #ffffff;
   display: flex;
   justify-content: center;
   align-items: center;
   transition: all 0.4s;
 }
 #project-list-page .project-item:hover .project-info-text-container {
-  color: #1EBDFF;
+  color: #1ebdff;
 }
 #project-list-page .project-info-text {
-
 }
 
 #project-list-page .project-name {
@@ -390,7 +417,7 @@
   width: 25%;
   height: 15%;
   border-radius: 50px;
-  background-color: #385EFF;
+  background-color: #385eff;
 }
 #project-list-page .project-options-overlay {
   position: absolute;
@@ -398,7 +425,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0,0,0,0.7);
+  background-color: rgba(0, 0, 0, 0.7);
   opacity: 0;
   visibility: hidden;
   transition: all 0.4s;
@@ -463,11 +490,11 @@
 
 #project-list-page .project-options-detail-item:hover {
   background-color: #04608a;
-  color: #1EBDFF;
+  color: #1ebdff;
 }
 
 #project-list-page .project-edit-container {
-  --projectEditColor: #1EBDFF;
+  --projectEditColor: #1ebdff;
 
   width: 100%;
   height: 100%;

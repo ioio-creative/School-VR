@@ -69,6 +69,7 @@ let config = {
   captured360ImageExtension: '.png',
   captured360VideoExtension: '.mp4',
   captured360VideoFps: 30,
+  capture360VideoRenderFrameIntervalInMillis: 1000,
 
   presentationRecordingVideoExtension: '.webm',
   presentationRecordingVideoFps: 60

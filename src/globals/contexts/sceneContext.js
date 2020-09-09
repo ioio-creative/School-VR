@@ -1,7 +1,7 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import moment from 'moment';
 
-import {jsonCopy} from 'globals/helperfunctions'
+import { jsonCopy } from 'globals/helperfunctions';
 import ABox from 'utils/aframeEditor/aBox';
 import ASphere from 'utils/aframeEditor/aSphere';
 import ATetrahedron from 'utils/aframeEditor/aTetrahedron';
@@ -14,13 +14,13 @@ import AText from 'utils/aframeEditor/aText';
 import ASky from 'utils/aframeEditor/aSky';
 import AVideo from 'utils/aframeEditor/aVideo';
 import ACamera from 'utils/aframeEditor/aCamera';
-import {TimelineMax, TweenMax, Power0} from 'gsap';
+import { TimelineMax, TweenMax, Power0 } from 'gsap';
 
-import {mediaType} from 'globals/config';
-import {getLocalizedMessage} from 'globals/contexts/locale/languageContext';
+import { mediaType } from 'globals/config';
+import { getLocalizedMessage } from 'globals/contexts/locale/languageContext';
 
-import isFunction, {invokeIfIsFunction} from 'utils/variableType/isFunction';
-import {makeVideoSeekableByInjectingMetadataPromise} from 'utils/videos/injectMetaData';
+import isFunction, { invokeIfIsFunction } from 'utils/variableType/isFunction';
+import { makeVideoSeekableByInjectingMetadataPromise } from 'utils/videos/injectMetaData';
 
 //import bytesToBase64 from 'utils/js/uint8ToBase64';
 // This pixel-wise implementation is not as efficient as SceneContextProvider.convertEquirectangularImageDataToBase64Str
@@ -46,7 +46,7 @@ const entityModel = {
   'a-video': AVideo,
   'a-camera': ACamera,
   'a-sky': ASky,
-  'a-navigation': ANavigation,
+  'a-navigation': ANavigation
 };
 
 const capture360OutputResolutionTypeToWidthMap = {
@@ -69,7 +69,7 @@ const SceneContext = React.createContext();
 // const jsonCopy = (json) => JSON.parse(JSON.stringify(json));
 /** seems all SceneData class data will be duplicate once in the contextProvider
  *  so put the data in contextProvider
-*/
+ */
 // class SceneData {
 //   constructor(srcData) {
 //     if (srcData instanceof SceneData) {
@@ -92,7 +92,7 @@ class SceneContextProvider extends Component {
     window.jsonCopy = jsonCopy;
 
     super(props);
-    
+
     this.state = {
       loaded: false,
       sceneData: [],
@@ -117,7 +117,7 @@ class SceneContextProvider extends Component {
       // track isProjectSaved
       isProjectSaved: false,
 
-      isInPresentationRecording: false,
+      isInPresentationRecording: false
     };
 
     this.editor = null;
@@ -128,7 +128,7 @@ class SceneContextProvider extends Component {
     this.recordingTimerHandle = null;
 
     this.cameraRotationBeforeToggle = null;
-    
+
     [
       'setAppName',
       'getAppName',
@@ -151,9 +151,9 @@ class SceneContextProvider extends Component {
       'getCameraEl',
       'getCameraElAttributeObjCopy',
       'getCameraElPositionCopy',
-      'getCameraElRotationCopy',      
+      'getCameraElRotationCopy',
       'setCameraElPosition',
-      'setCameraElRotation',  
+      'setCameraElRotation',
 
       'getEntitiesList',
       'setEntityRotation',
@@ -161,7 +161,7 @@ class SceneContextProvider extends Component {
       'resetEntityRotation',
       'resetCurrentEntityRotation',
       'getCurrentEntity',
-      'getCurrentEntityId',      
+      'getCurrentEntityId',
 
       'copyEntity',
       'addEntity',
@@ -218,12 +218,12 @@ class SceneContextProvider extends Component {
       'captureEquirectangularImageInternal',
       'captureEquirectangularImage',
       'captureEquirectangularVideo',
-            
+
       'handleRecordingTimerEvent',
       'startRecording',
       'stopRecording',
-      
-      'getIsEditorOpened',
+
+      'getIsEditorOpened'
     ].forEach(methodName => {
       this[methodName] = this[methodName].bind(this);
     });
@@ -238,12 +238,12 @@ class SceneContextProvider extends Component {
         this.setState({
           loaded: true,
           editor: obj
-        })
+        });
         // const cameraId = uuid();
         // obj.currentCameraEl.id = cameraId;
         // this.updateCameraEl(obj.currentCameraEl);
       },
-      'objectselected': obj => {
+      objectselected: obj => {
         // console.log(obj);
         if (obj) {
           const currentEntity = this.getCurrentEntity();
@@ -251,19 +251,19 @@ class SceneContextProvider extends Component {
             this.setState({
               entityId: obj.el.id,
               timelineId: null
-            })
+            });
           }
         } else {
           this.setState({
             entityId: null,
             timelineId: null
-          })
+          });
         }
       },
-      'editormodechanged': () => {
+      editormodechanged: () => {
         this.forceUpdate();
       }
-    }
+    };
   }
   componentDidMount() {
     //const self = this;
@@ -288,9 +288,9 @@ class SceneContextProvider extends Component {
       undoQueue
     } = this.state;
 
-    const isUndoQueueChanged = prevState.undoQueue !== undoQueue;    
+    const isUndoQueueChanged = prevState.undoQueue !== undoQueue;
 
-    if (isUndoQueueChanged) {      
+    if (isUndoQueueChanged) {
       this.setState({
         isProjectSaved: false
       });
@@ -311,13 +311,13 @@ class SceneContextProvider extends Component {
     return this.state.appName;
   }
   setProjectName(newProjectName) {
-    this.setState((prevState) => {
+    this.setState(prevState => {
       const newSceneData = jsonCopy(prevState.sceneData);
       newSceneData['projectName'] = newProjectName;
       return {
         sceneData: newSceneData
-      }
-    })
+      };
+    });
   }
   getProjectName() {
     return this.state.sceneData.projectName;
@@ -336,7 +336,7 @@ class SceneContextProvider extends Component {
     if (cameraEl) {
       cameraEl.setAttribute('id', cameraId);
     }
-    const cameraModel = new entityModel['a-camera'];
+    const cameraModel = new entityModel['a-camera']();
     //console.log(cameraModel);
     const data = {
       projectName: projectName,
@@ -345,10 +345,10 @@ class SceneContextProvider extends Component {
           id: slideId,
           entities: [
             {
-              type: "a-camera",
+              type: 'a-camera',
               id: cameraId,
               el: cameraEl,
-              name: getLocalizedMessage(cameraModel._messageId),  //"Camera",
+              name: getLocalizedMessage(cameraModel._messageId), //"Camera",
               timelines: [],
               components: {
                 id: cameraId,
@@ -358,7 +358,7 @@ class SceneContextProvider extends Component {
             }
           ]
         }
-      ],
+      ]
       // assets: []
     };
     // this.setProjectName(projectName);
@@ -382,7 +382,8 @@ class SceneContextProvider extends Component {
         // remove circular ref
         delete entity['el'];
         // try to remove unwant assets
-        if (entity['components'] && entity['components']['material']) { // if (entity['type'] !== 'a-camera')
+        if (entity['components'] && entity['components']['material']) {
+          // if (entity['type'] !== 'a-camera')
           const assetId = entity['components']['material']['src'];
           if (assetId) {
             assetsList[assetId.substr(1)] = true;
@@ -391,11 +392,11 @@ class SceneContextProvider extends Component {
       });
     });
     assetsData = assetsData.filter(assetData => assetsList[assetData['id']]);
-        
+
     this.setState({
       isProjectSaved: true
-    });    
-    
+    });
+
     return {
       projectName: sceneData.projectName,
       entitiesList: sceneData,
@@ -410,7 +411,7 @@ class SceneContextProvider extends Component {
         if (entity.type !== 'a-camera') {
           this.editor.removeObject(entity.el.object3D);
         }
-      })
+      });
     }
     // need to parse camera data inside data
     const projectName = projectData['projectName'];
@@ -420,38 +421,47 @@ class SceneContextProvider extends Component {
     // items in assetData need to add element to the sceneEl
     assetsData.forEach(assetData => {
       this.addAsset(assetData);
-    })
-    this.setState({
-      sceneData: sceneData,
-      slideId: undefined,
-
-      isProjectSaved: true
-    }, _ => {
-      const cameraEl = this.getCameraEl();
-      this.updateCameraEl(cameraEl);
-      this.selectSlide(sceneData.slides[0].id);
     });
+    this.setState(
+      {
+        sceneData: sceneData,
+        slideId: undefined,
+
+        isProjectSaved: true
+      },
+      _ => {
+        const cameraEl = this.getCameraEl();
+        this.updateCameraEl(cameraEl);
+        this.selectSlide(sceneData.slides[0].id);
+      }
+    );
   }
   updateCameraEl(cameraEl) {
-    this.setState((prevState) => {
+    this.setState(prevState => {
       const currentCameraId = cameraEl.getAttribute('id') || uuid();
       cameraEl.setAttribute('id', currentCameraId);
       const newSceneData = jsonCopy(prevState.sceneData);
       newSceneData.slides.forEach(slide => {
-        const cameraData = slide.entities.find(entity => entity.type='a-camera');
+        const cameraData = slide.entities.find(
+          entity => (entity.type = 'a-camera')
+        );
         // console.log(cameraEl.getAttribute('id'));
         cameraData.el = cameraEl;
         cameraData.id = currentCameraId;
-      })
+      });
       return {
         sceneData: newSceneData
-      }
-    })
+      };
+    });
   }
   addSlide(copyFromSlideId) {
     if (this.state.sceneData.slides && copyFromSlideId) {
-      const oldIdx = this.state.sceneData.slides.findIndex(slide=>slide.id===copyFromSlideId);
-      const newSlide = jsonCopy(this.state.sceneData.slides.find(slide=>slide.id===copyFromSlideId));
+      const oldIdx = this.state.sceneData.slides.findIndex(
+        slide => slide.id === copyFromSlideId
+      );
+      const newSlide = jsonCopy(
+        this.state.sceneData.slides.find(slide => slide.id === copyFromSlideId)
+      );
       newSlide.id = uuid();
       // idx field is for debug only
       // newSlide.idx = (newSlide.idx.toString().split('>').slice(-1)[0]) + '>' + this.state.sceneData.slides.length;
@@ -465,31 +475,34 @@ class SceneContextProvider extends Component {
         // el.timelines.forEach(tl => {
         //   tl.id = uuid()
         // })
-      })
-      this.setState((prevState) => {
-        const newSceneData = jsonCopy(prevState.sceneData);
-        const newUndoQueue = jsonCopy(prevState.undoQueue);
-        console.log('addSlide 1');
-        newUndoQueue.push({
-          sceneData: jsonCopy(prevState.sceneData),
-          slideId: prevState.slideId,
-          entityId: prevState.entityId,
-          timelineId: prevState.timelineId,
-          timelinePosition: prevState.timelinePosition,
-          currentTime: prevState.currentTime,
-        });
-        newSceneData.slides.splice(oldIdx + 1, 0, newSlide);
-        return {
-          sceneData: newSceneData,
-          // slideId: newSlide.id,
-          entityId: undefined,
-          timelineId: undefined,
-          undoQueue: newUndoQueue,
-          redoQueue: [],
+      });
+      this.setState(
+        prevState => {
+          const newSceneData = jsonCopy(prevState.sceneData);
+          const newUndoQueue = jsonCopy(prevState.undoQueue);
+          console.log('addSlide 1');
+          newUndoQueue.push({
+            sceneData: jsonCopy(prevState.sceneData),
+            slideId: prevState.slideId,
+            entityId: prevState.entityId,
+            timelineId: prevState.timelineId,
+            timelinePosition: prevState.timelinePosition,
+            currentTime: prevState.currentTime
+          });
+          newSceneData.slides.splice(oldIdx + 1, 0, newSlide);
+          return {
+            sceneData: newSceneData,
+            // slideId: newSlide.id,
+            entityId: undefined,
+            timelineId: undefined,
+            undoQueue: newUndoQueue,
+            redoQueue: []
+          };
+        },
+        _ => {
+          this.selectSlide(newSlide.id);
         }
-      }, _=> {
-        this.selectSlide(newSlide.id);
-      })
+      );
       // this.forceUpdate();
     } else {
       const cameraEl = this.editor.currentCameraEl;
@@ -498,46 +511,53 @@ class SceneContextProvider extends Component {
         id: uuid(),
         entities: [
           {
-            type: "a-camera",
+            type: 'a-camera',
             id: cameraId,
             el: cameraEl,
-            name: "Camera",
+            name: 'Camera',
             timelines: []
           }
         ]
-      }
-      this.setState((prevState) => {
-        const newSceneData = jsonCopy(prevState.sceneData);
-        const newUndoQueue = jsonCopy(prevState.undoQueue);
-        console.log('addSlide 2');
-        newUndoQueue.push({
-          sceneData: jsonCopy(prevState.sceneData),
-          slideId: prevState.slideId,
-          entityId: prevState.entityId,
-          timelineId: prevState.timelineId,
-          timelinePosition: prevState.timelinePosition,
-          currentTime: prevState.currentTime,
-        });
-        newSceneData.slides.splice(newSceneData.slides.length, 0, newSlide);
-        return {
-          sceneData: newSceneData,
-          // slideId: newSlide.id,
-          entityId: undefined,
-          timelineId: undefined,
-          undoQueue: newUndoQueue,
-          redoQueue: [],
+      };
+      this.setState(
+        prevState => {
+          const newSceneData = jsonCopy(prevState.sceneData);
+          const newUndoQueue = jsonCopy(prevState.undoQueue);
+          console.log('addSlide 2');
+          newUndoQueue.push({
+            sceneData: jsonCopy(prevState.sceneData),
+            slideId: prevState.slideId,
+            entityId: prevState.entityId,
+            timelineId: prevState.timelineId,
+            timelinePosition: prevState.timelinePosition,
+            currentTime: prevState.currentTime
+          });
+          newSceneData.slides.splice(newSceneData.slides.length, 0, newSlide);
+          return {
+            sceneData: newSceneData,
+            // slideId: newSlide.id,
+            entityId: undefined,
+            timelineId: undefined,
+            undoQueue: newUndoQueue,
+            redoQueue: []
+          };
+        },
+        _ => {
+          this.selectSlide(newSlide.id);
         }
-      }, _=> {
-        this.selectSlide(newSlide.id);
-      })
+      );
     }
   }
   sortSlide(oldIdx, newIdx) {
     if (oldIdx !== newIdx) {
-      this.setState((prevState) => {
+      this.setState(prevState => {
         const newSceneData = jsonCopy(prevState.sceneData);
         // https://stackoverflow.com/questions/5306680/move-an-array-element-from-one-array-position-to-another
-        newSceneData.slides.splice(newIdx, 0, newSceneData.slides.splice(oldIdx, 1)[0])
+        newSceneData.slides.splice(
+          newIdx,
+          0,
+          newSceneData.slides.splice(oldIdx, 1)[0]
+        );
         const newUndoQueue = jsonCopy(prevState.undoQueue);
         console.log('sortSlide');
         newUndoQueue.push({
@@ -546,52 +566,60 @@ class SceneContextProvider extends Component {
           entityId: prevState.entityId,
           timelineId: prevState.timelineId,
           timelinePosition: prevState.timelinePosition,
-          currentTime: prevState.currentTime,
+          currentTime: prevState.currentTime
         });
         return {
           sceneData: newSceneData,
           undoQueue: newUndoQueue,
-          redoQueue: [],
-        }
-      })
+          redoQueue: []
+        };
+      });
     } else {
       this.selectSlide(this.state.sceneData.slides[oldIdx]['id']);
     }
   }
   deleteSlide(slideIdx) {
     if (this.state.sceneData.slides.length > 1) {
-      this.setState((prevState) => {
-        const newSceneData = prevState.sceneData;
-        const currentSlide = newSceneData.slides[slideIdx];
-        if (currentSlide.id === prevState.slideId) {
-          currentSlide.entities.forEach(entity => {
-            if (entity.type !== 'a-camera') {
-              this.editor.removeObject(entity.el.object3D);
-            }
-          })
+      this.setState(
+        prevState => {
+          const newSceneData = prevState.sceneData;
+          const currentSlide = newSceneData.slides[slideIdx];
+          if (currentSlide.id === prevState.slideId) {
+            currentSlide.entities.forEach(entity => {
+              if (entity.type !== 'a-camera') {
+                this.editor.removeObject(entity.el.object3D);
+              }
+            });
+          }
+          newSceneData.slides.splice(slideIdx, 1);
+          const newUndoQueue = jsonCopy(prevState.undoQueue);
+          console.log('deleteSlide');
+          newUndoQueue.push({
+            sceneData: jsonCopy(prevState.sceneData),
+            slideId: prevState.slideId,
+            entityId: prevState.entityId,
+            timelineId: prevState.timelineId,
+            timelinePosition: prevState.timelinePosition,
+            currentTime: prevState.currentTime
+          });
+          return {
+            sceneData: newSceneData,
+            slideId:
+              currentSlide.id === prevState.slideId
+                ? newSceneData.slides[0].id
+                : prevState.slideId,
+            undoQueue: newUndoQueue,
+            redoQueue: []
+          };
+        },
+        _ => {
+          const sceneData = this.state.sceneData;
+          const selectedSlide = sceneData.slides.find(
+            slide => slide.id === this.state.slideId
+          );
+          this.selectSlide(selectedSlide.id);
         }
-        newSceneData.slides.splice(slideIdx, 1);
-        const newUndoQueue = jsonCopy(prevState.undoQueue);
-        console.log('deleteSlide');
-        newUndoQueue.push({
-          sceneData: jsonCopy(prevState.sceneData),
-          slideId: prevState.slideId,
-          entityId: prevState.entityId,
-          timelineId: prevState.timelineId,
-          timelinePosition: prevState.timelinePosition,
-          currentTime: prevState.currentTime,
-        });
-        return {
-          sceneData: newSceneData,
-          slideId: (currentSlide.id === prevState.slideId? newSceneData.slides[0].id: prevState.slideId),
-          undoQueue: newUndoQueue,
-          redoQueue: [],
-        }
-      },_=> {
-        const sceneData = this.state.sceneData;
-        const selectedSlide = sceneData.slides.find(slide => slide.id === this.state.slideId);
-        this.selectSlide(selectedSlide.id);
-      })
+      );
     }
   }
   getSlidesList() {
@@ -615,71 +643,81 @@ class SceneContextProvider extends Component {
 
   selectSlide(slideId, autoPlay) {
     const editor = this.editor;
-    this.setState((prevState) => {
-      const sceneData = prevState.sceneData;
-      if (prevState.slideId) {
-        const currentSlide = sceneData.slides.find(slide => slide.id === prevState.slideId);
-        if (currentSlide) {
-          currentSlide.entities.forEach(entity => {
-            if (entity.type !== 'a-camera') {
-              editor.removeObject(entity.el.object3D);
-            }
-          })
-        }
-      }
-      const newSceneData = jsonCopy(prevState.sceneData);
-      const newSlide = newSceneData.slides.find(slide => slide.id === slideId);
-      newSlide.entities.forEach(entity => {
-        if (entity.type !== 'a-camera') {
-          entity.el = editor.createNewEntity(entity);
-          const objectModel = new entityModel[entity.type];
-          objectModel.setEl(entity.el);
-          if (entity.type === 'a-text') {
-            // seems the custom component need setAttribute to trigger init
-            const currentFontSize = entity.components.ttfFont.fontSize;
-            // console.log(entity.el, entity.el.hasLoaded);
-            if (!currentFontSize) {
-              entity.el.addEventListener('loaded', function elOnLoad() {
-                // console.log('elOnLoad');
-                // entity.el.setAttribute('ttfFont','fontSize:2');
-                entity.el.setAttribute('ttfFont','fontSize:1');
-                entity.el.removeEventListener('loaded', elOnLoad);
-              })
-            } else {
-              entity.el.addEventListener('loaded', function elOnLoad() {
-                // console.log('elOnLoad');
-                // entity.el.setAttribute('ttfFont','fontSize:' + (currentFontSize + 1));
-                entity.el.setAttribute('ttfFont','fontSize:' + currentFontSize);
-                entity.el.removeEventListener('loaded', elOnLoad);
-              })
-            }
+    this.setState(
+      prevState => {
+        const sceneData = prevState.sceneData;
+        if (prevState.slideId) {
+          const currentSlide = sceneData.slides.find(
+            slide => slide.id === prevState.slideId
+          );
+          if (currentSlide) {
+            currentSlide.entities.forEach(entity => {
+              if (entity.type !== 'a-camera') {
+                editor.removeObject(entity.el.object3D);
+              }
+            });
           }
         }
-      });
-      return {
-        sceneData: newSceneData,
-        entityId: null,
-        timelineId: null,
-        timelinePosition: null,
-        // animationTimeline: null,
-        currentTime: 0,
-        slideId: slideId
+        const newSceneData = jsonCopy(prevState.sceneData);
+        const newSlide = newSceneData.slides.find(
+          slide => slide.id === slideId
+        );
+        newSlide.entities.forEach(entity => {
+          if (entity.type !== 'a-camera') {
+            entity.el = editor.createNewEntity(entity);
+            const objectModel = new entityModel[entity.type]();
+            objectModel.setEl(entity.el);
+            if (entity.type === 'a-text') {
+              // seems the custom component need setAttribute to trigger init
+              const currentFontSize = entity.components.ttfFont.fontSize;
+              // console.log(entity.el, entity.el.hasLoaded);
+              if (!currentFontSize) {
+                entity.el.addEventListener('loaded', function elOnLoad() {
+                  // console.log('elOnLoad');
+                  // entity.el.setAttribute('ttfFont','fontSize:2');
+                  entity.el.setAttribute('ttfFont', 'fontSize:1');
+                  entity.el.removeEventListener('loaded', elOnLoad);
+                });
+              } else {
+                entity.el.addEventListener('loaded', function elOnLoad() {
+                  // console.log('elOnLoad');
+                  // entity.el.setAttribute('ttfFont','fontSize:' + (currentFontSize + 1));
+                  entity.el.setAttribute(
+                    'ttfFont',
+                    'fontSize:' + currentFontSize
+                  );
+                  entity.el.removeEventListener('loaded', elOnLoad);
+                });
+              }
+            }
+          }
+        });
+        return {
+          sceneData: newSceneData,
+          entityId: null,
+          timelineId: null,
+          timelinePosition: null,
+          // animationTimeline: null,
+          currentTime: 0,
+          slideId: slideId
+        };
+      },
+      _ => {
+        this.editor && this.editor.selectEntity(null);
+        const newTl = this.rebuildTimeline(false);
+        if (autoPlay) {
+          newTl.then(tl => tl.play(0));
+        } else {
+          newTl.then(tl => {
+            tl.play();
+            setTimeout(_ => {
+              tl.stop();
+              this.seekSlide(0);
+            }, 100);
+          });
+        }
       }
-    }, _ => {
-      this.editor && this.editor.selectEntity(null);
-      const newTl = this.rebuildTimeline(false);
-      if (autoPlay) {
-        newTl.then(tl => tl.play(0));
-      } else {        
-        newTl.then(tl => {     
-          tl.play();
-          setTimeout(_ => {            
-            tl.stop();
-            this.seekSlide(0);
-          }, 100);
-        });        
-      }
-    })
+    );
   }
   getSlideTotalTime(slideId = this.state.slideId) {
     // loop through all entities and timelines to get the max total time
@@ -690,8 +728,8 @@ class SceneContextProvider extends Component {
         if (timeline.start + timeline.duration > maxTime) {
           maxTime = timeline.start + timeline.duration;
         }
-      })
-    })
+      });
+    });
     return maxTime;
   }
 
@@ -717,7 +755,7 @@ class SceneContextProvider extends Component {
           z: valueObj.z + 1
         });
         cameraEl.setAttribute('position', valueObj);
-      }      
+      }
     }
   }
   setCameraElRotation(valueObj) {
@@ -731,7 +769,7 @@ class SceneContextProvider extends Component {
         });
         cameraEl.setAttribute('rotation', valueObj);
       }
-    }        
+    }
   }
 
   getEntitiesList(slideId = this.state.slideId) {
@@ -746,8 +784,13 @@ class SceneContextProvider extends Component {
     // should be somethings wrong
     return [];
   }
-  setEntityRotation(entity, valueObj, isUpdateUndoQueue = true, isInTimeline = false) {    
-    if (entity && valueObj) {      
+  setEntityRotation(
+    entity,
+    valueObj,
+    isUpdateUndoQueue = true,
+    isInTimeline = false
+  ) {
+    if (entity && valueObj) {
       entity.el.setAttribute('rotation', {
         x: valueObj.x + 1,
         y: valueObj.y + 1,
@@ -762,29 +805,49 @@ class SceneContextProvider extends Component {
           this.updateTimelinePositionAttributes(updateAttributesFuncArg);
         } else {
           this.updateDefaultAttributes(updateAttributesFuncArg);
-        }        
+        }
       }
     }
   }
-  setCurrentEntityRotation(valueObj, isUpdateUndoQueue = true, isInTimeline = false) {
+  setCurrentEntityRotation(
+    valueObj,
+    isUpdateUndoQueue = true,
+    isInTimeline = false
+  ) {
     if (valueObj) {
       const currentEntity = this.getCurrentEntity();
-      if (currentEntity) {            
-        this.setEntityRotation(currentEntity, valueObj, isUpdateUndoQueue, isInTimeline);            
+      if (currentEntity) {
+        this.setEntityRotation(
+          currentEntity,
+          valueObj,
+          isUpdateUndoQueue,
+          isInTimeline
+        );
       }
     }
   }
-  resetEntityRotation(entity, isUpdateUndoQueue = true, isInTimeline = false) {    
+  resetEntityRotation(entity, isUpdateUndoQueue = true, isInTimeline = false) {
     if (entity) {
-      const myEntityModel = new entityModel[entity['type']];
-      const valueObjToUse = (myEntityModel.getAnimatableAttributesValues() && myEntityModel.getAnimatableAttributesValues().rotation);
-      if (valueObjToUse) {        
-        this.setEntityRotation(entity, valueObjToUse, isUpdateUndoQueue, isInTimeline);      
+      const myEntityModel = new entityModel[entity['type']]();
+      const valueObjToUse =
+        myEntityModel.getAnimatableAttributesValues() &&
+        myEntityModel.getAnimatableAttributesValues().rotation;
+      if (valueObjToUse) {
+        this.setEntityRotation(
+          entity,
+          valueObjToUse,
+          isUpdateUndoQueue,
+          isInTimeline
+        );
       }
     }
   }
-  resetCurrentEntityRotation(isUpdateUndoQueue = true, isInTimeline = false) {    
-    this.resetEntityRotation(this.getCurrentEntity(), isUpdateUndoQueue, isInTimeline);
+  resetCurrentEntityRotation(isUpdateUndoQueue = true, isInTimeline = false) {
+    this.resetEntityRotation(
+      this.getCurrentEntity(),
+      isUpdateUndoQueue,
+      isInTimeline
+    );
   }
   getCurrentEntity(entityId = this.state.entityId) {
     const state = this.state;
@@ -801,10 +864,10 @@ class SceneContextProvider extends Component {
     return this.state.entityId;
   }
 
-  copyEntity(entityId = this.state.entityId) {    
+  copyEntity(entityId = this.state.entityId) {
     const copyFromEntity = this.getCurrentEntity(entityId);
     const type = copyFromEntity.type;
-    const objectModel = new entityModel[type];
+    const objectModel = new entityModel[type]();
     const elementId = uuid();
     const newElement = {
       type: type,
@@ -825,128 +888,162 @@ class SceneContextProvider extends Component {
 
     const newEl = this.editor.createNewEntity(newElement);
     // need a setAttribute to trigger the ttfFont init
-    if (newElement['components']['ttfFont'] && newElement['components']['ttfFont']['opacity']) {
+    if (
+      newElement['components']['ttfFont'] &&
+      newElement['components']['ttfFont']['opacity']
+    ) {
       // console.log('sdfsaf');
-      newEl.setAttribute('ttfFont', 'opacity', !newElement['components']['ttfFont']['opacity']);
-      newEl.setAttribute('ttfFont', 'opacity', newElement['components']['ttfFont']['opacity']);
+      newEl.setAttribute(
+        'ttfFont',
+        'opacity',
+        !newElement['components']['ttfFont']['opacity']
+      );
+      newEl.setAttribute(
+        'ttfFont',
+        'opacity',
+        newElement['components']['ttfFont']['opacity']
+      );
     }
     // newEl.removeAttribute('something');
     newElement['el'] = newEl;
     objectModel.setEl(newEl);
-    this.setState((prevState) => {
-      const newSceneData = jsonCopy(prevState.sceneData);
-      const newUndoQueue = jsonCopy(prevState.undoQueue);
-      const currentSlide = newSceneData.slides.find(slide => slide.id === prevState.slideId);
-      currentSlide.entities.push(newElement);
-      console.log('copyEntity');
-      newUndoQueue.push({
-        sceneData: jsonCopy(prevState.sceneData),
-        slideId: prevState.slideId,
-        entityId: prevState.entityId,
-        timelineId: prevState.timelineId,
-        timelinePosition: prevState.timelinePosition,
-        currentTime: prevState.currentTime,
-      });
-      // prevState.undoQueue.push(jsonCopy(prevState.sceneData));
-      return {
-        sceneData: newSceneData,
-        entityId: elementId,
-        undoQueue: newUndoQueue,
-        redoQueue: [],
+    this.setState(
+      prevState => {
+        const newSceneData = jsonCopy(prevState.sceneData);
+        const newUndoQueue = jsonCopy(prevState.undoQueue);
+        const currentSlide = newSceneData.slides.find(
+          slide => slide.id === prevState.slideId
+        );
+        currentSlide.entities.push(newElement);
+        console.log('copyEntity');
+        newUndoQueue.push({
+          sceneData: jsonCopy(prevState.sceneData),
+          slideId: prevState.slideId,
+          entityId: prevState.entityId,
+          timelineId: prevState.timelineId,
+          timelinePosition: prevState.timelinePosition,
+          currentTime: prevState.currentTime
+        });
+        // prevState.undoQueue.push(jsonCopy(prevState.sceneData));
+        return {
+          sceneData: newSceneData,
+          entityId: elementId,
+          undoQueue: newUndoQueue,
+          redoQueue: []
+        };
+      },
+      _ => {
+        this.rebuildTimeline().then(tl =>
+          tl.seek(this.state.currentTime, false)
+        );
       }
-    }, _=> {
-      this.rebuildTimeline().then(tl => tl.seek(this.state.currentTime, false));
-    })
+    );
   }
   addEntity() {
     // what ??
   }
   deleteEntity(entityId) {
-    this.setState((prevState) => {
-      const newSceneData = jsonCopy(prevState.sceneData);
-      const slides = newSceneData.slides;
-      const currentSlide = slides.find(el => el.id === prevState.slideId);
-      const deleteEntityIdx = currentSlide.entities.findIndex(el => el.id === entityId);
-      const deletedEntity = currentSlide.entities.splice(deleteEntityIdx, 1)[0];
-      this.editor.removeObject(deletedEntity.el.object3D);
-      const newUndoQueue = jsonCopy(prevState.undoQueue);
-      console.log('deleteEntity');
-      newUndoQueue.push({
-        sceneData: jsonCopy(prevState.sceneData),
-        slideId: prevState.slideId,
-        entityId: prevState.entityId,
-        timelineId: prevState.timelineId,
-        timelinePosition: prevState.timelinePosition,
-        currentTime: prevState.currentTime,
-      });
-      return {
-        sceneData: newSceneData,
-        entityId: undefined,
-        undoQueue: newUndoQueue,
-        redoQueue: [],
+    this.setState(
+      prevState => {
+        const newSceneData = jsonCopy(prevState.sceneData);
+        const slides = newSceneData.slides;
+        const currentSlide = slides.find(el => el.id === prevState.slideId);
+        const deleteEntityIdx = currentSlide.entities.findIndex(
+          el => el.id === entityId
+        );
+        const deletedEntity = currentSlide.entities.splice(
+          deleteEntityIdx,
+          1
+        )[0];
+        this.editor.removeObject(deletedEntity.el.object3D);
+        const newUndoQueue = jsonCopy(prevState.undoQueue);
+        console.log('deleteEntity');
+        newUndoQueue.push({
+          sceneData: jsonCopy(prevState.sceneData),
+          slideId: prevState.slideId,
+          entityId: prevState.entityId,
+          timelineId: prevState.timelineId,
+          timelinePosition: prevState.timelinePosition,
+          currentTime: prevState.currentTime
+        });
+        return {
+          sceneData: newSceneData,
+          entityId: undefined,
+          undoQueue: newUndoQueue,
+          redoQueue: []
+        };
+      },
+      _ => {
+        this.rebuildTimeline();
       }
-    }, _ => {
-      this.rebuildTimeline()
-    })
+    );
   }
   selectEntity(entityId) {
     // pass back to editor to select?
     const state = this.state;
     const sceneData = state.sceneData;
     const slides = sceneData.slides;
-    if (!slides) return null;    
+    if (!slides) return null;
     const currentSlide = slides.find(el => el.id === state.slideId);
-    if (!currentSlide) return null;    
+    if (!currentSlide) return null;
     const selectedEntity = currentSlide.entities.find(el => el.id === entityId);
 
-    this.editor.selectEntity(selectedEntity.el);    
+    this.editor.selectEntity(selectedEntity.el);
     // after editor select, an event will be emit and state will update there
     // this.setState({
     //   entityId: entityId
     // })
-  }    
+  }
   updateEntity(newAttrs, entityId) {
-    this.setState((prevState) => {      
-      const newSceneData = jsonCopy(prevState.sceneData);
-      const slides = newSceneData.slides;
-      const currentSlide = slides.find(el => el.id === prevState.slideId);
-      const currentEntity = currentSlide.entities.find(el => el.id === entityId);
-      // currentEntity.name = newAttrs;
-      Object.keys(newAttrs).forEach(key => {
-        if (currentEntity['components'] && currentEntity['components'].hasOwnProperty(key)) {
-          if (typeof(newAttrs[key]) === "object") {
-            currentEntity['components'][key] = {
-              ...currentEntity['components'][key],
-              ...newAttrs[key]
+    this.setState(
+      prevState => {
+        const newSceneData = jsonCopy(prevState.sceneData);
+        const slides = newSceneData.slides;
+        const currentSlide = slides.find(el => el.id === prevState.slideId);
+        const currentEntity = currentSlide.entities.find(
+          el => el.id === entityId
+        );
+        // currentEntity.name = newAttrs;
+        Object.keys(newAttrs).forEach(key => {
+          if (
+            currentEntity['components'] &&
+            currentEntity['components'].hasOwnProperty(key)
+          ) {
+            if (typeof newAttrs[key] === 'object') {
+              currentEntity['components'][key] = {
+                ...currentEntity['components'][key],
+                ...newAttrs[key]
+              };
+            } else {
+              currentEntity['components'][key] = newAttrs[key]; //currentEntity
             }
           } else {
-            currentEntity['components'][key] = newAttrs[key]; //currentEntity
+            currentEntity[key] = newAttrs[key];
           }
-        } else {
-          currentEntity[key] = newAttrs[key];
-        }
-      })
-      // currentEntity = {...currentEntity, ...newAttrs};
-      // console.log(currentEntity);
-      const newUndoQueue = jsonCopy(prevState.undoQueue);
-      console.log('updateEntity');
-      newUndoQueue.push({
-        sceneData: jsonCopy(prevState.sceneData),
-        slideId: prevState.slideId,
-        entityId: prevState.entityId,
-        timelineId: prevState.timelineId,
-        timelinePosition: prevState.timelinePosition,
-        currentTime: prevState.currentTime,
-      });
-      return {
-        sceneData: newSceneData,
-        undoQueue: newUndoQueue,
-        redoQueue: [],
-       // slideId: newSceneData.slides[0].id
+        });
+        // currentEntity = {...currentEntity, ...newAttrs};
+        // console.log(currentEntity);
+        const newUndoQueue = jsonCopy(prevState.undoQueue);
+        console.log('updateEntity');
+        newUndoQueue.push({
+          sceneData: jsonCopy(prevState.sceneData),
+          slideId: prevState.slideId,
+          entityId: prevState.entityId,
+          timelineId: prevState.timelineId,
+          timelinePosition: prevState.timelinePosition,
+          currentTime: prevState.currentTime
+        });
+        return {
+          sceneData: newSceneData,
+          undoQueue: newUndoQueue,
+          redoQueue: []
+          // slideId: newSceneData.slides[0].id
+        };
+      },
+      _ => {
+        this.rebuildTimeline();
       }
-    }, _=> {
-      this.rebuildTimeline()
-    })
+    );
   }
 
   getTimelinesList(entityId) {
@@ -964,184 +1061,223 @@ class SceneContextProvider extends Component {
     if (!slides) return null;
     const currentSlide = slides.find(el => el.id === state.slideId);
     if (!currentSlide) return null;
-    const selectedEntity = currentSlide.entities.find(el => el.id === state.entityId);
+    const selectedEntity = currentSlide.entities.find(
+      el => el.id === state.entityId
+    );
     if (!selectedEntity) return null;
-    const selectedTimeline = selectedEntity.timelines.find(tl => tl.id === state.timelineId);
+    const selectedTimeline = selectedEntity.timelines.find(
+      tl => tl.id === state.timelineId
+    );
     return selectedTimeline;
   }
   getCurrentTimelineId() {
     return this.state.timelineId;
   }
   addTimeline(entityId, startTime = 0) {
-    this.setState((prevState) => {
-      const newSceneData = jsonCopy(prevState.sceneData);
-      const slides = newSceneData.slides;
-      const currentSlide = slides.find(el => el.id === prevState.slideId);
-      const currentEntity = currentSlide.entities.find(el => el.id === entityId);
+    this.setState(
+      prevState => {
+        const newSceneData = jsonCopy(prevState.sceneData);
+        const slides = newSceneData.slides;
+        const currentSlide = slides.find(el => el.id === prevState.slideId);
+        const currentEntity = currentSlide.entities.find(
+          el => el.id === entityId
+        );
 
-      //////////       *       *       *       //////////
-      // TODO: get the prev timeline and next timeline //
-      //////////       *       *       *       //////////
-      const aEntity = new entityModel[currentEntity['type']];
-      // const staticAttributes = abox.setStaticAttributesValues();
-      let animatableStartAttributes = aEntity.getAnimatableAttributesValues();
-      let animatableEndAttributes = aEntity.getAnimatableAttributesValues();
-      let duration = 5;
-      if (currentEntity.timelines.length > 0) {
-        let prevTimeline = null;
-        let nextTimeline = null;
-        let sameTimeline = null;
-        currentEntity.timelines.forEach(timeline => {
-          if (timeline.start < startTime && (prevTimeline === null || timeline.start > prevTimeline.start)) {
-            prevTimeline = timeline;
+        //////////       *       *       *       //////////
+        // TODO: get the prev timeline and next timeline //
+        //////////       *       *       *       //////////
+        const aEntity = new entityModel[currentEntity['type']]();
+        // const staticAttributes = abox.setStaticAttributesValues();
+        let animatableStartAttributes = aEntity.getAnimatableAttributesValues();
+        let animatableEndAttributes = aEntity.getAnimatableAttributesValues();
+        let duration = 5;
+        if (currentEntity.timelines.length > 0) {
+          let prevTimeline = null;
+          let nextTimeline = null;
+          let sameTimeline = null;
+          currentEntity.timelines.forEach(timeline => {
+            if (
+              timeline.start < startTime &&
+              (prevTimeline === null || timeline.start > prevTimeline.start)
+            ) {
+              prevTimeline = timeline;
+            }
+            if (
+              timeline.start > startTime &&
+              (nextTimeline === null || timeline.start < nextTimeline.start)
+            ) {
+              nextTimeline = timeline;
+            }
+            if (timeline.start === startTime) {
+              sameTimeline = timeline;
+            }
+          });
+          if (sameTimeline) {
+            return;
           }
-          if (timeline.start > startTime && (nextTimeline === null || timeline.start < nextTimeline.start)) {
-            nextTimeline = timeline;
+          if (prevTimeline) {
+            if (prevTimeline.start + prevTimeline.duration > startTime) return;
+            animatableStartAttributes = jsonCopy(prevTimeline.endAttribute);
+            if (!nextTimeline) {
+              animatableEndAttributes = jsonCopy(prevTimeline.endAttribute);
+            }
           }
-          if (timeline.start === startTime) {
-            sameTimeline = timeline;
+          if (nextTimeline) {
+            animatableEndAttributes = jsonCopy(nextTimeline.startAttribute);
+            duration = Math.min(duration, nextTimeline.start - startTime);
+            if (!prevTimeline) {
+              animatableStartAttributes = jsonCopy(nextTimeline.startAttribute);
+            }
           }
-        })
-        if (sameTimeline) {
-          return;
+        } else {
+          // get current components data as initial value
+          if (currentEntity['components']) {
+            animatableStartAttributes = jsonCopy(currentEntity['components']);
+            animatableEndAttributes = jsonCopy(currentEntity['components']);
+          }
         }
-        if (prevTimeline) {
-          if (prevTimeline.start + prevTimeline.duration > startTime) return;
-          animatableStartAttributes = jsonCopy(prevTimeline.endAttribute);
-          if (!nextTimeline) {
-            animatableEndAttributes = jsonCopy(prevTimeline.endAttribute);
-          }
-        }
-        if (nextTimeline) {
-          animatableEndAttributes = jsonCopy(nextTimeline.startAttribute);
-          duration = Math.min(duration, nextTimeline.start - startTime);
-          if (!prevTimeline) {
-            animatableStartAttributes = jsonCopy(nextTimeline.startAttribute);
-          }
-        }
-      } else {
-        // get current components data as initial value
-        if (currentEntity['components']) {
-          animatableStartAttributes = jsonCopy(currentEntity['components']);
-          animatableEndAttributes = jsonCopy(currentEntity['components']);
-        }
-      }
-      const newUndoQueue = jsonCopy(prevState.undoQueue);
-      console.log('addTimeline');
-      newUndoQueue.push({
-        sceneData: jsonCopy(prevState.sceneData),
-        slideId: prevState.slideId,
-        entityId: prevState.entityId,
-        timelineId: prevState.timelineId,
-        timelinePosition: prevState.timelinePosition,
-        currentTime: prevState.currentTime,
-      });
-      // console.log(duration);
-
-
-      const newTimelineId = uuid();
-      // console.log(newTimelineId);
-      currentEntity.timelines.push({
-        id: newTimelineId,
-        start: startTime,
-        duration: duration,
-        startAttribute: animatableStartAttributes,
-        endAttribute: animatableEndAttributes,
-      })
-      currentEntity.timelines.sort((a,b) => a.start - b.start);
-      return {
-        sceneData: newSceneData,
-        entityId: entityId,
-        timelineId: newTimelineId,
-        undoQueue: newUndoQueue,
-        redoQueue: [],
-        // timelinePosition: 'startAttribute'
-      }
-    }, _=> {
-      // console.log(this.state.timelineId);
-      this.rebuildTimeline();
-      this.selectTimelinePosition('startAttribute')
-    })
-  }
-  deleteTimeline(timelineId) {
-    this.setState((prevState) => {
-      const newSceneData = jsonCopy(prevState.sceneData);
-      const slides = newSceneData.slides;
-      const currentSlide = slides.find(el => el.id === prevState.slideId);
-      const currentEntity = currentSlide.entities.find(el => el.id === prevState.entityId);
-      const deleteTimelineIdx = currentEntity.timelines.findIndex(el => el.id === timelineId);
-      const deletedTimeline = currentEntity.timelines.splice(deleteTimelineIdx, 1);
-      if (currentEntity.timelines.length === 0) {
-        // just now deleted is the last timeline
-        const startAttribute = deletedTimeline[0]['startAttribute'];
-        currentEntity.components = mergeJSON(currentEntity.components, startAttribute);
-        Object.keys(startAttribute).forEach(k => {
-          currentEntity.el.setAttribute(k, startAttribute[k]);
-        })
-      }
-      this.editor.enableControls(false);
-      const newUndoQueue = jsonCopy(prevState.undoQueue);
-      console.log('deleteTimeline');
-      newUndoQueue.push({
-        sceneData: jsonCopy(prevState.sceneData),
-        slideId: prevState.slideId,
-        entityId: prevState.entityId,
-        timelineId: prevState.timelineId,
-        timelinePosition: prevState.timelinePosition,
-        currentTime: prevState.currentTime,
-      });
-      return {
-        sceneData: newSceneData,
-        timelineId: undefined,
-        timelinePosition: null,
-        undoQueue: newUndoQueue,
-        redoQueue: [],
-      }
-    }, _ => {
-      this.rebuildTimeline()
-    })
-  }
-  selectTimeline(timelineId) {
-    // console.log(timelineId);
-    this.setState({
-      timelineId: timelineId
-    })
-  }
-  updateTimeline(newAttrs, timelineId) {
-    const {start, duration} = newAttrs;
-    this.setState((prevState) => {
-      const newSceneData = jsonCopy(prevState.sceneData);
-      const slides = newSceneData.slides;
-      const currentSlide = slides.find(el => el.id === prevState.slideId);
-      const currentEntity = currentSlide.entities.find(el => el.id === prevState.entityId);
-      const currentTimeline = currentEntity.timelines.find(el => el.id === timelineId);
-      if (currentTimeline.start !== start ||
-          currentTimeline.duration !== duration) {
-
-        currentTimeline.start = start;
-        currentTimeline.duration = duration;
         const newUndoQueue = jsonCopy(prevState.undoQueue);
-        console.log('updateTimeline');
+        console.log('addTimeline');
         newUndoQueue.push({
           sceneData: jsonCopy(prevState.sceneData),
           slideId: prevState.slideId,
           entityId: prevState.entityId,
           timelineId: prevState.timelineId,
           timelinePosition: prevState.timelinePosition,
-          currentTime: prevState.currentTime,
+          currentTime: prevState.currentTime
+        });
+        // console.log(duration);
+
+        const newTimelineId = uuid();
+        // console.log(newTimelineId);
+        currentEntity.timelines.push({
+          id: newTimelineId,
+          start: startTime,
+          duration: duration,
+          startAttribute: animatableStartAttributes,
+          endAttribute: animatableEndAttributes
+        });
+        currentEntity.timelines.sort((a, b) => a.start - b.start);
+        return {
+          sceneData: newSceneData,
+          entityId: entityId,
+          timelineId: newTimelineId,
+          undoQueue: newUndoQueue,
+          redoQueue: []
+          // timelinePosition: 'startAttribute'
+        };
+      },
+      _ => {
+        // console.log(this.state.timelineId);
+        this.rebuildTimeline();
+        this.selectTimelinePosition('startAttribute');
+      }
+    );
+  }
+  deleteTimeline(timelineId) {
+    this.setState(
+      prevState => {
+        const newSceneData = jsonCopy(prevState.sceneData);
+        const slides = newSceneData.slides;
+        const currentSlide = slides.find(el => el.id === prevState.slideId);
+        const currentEntity = currentSlide.entities.find(
+          el => el.id === prevState.entityId
+        );
+        const deleteTimelineIdx = currentEntity.timelines.findIndex(
+          el => el.id === timelineId
+        );
+        const deletedTimeline = currentEntity.timelines.splice(
+          deleteTimelineIdx,
+          1
+        );
+        if (currentEntity.timelines.length === 0) {
+          // just now deleted is the last timeline
+          const startAttribute = deletedTimeline[0]['startAttribute'];
+          currentEntity.components = mergeJSON(
+            currentEntity.components,
+            startAttribute
+          );
+          Object.keys(startAttribute).forEach(k => {
+            currentEntity.el.setAttribute(k, startAttribute[k]);
+          });
+        }
+        this.editor.enableControls(false);
+        const newUndoQueue = jsonCopy(prevState.undoQueue);
+        console.log('deleteTimeline');
+        newUndoQueue.push({
+          sceneData: jsonCopy(prevState.sceneData),
+          slideId: prevState.slideId,
+          entityId: prevState.entityId,
+          timelineId: prevState.timelineId,
+          timelinePosition: prevState.timelinePosition,
+          currentTime: prevState.currentTime
         });
         return {
           sceneData: newSceneData,
+          timelineId: undefined,
+          timelinePosition: null,
           undoQueue: newUndoQueue,
-          redoQueue: [],
-        }
+          redoQueue: []
+        };
+      },
+      _ => {
+        this.rebuildTimeline();
       }
-    }, _ => {
-      this.rebuildTimeline();
-    })
+    );
+  }
+  selectTimeline(timelineId) {
+    // console.log(timelineId);
+    this.setState({
+      timelineId: timelineId
+    });
+  }
+  updateTimeline(newAttrs, timelineId) {
+    const { start, duration } = newAttrs;
+    this.setState(
+      prevState => {
+        const newSceneData = jsonCopy(prevState.sceneData);
+        const slides = newSceneData.slides;
+        const currentSlide = slides.find(el => el.id === prevState.slideId);
+        const currentEntity = currentSlide.entities.find(
+          el => el.id === prevState.entityId
+        );
+        const currentTimeline = currentEntity.timelines.find(
+          el => el.id === timelineId
+        );
+        if (
+          currentTimeline.start !== start ||
+          currentTimeline.duration !== duration
+        ) {
+          currentTimeline.start = start;
+          currentTimeline.duration = duration;
+          const newUndoQueue = jsonCopy(prevState.undoQueue);
+          console.log('updateTimeline');
+          newUndoQueue.push({
+            sceneData: jsonCopy(prevState.sceneData),
+            slideId: prevState.slideId,
+            entityId: prevState.entityId,
+            timelineId: prevState.timelineId,
+            timelinePosition: prevState.timelinePosition,
+            currentTime: prevState.currentTime
+          });
+          return {
+            sceneData: newSceneData,
+            undoQueue: newUndoQueue,
+            redoQueue: []
+          };
+        }
+      },
+      _ => {
+        this.rebuildTimeline();
+      }
+    );
   }
 
-  selectTimelinePosition(newPosition, timelineId = this.state.timelineId, entityId = this.state.entityId) {
+  selectTimelinePosition(
+    newPosition,
+    timelineId = this.state.timelineId,
+    entityId = this.state.entityId
+  ) {
     const state = this.state;
     let currentTime = state.currentTime;
     if (!newPosition && timelineId === state.timelineId) {
@@ -1162,10 +1298,15 @@ class SceneContextProvider extends Component {
     // endAttribute
     if (!!timelineId && !!newPosition) {
       // load the attributes to the scene
-      const selectedTimeline = selectedEntity.timelines.find(tl => tl.id === timelineId);
+      const selectedTimeline = selectedEntity.timelines.find(
+        tl => tl.id === timelineId
+      );
       if (selectedTimeline) {
         const selectedTimelinePosition = selectedTimeline[newPosition];
-        currentTime = (newPosition === 'startAttribute'? selectedTimeline.start: selectedTimeline.start + selectedTimeline.duration);
+        currentTime =
+          newPosition === 'startAttribute'
+            ? selectedTimeline.start
+            : selectedTimeline.start + selectedTimeline.duration;
         const element = selectedEntity['el'];
         // console.log(selectedTimelinePosition);
         const aEntity = new entityModel[selectedEntity['type']](element);
@@ -1198,104 +1339,117 @@ class SceneContextProvider extends Component {
   updateTimelinePositionAttributes(newAttrs) {
     // const currentTimeline = this.getCurrentTimeline();
     // console.log('updateTimelinePositionAttributes');
-    this.setState((prevState) => {
-      const newSceneData = jsonCopy(prevState.sceneData);
-      const slides = newSceneData.slides;
-      const currentSlide = slides.find(el => el.id === prevState.slideId);
-      const selectedEntity = currentSlide.entities.find(el => el.id === prevState.entityId);
-      const selectedTimeline = selectedEntity.timelines.find(tl => tl.id === prevState.timelineId);
-      let selectedTimelinePosition = selectedTimeline[prevState.timelinePosition];
-      for (let k in newAttrs) {
-        if (selectedTimelinePosition.hasOwnProperty(k)) {
-          if (typeof(newAttrs[k]) === "object") {
-            // console.log(selectedTimelinePosition[k], newAttrs[k]);
-            Object.assign(selectedTimelinePosition[k], newAttrs[k]);
-          } else {
-            selectedTimelinePosition[k] = newAttrs[k];
-          }
-        }
-      }
-      const newUndoQueue = jsonCopy(prevState.undoQueue);
-      console.log('updateTimelinePositionAttributes');
-      newUndoQueue.push({
-        sceneData: jsonCopy(prevState.sceneData),
-        slideId: prevState.slideId,
-        entityId: prevState.entityId,
-        timelineId: prevState.timelineId,
-        timelinePosition: prevState.timelinePosition,
-        currentTime: prevState.currentTime,
-      });
-
-      // console.log(selectedTimelinePosition);
-      return {
-        sceneData: newSceneData,
-        undoQueue: newUndoQueue,
-        redoQueue: [],
-      }
-    }, _=> {
-      this.rebuildTimeline()
-    })
-  }
-
-  updateDefaultAttributes(newAttrs) {
-    //console.log(newAttrs);
-    this.setState((prevState) => {
-      const newSceneData = jsonCopy(prevState.sceneData);
-      const slides = newSceneData.slides;
-      const currentSlide = slides.find(el => el.id === prevState.slideId);
-      const selectedEntity = currentSlide.entities.find(el => el.id === prevState.entityId);
-      const entityComponent = selectedEntity['components'];
-      const newUndoQueue = jsonCopy(prevState.undoQueue);
-      if (entityComponent) {
+    this.setState(
+      prevState => {
+        const newSceneData = jsonCopy(prevState.sceneData);
+        const slides = newSceneData.slides;
+        const currentSlide = slides.find(el => el.id === prevState.slideId);
+        const selectedEntity = currentSlide.entities.find(
+          el => el.id === prevState.entityId
+        );
+        const selectedTimeline = selectedEntity.timelines.find(
+          tl => tl.id === prevState.timelineId
+        );
+        let selectedTimelinePosition =
+          selectedTimeline[prevState.timelinePosition];
         for (let k in newAttrs) {
-          if (entityComponent.hasOwnProperty(k)) {
-            if (typeof(newAttrs[k]) === "object") {
+          if (selectedTimelinePosition.hasOwnProperty(k)) {
+            if (typeof newAttrs[k] === 'object') {
               // console.log(selectedTimelinePosition[k], newAttrs[k]);
-              Object.assign(entityComponent[k], newAttrs[k]);              
+              Object.assign(selectedTimelinePosition[k], newAttrs[k]);
             } else {
-              entityComponent[k] = newAttrs[k];              
+              selectedTimelinePosition[k] = newAttrs[k];
             }
           }
         }
-        console.log('updateDefaultAttributes');
+        const newUndoQueue = jsonCopy(prevState.undoQueue);
+        console.log('updateTimelinePositionAttributes');
         newUndoQueue.push({
           sceneData: jsonCopy(prevState.sceneData),
           slideId: prevState.slideId,
           entityId: prevState.entityId,
           timelineId: prevState.timelineId,
           timelinePosition: prevState.timelinePosition,
-          currentTime: prevState.currentTime,
+          currentTime: prevState.currentTime
         });
-      }
 
-      // console.log(selectedTimelinePosition);
-      return {
-        sceneData: newSceneData,
-        undoQueue: newUndoQueue,
-        redoQueue: [],
+        // console.log(selectedTimelinePosition);
+        return {
+          sceneData: newSceneData,
+          undoQueue: newUndoQueue,
+          redoQueue: []
+        };
+      },
+      _ => {
+        this.rebuildTimeline();
       }
-    }, _ => {
-      this.rebuildTimeline();
-    })
+    );
+  }
+
+  updateDefaultAttributes(newAttrs) {
+    //console.log(newAttrs);
+    this.setState(
+      prevState => {
+        const newSceneData = jsonCopy(prevState.sceneData);
+        const slides = newSceneData.slides;
+        const currentSlide = slides.find(el => el.id === prevState.slideId);
+        const selectedEntity = currentSlide.entities.find(
+          el => el.id === prevState.entityId
+        );
+        const entityComponent = selectedEntity['components'];
+        const newUndoQueue = jsonCopy(prevState.undoQueue);
+        if (entityComponent) {
+          for (let k in newAttrs) {
+            if (entityComponent.hasOwnProperty(k)) {
+              if (typeof newAttrs[k] === 'object') {
+                // console.log(selectedTimelinePosition[k], newAttrs[k]);
+                Object.assign(entityComponent[k], newAttrs[k]);
+              } else {
+                entityComponent[k] = newAttrs[k];
+              }
+            }
+          }
+          console.log('updateDefaultAttributes');
+          newUndoQueue.push({
+            sceneData: jsonCopy(prevState.sceneData),
+            slideId: prevState.slideId,
+            entityId: prevState.entityId,
+            timelineId: prevState.timelineId,
+            timelinePosition: prevState.timelinePosition,
+            currentTime: prevState.currentTime
+          });
+        }
+
+        // console.log(selectedTimelinePosition);
+        return {
+          sceneData: newSceneData,
+          undoQueue: newUndoQueue,
+          redoQueue: []
+        };
+      },
+      _ => {
+        this.rebuildTimeline();
+      }
+    );
   }
   getCurrentTime() {
-    return this.state.currentTime
+    return this.state.currentTime;
   }
   updateCurrentTime(currentTime) {
     this.seekSlide(currentTime);
     this.setState({
       currentTime: currentTime
-    })
+    });
   }
 
   addNewEntity(type) {
     //const state = this.state;
-    const objectModel = new entityModel[type];
+    const objectModel = new entityModel[type]();
     const elementId = uuid();
     const newElement = {
       type: type,
       id: elementId,
-      name: getLocalizedMessage(objectModel._messageId),  //type.split('-')[1],
+      name: getLocalizedMessage(objectModel._messageId), //type.split('-')[1],
       element: 'a-entity',
       // components: {
       //   id: elementId,
@@ -1322,43 +1476,61 @@ class SceneContextProvider extends Component {
     );
     const newEl = this.editor.createNewEntity(newElement);
     // need a setAttribute to trigger the ttfFont init
-    if (newElement['components']['ttfFont'] && newElement['components']['ttfFont']['opacity']) {
+    if (
+      newElement['components']['ttfFont'] &&
+      newElement['components']['ttfFont']['opacity']
+    ) {
       // console.log('sdfsaf');
-      newEl.setAttribute('ttfFont', 'opacity', !newElement['components']['ttfFont']['opacity']);
-      newEl.setAttribute('ttfFont', 'opacity', newElement['components']['ttfFont']['opacity']);
+      newEl.setAttribute(
+        'ttfFont',
+        'opacity',
+        !newElement['components']['ttfFont']['opacity']
+      );
+      newEl.setAttribute(
+        'ttfFont',
+        'opacity',
+        newElement['components']['ttfFont']['opacity']
+      );
     }
     // newEl.removeAttribute('something');
     newElement['el'] = newEl;
     objectModel.setEl(newEl);
-    this.setState((prevState) => {
-      const newSceneData = jsonCopy(prevState.sceneData);
-      const newUndoQueue = jsonCopy(prevState.undoQueue);
-      const currentSlide = newSceneData.slides.find(slide => slide.id === prevState.slideId);
-      currentSlide.entities.push(newElement);
-      console.log('addNewEntity');
-      newUndoQueue.push({
-        sceneData: jsonCopy(prevState.sceneData),
-        slideId: prevState.slideId,
-        entityId: prevState.entityId,
-        timelineId: prevState.timelineId,
-        timelinePosition: prevState.timelinePosition,
-        currentTime: prevState.currentTime,
-      });
-      // prevState.undoQueue.push(jsonCopy(prevState.sceneData));
-      return {
-        sceneData: newSceneData,
-        entityId: elementId,
-        undoQueue: newUndoQueue,
-        redoQueue: [],
+    this.setState(
+      prevState => {
+        const newSceneData = jsonCopy(prevState.sceneData);
+        const newUndoQueue = jsonCopy(prevState.undoQueue);
+        const currentSlide = newSceneData.slides.find(
+          slide => slide.id === prevState.slideId
+        );
+        currentSlide.entities.push(newElement);
+        console.log('addNewEntity');
+        newUndoQueue.push({
+          sceneData: jsonCopy(prevState.sceneData),
+          slideId: prevState.slideId,
+          entityId: prevState.entityId,
+          timelineId: prevState.timelineId,
+          timelinePosition: prevState.timelinePosition,
+          currentTime: prevState.currentTime
+        });
+        // prevState.undoQueue.push(jsonCopy(prevState.sceneData));
+        return {
+          sceneData: newSceneData,
+          entityId: elementId,
+          undoQueue: newUndoQueue,
+          redoQueue: []
+        };
+      },
+      _ => {
+        this.rebuildTimeline().then(tl =>
+          tl.seek(this.state.currentTime, false)
+        );
+        // console.log(this.state.sceneData);
+        // console.log(this.state.undoQueue);
       }
-    }, _=> {
-      this.rebuildTimeline().then(tl => tl.seek(this.state.currentTime, false));
-      // console.log(this.state.sceneData);
-      // console.log(this.state.undoQueue);
-    })
-// currentSlide.entites
-// slides
-// entities
+    );
+    // currentSlide.entites
+    // slides
+    // entities
   }
 
   // dunno if the queue undo in setstate function can get the same state or not
@@ -1378,101 +1550,121 @@ class SceneContextProvider extends Component {
   //     })
   undo() {
     if (this.state.undoQueue.length) {
-      this.setState((prevState) => {
-        this.stopEventListener('objectselected');
-        const currentSlide = prevState.sceneData.slides.find(slide => slide.id === prevState.slideId);
-        currentSlide.entities.forEach(entity => {
-          if (entity.type !== 'a-camera') {
-            this.editor.removeObject(entity.el.object3D);
-          }
-        })
-        const undoQueue = jsonCopy(prevState.undoQueue);
-        const redoQueue = jsonCopy(prevState.redoQueue);
-        const lastState = undoQueue.pop();        
-        redoQueue.push({
-          sceneData: jsonCopy(prevState.sceneData),
-          slideId: prevState.slideId,
-          entityId: prevState.entityId,
-          timelineId: prevState.timelineId,
-          timelinePosition: prevState.timelinePosition,
-          currentTime: prevState.currentTime,
-        });
-        return {
-          ...lastState,
-          undoQueue: undoQueue,
-          redoQueue: redoQueue
+      this.setState(
+        prevState => {
+          this.stopEventListener('objectselected');
+          const currentSlide = prevState.sceneData.slides.find(
+            slide => slide.id === prevState.slideId
+          );
+          currentSlide.entities.forEach(entity => {
+            if (entity.type !== 'a-camera') {
+              this.editor.removeObject(entity.el.object3D);
+            }
+          });
+          const undoQueue = jsonCopy(prevState.undoQueue);
+          const redoQueue = jsonCopy(prevState.redoQueue);
+          const lastState = undoQueue.pop();
+          redoQueue.push({
+            sceneData: jsonCopy(prevState.sceneData),
+            slideId: prevState.slideId,
+            entityId: prevState.entityId,
+            timelineId: prevState.timelineId,
+            timelinePosition: prevState.timelinePosition,
+            currentTime: prevState.currentTime
+          });
+          return {
+            ...lastState,
+            undoQueue: undoQueue,
+            redoQueue: redoQueue
+          };
+        },
+        _ => {
+          const newSceneData = this.state.sceneData;
+          const newSlide = newSceneData.slides.find(
+            slide => slide.id === this.state.slideId
+          );
+          newSlide.entities.forEach(entity => {
+            if (entity.type !== 'a-camera') {
+              entity.el = this.editor.createNewEntity(entity);
+            } else {
+              entity.el = this.editor.currentCameraEl;
+            }
+            if (entity.material && entity.material.src) {
+              entity.el.setAttribute('material', {
+                src: entity.material.src
+              });
+            }
+          });
+          // this.startEventListener('objectselected');
+          this.rebuildTimeline().then(tl => {
+            tl.seek(this.state.currentTime + 0.01).seek(
+              this.state.currentTime,
+              false
+            );
+            this.startEventListener('objectselected');
+          });
         }
-      }, _ => {
-        const newSceneData = this.state.sceneData;
-        const newSlide = newSceneData.slides.find(slide => slide.id === this.state.slideId);
-        newSlide.entities.forEach(entity => {
-          if (entity.type !== 'a-camera') {
-            entity.el = this.editor.createNewEntity(entity);
-          } else {
-            entity.el = this.editor.currentCameraEl;
-          }
-          if (entity.material && entity.material.src) {
-            entity.el.setAttribute('material', {
-              src: entity.material.src
-            })
-          }
-        })
-        // this.startEventListener('objectselected');
-        this.rebuildTimeline().then(tl => {
-          tl.seek(this.state.currentTime + 0.01).seek(this.state.currentTime, false);
-          this.startEventListener('objectselected');
-        });
-      })
+      );
     }
   }
   redo() {
     if (this.state.redoQueue.length) {
-      this.setState((prevState) => {
-        this.stopEventListener('objectselected');
-        const currentSlide = prevState.sceneData.slides.find(slide => slide.id === prevState.slideId);
-        currentSlide.entities.forEach(entity => {
-          if (entity.type !== 'a-camera') {
-            this.editor.removeObject(entity.el.object3D);
-          }
-        })
-        const undoQueue = jsonCopy(prevState.undoQueue);
-        const redoQueue = jsonCopy(prevState.redoQueue);
-        const lastState = redoQueue.pop();
-        undoQueue.push({
-          sceneData: jsonCopy(prevState.sceneData),
-          slideId: prevState.slideId,
-          entityId: prevState.entityId,
-          timelineId: prevState.timelineId,
-          timelinePosition: prevState.timelinePosition,
-          currentTime: prevState.currentTime,
-        });
-        return {
-          ...lastState,
-          undoQueue: undoQueue,
-          redoQueue: redoQueue
+      this.setState(
+        prevState => {
+          this.stopEventListener('objectselected');
+          const currentSlide = prevState.sceneData.slides.find(
+            slide => slide.id === prevState.slideId
+          );
+          currentSlide.entities.forEach(entity => {
+            if (entity.type !== 'a-camera') {
+              this.editor.removeObject(entity.el.object3D);
+            }
+          });
+          const undoQueue = jsonCopy(prevState.undoQueue);
+          const redoQueue = jsonCopy(prevState.redoQueue);
+          const lastState = redoQueue.pop();
+          undoQueue.push({
+            sceneData: jsonCopy(prevState.sceneData),
+            slideId: prevState.slideId,
+            entityId: prevState.entityId,
+            timelineId: prevState.timelineId,
+            timelinePosition: prevState.timelinePosition,
+            currentTime: prevState.currentTime
+          });
+          return {
+            ...lastState,
+            undoQueue: undoQueue,
+            redoQueue: redoQueue
+          };
+        },
+        _ => {
+          const newSceneData = this.state.sceneData;
+          const newSlide = newSceneData.slides.find(
+            slide => slide.id === this.state.slideId
+          );
+          newSlide.entities.forEach(entity => {
+            if (entity.type !== 'a-camera') {
+              entity.el = this.editor.createNewEntity(entity);
+            } else {
+              entity.el = this.editor.currentCameraEl;
+            }
+            // entity.el = this.editor.createNewEntity(entity);
+            if (entity.material && entity.material.src) {
+              entity.el.setAttribute('material', {
+                src: entity.material.src
+              });
+            }
+          });
+          this.rebuildTimeline().then(tl => {
+            // console.log(tl);
+            tl.seek(this.state.currentTime + 0.01).seek(
+              this.state.currentTime,
+              false
+            );
+            this.startEventListener('objectselected');
+          });
         }
-      }, _=> {
-        const newSceneData = this.state.sceneData;
-        const newSlide = newSceneData.slides.find(slide => slide.id === this.state.slideId);
-        newSlide.entities.forEach(entity => {
-          if (entity.type !== 'a-camera') {
-            entity.el = this.editor.createNewEntity(entity);
-          } else {
-            entity.el = this.editor.currentCameraEl;
-          }
-          // entity.el = this.editor.createNewEntity(entity);
-          if (entity.material && entity.material.src) {
-            entity.el.setAttribute('material', {
-              src: entity.material.src
-            })
-          }
-        })
-        this.rebuildTimeline().then(tl => {
-          // console.log(tl);
-          tl.seek(this.state.currentTime + 0.01).seek(this.state.currentTime, false);
-          this.startEventListener('objectselected');
-        });
-      })
+      );
     }
   }
   getUndoQueueLength() {
@@ -1488,21 +1680,21 @@ class SceneContextProvider extends Component {
   }
   flattenJSON(json, prefix = '') {
     let flatted = {};
-    Object.keys(json).forEach((attr) => {
-      let key = (prefix !== '' ? prefix + '.' + attr: attr);
+    Object.keys(json).forEach(attr => {
+      let key = prefix !== '' ? prefix + '.' + attr : attr;
       if (Object.prototype.toString.call(json[attr]) === '[object Object]') {
         flatted = mergeJSON(flatted, this.flattenJSON(json[attr], key));
       } else {
         flatted[key] = jsonCopy(json[attr]);
         return flatted;
       }
-    })
+    });
     return flatted;
   }
 
   deFlattenJSON(json) {
     let nested = {};
-    Object.keys(json).forEach((attr) => {
+    Object.keys(json).forEach(attr => {
       const key = attr.split('.')[0];
       const remain = attr.split('.').slice(1).join('.');
       // console.log(remain);
@@ -1512,21 +1704,20 @@ class SceneContextProvider extends Component {
         if (nested[key] === undefined) {
           nested[key] = {};
         }
-        nested[key] = mergeJSON(
-          nested[key],
-          this.deFlattenJSON(tmp)
-        );
+        nested[key] = mergeJSON(nested[key], this.deFlattenJSON(tmp));
       } else {
         nested[key] = json[key];
       }
-    })
+    });
     return nested;
   }
-  rebuildTimeline(generateThumb = true) {    
-    return new Promise((resolve, reject) => {      
+  rebuildTimeline(generateThumb = true) {
+    return new Promise((resolve, reject) => {
       // use timelinemax to build the timeline here
-      this.setState((prevState) => {
-        const currentSlideId = prevState.sceneData.slides.findIndex(slide => slide.id === prevState.slideId);
+      this.setState(prevState => {
+        const currentSlideId = prevState.sceneData.slides.findIndex(
+          slide => slide.id === prevState.slideId
+        );
         const newSceneData = jsonCopy(prevState.sceneData);
         // const newSlides = jsonCopy(prevState.sceneData.slides);
         const currentSlide = newSceneData.slides[currentSlideId];
@@ -1551,11 +1742,17 @@ class SceneContextProvider extends Component {
           let firstTimeline = null;
           let lastTimeline = null;
           const entityMedia = {
-            mediaEl : null,
-          }
-          if (entity.components && entity.components.material && entity.components.material.src) {
+            mediaEl: null
+          };
+          if (
+            entity.components &&
+            entity.components.material &&
+            entity.components.material.src
+          ) {
             // check if this is a video
-            const mediaEl = document.querySelector(entity.components.material.src);
+            const mediaEl = document.querySelector(
+              entity.components.material.src
+            );
             const mediaElType = Object.prototype.toString.call(mediaEl);
             if (mediaElType === '[object HTMLVideoElement]') {
               entityMedia['mediaEl'] = mediaEl;
@@ -1571,10 +1768,7 @@ class SceneContextProvider extends Component {
             }, deltaOffset);
           }
           entity.timelines.forEach(timeline => {
-            const {
-              start, duration,
-              startAttribute, endAttribute
-            } = timeline;
+            const { start, duration, startAttribute, endAttribute } = timeline;
             const tmpAttrs = this.flattenJSON(jsonCopy(startAttribute));
             if (firstTimeline === null || start < firstTimeline.start) {
               firstTimeline = timeline;
@@ -1582,10 +1776,8 @@ class SceneContextProvider extends Component {
             if (lastTimeline === null || start > lastTimeline.start) {
               lastTimeline = timeline;
             }
-            tl.add(TweenMax.to(
-              tmpAttrs,
-              duration - deltaOffset * 2,
-              {
+            tl.add(
+              TweenMax.to(tmpAttrs, duration - deltaOffset * 2, {
                 ...this.flattenJSON(endAttribute),
                 ease: Power0.easeNone,
                 onUpdate: () => {
@@ -1593,9 +1785,10 @@ class SceneContextProvider extends Component {
                   // Events.emit('refreshsidebarobject3d');
                   aEntity.updateEntityAttributes(this.deFlattenJSON(tmpAttrs));
                 }
-              }
-            ), start + deltaOffset);
-          })
+              }),
+              start + deltaOffset
+            );
+          });
 
           if (firstTimeline) {
             tl.add(_ => {
@@ -1616,19 +1809,18 @@ class SceneContextProvider extends Component {
                 }
               }, firstTimeline.start + deltaOffset);
 
-
               tl.add(_ => {
                 entityMedia['mediaEl'].pause();
               }, lastTimeline.start + lastTimeline.duration);
             }
           }
-        })
+        });
         let started = false;
 
         tl.eventCallback('onStart', () => {
           started = true;
           // console.log(tl);
-        })
+        });
         tl.eventCallback('onUpdate', () => {
           // Events.emit('refreshsidebarobject3d');
           if (started && tl.paused()) {
@@ -1642,7 +1834,7 @@ class SceneContextProvider extends Component {
           this.setState({
             currentTime: tl.progress() * tl.duration()
           });
-        })
+        });
         // tl.eventCallback('onPaused', () => {
         //   console.log('animation paused')
         //   for (let i = 0; i < mediaElsList.length; i++) {
@@ -1653,12 +1845,15 @@ class SceneContextProvider extends Component {
           // Events.emit('refreshsidebarobject3d');
           // console.log('onComplete');
           // the timeline need to manually pause after complete?
-          this.setState({
-            slideIsPlaying: false
-          }, _=> {
-            tl.pause();
-          })
-        })
+          this.setState(
+            {
+              slideIsPlaying: false
+            },
+            _ => {
+              tl.pause();
+            }
+          );
+        });
         // tl.play(0, false).stop().seek(0.001).seek(0, false);
         // const snapshot = this.takeSnapshot();
         if (this.editor.opened && generateThumb) {
@@ -1687,21 +1882,25 @@ class SceneContextProvider extends Component {
           animationTimeline: tl,
           sceneData: newSceneData
         };
-      })
+      });
     });
   }
   // animation function
   playSlide() {
-    this.setState({
-      slideIsPlaying: true
-    }, _=> {
-      if (this.state.animationTimeline) {
-        this.state.animationTimeline.seek(0.001).seek(0, false).play();
-      } else {
-        this.rebuildTimeline().then(tl => tl.stop().seek(0.001).seek(0, false));
+    this.setState(
+      {
+        slideIsPlaying: true
+      },
+      _ => {
+        if (this.state.animationTimeline) {
+          this.state.animationTimeline.seek(0.001).seek(0, false).play();
+        } else {
+          this.rebuildTimeline().then(tl =>
+            tl.stop().seek(0.001).seek(0, false)
+          );
+        }
       }
-    })
-
+    );
   }
 
   doSomethingBetweenHideShowOfEditorHelpers(functionToCall) {
@@ -1748,21 +1947,26 @@ class SceneContextProvider extends Component {
     });
   }
   stopSlide() {
-    this.setState((prevState) => {
-      return {
-        currentTime: Math.round(prevState.currentTime),
-        slideIsPlaying: false
+    this.setState(
+      prevState => {
+        return {
+          currentTime: Math.round(prevState.currentTime),
+          slideIsPlaying: false
+        };
+      },
+      _ => {
+        if (this.state.animationTimeline) {
+          // this.state.animationTimeline
+          // console.log(this.state.animationTimeline);
+          this.state.animationTimeline
+            .stop()
+            .seek(this.state.currentTime, false);
+        } else {
+          // the timeline must be present ?
+          this.rebuildTimeline().then(tl => tl.stop());
+        }
       }
-    }, _=> {
-      if (this.state.animationTimeline) {
-        // this.state.animationTimeline
-        // console.log(this.state.animationTimeline);
-        this.state.animationTimeline.stop().seek(this.state.currentTime, false);
-      } else {
-        // the timeline must be present ?
-        this.rebuildTimeline().then(tl => tl.stop());
-      }
-    })
+    );
   }
 
   renderByEditorCamera() {
@@ -1777,39 +1981,44 @@ class SceneContextProvider extends Component {
   hideEditorCameraModel() {
     this.setCurrentCameraModelVisibility(false);
   }
-  showEditorCameraModel(){
+  showEditorCameraModel() {
     this.setCurrentCameraModelVisibility(true);
   }
   setCurrentCameraModelVisibility(isVisible) {
-    [...this.editor.currentCameraEl.children].forEach(el => el.setAttribute('visible', isVisible));
+    [...this.editor.currentCameraEl.children].forEach(el =>
+      el.setAttribute('visible', isVisible)
+    );
   }
   hideEditorHelpers() {
     const isVisible = false;
-    const helper_visibility_array = new Array(this.editor.sceneHelpers.children.length).fill(isVisible);
+    const helper_visibility_array = new Array(
+      this.editor.sceneHelpers.children.length
+    ).fill(isVisible);
     return this.setEditorHelpersVisible(helper_visibility_array);
   }
   setEditorHelpersVisible(helper_visibility_array) {
     const editor = this.editor;
     const original_helper_status = [];
-    for (let i = 0; i < editor.sceneHelpers.children.length; i++){
+    for (let i = 0; i < editor.sceneHelpers.children.length; i++) {
       original_helper_status[i] = editor.sceneHelpers.children[i].visible;
       editor.sceneHelpers.children[i].visible = helper_visibility_array[i];
     }
     return original_helper_status;
   }
   convertEquirectangularImageDataToBase64Str(imgData) {
-    const canvas = document.createElement("canvas");
+    const canvas = document.createElement('canvas');
     canvas.width = imgData.width;
     canvas.height = imgData.height;
-    const context = canvas.getContext("2d");
+    const context = canvas.getContext('2d');
     context.putImageData(imgData, 0, 0);
 
     const snapshot = canvas.toDataURL();
     const base64Str = snapshot.split(',')[1];
-    return base64Str;    
+    return base64Str;
   }
   captureEquirectangularImageInternal(resolutionType) {
-    const resolutionWidth = capture360OutputResolutionTypeToWidthMap[resolutionType];
+    const resolutionWidth =
+      capture360OutputResolutionTypeToWidthMap[resolutionType];
 
     const editor = this.editor;
     const renderer = editor.sceneEl.renderer;
@@ -1817,69 +2026,162 @@ class SceneContextProvider extends Component {
     const camera = editor.currentCameraEl.getObject3D('camera');
 
     const THREE = window.AFRAME.THREE;
-    const cubeCamera = new THREE.CubeCamera( .005, 10000, resolutionWidth );
-    const equiUnmanaged = new CubemapToEquirectangular( renderer, false );
-    
+    const cubeCamera = new THREE.CubeCamera(0.005, 10000, resolutionWidth);
+    const equiUnmanaged = new CubemapToEquirectangular(renderer, false);
+
     // set output size
     equiUnmanaged.setSize(resolutionWidth, resolutionWidth / 2);
-    
+
     cubeCamera.position.copy(camera.getWorldPosition());
-    cubeCamera.updateCubeMap( renderer, scene );
+    cubeCamera.updateCubeMap(renderer, scene);
 
     //const isDownloadImgFromFrontEnd = true;
     const isDownloadImgFromFrontEnd = false;
 
-    const imgData = equiUnmanaged.convert( cubeCamera, isDownloadImgFromFrontEnd );
+    const imgData = equiUnmanaged.convert(
+      cubeCamera,
+      isDownloadImgFromFrontEnd
+    );
 
-    const imgBase64Str = this.convertEquirectangularImageDataToBase64Str(imgData);
+    const imgBase64Str = this.convertEquirectangularImageDataToBase64Str(
+      imgData
+    );
     return imgBase64Str;
   }
   captureEquirectangularImage(resolutionType) {
     return this.doSomethingBetweenHideShowOfEditorHelpers(_ => {
       return this.captureEquirectangularImageInternal(resolutionType);
-    });    
+    });
   }
-  captureEquirectangularVideo(resolutionType, fps, onFrameArrived) {
-    this.doSomethingBetweenHideShowOfEditorHelpers(_ => {
-      const timeline = this.state.animationTimeline;
+  /* recursion via setTimeout version */
+  captureEquirectangularVideo(
+    resolutionType,
+    fps,
+    onFrameArrived,
+    renderFrameIntervalInMillis
+  ) {
+    const timeline = this.state.animationTimeline;
 
-      if (timeline) {        
-        const totalTime = Math.round(timeline.duration() * 100) / 100;
-        const totalFrame = Math.floor(totalTime * fps) + 1;
-        let currentFrame = 0;
-        console.log('totalFrame:', totalFrame);
-        
-        timeline.pause();
-        while (currentFrame <= totalFrame) {
-          const currentTime = currentFrame / fps;
+    if (timeline) {
+      const totalTime = Math.round(timeline.duration() * 100) / 100;
+      const totalFrame = Math.floor(totalTime * fps) + 1;
+      let currentFrame = 0;
+      console.log('totalFrame:', totalFrame);
+
+      timeline.pause();
+
+      const renderFrameFunc = (callInterval = -1) => {
+        if (currentFrame > totalFrame) {
+          return;
+        }
+
+        const currentTime = currentFrame / fps;
+
+        this.doSomethingBetweenHideShowOfEditorHelpers(_ => {
           timeline.seek(currentTime, false);
-  
-          const imgBase64Str = this.captureEquirectangularImageInternal(resolutionType);
-          
-          onFrameArrived(currentFrame, totalFrame, imgBase64Str);
-          
-          currentFrame += 1;
-        };
-        // add last frame if need, maybe skip at the moment?
-        // if (totalFrame * fps < totalTime) {
-        //   currentFrame++;
-        //   timeline.seek(totalTime, false);
-        //   cubeCamera.position.copy(editor.currentCameraEl.getAttribute('position'));
-        //   cubeCamera.updateCubeMap( renderer, scene );
-        //   const snapshot = equiUnmanaged.convert( cubeCamera, false );
-        //   // const b64encoded = btoa(String.fromCharCode.apply(null, snapshot.data));
-        //   const b64encoded = bytesToBase64(snapshot.data);
-      } else {
-        // should be no ways to enter this condition since timeline must be existed
-        const imgBase64Str = this.captureEquirectangularImageInternal(resolutionType);
-        
-        onFrameArrived(1, 1, imgBase64Str);
-      }
-    });   
-  }
 
-  handleRecordingTimerEvent(onTimerCallback) {    
-    const duration = moment.duration(new moment().diff(this.recordingStartDT));    
+          const imgBase64Str = this.captureEquirectangularImageInternal(
+            resolutionType
+          );
+
+          onFrameArrived(currentFrame, totalFrame, imgBase64Str);
+        });
+
+        currentFrame += 1;
+
+        if (callInterval >= 0) {
+          setTimeout(_ => {
+            renderFrameFunc(callInterval);
+          }, callInterval);
+        }
+      };
+
+      /* setTimeout version */
+      renderFrameFunc(renderFrameIntervalInMillis);
+    } else {
+      // should be no ways to enter this condition since timeline must exist
+      const imgBase64Str = this.captureEquirectangularImageInternal(
+        resolutionType
+      );
+
+      onFrameArrived(1, 1, imgBase64Str);
+    }
+  }
+  /* loop version */
+  // captureEquirectangularVideo(
+  //   resolutionType,
+  //   fps,
+  //   onFrameArrived
+  // ) {
+  //   this.doSomethingBetweenHideShowOfEditorHelpers(_ => {
+  //     const timeline = this.state.animationTimeline;
+
+  //     if (timeline) {
+  //       const totalTime = Math.round(timeline.duration() * 100) / 100;
+  //       const totalFrame = Math.floor(totalTime * fps) + 1;
+  //       let currentFrame = 0;
+  //       console.log('totalFrame:', totalFrame);
+
+  //       timeline.pause();
+
+  //       const renderFrameFunc = (callInterval = -1) => {
+  //         if (currentFrame > totalFrame) {
+  //           return;
+  //         }
+
+  //         const currentTime = currentFrame / fps;
+  //         timeline.seek(currentTime, false);
+
+  //         const imgBase64Str = this.captureEquirectangularImageInternal(
+  //           resolutionType
+  //         );
+
+  //         onFrameArrived(currentFrame, totalFrame, imgBase64Str);
+
+  //         currentFrame += 1;
+
+  //         if (callInterval >= 0) {
+  //           setTimeout(_ => {
+  //             renderFrameFunc(callInterval);
+  //           }, callInterval);
+  //         }
+  //       };
+
+  //       while (currentFrame <= totalFrame) {
+  //         const currentTime = currentFrame / fps;
+  //         timeline.seek(currentTime, false);
+
+  //         const imgBase64Str = this.captureEquirectangularImageInternal(
+  //           resolutionType
+  //         );
+
+  //         onFrameArrived(currentFrame, totalFrame, imgBase64Str);
+
+  //         currentFrame += 1;
+  //       }
+
+  //       // add last frame if need, maybe skip at the moment?
+  //       // if (totalFrame * fps < totalTime) {
+  //       //   currentFrame++;
+  //       //   timeline.seek(totalTime, false);
+  //       //   cubeCamera.position.copy(editor.currentCameraEl.getAttribute('position'));
+  //       //   cubeCamera.updateCubeMap( renderer, scene );
+  //       //   const snapshot = equiUnmanaged.convert( cubeCamera, false );
+  //       //   // const b64encoded = btoa(String.fromCharCode.apply(null, snapshot.data));
+  //       //   const b64encoded = bytesToBase64(snapshot.data);
+  //     } else {
+  //       // should be no ways to enter this condition since timeline must exist
+  //       const imgBase64Str = this.captureEquirectangularImageInternal(
+  //         resolutionType
+  //       );
+
+  //       onFrameArrived(1, 1, imgBase64Str);
+  //     }
+  //   });
+  // }
+
+  handleRecordingTimerEvent(onTimerCallback) {
+    const duration = moment.duration(new moment().diff(this.recordingStartDT));
     onTimerCallback({
       hours: duration.hours(),
       minutes: duration.minutes(),
@@ -1902,27 +2204,33 @@ class SceneContextProvider extends Component {
         Don't change mimeType to 'video/mp4'. It won't work.
         https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/isTypeSupported
       */
-      const options = { 
-        mimeType: 'video/webm; codecs=vp9',
+      const options = {
+        mimeType: 'video/webm; codecs=vp9'
       };
-      const mediaRecorder = this.mediaRecorder = new MediaRecorder(stream, options);
-      mediaRecorder.onerror = (event) => {
+      const mediaRecorder = (this.mediaRecorder = new MediaRecorder(
+        stream,
+        options
+      ));
+      mediaRecorder.onerror = event => {
         if (isFunction(onErrorCallback)) {
           onErrorCallback(event.error);
         } else {
           console.error('mediaRecorder.onerror:', event.error);
         }
-      }
+      };
 
       this.recordingStartDT = new moment();
 
       mediaRecorder.start();
 
-      this.recordingTimerHandle = setInterval(_ => this.handleRecordingTimerEvent(onTimerCallback), timerIntervalInMillis);
+      this.recordingTimerHandle = setInterval(
+        _ => this.handleRecordingTimerEvent(onTimerCallback),
+        timerIntervalInMillis
+      );
 
       console.log('mediaRecorder:', mediaRecorder);
     }
-  }  
+  }
 
   // https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_Recording_API
   stopRecording(videoOutputExtensionWithDot, onRecordingAvailableCallback) {
@@ -1931,11 +2239,14 @@ class SceneContextProvider extends Component {
         isInPresentationRecording: false
       });
 
-      const videoOutputMimeType = recordingVideoOutputExtensionWithDotToMimeMap[videoOutputExtensionWithDot];
+      const videoOutputMimeType =
+        recordingVideoOutputExtensionWithDotToMimeMap[
+          videoOutputExtensionWithDot
+        ];
 
       const mediaRecorder = this.mediaRecorder;
       const recordedChunks = [];
-      mediaRecorder.ondataavailable = async (event) => {
+      mediaRecorder.ondataavailable = async event => {
         if (event.data.size > 0) {
           recordedChunks.push(event.data);
           // console.log(recordedChunks);
@@ -1945,23 +2256,25 @@ class SceneContextProvider extends Component {
           });
 
           // https://github.com/collab-project/videojs-record/issues/317
-          const seekableVideoBlob = await makeVideoSeekableByInjectingMetadataPromise(blob);
+          const seekableVideoBlob = await makeVideoSeekableByInjectingMetadataPromise(
+            blob
+          );
 
           invokeIfIsFunction(onRecordingAvailableCallback, seekableVideoBlob);
         }
-      }
+      };
 
       clearInterval(this.recordingTimerHandle);
       this.recordingTimerHandle = null;
 
       mediaRecorder.stop();
     }
-    
+
     this.mediaRecorder = null;
   }
 
   getIsEditorOpened() {
-    return this.editor && this.editor.opened
+    return this.editor && this.editor.opened;
   }
 
   seekSlide(timeInSec) {
@@ -1993,14 +2306,12 @@ class SceneContextProvider extends Component {
     // assetEl.append(el);
     let newEl = null;
     const newId = newFile.id || uuid();
-    const newFileUrl = (
-      Object.prototype.toString.call(newFile) === '[object File]' ?
-        URL.createObjectURL(newFile) :
-        (newFile.src?
-          newFile.src :
-          newFile.filePath
-        )
-    );
+    const newFileUrl =
+      Object.prototype.toString.call(newFile) === '[object File]'
+        ? URL.createObjectURL(newFile)
+        : newFile.src
+        ? newFile.src
+        : newFile.filePath;
     const newAssetData = {
       id: newId,
       src: newFileUrl,
@@ -2045,11 +2356,13 @@ class SceneContextProvider extends Component {
         break;
       }
       default: {
-        console.log('unsupported files type (image/svg+xml, image/jpeg, image/png, image/gif, video/mp4)');
+        console.log(
+          'unsupported files type (image/svg+xml, image/jpeg, image/png, image/gif, video/mp4)'
+        );
         console.log('your file: ' + newFile.type);
       }
     }
-    this.setState((prevState) => {
+    this.setState(prevState => {
       const assetsData = prevState.assetsData;
       let newStateAssetsData = [...assetsData];
       let needInsert = true;
@@ -2060,14 +2373,11 @@ class SceneContextProvider extends Component {
         }
       }
       if (needInsert) {
-        newStateAssetsData = [
-          ...newStateAssetsData,
-          newAssetData
-        ]
+        newStateAssetsData = [...newStateAssetsData, newAssetData];
       }
       return {
         assetsData: newStateAssetsData
-      }
+      };
     });
     return newAssetData;
   }
@@ -2075,7 +2385,7 @@ class SceneContextProvider extends Component {
   resetView() {
     this.editor.EDITOR_CAMERA.position.set(20, 10, 20);
     this.editor.EDITOR_CAMERA.el.setAttribute('position', '0 0 0');
-    this.editor.EDITOR_CAMERA.lookAt(0,0,0);
+    this.editor.EDITOR_CAMERA.lookAt(0, 0, 0);
     this.editor.editorControls.center.set(0, 0, 0);
   }
 
@@ -2083,16 +2393,16 @@ class SceneContextProvider extends Component {
     this.editor = editor;
   }
 
-  openEditor() {  
+  openEditor() {
     if (this.cameraRotationBeforeToggle) {
       this.setCameraElRotation(this.cameraRotationBeforeToggle);
       this.cameraRotationBeforeToggle = null;
-    }    
+    }
     this.editor.open();
   }
 
   toggleEditor() {
-    this.cameraRotationBeforeToggle = this.getCameraElRotationCopy();    
+    this.cameraRotationBeforeToggle = this.getCameraElRotationCopy();
     this.editor.toggle();
     // this.forceUpdate();
   }
@@ -2131,7 +2441,7 @@ class SceneContextProvider extends Component {
           resetCurrentEntityRotation: this.resetCurrentEntityRotation,
           getCurrentEntity: this.getCurrentEntity,
           getCurrentEntityId: this.getCurrentEntityId,
-          
+
           copyEntity: this.copyEntity,
           addEntity: this.addEntity,
           deleteEntity: this.deleteEntity,
@@ -2150,7 +2460,8 @@ class SceneContextProvider extends Component {
           selectTimelinePosition: this.selectTimelinePosition,
           getCurrentTimelinePosition: this.getCurrentTimelinePosition,
 
-          updateTimelinePositionAttributes: this.updateTimelinePositionAttributes,
+          updateTimelinePositionAttributes: this
+            .updateTimelinePositionAttributes,
           // for non timeline
           updateDefaultAttributes: this.updateDefaultAttributes,
 
@@ -2179,20 +2490,21 @@ class SceneContextProvider extends Component {
           openEditor: this.openEditor,
           toggleEditor: this.toggleEditor,
 
-          takeSnapshot: this.takeSnapshot, 
+          takeSnapshot: this.takeSnapshot,
           captureEquirectangularImage: this.captureEquirectangularImage,
           captureEquirectangularVideo: this.captureEquirectangularVideo,
-          
+
           startRecording: this.startRecording,
           stopRecording: this.stopRecording,
           // variables, should use functions to return?
           // appName: state.appName,
           // projectName: state.projectName,
 
-          isProjectSaved: state.isProjectSaved,          
+          isProjectSaved: state.isProjectSaved,
           isInPresentationRecording: state.isInPresentationRecording,
           getIsEditorOpened: this.getIsEditorOpened
-        }}>
+        }}
+      >
         {props.children}
       </SceneContext.Provider>
     );
@@ -2211,6 +2523,5 @@ export {
   SceneContext,
   SceneContextProvider,
   withSceneContext,
-
-  capture360OutputResolutionTypes,
+  capture360OutputResolutionTypes
 };
