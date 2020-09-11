@@ -77,12 +77,18 @@ const writeMetaDataTo360VideoPromise = async (
   newVideoPath
 ) => {
   // sphericalMetadata.injectMetadata() returns a promise.
+  // https://www.npmjs.com/package/@bubltechnology/spherical-metadata
+  // https://www.exiv2.org/tags-xmp-GPano.html
+  // sourceCount is number of source images used to create the panorama
+  // https://en.wikipedia.org/wiki/Cube_mapping
+  // for cubemap, maybe sourceCount is 6 ???
   return sphericalMetadata.injectMetadata({
     source: existingVideoPath,
     destination: newVideoPath,
     software: appName,
     projection: 'equirectangular',
-    sourceCount: 4
+    sourceCount: 6, // 4,
+    stereo: 'top-bottom' // this is key
   });
 };
 
